@@ -415,6 +415,8 @@
 <a href="#413" id="413">413</a>
 <a href="#414" id="414">414</a>
 <a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -576,6 +578,8 @@
             </span>Scheme::Alluxio =&gt; <span class="self">Self</span>::from_map::&lt;services::Alluxio&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-upyun"</span>)]
             </span>Scheme::Upyun =&gt; <span class="self">Self</span>::from_map::&lt;services::Upyun&gt;(map)<span class="question-mark">?</span>.finish(),
+            <span class="attr">#[cfg(feature = <span class="string">"services-koofr"</span>)]
+            </span>Scheme::Koofr =&gt; <span class="self">Self</span>::from_map::&lt;services::Koofr&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-yandex-disk"</span>)]
             </span>Scheme::YandexDisk =&gt; <span class="self">Self</span>::from_map::&lt;services::YandexDisk&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-pcloud"</span>)]
