@@ -1054,7 +1054,7 @@
     /// There is a strange dead lock issues when copying a non-exist file, so we will check
     /// if the source exists first.
     ///
-    /// For example: &lt;https://github.com/apache/incubator-opendal/pull/2809&gt;
+    /// For example: &lt;https://github.com/apache/opendal/pull/2809&gt;
     </span><span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.stat(from, OpStat::default()).<span class="kw">await </span>{
             <span class="kw">if </span>err.kind() == ErrorKind::NotFound {
