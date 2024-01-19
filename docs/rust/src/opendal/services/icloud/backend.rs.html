@@ -330,6 +330,8 @@
 <a href="#328" id="328">328</a>
 <a href="#329" id="329">329</a>
 <a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -355,11 +357,9 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>tokio::sync::Mutex;
 
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::{Capability, Scheme};
-
-<span class="kw">use </span><span class="kw">super</span>::core::{parse_error, IcloudCore, IcloudPathQuery, IcloudSigner, SessionData};
 
 <span class="doccomment">/// Config for icloud services support.
 </span><span class="attr">#[derive(Default, Deserialize)]
@@ -478,6 +478,7 @@
 
         <span class="self">self
     </span>}
+
     <span class="doccomment">/// ds_web_auth_token must be set in Session
     ///
     /// Avoid Two Factor Authentication
@@ -490,9 +491,11 @@
 
         <span class="self">self
     </span>}
-    <span class="doccomment">/// Enable the china origin
-    /// For China, use "https://www.icloud.com.cn"
-    /// For Other region, use "https://www.icloud.com"
+
+    <span class="doccomment">/// Set if your apple id in China mainland.
+    ///
+    /// If in china mainland, we will connect to `https://www.icloud.com.cn`.
+    /// Otherwise, we will connect to `https://www.icloud.com`.
     </span><span class="kw">pub fn </span>is_china_mainland(<span class="kw-2">&amp;mut </span><span class="self">self</span>, is_china_mainland: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.config.is_china_mainland = is_china_mainland;
         <span class="self">self
@@ -575,6 +578,7 @@
             trust_token: <span class="prelude-val">Some</span>(trust_token),
             ds_web_auth_token: <span class="prelude-val">Some</span>(ds_web_auth_token),
             is_china_mainland: <span class="self">self</span>.config.is_china_mainland,
+            initiated: <span class="bool-val">false</span>,
         };
 
         <span class="kw">let </span>signer = Arc::new(Mutex::new(signer));
@@ -582,7 +586,7 @@
             core: Arc::new(IcloudCore {
                 signer: signer.clone(),
                 root,
-                path_cache: PathCacher::new(IcloudPathQuery::new(client, signer.clone())),
+                path_cache: PathCacher::new(IcloudPathQuery::new(signer.clone())),
             }),
         })
     }

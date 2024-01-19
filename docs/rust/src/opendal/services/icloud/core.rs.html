@@ -832,111 +832,6 @@
 <a href="#830" id="830">830</a>
 <a href="#831" id="831">831</a>
 <a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
-<a href="#834" id="834">834</a>
-<a href="#835" id="835">835</a>
-<a href="#836" id="836">836</a>
-<a href="#837" id="837">837</a>
-<a href="#838" id="838">838</a>
-<a href="#839" id="839">839</a>
-<a href="#840" id="840">840</a>
-<a href="#841" id="841">841</a>
-<a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
-<a href="#872" id="872">872</a>
-<a href="#873" id="873">873</a>
-<a href="#874" id="874">874</a>
-<a href="#875" id="875">875</a>
-<a href="#876" id="876">876</a>
-<a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
-<a href="#888" id="888">888</a>
-<a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a>
-<a href="#894" id="894">894</a>
-<a href="#895" id="895">895</a>
-<a href="#896" id="896">896</a>
-<a href="#897" id="897">897</a>
-<a href="#898" id="898">898</a>
-<a href="#899" id="899">899</a>
-<a href="#900" id="900">900</a>
-<a href="#901" id="901">901</a>
-<a href="#902" id="902">902</a>
-<a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
-<a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -955,43 +850,31 @@
 // under the License.
 
 </span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>std::collections::{BTreeMap, HashMap};
+<span class="kw">use </span>bytes::{Buf, Bytes};
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::header::{IF_MATCH, IF_NONE_MATCH};
-<span class="kw">use </span>http::Method;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>serde_json::json;
 <span class="kw">use </span>tokio::sync::Mutex;
 
-<span class="kw">use </span><span class="kw">crate</span>::types::Result;
-<span class="kw">use crate</span>::{Error, ErrorKind};
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::{
-    build_rooted_abs_path, get_basename, get_parent, new_json_deserialize_error,
-    parse_header_to_str, with_error_response_context, AsyncBody, HttpClient, IncomingAsyncBody,
-    OpRead, PathCacher, PathQuery,
-};
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">static </span>ACCOUNT_COUNTRY_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-ID-Account-Country"</span>;
 <span class="kw">static </span>OAUTH_STATE_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-OAuth-State"</span>;
-
 <span class="kw">static </span>SESSION_ID_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-ID-Session-Id"</span>;
-
 <span class="kw">static </span>SCNT_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"scnt"</span>;
-
 <span class="kw">static </span>SESSION_TOKEN_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-Session-Token"</span>;
+<span class="kw">static </span>APPLE_RESPONSE_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-I-Rscd"</span>;
+
 <span class="kw">static </span>AUTH_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">"https://idmsa.apple.com/appleauth/auth"</span>;
 <span class="kw">static </span>SETUP_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">"https://setup.icloud.com/setup/ws/1"</span>;
-
-<span class="kw">static </span>APPLE_RESPONSE_HEADER: <span class="kw-2">&amp;</span>str = <span class="string">"X-Apple-I-Rscd"</span>;
 
 <span class="kw">const </span>AUTH_HEADERS: [(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str); <span class="number">7</span>] = [
     (
@@ -1012,11 +895,6 @@
 ];
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>ServiceInfo {
-    <span class="kw">pub </span>url: String,
-}
-
-<span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>SessionData {
     oauth_state: String,
     session_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -1025,8 +903,8 @@
     scnt: <span class="prelude-ty">Option</span>&lt;String&gt;,
     account_country: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
-    cookies: BTreeMap&lt;String, String&gt;,
-    webservices: HashMap&lt;String, ServiceInfo&gt;,
+    drivews_url: String,
+    docws_url: String,
 }
 
 <span class="kw">impl </span>SessionData {
@@ -1037,8 +915,8 @@
             session_token: <span class="prelude-val">None</span>,
             scnt: <span class="prelude-val">None</span>,
             account_country: <span class="prelude-val">None</span>,
-            cookies: BTreeMap::new(),
-            webservices: HashMap::new(),
+            drivews_url: String::new(),
+            docws_url: String::new(),
         }
     }
 }
@@ -1047,13 +925,14 @@
 </span><span class="kw">pub struct </span>IcloudSigner {
     <span class="kw">pub </span>client: HttpClient,
 
-    <span class="kw">pub </span>data: SessionData,
     <span class="kw">pub </span>apple_id: String,
     <span class="kw">pub </span>password: String,
-
+    <span class="kw">pub </span>is_china_mainland: bool,
     <span class="kw">pub </span>trust_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>ds_web_auth_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>is_china_mainland: bool,
+
+    <span class="kw">pub </span>data: SessionData,
+    <span class="kw">pub </span>initiated: bool,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>IcloudSigner {
@@ -1065,198 +944,168 @@
 }
 
 <span class="kw">impl </span>IcloudSigner {
-    <span class="kw">pub fn </span>get_service_info(<span class="kw-2">&amp;</span><span class="self">self</span>, name: String) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ServiceInfo&gt; {
-        <span class="self">self</span>.data.webservices.get(<span class="kw-2">&amp;</span>name)
+    <span class="doccomment">/// Get the session data from signer.
+    </span><span class="kw">pub fn </span>session_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SessionData {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.data
     }
 
-    <span class="comment">// create_dir could use client_id
-    </span><span class="kw">pub fn </span>get_client_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
+    <span class="doccomment">/// iCloud will use our oauth state as client id.
+    </span><span class="kw">pub fn </span>client_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="kw-2">&amp;</span><span class="self">self</span>.data.oauth_state
     }
-}
 
-<span class="kw">impl </span>IcloudSigner {
-    <span class="kw">pub async fn </span>signer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>body = <span class="macro">json!</span>({
+    <span class="kw">async fn </span>init(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// Sign the auth endpoint first.
+        </span><span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/signin?isRememberMeEnable=true"</span>, AUTH_ENDPOINT);
+        <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>({
             <span class="string">"accountName" </span>: <span class="self">self</span>.apple_id,
             <span class="string">"password" </span>: <span class="self">self</span>.password,
             <span class="string">"rememberMe"</span>: <span class="bool-val">true</span>,
             <span class="string">"trustTokens"</span>: [<span class="self">self</span>.trust_token.clone().unwrap()],
-        })
-        .to_string();
+        }))
+        .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/signin?isRememberMeEnable=true"</span>, AUTH_ENDPOINT);
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(uri)
+            .header(header::CONTENT_TYPE, <span class="string">"application/json"</span>)
+            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>async_body = AsyncBody::Bytes(bytes::Bytes::from(body));
-
-        <span class="kw">let </span>response = <span class="self">self</span>.sign(Method::POST, uri, async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = response.status();
-
-        <span class="kw">return match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(rscd) = response.headers().get(APPLE_RESPONSE_HEADER) {
-                    <span class="kw">let </span>status_code = StatusCode::from_bytes(rscd.as_bytes()).unwrap();
-                    <span class="kw">if </span>status_code != StatusCode::CONFLICT {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>);
-                    }
-                }
-                <span class="self">self</span>.authenticate().<span class="kw">await
-            </span>}
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>),
-        };
-    }
-
-    <span class="kw">pub async fn </span>authenticate(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>body = <span class="macro">json!</span>({
-            <span class="string">"accountCountryCode"</span>: <span class="self">self</span>.data.account_country.as_ref().unwrap_or(<span class="kw-2">&amp;</span>String::new()),
-            <span class="string">"dsWebAuthToken"</span>:<span class="self">self</span>.ds_web_auth_token.as_ref().unwrap_or(<span class="kw-2">&amp;</span>String::new()),
-                    <span class="string">"extended_login"</span>: <span class="bool-val">true</span>,
-                    <span class="string">"trustToken"</span>: <span class="self">self</span>.trust_token.as_ref().unwrap_or(<span class="kw-2">&amp;</span>String::new())
-        })
-        .to_string();
-
-        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/accountLogin"</span>, SETUP_ENDPOINT);
-
-        <span class="kw">let </span>async_body = AsyncBody::Bytes(bytes::Bytes::from(body));
-
-        <span class="kw">let </span>response = <span class="self">self</span>.sign(Method::POST, uri, async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = response.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = <span class="kw-2">&amp;</span>response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>auth_info: IcloudWebservicesResponse =
-                    serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(drivews_url) = <span class="kw-2">&amp;</span>auth_info.webservices.drivews.url {
-                    <span class="self">self</span>.data.webservices.insert(
-                        String::from(<span class="string">"drive"</span>),
-                        ServiceInfo {
-                            url: drivews_url.to_string(),
-                        },
-                    );
-                }
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(docws_url) = <span class="kw-2">&amp;</span>auth_info.webservices.docws.url {
-                    <span class="self">self</span>.data.webservices.insert(
-                        String::from(<span class="string">"docw"</span>),
-                        ServiceInfo {
-                            url: docws_url.to_string(),
-                        },
-                    );
-                }
-
-                <span class="kw">if </span>auth_info.hsa_challenge_required {
-                    <span class="kw">if </span>auth_info.hsa_trusted_browser {
-                        <span class="prelude-val">Ok</span>(())
-                    } <span class="kw">else </span>{
-                        <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"Apple icloud AuthenticationFailed:Unauthorized request:Needs two-factor authentication"</span>))
-                    }
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">Ok</span>(())
-                }
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unexpected,
-                <span class="string">"Apple icloud AuthenticationFailed:Unauthorized:Invalid token"</span>,
-            )),
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(rscd) = resp.headers().get(APPLE_RESPONSE_HEADER) {
+            <span class="kw">let </span>status_code = StatusCode::from_bytes(rscd.as_bytes()).unwrap();
+            <span class="kw">if </span>status_code != StatusCode::CONFLICT {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            }
+        }
+
+        <span class="comment">// Setup to get the session id.
+        </span><span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/accountLogin"</span>, SETUP_ENDPOINT);
+        <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>({
+            <span class="string">"accountCountryCode"</span>: <span class="self">self</span>.data.account_country.clone().unwrap_or_default(),
+            <span class="string">"dsWebAuthToken"</span>:<span class="self">self</span>.ds_web_auth_token.clone().unwrap_or_default(),
+            <span class="string">"extended_login"</span>: <span class="bool-val">true</span>,
+            <span class="string">"trustToken"</span>: <span class="self">self</span>.trust_token.clone().unwrap_or_default(),
+        }))
+        .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(uri)
+            .header(header::CONTENT_TYPE, <span class="string">"application/json"</span>)
+            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>auth_info: IcloudWebservicesResponse =
+            serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+        <span class="comment">// Check if we have extra challenge to take.
+        </span><span class="kw">if </span>auth_info.hsa_challenge_required &amp;&amp; !auth_info.hsa_trusted_browser {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"Apple icloud AuthenticationFailed:Unauthorized request:Needs two-factor authentication"</span>));
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="kw-2">&amp;</span>auth_info.webservices.drivews.url {
+            <span class="self">self</span>.data.drivews_url = v.to_string();
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="kw-2">&amp;</span>auth_info.webservices.docws.url {
+            <span class="self">self</span>.data.docws_url = v.to_string();
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
-}
 
-<span class="kw">impl </span>IcloudSigner {
-    <span class="kw">pub async fn </span>sign(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        method: Method,
-        uri: String,
-        body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>request = Request::builder().method(method).uri(uri);
+    <span class="kw">fn </span>sign&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>headers = req.headers_mut();
 
-        request = request.header(OAUTH_STATE_HEADER, <span class="self">self</span>.data.oauth_state.clone());
+        headers.insert(
+            OAUTH_STATE_HEADER,
+            build_header_value(<span class="kw-2">&amp;</span><span class="self">self</span>.data.oauth_state)<span class="question-mark">?</span>,
+        );
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(session_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.data.session_id {
-            request = request.header(SESSION_ID_HEADER, session_id);
+            headers.insert(SESSION_ID_HEADER, build_header_value(session_id)<span class="question-mark">?</span>);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(scnt) = <span class="kw-2">&amp;</span><span class="self">self</span>.data.scnt {
-            request = request.header(SCNT_HEADER, scnt);
+            headers.insert(SCNT_HEADER, build_header_value(scnt)<span class="question-mark">?</span>);
         }
 
-        <span class="comment">// China region
-        // ("Origin", "https://www.icloud.com.cn")
-        // ("Referer", "https://www.icloud.com.cn/")
-        // You can get more information from [apple.com](https://support.apple.com/en-us/111754)
+        <span class="comment">// You can get more information from [apple.com](https://support.apple.com/en-us/111754)
         </span><span class="kw">if </span><span class="self">self</span>.is_china_mainland {
-            request = request.header(<span class="string">"Origin"</span>, <span class="string">"https://www.icloud.com.cn"</span>);
-            request = request.header(<span class="string">"Referer"</span>, <span class="string">"https://www.icloud.com.cn/"</span>);
+            headers.insert(
+                header::ORIGIN,
+                build_header_value(<span class="string">"https://www.icloud.com.cn"</span>)<span class="question-mark">?</span>,
+            );
+            headers.insert(
+                header::REFERER,
+                build_header_value(<span class="string">"https://www.icloud.com.cn/"</span>)<span class="question-mark">?</span>,
+            );
         } <span class="kw">else </span>{
-            request = request.header(<span class="string">"Origin"</span>, <span class="string">"https://www.icloud.com"</span>);
-            request = request.header(<span class="string">"Referer"</span>, <span class="string">"https://www.icloud.com/"</span>);
+            headers.insert(
+                header::ORIGIN,
+                build_header_value(<span class="string">"https://www.icloud.com"</span>)<span class="question-mark">?</span>,
+            );
+            headers.insert(
+                header::REFERER,
+                build_header_value(<span class="string">"https://www.icloud.com/"</span>)<span class="question-mark">?</span>,
+            );
         }
 
-        <span class="kw">if </span>!<span class="self">self</span>.data.cookies.is_empty() {
-            <span class="kw">let </span>cookies: Vec&lt;String&gt; = <span class="self">self
-                </span>.data
-                .cookies
-                .iter()
-                .map(|(k, v)| <span class="macro">format!</span>(<span class="string">"{}={}"</span>, k, v))
-                .collect();
-            request = request.header(header::COOKIE, cookies.as_slice().join(<span class="string">"; "</span>));
+        <span class="kw">for </span>(key, value) <span class="kw">in </span>AUTH_HEADERS {
+            headers.insert(key, build_header_value(value)<span class="question-mark">?</span>);
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(headers) = request.headers_mut() {
-            headers.insert(<span class="string">"Content-Type"</span>, <span class="string">"application/json"</span>.parse().unwrap());
-            headers.insert(<span class="string">"Accept"</span>, <span class="string">"*/*"</span>.parse().unwrap());
-            <span class="kw">for </span>(key, value) <span class="kw">in </span>AUTH_HEADERS {
-                headers.insert(key, value.parse().unwrap());
-            }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Update signer's data after request sent out.
+    </span><span class="kw">fn </span>update(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resp: <span class="kw-2">&amp;</span>Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(account_country) = parse_header_to_str(resp.headers(), ACCOUNT_COUNTRY_HEADER)<span class="question-mark">?
+        </span>{
+            <span class="self">self</span>.data.account_country = <span class="prelude-val">Some</span>(account_country.to_string());
         }
 
-        <span class="kw">match </span><span class="self">self</span>.client.send(request.body(body).unwrap()).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(response) =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(account_country) =
-                    parse_header_to_str(response.headers(), ACCOUNT_COUNTRY_HEADER)<span class="question-mark">?
-                </span>{
-                    <span class="self">self</span>.data.account_country = <span class="prelude-val">Some</span>(account_country.to_string());
-                }
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(session_id) =
-                    parse_header_to_str(response.headers(), SESSION_ID_HEADER)<span class="question-mark">?
-                </span>{
-                    <span class="self">self</span>.data.session_id = <span class="prelude-val">Some</span>(session_id.to_string());
-                }
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(session_token) =
-                    parse_header_to_str(response.headers(), SESSION_TOKEN_HEADER)<span class="question-mark">?
-                </span>{
-                    <span class="self">self</span>.data.session_token = <span class="prelude-val">Some</span>(session_token.to_string());
-                }
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(scnt) = parse_header_to_str(response.headers(), SCNT_HEADER)<span class="question-mark">? </span>{
-                    <span class="self">self</span>.data.scnt = <span class="prelude-val">Some</span>(scnt.to_string());
-                }
-
-                <span class="kw">for </span>(key, value) <span class="kw">in </span>response.headers() {
-                    <span class="kw">if </span>key == header::SET_COOKIE {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(cookie) = value.to_str().unwrap().split(<span class="string">';'</span>).next() {
-                            <span class="kw">if let </span><span class="prelude-val">Some</span>((key, value)) = cookie.split_once(<span class="string">'='</span>) {
-                                <span class="self">self</span>.data
-                                    .cookies
-                                    .insert(String::from(key), String::from(value));
-                            }
-                        }
-                    }
-                }
-                <span class="kw">match </span>response.status() {
-                    StatusCode::UNAUTHORIZED =&gt; <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>),
-                    <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(response),
-                }
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unexpected,
-                <span class="string">"Apple icloud AuthenticationFailed:Unauthorized request"</span>,
-            )),
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(session_id) = parse_header_to_str(resp.headers(), SESSION_ID_HEADER)<span class="question-mark">? </span>{
+            <span class="self">self</span>.data.session_id = <span class="prelude-val">Some</span>(session_id.to_string());
         }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(session_token) = parse_header_to_str(resp.headers(), SESSION_TOKEN_HEADER)<span class="question-mark">? </span>{
+            <span class="self">self</span>.data.session_token = <span class="prelude-val">Some</span>(session_token.to_string());
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(scnt) = parse_header_to_str(resp.headers(), SCNT_HEADER)<span class="question-mark">? </span>{
+            <span class="self">self</span>.data.scnt = <span class="prelude-val">Some</span>(scnt.to_string());
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Send will make sure the following things:
+    ///
+    /// - Init the signer if it's not initiated.
+    /// - Sign the request.
+    /// - Update the session data if needed.
+    </span><span class="kw">pub async fn </span>send(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span>req: Request&lt;AsyncBody&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="comment">// Init the signer first.
+        </span><span class="kw">if </span><span class="self">self</span>.initiated {
+            <span class="self">self</span>.init().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.initiated = <span class="bool-val">true</span>;
+        }
+
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.update(<span class="kw-2">&amp;</span>resp)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(resp)
     }
 }
 
@@ -1274,132 +1123,94 @@
     }
 }
 
-<span class="kw">pub struct </span>IcloudPathQuery {
-    <span class="kw">pub </span>client: HttpClient,
-    <span class="kw">pub </span>signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;,
-}
-
-<span class="kw">impl </span>IcloudPathQuery {
-    <span class="kw">pub fn </span>new(client: HttpClient, signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;) -&gt; <span class="self">Self </span>{
-        IcloudPathQuery { client, signer }
-    }
-}
-
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>PathQuery <span class="kw">for </span>IcloudPathQuery {
-    <span class="kw">async fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="prelude-val">Ok</span>(<span class="string">"FOLDER::com.apple.CloudDocs::root"</span>.to_string())
-    }
-
-    <span class="comment">// Retrieves the root directory within the icloud Drive.
-    </span><span class="kw">async fn </span>query(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>drive_url = signer
-            .get_service_info(String::from(<span class="string">"drive"</span>))
-            .ok_or(Error::new(
-                ErrorKind::NotFound,
-                <span class="string">"drive service info drivews not found"</span>,
-            ))<span class="question-mark">?
-            </span>.clone()
-            .url;
-
-        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/retrieveItemDetailsInFolders"</span>, drive_url);
-
-        <span class="kw">let </span>body = <span class="macro">json!</span>([
-                         {
-                             <span class="string">"drivewsid"</span>: parent_id,
-                             <span class="string">"partialData"</span>: <span class="bool-val">false
-                         </span>}
-        ])
-        .to_string();
-
-        <span class="kw">let </span>async_body = AsyncBody::Bytes(bytes::Bytes::from(body));
-
-        <span class="kw">let </span>response = signer.sign(Method::POST, uri, async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">if </span>response.status() == StatusCode::OK {
-            <span class="kw">let </span>body = <span class="kw-2">&amp;</span>response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-
-            <span class="kw">let </span>root: Vec&lt;IcloudRoot&gt; =
-                serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-            <span class="kw">let </span>node = <span class="kw-2">&amp;</span>root[<span class="number">0</span>];
-
-            <span class="kw">let </span>id = <span class="kw">match </span>node.items.iter().find(|it| it.name == name) {
-                <span class="prelude-val">Some</span>(it) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(it.drivewsid.clone())),
-                <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-            }<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(id)
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>)
-        }
-    }
-
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>client_id = signer.get_client_id();
-        <span class="kw">let </span>drive_url = signer
-            .get_service_info(String::from(<span class="string">"drive"</span>))
-            .ok_or(Error::new(
-                ErrorKind::NotFound,
-                <span class="string">"drive service info drivews not found"</span>,
-            ))<span class="question-mark">?
-            </span>.url
-            .clone();
-
-        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/createFolders"</span>, drive_url);
-        <span class="kw">let </span>body = <span class="macro">json!</span>(
-                         {
-                             <span class="string">"destinationDrivewsId"</span>: parent_id,
-                             <span class="string">"folders"</span>: [
-                             {
-                                <span class="string">"clientId"</span>: client_id,
-                                <span class="string">"name"</span>: name,
-                            }
-                            ],
-                         }
-        )
-        .to_string();
-
-        <span class="kw">let </span>async_body = AsyncBody::Bytes(bytes::Bytes::from(body));
-        <span class="kw">let </span>response = signer.sign(Method::POST, uri, async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">match </span>response.status() {
-            StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = <span class="kw-2">&amp;</span>response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="kw">let </span>create_folder: IcloudCreateFolder =
-                    serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(create_folder.destination_drivews_id)
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
-    }
-}
-
 <span class="kw">impl </span>IcloudCore {
-    <span class="comment">// Logs into icloud using the provided credentials.
-    </span><span class="kw">pub async fn </span>login(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="comment">// Retrieves a root within the icloud Drive.
+    // "FOLDER::com.apple.CloudDocs::root"
+    </span><span class="kw">pub async fn </span>get_root(<span class="kw-2">&amp;</span><span class="self">self</span>, id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;IcloudRoot&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
 
-        signer.signer().<span class="kw">await
-    </span>}
+        <span class="kw">let </span>uri = <span class="macro">format!</span>(
+            <span class="string">"{}/retrieveItemDetailsInFolders"</span>,
+            signer.session_data().drivews_url
+        );
 
-    <span class="comment">//Apple Drive
-    </span><span class="kw">pub async fn </span>drive(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;DriveService&gt; {
-        <span class="kw">let </span>clone = <span class="self">self</span>.signer.clone();
-        <span class="kw">let </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>([
+             {
+                 <span class="string">"drivewsid"</span>: id,
+                 <span class="string">"partialData"</span>: <span class="bool-val">false
+             </span>}
+        ]))
+        .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>docws = signer.get_service_info(String::from(<span class="string">"docw"</span>)).unwrap();
-        signer
-            .get_service_info(String::from(<span class="string">"drive"</span>))
-            .map(|s| DriveService::new(clone, s.url.clone(), docws.url.clone()))
+        <span class="kw">let </span>req = Request::post(uri)
+            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>drive_node: Vec&lt;IcloudRoot&gt; =
+            serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(drive_node[<span class="number">0</span>].clone())
+    }
+
+    <span class="kw">pub async fn </span>get_file(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        id: <span class="kw-2">&amp;</span>str,
+        zone: <span class="kw-2">&amp;</span>str,
+        args: OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
+
+        <span class="kw">let </span>uri = <span class="macro">format!</span>(
+            <span class="string">"{}/ws/{}/download/by_id?document_id={}"</span>,
+            signer.session_data().drivews_url,
+            zone,
+            id
+        );
+
+        <span class="kw">let </span>req = Request::get(uri)
+            .body(AsyncBody::Empty)
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>object: IcloudObject =
+            serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>url = object.data_token.url.to_string();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(url);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = args.if_match() {
+            req = req.header(IF_MATCH, if_match);
+        }
+
+        <span class="kw">let </span>range = args.range();
+        <span class="kw">if </span>!range.is_full() {
+            req = req.header(header::RANGE, range.to_header())
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
+            req = req.header(IF_NONE_MATCH, if_none_match);
+        }
+
+        <span class="kw">let </span>req = req
+            .body(AsyncBody::Empty)
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = signer.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(resp)
     }
 
     <span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="self">self</span>.login().<span class="kw">await</span><span class="question-mark">?</span>;
-
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>base = get_basename(<span class="kw-2">&amp;</span>path);
 
@@ -1408,14 +1219,9 @@
             <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"read path not found: {}"</span>, base),
         ))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>drive = <span class="self">self
-            </span>.drive()
-            .<span class="kw">await
-            </span>.expect(<span class="string">"icloud DriveService read drive not found"</span>);
-
         <span class="kw">if let </span><span class="prelude-val">Some</span>(docwsid) = path_id.strip_prefix(<span class="string">"FILE::com.apple.CloudDocs::"</span>) {
-            <span class="prelude-val">Ok</span>(drive
-                .get_file(docwsid, <span class="string">"com.apple.CloudDocs"</span>, args.clone())
+            <span class="prelude-val">Ok</span>(<span class="self">self
+                </span>.get_file(docwsid, <span class="string">"com.apple.CloudDocs"</span>, args.clone())
                 .<span class="kw">await</span><span class="question-mark">?</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(Error::new(
@@ -1426,8 +1232,6 @@
     }
 
     <span class="kw">pub async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;IcloudItem&gt; {
-        <span class="self">self</span>.login().<span class="kw">await</span><span class="question-mark">?</span>;
-
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>base = get_basename(<span class="kw-2">&amp;</span>path);
@@ -1442,17 +1246,12 @@
             <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, base),
         ))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>drive = <span class="self">self
-            </span>.drive()
-            .<span class="kw">await
-            </span>.expect(<span class="string">"icloud DriveService stat drive not found"</span>);
-
         <span class="kw">let </span>folder_id = <span class="self">self</span>.path_cache.get(parent).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
             <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, parent),
         ))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>node = drive.get_root(<span class="kw-2">&amp;</span>folder_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>node = <span class="self">self</span>.get_root(<span class="kw-2">&amp;</span>folder_id).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">match </span>node.items.iter().find(|it| it.drivewsid == file_id.clone()) {
             <span class="prelude-val">Some</span>(it) =&gt; <span class="prelude-val">Ok</span>(it.clone()),
@@ -1464,104 +1263,95 @@
     }
 }
 
-<span class="kw">pub struct </span>DriveService {
-    signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;,
-    drive_url: String,
-    docw_url: String,
+<span class="kw">pub struct </span>IcloudPathQuery {
+    <span class="kw">pub </span>signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;,
 }
 
-<span class="kw">impl </span>DriveService {
-    <span class="comment">// Constructs an interface to an icloud Drive.
-    </span><span class="kw">pub fn </span>new(
-        signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;,
-        drive_url: String,
-        docw_url: String,
-    ) -&gt; DriveService {
-        DriveService {
-            signer,
-            drive_url,
-            docw_url,
-        }
+<span class="kw">impl </span>IcloudPathQuery {
+    <span class="kw">pub fn </span>new(signer: Arc&lt;Mutex&lt;IcloudSigner&gt;&gt;) -&gt; <span class="self">Self </span>{
+        IcloudPathQuery { signer }
+    }
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>PathQuery <span class="kw">for </span>IcloudPathQuery {
+    <span class="kw">async fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="prelude-val">Ok</span>(<span class="string">"FOLDER::com.apple.CloudDocs::root"</span>.to_string())
     }
 
-    <span class="comment">// Retrieves a root within the icloud Drive.
-    // "FOLDER::com.apple.CloudDocs::root"
-    </span><span class="kw">pub async fn </span>get_root(<span class="kw-2">&amp;</span><span class="self">self</span>, id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;IcloudRoot&gt; {
-        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/retrieveItemDetailsInFolders"</span>, <span class="self">self</span>.drive_url);
-
-        <span class="kw">let </span>body = <span class="macro">json!</span>([
-                         {
-                             <span class="string">"drivewsid"</span>: id,
-                             <span class="string">"partialData"</span>: <span class="bool-val">false
-                         </span>}
-        ])
-        .to_string();
-
+    <span class="doccomment">/// Retrieves the root directory within the icloud Drive.
+    ///
+    /// FIXME: we are reading the entire dir to find the file, this is not efficient.
+    /// Maybe we should build a new path cache for this kind of services instead.
+    </span><span class="kw">async fn </span>query(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>async_body = AsyncBody::Bytes(bytes::Bytes::from(body));
 
-        <span class="kw">let </span>response = signer.sign(Method::POST, uri, async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">if </span>response.status() == StatusCode::OK {
-            <span class="kw">let </span>body = <span class="kw-2">&amp;</span>response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-
-            <span class="kw">let </span>drive_node: Vec&lt;IcloudRoot&gt; =
-                serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-            <span class="prelude-val">Ok</span>(drive_node[<span class="number">0</span>].clone())
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>)
-        }
-    }
-
-    <span class="kw">pub async fn </span>get_file(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        id: <span class="kw-2">&amp;</span>str,
-        zone: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>uri = <span class="macro">format!</span>(
-            <span class="string">"{}\
-        /ws/{}/download/by_id?document_id={}"</span>,
-            <span class="self">self</span>.docw_url, zone, id
+            <span class="string">"{}/retrieveItemDetailsInFolders"</span>,
+            signer.session_data().drivews_url
         );
-        <span class="macro">debug!</span>(<span class="string">"{}"</span>, uri);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>([
+             {
+                 <span class="string">"drivewsid"</span>: parent_id,
+                 <span class="string">"partialData"</span>: <span class="bool-val">false
+             </span>}
+        ]))
+        .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>response = signer.sign(Method::GET, uri, AsyncBody::Empty).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = Request::post(uri)
+            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="kw">match </span>response.status() {
-            StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = <span class="kw-2">&amp;</span>response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>object: IcloudObject =
-                    serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-                <span class="kw">let </span>url = object.data_token.url.to_string();
-
-                <span class="kw">let </span><span class="kw-2">mut </span>request_builder = Request::builder().method(Method::GET).uri(url);
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = args.if_match() {
-                    request_builder = request_builder.header(IF_MATCH, if_match);
-                }
-
-                <span class="kw">let </span>range = args.range();
-                <span class="kw">if </span>!range.is_full() {
-                    request_builder = request_builder.header(header::RANGE, range.to_header())
-                }
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
-                    request_builder = request_builder.header(IF_NONE_MATCH, if_none_match);
-                }
-
-                <span class="kw">let </span>async_body = request_builder.body(AsyncBody::Empty).unwrap();
-
-                <span class="kw">let </span>response = signer.client.send(async_body).<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(response)
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>),
+        <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
+
+        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>root: Vec&lt;IcloudRoot&gt; =
+            serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>node = <span class="kw-2">&amp;</span>root[<span class="number">0</span>];
+
+        <span class="kw">let </span>id = <span class="kw">match </span>node.items.iter().find(|it| it.name == name) {
+            <span class="prelude-val">Some</span>(it) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(it.drivewsid.clone())),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        }<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(id)
+    }
+
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>client_id = signer.client_id();
+
+        <span class="kw">let </span>uri = <span class="macro">format!</span>(<span class="string">"{}/createFolders"</span>, signer.session_data().drivews_url);
+        <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>(
+             {
+                 <span class="string">"destinationDrivewsId"</span>: parent_id,
+                 <span class="string">"folders"</span>: [
+                 {
+                    <span class="string">"clientId"</span>: client_id,
+                    <span class="string">"name"</span>: name,
+                }
+                ],
+             }
+        ))
+        .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>req = Request::post(uri)
+            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>resp.status() != StatusCode::OK {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>create_folder: IcloudCreateFolder =
+            serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(create_folder.destination_drivews_id)
     }
 }
 
