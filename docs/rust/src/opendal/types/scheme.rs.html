@@ -446,6 +446,12 @@
 <a href="#444" id="444">444</a>
 <a href="#445" id="445">445</a>
 <a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -538,6 +544,8 @@
     <span class="doccomment">/// [ipmfs][crate::services::Ipmfs]: IPFS mutable file system
     </span>Ipmfs,
     <span class="doccomment">/// [memcached][crate::services::Memcached]: Memcached service support.
+    </span>Icloud,
+    <span class="doccomment">/// [icloud][crate::services::Icloud]: APPLE icloud services.
     </span>Memcached,
     <span class="doccomment">/// [memory][crate::services::Memory]: In memory backend support.
     </span>Memory,
@@ -671,6 +679,8 @@
             </span>Scheme::Ipfs,
             <span class="attr">#[cfg(feature = <span class="string">"services-ipmfs"</span>)]
             </span>Scheme::Ipmfs,
+            <span class="attr">#[cfg(feature = <span class="string">"services-icloud"</span>)]
+            </span>Scheme::Icloud,
             <span class="attr">#[cfg(feature = <span class="string">"services-libsql"</span>)]
             </span>Scheme::Libsql,
             <span class="attr">#[cfg(feature = <span class="string">"services-memcached"</span>)]
@@ -784,6 +794,7 @@
             <span class="string">"ftp" </span>| <span class="string">"ftps" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ftp),
             <span class="string">"ipfs" </span>| <span class="string">"ipns" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ipfs),
             <span class="string">"ipmfs" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ipmfs),
+            <span class="string">"icloud" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Icloud),
             <span class="string">"koofr" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Koofr),
             <span class="string">"libsql" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Libsql),
             <span class="string">"memcached" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Memcached),
@@ -847,6 +858,7 @@
             Scheme::Ftp =&gt; <span class="string">"ftp"</span>,
             Scheme::Ipfs =&gt; <span class="string">"ipfs"</span>,
             Scheme::Ipmfs =&gt; <span class="string">"ipmfs"</span>,
+            Scheme::Icloud =&gt; <span class="string">"icloud"</span>,
             Scheme::Koofr =&gt; <span class="string">"koofr"</span>,
             Scheme::Libsql =&gt; <span class="string">"libsql"</span>,
             Scheme::Memcached =&gt; <span class="string">"memcached"</span>,

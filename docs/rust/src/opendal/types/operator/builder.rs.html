@@ -417,6 +417,8 @@
 <a href="#415" id="415">415</a>
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -628,6 +630,8 @@
             </span>Scheme::Ipfs =&gt; <span class="self">Self</span>::from_map::&lt;services::Ipfs&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-ipmfs"</span>)]
             </span>Scheme::Ipmfs =&gt; <span class="self">Self</span>::from_map::&lt;services::Ipmfs&gt;(map)<span class="question-mark">?</span>.finish(),
+            <span class="attr">#[cfg(feature = <span class="string">"services-icloud"</span>)]
+            </span>Scheme::Icloud =&gt; <span class="self">Self</span>::from_map::&lt;services::Icloud&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-libsql"</span>)]
             </span>Scheme::Libsql =&gt; <span class="self">Self</span>::from_map::&lt;services::Libsql&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-memcached"</span>)]
