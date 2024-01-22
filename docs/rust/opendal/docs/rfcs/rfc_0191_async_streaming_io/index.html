@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Async streaming IO"><title>opendal::docs::rfcs::rfc_0191_async_streaming_io - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (88189a71e 2024-01-19)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.44.2</span></h2></div><h2 class="location"><a href="#">Module rfc_0191_async_streaming_io</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::rfcs</a></h2></div></nav><div class="sidebar-resizer"></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Async streaming IO"><title>opendal::docs::rfcs::rfc_0191_async_streaming_io - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (ef71f1047 2024-01-21)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.44.2</span></h2></div><h2 class="location"><a href="#">Module rfc_0191_async_streaming_io</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::rfcs</a></h2></div></nav><div class="sidebar-resizer"></div>
     <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../../index.html">opendal</a>::<wbr><a href="../../index.html">docs</a>::<wbr><a href="../index.html">rfcs</a>::<wbr><a class="mod" href="#">rfc_0191_async_streaming_io</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../../../src/opendal/docs/rfcs/mod.rs.html#50">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Async streaming IO</p>
 <ul>
 <li>Proposal Name: <code>async_streaming_io</code></li>
@@ -7,11 +7,11 @@
 <li>Tracking Issue: <a href="https://github.com/apache/opendal/issues/190">apache/opendal#190</a></li>
 </ul>
 <p><strong>Reverted</strong></p>
-<h2 id="summary"><a href="#summary">Summary</a></h2>
+<h2 id="summary"><a class="doc-anchor" href="#summary">§</a>Summary</h2>
 <p>Use <code>Stream</code>/<code>Sink</code> instead of <code>AsyncRead</code> in <code>Accessor</code>.</p>
-<h2 id="motivation"><a href="#motivation">Motivation</a></h2>
+<h2 id="motivation"><a class="doc-anchor" href="#motivation">§</a>Motivation</h2>
 <p><code>Accessor</code> intends to be the <code>underlying trait of all backends for implementors</code>. However, it’s not so underlying enough.</p>
-<h3 id="over-wrapped"><a href="#over-wrapped">Over-wrapped</a></h3>
+<h3 id="over-wrapped"><a class="doc-anchor" href="#over-wrapped">§</a>Over-wrapped</h3>
 <p><code>Accessor</code> returns a <code>BoxedAsyncReader</code> for <code>read</code> operation:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub type </span>BoxedAsyncReader = Box&lt;<span class="kw">dyn </span>AsyncRead + Unpin + Send&gt;;
@@ -35,7 +35,7 @@
 <li><code>ByteStream::poll_next()</code></li>
 </ul>
 <p>In this way, we operate on the underlying IO stream, and the caller must keep track of the reading states.</p>
-<h3 id="inconsistent"><a href="#inconsistent">Inconsistent</a></h3>
+<h3 id="inconsistent"><a class="doc-anchor" href="#inconsistent">§</a>Inconsistent</h3>
 <p>OpenDAL’s <code>read</code> and <code>write</code> behavior is not consistent.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub type </span>BoxedAsyncReader = Box&lt;<span class="kw">dyn </span>AsyncRead + Unpin + Send&gt;;
@@ -51,7 +51,7 @@
     }
 }</code></pre></div>
 <p>For <code>read</code>, OpenDAL returns a <code>BoxedAsyncReader</code> which users can decide when and how to read data. But for <code>write</code>, OpenDAL accepts a <code>BoxedAsyncReader</code> instead, in which users can’t control the writing logic. How large will the writing buffer size be? When to call <code>flush</code>?</p>
-<h3 id="service-native-optimization"><a href="#service-native-optimization">Service native optimization</a></h3>
+<h3 id="service-native-optimization"><a class="doc-anchor" href="#service-native-optimization">§</a>Service native optimization</h3>
 <p>OpenDAL knows more about the service detail, but returning <code>BoxedAsyncReader</code> makes it can’t fully use the advantage.</p>
 <p>For example, most object storage services use HTTP to transfer data which is TCP stream-based. The most efficient way is to return a full TCP buffer, but users don’t know about that. First, users could have continuous small reads on stream. To overcome the poor performance, they have to use <code>BufReader</code>, which adds a new buffering between reading. Then, users don’t know the correct (best) buffer size to set.</p>
 <p>Via returning a <code>Stream</code>, users could benefit from it in both ways:</p>
@@ -59,7 +59,7 @@
 <li>Users who want underlying control can operate on the <code>Stream</code> directly.</li>
 <li>Users who don’t care about the behavior can use OpenDAL provided Reader, which always adopts the best optimization.</li>
 </ul>
-<h2 id="guide-level-explanation"><a href="#guide-level-explanation">Guide-level explanation</a></h2>
+<h2 id="guide-level-explanation"><a class="doc-anchor" href="#guide-level-explanation">§</a>Guide-level explanation</h2>
 <p>Within the <code>async_streaming_io</code> feature, we will add the following new APIs to <code>Object</code>:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Object {
@@ -77,7 +77,7 @@
 <li><code>async read(offset: Option&lt;u64&gt;, size: Option&lt;u64&gt;) -&gt; Result&lt;bytes::Bytes&gt;</code></li>
 <li><code>async write(bs: bytes::Bytes) -&gt; Result&lt;()&gt;</code></li>
 </ul>
-<h2 id="reference-level-explanation"><a href="#reference-level-explanation">Reference-level explanation</a></h2>
+<h2 id="reference-level-explanation"><a class="doc-anchor" href="#reference-level-explanation">§</a>Reference-level explanation</h2>
 <p><code>read</code> and <code>write</code> in <code>Accessor</code> will be refactored into streaming-based:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub type </span>BytesStream =  Box&lt;<span class="kw">dyn </span>Stream + Unpin + Send&gt;;
@@ -101,7 +101,7 @@
     fut: ResponseFuture,
     sender: Sender&lt;bytes::Bytes&gt;
 }</code></pre></div>
-<h2 id="drawbacks"><a href="#drawbacks">Drawbacks</a></h2><h3 id="performance-regression-on-fs"><a href="#performance-regression-on-fs">Performance regression on fs</a></h3>
+<h2 id="drawbacks"><a class="doc-anchor" href="#drawbacks">§</a>Drawbacks</h2><h3 id="performance-regression-on-fs"><a class="doc-anchor" href="#performance-regression-on-fs">§</a>Performance regression on fs</h3>
 <p><code>fs</code> is not stream based backend, and convert from <code>Reader</code> to <code>Stream</code> is not zero cost. Based on benchmark over <code>IntoStream</code>, we can get nearly 70% performance drawback (pure memory):</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>into_stream/into_stream time:   [<span class="number">1.3046 </span>ms <span class="number">1.3056 </span>ms <span class="number">1.3068 </span>ms]
@@ -109,7 +109,7 @@
 into_stream/raw_reader  time:   [<span class="number">382.10 </span>us <span class="number">383.52 </span>us <span class="number">385.16 </span>us]
                         thrpt:  [<span class="number">10.142 </span>GiB/s <span class="number">10.185 </span>GiB/s <span class="number">10.223 </span>GiB/s]</code></pre></div>
 <p>However, real fs is not as fast as memory and most overhead will happen at disk side, so that performance regression is allowed (at least at this time).</p>
-<h2 id="rationale-and-alternatives"><a href="#rationale-and-alternatives">Rationale and alternatives</a></h2><h3 id="performance-for-switching-from-reader-to-stream"><a href="#performance-for-switching-from-reader-to-stream">Performance for switching from Reader to Stream</a></h3>
+<h2 id="rationale-and-alternatives"><a class="doc-anchor" href="#rationale-and-alternatives">§</a>Rationale and alternatives</h2><h3 id="performance-for-switching-from-reader-to-stream"><a class="doc-anchor" href="#performance-for-switching-from-reader-to-stream">§</a>Performance for switching from Reader to Stream</h3>
 <p>Before</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>read_full/<span class="number">4.00 </span>KiB      time:   [<span class="number">455.70 </span>us <span class="number">466.18 </span>us <span class="number">476.93 </span>us]
@@ -146,7 +146,7 @@ read_full/<span class="number">16.0 </span>MiB      time:   [<span class="number
                         time:   [-<span class="number">15.917</span>% -<span class="number">11.816</span>% -<span class="number">7.5219</span>%] (p = <span class="number">0.00 </span>&lt; <span class="number">0.05</span>)
                         thrpt:  [+<span class="number">8.1337</span>% +<span class="number">13.400</span>% +<span class="number">18.930</span>%]
                         Performance has improved.</code></pre></div>
-<h3 id="performance-for-the-extra-channel-in-write"><a href="#performance-for-the-extra-channel-in-write">Performance for the extra channel in <code>write</code></a></h3>
+<h3 id="performance-for-the-extra-channel-in-write"><a class="doc-anchor" href="#performance-for-the-extra-channel-in-write">§</a>Performance for the extra channel in <code>write</code></h3>
 <p>Based on the benchmark during research, the <strong>unbuffered</strong> channel does improve the performance a bit in some cases:</p>
 <p>Before:</p>
 
@@ -184,7 +184,7 @@ write_once/<span class="number">16.0 </span>MiB     time:   [<span class="number
                         time:   [-<span class="number">10.829</span>% -<span class="number">8.3611</span>% -<span class="number">5.8702</span>%] (p = <span class="number">0.00 </span>&lt; <span class="number">0.05</span>)
                         thrpt:  [+<span class="number">6.2363</span>% +<span class="number">9.1240</span>% +<span class="number">12.145</span>%]
                         Performance has improved.</code></pre></div>
-<h3 id="add-complexity-on-the-services-side"><a href="#add-complexity-on-the-services-side">Add complexity on the services side</a></h3>
+<h3 id="add-complexity-on-the-services-side"><a class="doc-anchor" href="#add-complexity-on-the-services-side">§</a>Add complexity on the services side</h3>
 <p>Returning <code>Stream</code> and <code>Sink</code> make it complex to implement. At first glance, it does. But in reality, it’s not.</p>
 <p>Note: HTTP (especially for hyper) is stream-oriented.</p>
 <ul>
@@ -192,7 +192,7 @@ write_once/<span class="number">16.0 </span>MiB     time:   [<span class="number
 <li>Returning <code>Sink</code> is covered by the global shared <code>BodySinker</code> struct.</li>
 </ul>
 <p>Other helper functions will be covered at the Object-level which services don’t need to bother.</p>
-<h2 id="prior-art"><a href="#prior-art">Prior art</a></h2><h3 id="returning-a-writer"><a href="#returning-a-writer">Returning a <code>Writer</code></a></h3>
+<h2 id="prior-art"><a class="doc-anchor" href="#prior-art">§</a>Prior art</h2><h3 id="returning-a-writer"><a class="doc-anchor" href="#returning-a-writer">§</a>Returning a <code>Writer</code></h3>
 <p>The most natural extending is to return <code>BoxedAsyncWriter</code>:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor: Send + Sync + Debug {
@@ -208,7 +208,7 @@ write_once/<span class="number">16.0 </span>MiB     time:   [<span class="number
     }
 }</code></pre></div>
 <p>But it only fixes the <code>Inconsistent</code> concern and can’t help with other issues.</p>
-<h3 id="slice-based-api"><a href="#slice-based-api">Slice based API</a></h3>
+<h3 id="slice-based-api"><a class="doc-anchor" href="#slice-based-api">§</a>Slice based API</h3>
 <p>Most rust IO APIs are based on slice:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor: Send + Sync + Debug {
@@ -228,7 +228,7 @@ write_once/<span class="number">16.0 </span>MiB     time:   [<span class="number
 <li>If we require all data must be passed at one time, we can’t support large files read &amp; write</li>
 <li>If we allow users to call <code>read</code>/<code>write</code> multiple times, we need to implement another <code>Reader</code> and <code>Writer</code> alike logic.</li>
 </ul>
-<h3 id="accept-reader-and-writer"><a href="#accept-reader-and-writer">Accept <code>Reader</code> and <code>Writer</code></a></h3>
+<h3 id="accept-reader-and-writer"><a class="doc-anchor" href="#accept-reader-and-writer">§</a>Accept <code>Reader</code> and <code>Writer</code></h3>
 <p>It’s also possible to accept <code>Reader</code> and <code>Writer</code> instead.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor: Send + Sync + Debug {
@@ -245,9 +245,9 @@ write_once/<span class="number">16.0 </span>MiB     time:   [<span class="number
 }</code></pre></div>
 <p>This API design addressed all concerns but made it hard for users to use. Primarily, we can’t support <code>futures::AsyncRead</code> and <code>tokio::AsyncRead</code> simultaneously.</p>
 <p>For example, we can’t accept a <code>Box::new(Vec::new())</code>, user can’t get this vec from OpenDAL.</p>
-<h2 id="unresolved-questions"><a href="#unresolved-questions">Unresolved questions</a></h2>
+<h2 id="unresolved-questions"><a class="doc-anchor" href="#unresolved-questions">§</a>Unresolved questions</h2>
 <p>None.</p>
-<h2 id="future-possibilities"><a href="#future-possibilities">Future possibilities</a></h2>
+<h2 id="future-possibilities"><a class="doc-anchor" href="#future-possibilities">§</a>Future possibilities</h2>
 <ul>
 <li>Implement <code>Object::read_into(w: BoxedAsyncWriter)</code></li>
 <li>Implement <code>Object::write_from(r: BoxedAsyncReader)</code></li>
