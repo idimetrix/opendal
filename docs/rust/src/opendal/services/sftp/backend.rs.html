@@ -641,6 +641,7 @@
 
 <span class="kw">impl </span>SftpBuilder {
     <span class="doccomment">/// set endpoint for sftp backend.
+    /// The format is same as `openssh`, using either `[user@]hostname` or `ssh://[user@]hostname[:port]`. A username or port that is specified in the endpoint overrides the one set in the builder (but does not change the builder).
     </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.config.endpoint = <span class="kw">if </span>endpoint.is_empty() {
             <span class="prelude-val">None
@@ -720,10 +721,7 @@
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"endpoint is empty"</span>)),
         };
 
-        <span class="kw">let </span>user = <span class="kw">match </span><span class="self">self</span>.config.user.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"user is empty"</span>)),
-        };
+        <span class="kw">let </span>user = <span class="self">self</span>.config.user.clone();
 
         <span class="kw">let </span>root = <span class="self">self
             </span>.config
@@ -776,7 +774,7 @@
 </span><span class="kw">pub struct </span>SftpBackend {
     endpoint: String,
     root: String,
-    user: String,
+    user: <span class="prelude-ty">Option</span>&lt;String&gt;,
     key: <span class="prelude-ty">Option</span>&lt;String&gt;,
     known_hosts_strategy: KnownHosts,
     copyable: bool,
@@ -1047,13 +1045,15 @@
 <span class="kw">async fn </span>connect_sftp(
     endpoint: <span class="kw-2">&amp;</span>str,
     root: String,
-    user: String,
+    user: <span class="prelude-ty">Option</span>&lt;String&gt;,
     key: <span class="prelude-ty">Option</span>&lt;String&gt;,
     known_hosts_strategy: KnownHosts,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Sftp&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>session = SessionBuilder::default();
 
-    session.user(user);
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(user) = user {
+        session.user(user);
+    }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = <span class="kw-2">&amp;</span>key {
         session.keyfile(key);
