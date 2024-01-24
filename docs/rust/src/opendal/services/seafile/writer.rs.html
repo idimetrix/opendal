@@ -166,10 +166,10 @@
             .stream(bs.len() <span class="kw">as </span>u64, Box::new(bs));
 
         <span class="kw">let </span>multipart = Multipart::new()
-            .part(file_part)
             .part(FormDataPart::new(<span class="string">"parent_dir"</span>).content(<span class="string">"/"</span>))
             .part(FormDataPart::new(<span class="string">"relative_path"</span>).content(relative_path.clone()))
-            .part(FormDataPart::new(<span class="string">"replace"</span>).content(<span class="string">"1"</span>));
+            .part(FormDataPart::new(<span class="string">"replace"</span>).content(<span class="string">"1"</span>))
+            .part(file_part);
 
         <span class="kw">let </span>req = multipart.apply(req)<span class="question-mark">?</span>;
 
