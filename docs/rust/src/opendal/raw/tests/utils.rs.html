@@ -169,7 +169,7 @@
     <span class="comment">// Enable blocking layer if needed.
     </span><span class="kw">if </span>!op.info().full_capability().blocking {
         <span class="kw">let </span>_guard = TEST_RUNTIME.enter();
-        op = op.layer(layers::BlockingLayer::create().expect(<span class="string">"blocking layer must be created"</span>))
+        op = op.layer(layers::BlockingLayer::create().expect(<span class="string">"blocking layer must be created"</span>));
     }
 
     <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(op))

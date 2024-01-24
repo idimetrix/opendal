@@ -1,3 +1,3 @@
 (function() {var implementors = {
-"opendal":[["impl AsyncRead for dyn <a class=\"trait\" href=\"opendal/raw/oio/trait.Read.html\" title=\"trait opendal::raw::oio::Read\">Read</a>"],["impl AsyncRead for <a class=\"struct\" href=\"opendal/struct.Reader.html\" title=\"struct opendal::Reader\">Reader</a>"]]
+"opendal":[["impl AsyncRead for <a class=\"struct\" href=\"opendal/struct.Reader.html\" title=\"struct opendal::Reader\">Reader</a>"],["impl AsyncRead for dyn <a class=\"trait\" href=\"opendal/raw/oio/trait.Read.html\" title=\"trait opendal::raw::oio::Read\">Read</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

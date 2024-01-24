@@ -40,7 +40,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
+</span><span class="kw">use crate</span>::{Error, ErrorKind};
 
 <span class="doccomment">/// Parse tokio error into opendal::Error.
 </span><span class="kw">pub fn </span>new_task_join_error(e: tokio::task::JoinError) -&gt; Error {

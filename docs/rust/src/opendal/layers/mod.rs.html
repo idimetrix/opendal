@@ -103,6 +103,8 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -143,8 +145,10 @@
 <span class="kw">mod </span>timeout;
 <span class="kw">pub use </span>timeout::TimeoutLayer;
 
-<span class="kw">mod </span>blocking;
-<span class="kw">pub use </span>blocking::BlockingLayer;
+<span class="attr">#[cfg(feature = <span class="string">"layers-blocking"</span>)]
+</span><span class="kw">mod </span>blocking;
+<span class="attr">#[cfg(feature = <span class="string">"layers-blocking"</span>)]
+</span><span class="kw">pub use </span>blocking::BlockingLayer;
 
 <span class="attr">#[cfg(feature = <span class="string">"layers-chaos"</span>)]
 </span><span class="kw">mod </span>chaos;
