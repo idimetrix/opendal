@@ -82,6 +82,15 @@
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -137,6 +146,15 @@
     }
 }
 
+<span class="attr">#[inline]
+</span><span class="kw">fn </span>starts_with_not_eq(entry: <span class="kw-2">&amp;</span>oio::Entry, prefix: <span class="kw-2">&amp;</span>str) -&gt; bool {
+    <span class="kw">match </span>entry.path().strip_prefix(prefix) {
+        <span class="prelude-val">None </span>=&gt; <span class="bool-val">false</span>,
+        <span class="prelude-val">Some</span>(<span class="string">""</span>) =&gt; <span class="bool-val">false</span>,
+        <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+    }
+}
+
 <span class="kw">impl</span>&lt;L&gt; oio::List <span class="kw">for </span>PrefixLister&lt;L&gt;
 <span class="kw">where
     </span>L: oio::List,
@@ -144,7 +162,7 @@
     <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.lister.poll_next(cx)) {
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e)) <span class="kw">if </span>!e.path().starts_with(<span class="kw-2">&amp;</span><span class="self">self</span>.prefix) =&gt; <span class="kw">continue</span>,
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e)) <span class="kw">if </span>!starts_with_not_eq(<span class="kw-2">&amp;</span>e, <span class="kw-2">&amp;</span><span class="self">self</span>.prefix) =&gt; <span class="kw">continue</span>,
                 v =&gt; <span class="kw">return </span>Poll::Ready(v),
             }
         }
@@ -158,7 +176,7 @@
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.lister.next() {
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e)) <span class="kw">if </span>!e.path().starts_with(<span class="kw-2">&amp;</span><span class="self">self</span>.prefix) =&gt; <span class="kw">continue</span>,
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e)) <span class="kw">if </span>!starts_with_not_eq(<span class="kw-2">&amp;</span>e, <span class="kw-2">&amp;</span><span class="self">self</span>.prefix) =&gt; <span class="kw">continue</span>,
                 v =&gt; <span class="kw">return </span>v,
             }
         }
