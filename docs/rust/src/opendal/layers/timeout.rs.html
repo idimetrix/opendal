@@ -476,6 +476,15 @@
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -496,8 +505,9 @@
 </span><span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::pin::Pin;
+<span class="kw">use </span>std::task::ready;
+<span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
-<span class="kw">use </span>std::task::{ready, Context};
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -535,18 +545,21 @@
 /// operations, 3 seconds timeout for all io operations.
 ///
 /// ```
+/// use std::time::Duration;
+///
 /// use anyhow::Result;
 /// use opendal::layers::TimeoutLayer;
 /// use opendal::services;
 /// use opendal::Operator;
 /// use opendal::Scheme;
-/// use std::time::Duration;
 ///
 /// let _ = Operator::new(services::Memory::default())
 ///     .expect("must init")
-///     .layer(TimeoutLayer::default()
-///         .with_timeout(Duration::from_secs(10))
-///         .with_io_timeout(Duration::from_secs(3)))
+///     .layer(
+///         TimeoutLayer::default()
+///             .with_timeout(Duration::from_secs(10))
+///             .with_io_timeout(Duration::from_secs(3)),
+///     )
 ///     .finish();
 /// ```
 ///
@@ -846,17 +859,22 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">crate</span>::layers::{TimeoutLayer, TypeEraseLayer};
+    <span class="kw">use </span>std::io::SeekFrom;
+    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>std::task::Context;
+    <span class="kw">use </span>std::task::Poll;
+    <span class="kw">use </span>std::time::Duration;
+
+    <span class="kw">use </span>async_trait::async_trait;
+    <span class="kw">use </span>bytes::Bytes;
+    <span class="kw">use </span>tokio::time::sleep;
+    <span class="kw">use </span>tokio::time::timeout;
+
+    <span class="kw">use </span><span class="kw">crate</span>::layers::TimeoutLayer;
+    <span class="kw">use </span><span class="kw">crate</span>::layers::TypeEraseLayer;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadExt;
     <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span>async_trait::async_trait;
-    <span class="kw">use </span>bytes::Bytes;
-    <span class="kw">use </span>std::io::SeekFrom;
-    <span class="kw">use </span>std::sync::Arc;
-    <span class="kw">use </span>std::task::{Context, Poll};
-    <span class="kw">use </span>std::time::Duration;
-    <span class="kw">use </span>tokio::time::{sleep, timeout};
 
     <span class="attr">#[derive(Debug, Clone, Default)]
     </span><span class="kw">struct </span>MockService;

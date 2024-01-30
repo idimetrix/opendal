@@ -871,6 +871,11 @@
 <a href="#869" id="869">869</a>
 <a href="#870" id="870">870</a>
 <a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -888,18 +893,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::{Buf, Bytes};
-<span class="kw">use </span>std::collections::BTreeMap;
-<span class="kw">use </span>std::fmt::{Debug, Formatter};
+</span><span class="kw">use </span>std::collections::BTreeMap;
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header;
-<span class="kw">use </span>http::header::{IF_MATCH, IF_NONE_MATCH};
+<span class="kw">use </span>http::header::IF_MATCH;
+<span class="kw">use </span>http::header::IF_NONE_MATCH;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>serde_json::json;
 <span class="kw">use </span>tokio::sync::Mutex;
 
@@ -1579,7 +1588,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::{IcloudRoot, IcloudWebservicesResponse};
+    <span class="kw">use </span><span class="kw">super</span>::IcloudRoot;
+    <span class="kw">use </span><span class="kw">super</span>::IcloudWebservicesResponse;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_icloud_drive_root_json() {

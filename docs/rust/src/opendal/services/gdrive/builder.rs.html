@@ -225,6 +225,9 @@
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -254,10 +257,13 @@
 <span class="kw">use </span>tokio::sync::Mutex;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::GdriveBackend;
-<span class="kw">use </span><span class="kw">crate</span>::raw::{normalize_root, PathCacher};
-<span class="kw">use </span><span class="kw">crate</span>::raw::{ConfigDeserializer, HttpClient};
+<span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
+<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
+<span class="kw">use </span><span class="kw">crate</span>::raw::HttpClient;
+<span class="kw">use </span><span class="kw">crate</span>::raw::PathCacher;
+<span class="kw">use </span><span class="kw">crate</span>::services::gdrive::core::GdriveCore;
+<span class="kw">use </span><span class="kw">crate</span>::services::gdrive::core::GdrivePathQuery;
 <span class="kw">use </span><span class="kw">crate</span>::services::gdrive::core::GdriveSigner;
-<span class="kw">use </span><span class="kw">crate</span>::services::gdrive::core::{GdriveCore, GdrivePathQuery};
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 

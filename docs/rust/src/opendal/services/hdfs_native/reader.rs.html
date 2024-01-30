@@ -57,6 +57,9 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -74,12 +77,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::oio::Read;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+</span><span class="kw">use </span>std::io::SeekFrom;
+<span class="kw">use </span>std::task::Context;
+<span class="kw">use </span>std::task::Poll;
+
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>hdfs_native::file::FileReader;
-<span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::task::{Context, Poll};
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Read;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>HdfsNativeReader {
     _f: FileReader,

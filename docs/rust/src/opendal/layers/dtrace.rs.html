@@ -519,6 +519,9 @@
 <a href="#517" id="517">517</a>
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -536,18 +539,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::Accessor;
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>probe::probe_lazy;
-<span class="kw">use </span>std::ffi::CString;
+</span><span class="kw">use </span>std::ffi::CString;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
+
+<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>probe::probe_lazy;
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::Accessor;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Support User Statically-Defined Tracing(aka USDT) on Linux
 ///
@@ -634,11 +639,10 @@
 ///
 /// Example:
 /// ```
-///
 /// use anyhow::Result;
+/// use opendal::layers::DTraceLayer;
 /// use opendal::services::Fs;
 /// use opendal::Operator;
-/// use opendal::layers::DTraceLayer;
 ///
 /// #[tokio::main]
 /// async fn main() -&gt; Result&lt;()&gt; {
@@ -647,10 +651,12 @@
 ///     builder.root("/tmp");
 ///
 ///     // `Accessor` provides the low level APIs, we will use `Operator` normally.
-///     let op: Operator = Operator::new(builder)?.layer(DtraceLayer::default()).finish();
-///     
-///     let path="/tmp/test.txt";
-///     for _ in 1..100000{
+///     let op: Operator = Operator::new(builder)?
+///         .layer(DtraceLayer::default())
+///         .finish();
+///
+///     let path = "/tmp/test.txt";
+///     for _ in 1..100000 {
 ///         let bs = vec![0; 64 * 1024 * 1024];
 ///         op.write(path, bs).await?;
 ///         op.read(path).await?;

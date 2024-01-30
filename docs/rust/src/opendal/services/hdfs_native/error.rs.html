@@ -53,6 +53,7 @@
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -70,8 +71,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>hdfs_native::HdfsError;
+</span><span class="kw">use </span>hdfs_native::HdfsError;
+
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Parse hdfs-native error into opendal::Error.
 </span><span class="kw">pub fn </span>parse_hdfs_error(hdfs_error: HdfsError) -&gt; Error {

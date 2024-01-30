@@ -520,6 +520,10 @@
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -926,11 +930,15 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>std::sync::Mutex;
+
+    <span class="kw">use </span>pretty_assertions::assert_eq;
+    <span class="kw">use </span>rand::thread_rng;
+    <span class="kw">use </span>rand::Rng;
+    <span class="kw">use </span>rand::RngCore;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteExt;
-    <span class="kw">use </span>pretty_assertions::assert_eq;
-    <span class="kw">use </span>rand::{thread_rng, Rng, RngCore};
-    <span class="kw">use </span>std::sync::Mutex;
 
     <span class="kw">struct </span>TestWrite {
         upload_id: String,

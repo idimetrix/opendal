@@ -81,7 +81,6 @@
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -109,10 +108,9 @@
 <span class="kw">use </span>openssh_sftp_client::fs::DirEntry;
 <span class="kw">use </span>openssh_sftp_client::fs::ReadDir;
 
+<span class="kw">use </span><span class="kw">super</span>::error::parse_sftp_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
-
-<span class="kw">use </span><span class="kw">super</span>::error::parse_sftp_error;
 
 <span class="kw">pub struct </span>SftpLister {
     dir: Pin&lt;Box&lt;ReadDir&gt;&gt;,

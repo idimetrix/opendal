@@ -1196,7 +1196,6 @@
 <a href="#1194" id="1194">1194</a>
 <a href="#1195" id="1195">1195</a>
 <a href="#1196" id="1196">1196</a>
-<a href="#1197" id="1197">1197</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1257,7 +1256,6 @@
 ///
 /// Some services like s3, gcs doesn't have native blocking supports, we can use [`layers::BlockingLayer`]
 /// to wrap the async operator to make it blocking.
-///
 </span><span class="attr">#[cfg_attr(feature = <span class="string">"layers-blocking"</span>, doc = <span class="string">"```rust"</span>)]
 #[cfg_attr(not(feature = <span class="string">"layers-blocking"</span>), doc = <span class="string">"```ignore"</span>)]
 </span><span class="doccomment">/// # use anyhow::Result;

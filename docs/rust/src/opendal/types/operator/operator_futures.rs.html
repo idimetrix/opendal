@@ -636,6 +636,21 @@
         <span class="self">self</span>.map(|args| args.with_range(range.into()))
     }
 
+    <span class="doccomment">/// Set the buffer capability to enable buffer for reader.
+    </span><span class="kw">pub fn </span>buffer(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|args| args.with_buffer(v))
+    }
+
+    <span class="doccomment">/// Set the If-Match for this operation.
+    </span><span class="kw">pub fn </span>if_match(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|args| args.with_if_match(v))
+    }
+
+    <span class="doccomment">/// Set the If-None-Match for this operation.
+    </span><span class="kw">pub fn </span>if_none_match(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|args| args.with_if_none_match(v))
+    }
+
     <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
     </span><span class="kw">pub fn </span>override_content_disposition(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|args| args.with_override_content_disposition(v))
@@ -651,24 +666,9 @@
         <span class="self">self</span>.map(|args| args.with_override_content_type(v))
     }
 
-    <span class="doccomment">/// Set the If-Match for this operation.
-    </span><span class="kw">pub fn </span>if_match(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|args| args.with_if_match(v))
-    }
-
-    <span class="doccomment">/// Set the If-None-Match for this operation.
-    </span><span class="kw">pub fn </span>if_none_match(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|args| args.with_if_none_match(v))
-    }
-
     <span class="doccomment">/// Set the version for this operation.
     </span><span class="kw">pub fn </span>version(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|args| args.with_version(v))
-    }
-
-    <span class="doccomment">/// Set the buffer capability to enable buffer for reader.
-    </span><span class="kw">pub fn </span>buffer(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|args| args.with_buffer(v))
     }
 }
 
@@ -701,6 +701,16 @@
         <span class="self">self</span>.map(|(args, bs)| (args.with_buffer(v), bs))
     }
 
+    <span class="doccomment">/// Set the maximum concurrent write task amount.
+    </span><span class="kw">pub fn </span>concurrent(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|(args, bs)| (args.with_buffer(v), bs))
+    }
+
+    <span class="doccomment">/// Set the content type of option
+    </span><span class="kw">pub fn </span>cache_control(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|(args, bs)| (args.with_cache_control(v), bs))
+    }
+
     <span class="doccomment">/// Set the content type of option
     </span><span class="kw">pub fn </span>content_type(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|(args, bs)| (args.with_content_type(v), bs))
@@ -709,16 +719,6 @@
     <span class="doccomment">/// Set the content disposition of option
     </span><span class="kw">pub fn </span>content_disposition(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|(args, bs)| (args.with_content_disposition(v), bs))
-    }
-
-    <span class="doccomment">/// Set the content type of option
-    </span><span class="kw">pub fn </span>cache_control(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|(args, bs)| (args.with_cache_control(v), bs))
-    }
-
-    <span class="doccomment">/// Set the maximum concurrent write task amount.
-    </span><span class="kw">pub fn </span>concurrent(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|(args, bs)| (args.with_buffer(v), bs))
     }
 }
 
@@ -758,6 +758,16 @@
         <span class="self">self</span>.map(|args| args.with_buffer(v))
     }
 
+    <span class="doccomment">/// Set the maximum concurrent write task amount.
+    </span><span class="kw">pub fn </span>concurrent(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|args| args.with_concurrent(v))
+    }
+
+    <span class="doccomment">/// Set the content type of option
+    </span><span class="kw">pub fn </span>cache_control(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|args| args.with_cache_control(v))
+    }
+
     <span class="doccomment">/// Set the content type of option
     </span><span class="kw">pub fn </span>content_type(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|args| args.with_content_type(v))
@@ -766,16 +776,6 @@
     <span class="doccomment">/// Set the content disposition of option
     </span><span class="kw">pub fn </span>content_disposition(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|args| args.with_content_disposition(v))
-    }
-
-    <span class="doccomment">/// Set the content type of option
-    </span><span class="kw">pub fn </span>cache_control(<span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|args| args.with_cache_control(v))
-    }
-
-    <span class="doccomment">/// Set the maximum concurrent write task amount.
-    </span><span class="kw">pub fn </span>concurrent(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|args| args.with_concurrent(v))
     }
 }
 
