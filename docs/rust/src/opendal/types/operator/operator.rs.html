@@ -1668,45 +1668,6 @@
 <a href="#1666" id="1666">1666</a>
 <a href="#1667" id="1667">1667</a>
 <a href="#1668" id="1668">1668</a>
-<a href="#1669" id="1669">1669</a>
-<a href="#1670" id="1670">1670</a>
-<a href="#1671" id="1671">1671</a>
-<a href="#1672" id="1672">1672</a>
-<a href="#1673" id="1673">1673</a>
-<a href="#1674" id="1674">1674</a>
-<a href="#1675" id="1675">1675</a>
-<a href="#1676" id="1676">1676</a>
-<a href="#1677" id="1677">1677</a>
-<a href="#1678" id="1678">1678</a>
-<a href="#1679" id="1679">1679</a>
-<a href="#1680" id="1680">1680</a>
-<a href="#1681" id="1681">1681</a>
-<a href="#1682" id="1682">1682</a>
-<a href="#1683" id="1683">1683</a>
-<a href="#1684" id="1684">1684</a>
-<a href="#1685" id="1685">1685</a>
-<a href="#1686" id="1686">1686</a>
-<a href="#1687" id="1687">1687</a>
-<a href="#1688" id="1688">1688</a>
-<a href="#1689" id="1689">1689</a>
-<a href="#1690" id="1690">1690</a>
-<a href="#1691" id="1691">1691</a>
-<a href="#1692" id="1692">1692</a>
-<a href="#1693" id="1693">1693</a>
-<a href="#1694" id="1694">1694</a>
-<a href="#1695" id="1695">1695</a>
-<a href="#1696" id="1696">1696</a>
-<a href="#1697" id="1697">1697</a>
-<a href="#1698" id="1698">1698</a>
-<a href="#1699" id="1699">1699</a>
-<a href="#1700" id="1700">1700</a>
-<a href="#1701" id="1701">1701</a>
-<a href="#1702" id="1702">1702</a>
-<a href="#1703" id="1703">1703</a>
-<a href="#1704" id="1704">1704</a>
-<a href="#1705" id="1705">1705</a>
-<a href="#1706" id="1706">1706</a>
-<a href="#1707" id="1707">1707</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1724,7 +1685,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::time::Duration;
+</span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
@@ -1989,24 +1951,18 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>stat_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureStat {
+    </span><span class="kw">pub fn </span>stat_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureStat&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Metadata&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureStat(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpStat::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>rp = inner.stat(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(rp.into_metadata())
-                };
-
-                Box::pin(fut)
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">let </span>rp = inner.stat(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(rp.into_metadata())
             },
-        ));
-
-        fut
+        )
     }
 
     <span class="doccomment">/// Check if this path exists or not.
@@ -2118,50 +2074,43 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>read_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureRead {
+    </span><span class="kw">pub fn </span>read_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureRead&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureRead(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpRead::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                            ErrorKind::IsADirectory,
-                            <span class="string">"read path is a directory"</span>,
-                        )
-                        .with_operation(<span class="string">"read"</span>)
-                        .with_context(<span class="string">"service"</span>, inner.info().scheme())
-                        .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path));
-                    }
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
+                            .with_operation(<span class="string">"read"</span>)
+                            .with_context(<span class="string">"service"</span>, inner.info().scheme())
+                            .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path),
+                    );
+                }
 
-                    <span class="kw">let </span>range = args.range();
-                    <span class="kw">let </span>(size_hint, range) = <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
-                        (size, range)
-                    } <span class="kw">else </span>{
-                        <span class="kw">let </span>size = inner
-                            .stat(<span class="kw-2">&amp;</span>path, OpStat::default())
-                            .<span class="kw">await</span><span class="question-mark">?
-                            </span>.into_metadata()
-                            .content_length();
-                        <span class="kw">let </span>range = range.complete(size);
-                        (range.size().unwrap(), range)
-                    };
-
-                    <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>s) = inner.read(<span class="kw-2">&amp;</span>path, args.with_range(range)).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint <span class="kw">as </span>usize);
-                    s.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
-
-                    <span class="prelude-val">Ok</span>(buf)
+                <span class="kw">let </span>range = args.range();
+                <span class="kw">let </span>(size_hint, range) = <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
+                    (size, range)
+                } <span class="kw">else </span>{
+                    <span class="kw">let </span>size = inner
+                        .stat(<span class="kw-2">&amp;</span>path, OpStat::default())
+                        .<span class="kw">await</span><span class="question-mark">?
+                        </span>.into_metadata()
+                        .content_length();
+                    <span class="kw">let </span>range = range.complete(size);
+                    (range.size().unwrap(), range)
                 };
 
-                Box::pin(fut)
-            },
-        ));
+                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>s) = inner.read(<span class="kw-2">&amp;</span>path, args.with_range(range)).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint <span class="kw">as </span>usize);
+                s.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        fut
+                <span class="prelude-val">Ok</span>(buf)
+            },
+        )
     }
 
     <span class="doccomment">/// Create a new reader which can read the whole path.
@@ -2198,32 +2147,26 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>reader_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureReader {
+    </span><span class="kw">pub fn </span>reader_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureRead&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Reader&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureReader(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpRead::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                            ErrorKind::IsADirectory,
-                            <span class="string">"read path is a directory"</span>,
-                        )
-                        .with_operation(<span class="string">"Operator::reader"</span>)
-                        .with_context(<span class="string">"service"</span>, inner.info().scheme())
-                        .with_context(<span class="string">"path"</span>, path));
-                    }
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
+                            .with_operation(<span class="string">"Operator::reader"</span>)
+                            .with_context(<span class="string">"service"</span>, inner.info().scheme())
+                            .with_context(<span class="string">"path"</span>, path),
+                    );
+                }
 
-                    Reader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args).<span class="kw">await
-                </span>};
-
-                Box::pin(fut)
-            },
-        ));
-        fut
+                Reader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args).<span class="kw">await
+            </span>},
+        )
     }
 
     <span class="doccomment">/// Write bytes into path.
@@ -2420,32 +2363,26 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>writer_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureWriter {
+    </span><span class="kw">pub fn </span>writer_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureWriter&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Writer&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureWriter(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpWrite::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                            ErrorKind::IsADirectory,
-                            <span class="string">"write path is a directory"</span>,
-                        )
-                        .with_operation(<span class="string">"Operator::writer"</span>)
-                        .with_context(<span class="string">"service"</span>, inner.info().scheme().into_static())
-                        .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path));
-                    }
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
+                            .with_operation(<span class="string">"Operator::writer"</span>)
+                            .with_context(<span class="string">"service"</span>, inner.info().scheme().into_static())
+                            .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path),
+                    );
+                }
 
-                    Writer::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await
-                </span>};
-                Box::pin(fut)
-            },
-        ));
-
-        fut
+                Writer::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await
+            </span>},
+        )
     }
 
     <span class="doccomment">/// Write data with extra options.
@@ -2471,40 +2408,39 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; FutureWrite {
+    </span><span class="kw">pub fn </span>write_with(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        bs: <span class="kw">impl </span>Into&lt;Bytes&gt;,
+    ) -&gt; FutureWrite&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
         <span class="kw">let </span>bs = bs.into();
 
-        <span class="kw">let </span>fut = FutureWrite(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             (OpWrite::default(), bs),
-            |inner, path, (args, <span class="kw-2">mut </span>bs)| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                            ErrorKind::IsADirectory,
-                            <span class="string">"write path is a directory"</span>,
-                        )
-                        .with_operation(<span class="string">"Operator::write_with"</span>)
-                        .with_context(<span class="string">"service"</span>, inner.info().scheme().into_static())
-                        .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path));
-                    }
+            |inner, path, (args, <span class="kw-2">mut </span>bs)| <span class="kw">async move </span>{
+                <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
+                            .with_operation(<span class="string">"Operator::write_with"</span>)
+                            .with_context(<span class="string">"service"</span>, inner.info().scheme().into_static())
+                            .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span>path),
+                    );
+                }
 
-                    <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-                        <span class="kw">let </span>n = w.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span><span class="question-mark">?</span>;
-                        bs.advance(n);
-                    }
+                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
+                    <span class="kw">let </span>n = w.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span><span class="question-mark">?</span>;
+                    bs.advance(n);
+                }
 
-                    w.close().<span class="kw">await</span><span class="question-mark">?</span>;
+                w.close().<span class="kw">await</span><span class="question-mark">?</span>;
 
-                    <span class="prelude-val">Ok</span>(())
-                };
-                Box::pin(fut)
+                <span class="prelude-val">Ok</span>(())
             },
-        ));
-        fut
+        )
     }
 
     <span class="doccomment">/// Delete the given path.
@@ -2548,24 +2484,18 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>delete_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureDelete {
+    </span><span class="kw">pub fn </span>delete_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureDelete&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureDelete(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpDelete::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let _ </span>= inner.delete(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(())
-                };
-
-                Box::pin(fut)
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">let _ </span>= inner.delete(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
             },
-        ));
-
-        fut
+        )
     }
 
     <span class="doccomment">///
@@ -2962,23 +2892,19 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>list_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureList {
+    </span><span class="kw">pub fn </span>list_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureList&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Vec&lt;Entry&gt;&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureList(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpList::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>lister = Lister::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+            |inner, path, args| <span class="kw">async move </span>{
+                <span class="kw">let </span>lister = Lister::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
 
-                    lister.try_collect().<span class="kw">await
-                </span>};
-                Box::pin(fut)
-            },
-        ));
-        fut
+                lister.try_collect().<span class="kw">await
+            </span>},
+        )
     }
 
     <span class="doccomment">/// List entries that starts with given `path` in parent dir.
@@ -3183,19 +3109,15 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>lister_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureLister {
+    </span><span class="kw">pub fn </span>lister_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; FutureList&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Lister&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FutureLister(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             OpList::default(),
-            |inner, path, args| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{ Lister::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await </span>};
-                Box::pin(fut)
-            },
-        ));
-        fut
+            |inner, path, args| <span class="kw">async move </span>{ Lister::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await </span>},
+        )
     }
 }
 
@@ -3247,23 +3169,23 @@
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_stat_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; FuturePresignStat {
+    </span><span class="kw">pub fn </span>presign_stat_with(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        expire: Duration,
+    ) -&gt; FuturePresignStat&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FuturePresignStat(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             (OpStat::default(), expire),
-            |inner, path, (args, dur)| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>op = OpPresign::new(args, dur);
-                    <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(rp.into_presigned_request())
-                };
-                Box::pin(fut)
+            |inner, path, (args, dur)| <span class="kw">async move </span>{
+                <span class="kw">let </span>op = OpPresign::new(args, dur);
+                <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(rp.into_presigned_request())
             },
-        ));
-        fut
+        )
     }
 
     <span class="doccomment">/// Presign an operation for read.
@@ -3322,23 +3244,23 @@
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_read_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; FuturePresignRead {
+    </span><span class="kw">pub fn </span>presign_read_with(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        expire: Duration,
+    ) -&gt; FuturePresignRead&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FuturePresignRead(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             (OpRead::default(), expire),
-            |inner, path, (args, dur)| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>op = OpPresign::new(args, dur);
-                    <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(rp.into_presigned_request())
-                };
-                Box::pin(fut)
+            |inner, path, (args, dur)| <span class="kw">async move </span>{
+                <span class="kw">let </span>op = OpPresign::new(args, dur);
+                <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(rp.into_presigned_request())
             },
-        ));
-        fut
+        )
     }
 
     <span class="doccomment">/// Presign an operation for write.
@@ -3395,23 +3317,23 @@
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; FuturePresignWrite {
+    </span><span class="kw">pub fn </span>presign_write_with(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        expire: Duration,
+    ) -&gt; FuturePresignWrite&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
-        <span class="kw">let </span>fut = FuturePresignWrite(OperatorFuture::new(
+        OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
             (OpWrite::default(), expire),
-            |inner, path, (args, dur)| {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>op = OpPresign::new(args, dur);
-                    <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(rp.into_presigned_request())
-                };
-                Box::pin(fut)
+            |inner, path, (args, dur)| <span class="kw">async move </span>{
+                <span class="kw">let </span>op = OpPresign::new(args, dur);
+                <span class="kw">let </span>rp = inner.presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(rp.into_presigned_request())
             },
-        ));
-        fut
+        )
     }
 }
 </code></pre></div></section></main></body></html>
