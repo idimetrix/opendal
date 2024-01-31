@@ -101,6 +101,15 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -151,7 +160,7 @@
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>response = <span class="self">self
             </span>.core
-            .swift_list(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="self">self</span>.delimiter, <span class="self">self</span>.limit)
+            .swift_list(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="self">self</span>.delimiter, <span class="self">self</span>.limit, <span class="kw-2">&amp;</span>ctx.token)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status_code = response.status();
@@ -161,11 +170,20 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(error);
         }
 
-        ctx.done = <span class="bool-val">true</span>;
-
         <span class="kw">let </span>bytes = response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>decoded_response: Vec&lt;ListOpResponse&gt; =
             serde_json::from_slice(<span class="kw-2">&amp;</span>bytes).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+        <span class="comment">// Update token and done based on resp.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(entry) = decoded_response.last() {
+            <span class="kw">let </span>path = <span class="kw">match </span>entry {
+                ListOpResponse::Subdir { subdir } =&gt; subdir,
+                ListOpResponse::FileInfo { name, .. } =&gt; name,
+            };
+            ctx.token = path.clone();
+        } <span class="kw">else </span>{
+            ctx.done = <span class="bool-val">true</span>;
+        }
 
         <span class="kw">for </span>status <span class="kw">in </span>decoded_response {
             <span class="kw">let </span>entry: oio::Entry = <span class="kw">match </span>status {

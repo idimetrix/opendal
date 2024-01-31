@@ -342,6 +342,7 @@
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -638,10 +639,11 @@
                 .expect(<span class="string">"write into string must succeed"</span>);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(limit) = limit {
-            <span class="macro">write!</span>(url, <span class="string">"&amp;maxresults={limit}"</span>).expect(<span class="string">"write into string must succeed"</span>);
+            <span class="macro">write!</span>(url, <span class="string">"&amp;maxResults={limit}"</span>).expect(<span class="string">"write into string must succeed"</span>);
         }
         <span class="kw">if </span>!continuation.is_empty() {
-            <span class="macro">write!</span>(url, <span class="string">"&amp;continuation={continuation}"</span>).expect(<span class="string">"write into string must succeed"</span>);
+            <span class="macro">write!</span>(url, <span class="string">"&amp;continuation={}"</span>, percent_encode_path(continuation))
+                .expect(<span class="string">"write into string must succeed"</span>);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url)
