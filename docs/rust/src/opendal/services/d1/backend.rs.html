@@ -333,6 +333,30 @@
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
 <a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -358,6 +382,7 @@
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::StatusCode;
+<span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde_json::Value;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -367,29 +392,52 @@
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
-</span><span class="kw">pub struct </span>D1Builder {
-    token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    account_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    database_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+<span class="doccomment">/// Config for [Cloudflare D1](https://developers.cloudflare.com/d1) backend support.
+</span><span class="attr">#[derive(Default, Deserialize)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>D1Config {
+    <span class="doccomment">/// Set the token of cloudflare api.
+    </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the account id of cloudflare api.
+    </span><span class="kw">pub </span>account_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the database id of cloudflare api.
+    </span><span class="kw">pub </span>database_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
-    http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    table: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the working directory of OpenDAL.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the table of D1 Database.
+    </span><span class="kw">pub </span>table: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the key field of D1 Database.
+    </span><span class="kw">pub </span>key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Set the value field of D1 Database.
+    </span><span class="kw">pub </span>value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>D1Builder {
+<span class="kw">impl </span>Debug <span class="kw">for </span>D1Config {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"D1Builder"</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"D1Config"</span>);
         ds.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
         ds.field(<span class="string">"table"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.table);
         ds.field(<span class="string">"key_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key_field);
         ds.field(<span class="string">"value_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value_field);
-        ds.finish()
+        ds.finish_non_exhaustive()
+    }
+}
+
+<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[derive(Default)]
+</span><span class="kw">pub struct </span>D1Builder {
+    config: D1Config,
+
+    http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>D1Builder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"D1Builder"</span>)
+            .field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
+            .finish()
     }
 }
 
@@ -399,7 +447,7 @@
     /// create a api token from [here](https://dash.cloudflare.com/profile/api-tokens)
     </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
-            <span class="self">self</span>.token = <span class="prelude-val">Some</span>(token.to_string());
+            <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
         }
         <span class="self">self
     </span>}
@@ -410,7 +458,7 @@
     /// If not specified, it will return an error when building.
     </span><span class="kw">pub fn </span>account_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!account_id.is_empty() {
-            <span class="self">self</span>.account_id = <span class="prelude-val">Some</span>(account_id.to_string());
+            <span class="self">self</span>.config.account_id = <span class="prelude-val">Some</span>(account_id.to_string());
         }
         <span class="self">self
     </span>}
@@ -421,7 +469,7 @@
     /// If not specified, it will return an error when building.
     </span><span class="kw">pub fn </span>database_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!database_id.is_empty() {
-            <span class="self">self</span>.database_id = <span class="prelude-val">Some</span>(database_id.to_string());
+            <span class="self">self</span>.config.database_id = <span class="prelude-val">Some</span>(database_id.to_string());
         }
         <span class="self">self
     </span>}
@@ -431,7 +479,7 @@
     /// default: "/"
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.root = <span class="prelude-val">Some</span>(root.to_owned());
+            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
         <span class="self">self
     </span>}
@@ -441,7 +489,7 @@
     /// If not specified, it will return an error when building.
     </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
-            <span class="self">self</span>.table = <span class="prelude-val">Some</span>(table.to_owned());
+            <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_owned());
         }
         <span class="self">self
     </span>}
@@ -451,7 +499,7 @@
     /// Default to `key` if not specified.
     </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
-            <span class="self">self</span>.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
+            <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
         <span class="self">self
     </span>}
@@ -461,7 +509,7 @@
     /// Default to `value` if not specified.
     </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
-            <span class="self">self</span>.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
+            <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }
         <span class="self">self
     </span>}
@@ -472,32 +520,28 @@
     <span class="kw">type </span>Accessor = D1Backend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = D1Builder::default();
-        map.get(<span class="string">"token"</span>).map(|v| builder.token(v));
-        map.get(<span class="string">"account_id"</span>).map(|v| builder.account_id(v));
-        map.get(<span class="string">"database_id"</span>).map(|v| builder.database_id(v));
-
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"table"</span>).map(|v| builder.table(v));
-        map.get(<span class="string">"key_field"</span>).map(|v| builder.key_field(v));
-        map.get(<span class="string">"value_field"</span>).map(|v| builder.value_field(v));
-        builder
+        <span class="self">Self </span>{
+            config: D1Config::deserialize(ConfigDeserializer::new(map))
+                .expect(<span class="string">"config deserialize must succeed"</span>),
+            ..Default::default()
+        }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>authorization = <span class="prelude-val">None</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span><span class="self">self</span>.token {
+        <span class="kw">let </span>config = <span class="kw-2">&amp;</span><span class="self">self</span>.config;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span>config.token {
             authorization = <span class="prelude-val">Some</span>(format_authorization_by_bearer(token)<span class="question-mark">?</span>)
         }
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(account_id) = <span class="self">self</span>.account_id.clone() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(account_id) = config.account_id.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
                 <span class="string">"account_id is required"</span>,
             ));
         };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(database_id) = <span class="self">self</span>.database_id.clone() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(database_id) = config.database_id.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
                 <span class="string">"database_id is required"</span>,
@@ -513,19 +557,23 @@
             })<span class="question-mark">?
         </span>};
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(table) = <span class="self">self</span>.table.clone() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(table) = config.table.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"table is required"</span>));
         };
 
-        <span class="kw">let </span>key_field = <span class="self">self</span>.key_field.clone().unwrap_or_else(|| <span class="string">"key"</span>.to_string());
+        <span class="kw">let </span>key_field = config
+            .key_field
+            .clone()
+            .unwrap_or_else(|| <span class="string">"key"</span>.to_string());
 
-        <span class="kw">let </span>value_field = <span class="self">self
-            </span>.value_field
+        <span class="kw">let </span>value_field = config
+            .value_field
             .clone()
             .unwrap_or_else(|| <span class="string">"value"</span>.to_string());
 
         <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.root
+            config
+                .root
                 .clone()
                 .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
                 .as_str(),

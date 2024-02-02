@@ -386,6 +386,8 @@
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -678,6 +680,8 @@
 
 <span class="attr">#[cfg(feature = <span class="string">"services-d1"</span>)]
 </span><span class="kw">mod </span>d1;
+<span class="attr">#[cfg(feature = <span class="string">"services-d1"</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::d1::D1Config;
 <span class="attr">#[cfg(feature = <span class="string">"services-d1"</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::d1::D1;
 
