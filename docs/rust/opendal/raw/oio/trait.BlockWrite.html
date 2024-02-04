@@ -10,7 +10,7 @@
              'life0: 'async_trait</span>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.write_block" class="fn">write_block</a>&lt;'life0, 'async_trait&gt;(
         &amp;'life0 self,
-        block_id: <a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
+        block_id: <a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
         body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
@@ -18,13 +18,13 @@
              'life0: 'async_trait</span>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.complete_block" class="fn">complete_block</a>&lt;'life0, 'async_trait&gt;(
         &amp;'life0 self,
-        block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
+        block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
        <span class="where">where Self: 'async_trait,
              'life0: 'async_trait</span>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.abort_block" class="fn">abort_block</a>&lt;'life0, 'async_trait&gt;(
         &amp;'life0 self,
-        block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
+        block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
        <span class="where">where Self: 'async_trait,
              'life0: 'async_trait</span>;
@@ -65,7 +65,7 @@ w.close().await?;
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.write_block" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/block_write.rs.html#81">source</a><h4 class="code-header">fn <a href="#tymethod.write_block" class="fn">write_block</a>&lt;'life0, 'async_trait&gt;(
     &amp;'life0 self,
-    block_id: <a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
+    block_id: <a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
     body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
@@ -79,14 +79,14 @@ order.</p>
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.complete_block" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/block_write.rs.html#85">source</a><h4 class="code-header">fn <a href="#tymethod.complete_block" class="fn">complete_block</a>&lt;'life0, 'async_trait&gt;(
     &amp;'life0 self,
-    block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
+    block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
     Self: 'async_trait,
     'life0: 'async_trait,</div></h4></section></summary><div class="docblock"><p>complete_block will complete the block upload to build the final
 file.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.abort_block" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/block_write.rs.html#88">source</a><h4 class="code-header">fn <a href="#tymethod.abort_block" class="fn">abort_block</a>&lt;'life0, 'async_trait&gt;(
     &amp;'life0 self,
-    block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.6.1/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
+    block_ids: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>&gt;
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
     Self: 'async_trait,
     'life0: 'async_trait,</div></h4></section></summary><div class="docblock"><p>abort_block will cancel the block upload and purge all data.</p>
