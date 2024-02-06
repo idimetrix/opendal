@@ -1,23 +1,23 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="OpenDAL vs object_store"><title>opendal::docs::comparisons::vs_object_store - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.45.0</span></h2></div><h2 class="location"><a href="#">Module vs_object_store</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::comparisons</a></h2></div></nav><div class="sidebar-resizer"></div>
-    <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../../index.html">opendal</a>::<wbr><a href="../../index.html">docs</a>::<wbr><a href="../index.html">comparisons</a>::<wbr><a class="mod" href="#">vs_object_store</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../../../src/opendal/docs/comparisons/mod.rs.html#30">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="opendal-vs-object_store"><a class="doc-anchor" href="#opendal-vs-object_store">§</a>OpenDAL vs object_store</h2>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="OpenDAL vs object_store"><title>opendal::docs::comparisons::vs_object_store - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-bf502f66ec635d5d.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (e51e98dde 2023-12-31)" data-channel="nightly" data-search-js="search-c17e98913a53b3b7.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.45.0</span></h2></div><h2 class="location"><a href="#">Module vs_object_store</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::comparisons</a></h2></div></nav><div class="sidebar-resizer"></div>
+    <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../../index.html">opendal</a>::<wbr><a href="../../index.html">docs</a>::<wbr><a href="../index.html">comparisons</a>::<wbr><a class="mod" href="#">vs_object_store</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../../../src/opendal/docs/comparisons/mod.rs.html#30">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="opendal-vs-object_store"><a href="#opendal-vs-object_store">OpenDAL vs object_store</a></h2>
 <blockquote>
 <p>NOTE: This document is written by OpenDAL’s maintainers and not reviewed by
 object_store’s maintainers. So it could not be very objective.</p>
 </blockquote>
-<h3 id="about-object_store"><a class="doc-anchor" href="#about-object_store">§</a>About object_store</h3>
+<h3 id="about-object_store"><a href="#about-object_store">About object_store</a></h3>
 <p><a href="https://crates.io/crates/object_store">object_store</a> is</p>
 <blockquote>
 <p>A focused, easy to use, idiomatic, high performance, <code>async</code> object store library interacting with object stores.</p>
 </blockquote>
 <p>It was initially developed for <a href="https://github.com/influxdata/influxdb_iox/">InfluxDB IOx</a> and later split out and donated to <a href="https://arrow.apache.org/">Apache Arrow</a>.</p>
-<h3 id="similarities"><a class="doc-anchor" href="#similarities">§</a>Similarities</h3><h4 id="language"><a class="doc-anchor" href="#language">§</a>Language</h4>
+<h3 id="similarities"><a href="#similarities">Similarities</a></h3><h4 id="language"><a href="#language">Language</a></h4>
 <p>Yes, of course. Both <code>opendal</code> and <code>object_store</code> are developed in <a href="https://www.rust-lang.org/">Rust</a>, a language empowering everyone to build reliable and efficient software.</p>
-<h4 id="license"><a class="doc-anchor" href="#license">§</a>License</h4>
+<h4 id="license"><a href="#license">License</a></h4>
 <p>Both <code>opendal</code> and <code>object_store</code> are licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.</p>
-<h4 id="owner"><a class="doc-anchor" href="#owner">§</a>Owner</h4>
+<h4 id="owner"><a href="#owner">Owner</a></h4>
 <p><code>object_store</code> is a part of <code>Apache Arrow</code> which means it’s hosted and maintained by the <a href="https://www.apache.org/">Apache Software Foundation</a>.</p>
 <p><code>opendal</code> is now hosted by the <a href="https://www.apache.org/">Apache Software Foundation</a> also.</p>
-<h4 id="domain"><a class="doc-anchor" href="#domain">§</a>Domain</h4>
+<h4 id="domain"><a href="#domain">Domain</a></h4>
 <p>Both <code>opendal</code> and <code>object_store</code> can be used to access data stored on object storage services. The primary users of those projects are both cloud-native databases too:</p>
 <ul>
 <li><code>opendal</code> is mainly used by:
@@ -36,10 +36,10 @@ object_store’s maintainers. So it could not be very objective.</p>
 </ul>
 </li>
 </ul>
-<h3 id="differences"><a class="doc-anchor" href="#differences">§</a>Differences</h3><h4 id="vision"><a class="doc-anchor" href="#vision">§</a>Vision</h4>
+<h3 id="differences"><a href="#differences">Differences</a></h3><h4 id="vision"><a href="#vision">Vision</a></h4>
 <p><code>opendal</code> is Open Data Access Layer that accesses data freely, painlessly, and efficiently. <code>object_store</code> is more focused on async object store support.</p>
 <p>You will see the different visions lead to very different routes.</p>
-<h4 id="design"><a class="doc-anchor" href="#design">§</a>Design</h4>
+<h4 id="design"><a href="#design">Design</a></h4>
 <p><code>object_store</code> exposed a trait called <a href="https://docs.rs/object_store/latest/object_store/trait.ObjectStore.html"><code>ObjectStore</code></a> to users.</p>
 <p>Users need to build a <code>dyn ObjectStore</code> and operate on it directly:</p>
 
@@ -54,7 +54,7 @@ object_store’s maintainers. So it could not be very objective.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>op: Operator = Operator::from_env(Scheme::S3)<span class="question-mark">?</span>;
 <span class="kw">let </span>r = op.reader(<span class="string">"data/file01.parquet"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-<h4 id="interception"><a class="doc-anchor" href="#interception">§</a>Interception</h4>
+<h4 id="interception"><a href="#interception">Interception</a></h4>
 <p>Both <code>object_store</code> and <code>opendal</code> provide a mechanism to intercept operations.</p>
 <p><code>object_store</code> called <code>Adapters</code>:</p>
 
@@ -79,7 +79,7 @@ object_store’s maintainers. So it could not be very objective.</p>
 <li>SubdirLayer: Allow switch directory without changing original operator.</li>
 <li>TracingLayer: tracing</li>
 </ul>
-<h4 id="services"><a class="doc-anchor" href="#services">§</a>Services</h4>
+<h4 id="services"><a href="#services">Services</a></h4>
 <p><code>opendal</code> and <code>object_store</code> have different visions, so they have other services support:</p>
 <div><table><thead><tr><th>service</th><th>opendal</th><th>object_store</th></tr></thead><tbody>
 <tr><td>azblob</td><td>Y</td><td>Y</td></tr>
@@ -96,7 +96,7 @@ object_store’s maintainers. So it could not be very objective.</p>
 </tbody></table>
 </div>
 <p>opendal has an idea called <a href="../../../struct.Capability.html" title="struct opendal::Capability"><code>Capability</code></a>, so it’s services may have different capability sets. For example, opendal’s <code>http</code> and <code>ipfs</code> are read only.</p>
-<h4 id="features"><a class="doc-anchor" href="#features">§</a>Features</h4>
+<h4 id="features"><a href="#features">Features</a></h4>
 <p><code>opendal</code> and <code>object_store</code> have different visions, so they have different feature sets:</p>
 <div><table><thead><tr><th>opendal</th><th>object_store</th><th>notes</th></tr></thead><tbody>
 <tr><td>metadata</td><td>-</td><td>get some metadata from underlying storage</td></tr>
@@ -117,7 +117,7 @@ object_store’s maintainers. So it could not be very objective.</p>
 <tr><td>multipart</td><td>multipart</td><td>both support, but API is different</td></tr>
 <tr><td>blocking</td><td>-</td><td>opendal supports blocking API</td></tr>
 </tbody></table>
-</div><h3 id="demo-show"><a class="doc-anchor" href="#demo-show">§</a>Demo show</h3>
+</div><h3 id="demo-show"><a href="#demo-show">Demo show</a></h3>
 <p>The most straightforward complete demo how to read a file from s3:</p>
 <p><code>opendal</code></p>
 
