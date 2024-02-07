@@ -108,6 +108,7 @@ hdrs = { version = &quot;&lt;version_number&gt;&quot;, features = [&quot;vendore
     <span class="comment">// Create fs backend builder.
     </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Hdfs::default();
     <span class="comment">// Set the name node for hdfs.
+    // If the string starts with a protocol type such as file://, hdfs://, or gs://, this protocol type will be used.
     </span>builder.name_node(<span class="string">"hdfs://127.0.0.1:9000"</span>);
     <span class="comment">// Set the root for hdfs, all operations will happen under this root.
     //
