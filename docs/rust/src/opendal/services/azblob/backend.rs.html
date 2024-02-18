@@ -936,6 +936,7 @@
 <a href="#934" id="934">934</a>
 <a href="#935" id="935">935</a>
 <a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1505,8 +1506,9 @@
                 read_with_override_content_disposition: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
-                write_can_empty: <span class="bool-val">true</span>,
                 write_can_append: <span class="bool-val">true</span>,
+                write_can_empty: <span class="bool-val">true</span>,
+                write_can_multi: <span class="bool-val">true</span>,
                 write_with_cache_control: <span class="bool-val">true</span>,
                 write_with_content_type: <span class="bool-val">true</span>,
 
@@ -1569,7 +1571,7 @@
         <span class="kw">let </span>w = <span class="kw">if </span>args.append() {
             AzblobWriters::Two(oio::AppendWriter::new(w))
         } <span class="kw">else </span>{
-            AzblobWriters::One(oio::OneShotWriter::new(w))
+            AzblobWriters::One(oio::BlockWriter::new(w, args.concurrent()))
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
