@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Upgrade and migrate procedures while OpenDAL meets breaking changes."><title>opendal::docs::upgrade - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-bf502f66ec635d5d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (e51e98dde 2023-12-31)" data-channel="nightly" data-search-js="search-c17e98913a53b3b7.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../opendal/index.html">opendal</a><span class="version">0.45.0</span></h2></div><h2 class="location"><a href="#">Module upgrade</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs</a></h2></div></nav><div class="sidebar-resizer"></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Upgrade and migrate procedures while OpenDAL meets breaking changes."><title>opendal::docs::upgrade - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-bf502f66ec635d5d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (e51e98dde 2023-12-31)" data-channel="nightly" data-search-js="search-c17e98913a53b3b7.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../opendal/index.html">opendal</a><span class="version">0.45.1</span></h2></div><h2 class="location"><a href="#">Module upgrade</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs</a></h2></div></nav><div class="sidebar-resizer"></div>
     <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../index.html">opendal</a>::<wbr><a href="../index.html">docs</a>::<wbr><a class="mod" href="#">upgrade</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../../src/opendal/docs/mod.rs.html#38">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Upgrade and migrate procedures while OpenDAL meets breaking changes.</p>
 <h2 id="upgrade-to-v045"><a href="#upgrade-to-v045">Upgrade to v0.45</a></h2><h3 id="public-api"><a href="#public-api">Public API</a></h3><h4 id="blockinglayer-is-not-enabled-by-default"><a href="#blockinglayer-is-not-enabled-by-default">BlockingLayer is not enabled by default</a></h4>
 <p>To further enhance the optionality of <code>tokio</code>, we have introduced a new feature called <code>layers-blocking</code>. The default usage of the blocking layer has been disabled. To utilize the <code>BlockingLayer</code>, please enable the <code>layers-blocking</code> feature.</p>
@@ -54,7 +54,7 @@
 </ul>
 <h4 id="ghac-service-configuration"><a href="#ghac-service-configuration">Ghac Service Configuration</a></h4>
 <ul>
-<li>The <code>enable_create_simulation</code> option has been removed. We add this option to allow ghac simulate create empty file, but it’s could result in unexpected behavior when users create a file with content length <code>1</code>. So we remove it.</li>
+<li>The <code>enable_create_simulation</code> option has been removed. We add this option to allow ghac simulate create empty file, but it could result in unexpected behavior when users create a file with content length <code>1</code>. So we remove it.</li>
 </ul>
 <h4 id="wasabi-service-removed"><a href="#wasabi-service-removed">Wasabi Service Removed</a></h4>
 <p><code>wasabi</code> service native support has been removed. Users who want to access wasabi can use our <code>s3</code> service instead.</p>
@@ -98,7 +98,7 @@
 <li><code>native_capability</code> returns <code>true</code> if the capability is supported natively.</li>
 <li><code>full_capability</code> returns <code>true</code> if the capability is supported, maybe via a layer.</li>
 </ul>
-<p>Most of time, you can use <code>full_capability</code> to replace <code>capability</code> call. But if to check if the capability is supported natively for better performance design, please use <code>native_capability</code> instead.</p>
+<p>Most of time, you can use <code>full_capability</code> to replace <code>capability</code> call. But to check if the capability is supported natively for better performance design, please use <code>native_capability</code> instead.</p>
 <h4 id="buffered-writer"><a href="#buffered-writer">Buffered Writer</a></h4>
 <p>OpenDAL v0.40 added buffered writer support!</p>
 <p>Users don’t need to specify the <code>content_length()</code> for writer anymore!</p>
@@ -130,7 +130,7 @@
 <h3 id="raw-api-4"><a href="#raw-api-4">Raw API</a></h3>
 <p>OpenDAL add the <code>Write::sink</code> API to enable streaming writing. This is a breaking change for users who depend on the raw API.</p>
 <p>For a quick fix, users who have implemented <code>opendal::raw::oio::Write</code> can return an <code>Unsupported</code> error for <code>Write::sink()</code>. </p>
-<p>More detailes could be found at <a href="../rfcs/rfc_2083_writer_sink_api/index.html" title="mod opendal::docs::rfcs::rfc_2083_writer_sink_api">RFC: Writer <code>sink</code> API</a>.</p>
+<p>More details could be found at <a href="../rfcs/rfc_2083_writer_sink_api/index.html" title="mod opendal::docs::rfcs::rfc_2083_writer_sink_api">RFC: Writer <code>sink</code> API</a>.</p>
 <h2 id="upgrade-to-v037"><a href="#upgrade-to-v037">Upgrade to v0.37</a></h2>
 <p>In v0.37.0, OpenDAL bump the version of <code>reqsign</code> to v0.13.0.</p>
 <p>There are no public API and raw API changes.</p>
@@ -166,7 +166,7 @@
   .override_content_disposition(<span class="string">"&lt;content_disposition&gt;"</span>)
   .call()<span class="question-mark">?</span>;</code></pre></div>
 <p>Along with this change, users don’t need to call <code>OpXxx</code> anymore so we moved it to <code>raw</code> API.</p>
-<p>More detailes could be found at <a href="../rfcs/rfc_2299_chain_based_operator_api/index.html" title="mod opendal::docs::rfcs::rfc_2299_chain_based_operator_api">RFC: Chain Based Operator API</a>.</p>
+<p>More details could be found at <a href="../rfcs/rfc_2299_chain_based_operator_api/index.html" title="mod opendal::docs::rfcs::rfc_2299_chain_based_operator_api">RFC: Chain Based Operator API</a>.</p>
 <h3 id="raw-api-5"><a href="#raw-api-5">Raw API</a></h3>
 <p>Migrated <code>opendal::ops</code> to <code>opendal::raw::ops</code>.</p>
 <h2 id="upgrade-to-v035"><a href="#upgrade-to-v035">Upgrade to v0.35</a></h2><h3 id="public-api-7"><a href="#public-api-7">Public API</a></h3>
@@ -184,7 +184,7 @@
 </ul>
 <h2 id="upgrade-to-v034"><a href="#upgrade-to-v034">Upgrade to v0.34</a></h2><h3 id="public-api-8"><a href="#public-api-8">Public API</a></h3>
 <ul>
-<li>OpenDAL raises it’s MSRV to 1.65 for dependences changes</li>
+<li>OpenDAL raises it’s MSRV to 1.65 for dependencies changes</li>
 <li><code>OperatorInfo::can_scan</code> has been removed, to check if underlying services support scan a dir natively, please use <code>Capability::list_without_delimiter</code> instead.</li>
 </ul>
 <h3 id="raw-api-7"><a href="#raw-api-7">Raw API</a></h3><h4 id="merged-scan-into-list"><a href="#merged-scan-into-list">Merged <code>scan</code> into <code>list</code></a></h4>
@@ -222,12 +222,12 @@
 }
 </code></pre></div><h2 id="upgrade-to-v030"><a href="#upgrade-to-v030">Upgrade to v0.30</a></h2>
 <p>In version 0.30, we made significant breaking changes by removing objects. Our goal in doing so was to provide our users with APIs that are easier to understand and maintain.</p>
-<p>More detailes could be found at <a href="../rfcs/rfc_1477_remove_object_concept/index.html" title="mod opendal::docs::rfcs::rfc_1477_remove_object_concept">RFC: Remove Object Concept</a>.</p>
+<p>More details could be found at <a href="../rfcs/rfc_1477_remove_object_concept/index.html" title="mod opendal::docs::rfcs::rfc_1477_remove_object_concept">RFC: Remove Object Concept</a>.</p>
 <p>To upgrade to OpenDAL v0.30, users need to make the following changes:</p>
 <ul>
 <li>regex replace <code>object\((.*)\).reader\(\)</code> to <code>reader($1)</code>
 <ul>
-<li>replace the function on your case, it’s recomanded to do it one by one</li>
+<li>replace the function on your case, it’s recommended to do it one by one</li>
 </ul>
 </li>
 <li>rename <code>ObjectMetakey</code> =&gt; <code>Metakey</code></li>
@@ -265,7 +265,7 @@ w.close()</code></pre></div>
 +    type BlockingPager: output::BlockingPage;
 }
 </code></pre></div><h3 id="user-defined-layers"><a href="#user-defined-layers">User defined layers</a></h3>
-<p>Due to this change, all layers implementation should be changed. If there is not changed over pager, they can by changed like the following:</p>
+<p>Due to this change, all layers implementation should be changed. If there is not changed over pager, they can be changed like the following:</p>
 <div class="example-wrap"><pre class="language-diff"><code>impl&lt;A: Accessor&gt; LayeredAccessor for MyAccessor&lt;A&gt; {
     type Inner = A;
     type Reader = MyReader&lt;A::Reader&gt;;
@@ -303,7 +303,7 @@ w.close()</code></pre></div>
 <div class="example-wrap"><pre class="language-diff"><code>- let op = Operator::new(builder.build()?);
 + let op = Operator::new(builder.build()?).finish();
 </code></pre></div>
-<p>By adding a <code>finish()</code> call, we will erase all generic types so that <code>Operator</code> can still be easily to used everywhere as before.</p>
+<p>By adding a <code>finish()</code> call, we will erase all generic types so that <code>Operator</code> can still be easily used everywhere as before.</p>
 <h3 id="accessor"><a href="#accessor">Accessor</a></h3>
 <p>In v0.26, <code>Accessor</code> has been changed into trait with associated types.</p>
 <p>All services need to declare the types returned as <code>Reader</code> or <code>BlockingReader</code>:</p>
@@ -312,7 +312,7 @@ w.close()</code></pre></div>
     <span class="kw">type </span>Reader: output::Read;
     <span class="kw">type </span>BlockingReader: output::BlockingRead;
 }</code></pre></div>
-<p>If your service doesn’t support <code>read</code> or <code>blocking_read</code>, we can use <code>()</code> to represent an dummy reader:</p>
+<p>If your service doesn’t support <code>read</code> or <code>blocking_read</code>, we can use <code>()</code> to represent a dummy reader:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Accessor <span class="kw">for </span>MyDummyAccessor {
     <span class="kw">type </span>Reader = ();

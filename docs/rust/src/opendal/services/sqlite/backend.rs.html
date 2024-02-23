@@ -469,7 +469,7 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"SqliteBuilder"</span>);
 
-        ds.field(<span class="string">"cofig"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
+        ds.field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
         ds.finish()
     }
 }
