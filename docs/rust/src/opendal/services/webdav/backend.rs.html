@@ -981,7 +981,7 @@
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::NotFound,
                     <span class="string">"Failed getting item stat: response field was not found"</span>,
-                ))
+                ));
             }
         };
 
@@ -1059,7 +1059,7 @@
                 <span class="kw">let </span>result: Multistatus =
                     quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
 
-                <span class="kw">let </span>l = WebdavLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path, result);
+                <span class="kw">let </span>l = WebdavLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.endpoint, <span class="kw-2">&amp;</span><span class="self">self</span>.root, path, result);
 
                 <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(oio::PageLister::new(l))))
             }
