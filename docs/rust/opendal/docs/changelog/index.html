@@ -14,6 +14,10 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>feat(release): Implement releasing OpenDAL components separately by @Xuanwo in https://github.com/apache/opendal/pull/4196</li>
 <li>feat: object store adapter based on v0.9 by @waynexia in https://github.com/apache/opendal/pull/4233</li>
 <li>feat(bin/ofs): implement fuse for linux by @ho-229 in https://github.com/apache/opendal/pull/4179</li>
+<li>feat(services/memcached): change to binary protocol by @hoslo in https://github.com/apache/opendal/pull/4252</li>
+<li>feat(services/memcached): setup auth test for memcached by @hoslo in https://github.com/apache/opendal/pull/4259</li>
+<li>feat(services/yandex_disk): setup test for yandex disk by @hoslo in https://github.com/apache/opendal/pull/4264</li>
+<li>feat: add ci support for ceph_rados by @ZhengLin-Li in https://github.com/apache/opendal/pull/4191</li>
 </ul>
 <h4 id="changed"><a href="#changed">Changed</a></h4>
 <ul>
@@ -31,6 +35,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>fix(services/webdav): remove base_dir component by @hoslo in https://github.com/apache/opendal/pull/4231</li>
 <li>fix(core): Poll TimeoutLayer::sleep once to make sure timer registered by @Xuanwo in https://github.com/apache/opendal/pull/4230</li>
 <li>fix(services/webdav): Fix endpoint suffix not handled by @Xuanwo in https://github.com/apache/opendal/pull/4257</li>
+<li>fix(services/webdav): Fix possible error with value loosing from config by @AJIOB in https://github.com/apache/opendal/pull/4262</li>
 </ul>
 <h4 id="docs"><a href="#docs">Docs</a></h4>
 <ul>
@@ -53,6 +58,9 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>docs: fix grammar and spelling in Markdown in <code>examples/rust</code> by @jbampton in https://github.com/apache/opendal/pull/4241</li>
 <li>docs: remove unneeded duplicate words from Rust files by @jbampton in https://github.com/apache/opendal/pull/4243</li>
 <li>docs: fix grammar and spelling in Markdown by @jbampton in https://github.com/apache/opendal/pull/4245</li>
+<li>docs: Add architectural.png to website by @Xuanwo in https://github.com/apache/opendal/pull/4261</li>
+<li>docs: Re-org project README by @Xuanwo in https://github.com/apache/opendal/pull/4260</li>
+<li>docs: order the README <code>Who is using OpenDAL</code> list  by @jbampton in https://github.com/apache/opendal/pull/4263</li>
 </ul>
 <h4 id="ci"><a href="#ci">CI</a></h4>
 <ul>
@@ -67,6 +75,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>ci: Fix dependabot not update by @Xuanwo in https://github.com/apache/opendal/pull/4202</li>
 <li>ci: reduce the open pull request limits to 1 by @jbampton in https://github.com/apache/opendal/pull/4225</li>
 <li>ci: Remove version suffix from package versions by @Xuanwo in https://github.com/apache/opendal/pull/4254</li>
+<li>ci: Fix fuzz test for minio s3 name change by @Xuanwo in https://github.com/apache/opendal/pull/4266</li>
 </ul>
 <h4 id="chore"><a href="#chore">Chore</a></h4>
 <ul>
@@ -88,6 +97,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>chore(deps): bump serde from 1.0.196 to 1.0.197 in /bin/oay by @dependabot in https://github.com/apache/opendal/pull/4214</li>
 <li>chore(deps): bump anyhow from 1.0.79 to 1.0.80 in /bin/ofs by @dependabot in https://github.com/apache/opendal/pull/4209</li>
 <li>chore(deps): bump anyhow from 1.0.79 to 1.0.80 in /bin/oli by @dependabot in https://github.com/apache/opendal/pull/4216</li>
+<li>chore(deps): bump cacache from 12.0.0 to 13.0.0 in /core by @dependabot in https://github.com/apache/opendal/pull/4215</li>
 </ul>
 <h3 id="v0450---2024-01-29"><a href="#v0450---2024-01-29">v0.45.0 - 2024-01-29</a></h3><h4 id="added-1"><a href="#added-1">Added</a></h4>
 <ul>
