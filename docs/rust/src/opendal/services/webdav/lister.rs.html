@@ -564,6 +564,19 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -592,12 +605,12 @@
     server_path: String,
     root: String,
     path: String,
-    multistates: Multistatus,
+    response: Vec&lt;ListOpResponse&gt;,
 }
 
 <span class="kw">impl </span>WebdavLister {
     <span class="doccomment">/// TODO: sending request in `next_page` instead of in `new`.
-    </span><span class="kw">pub fn </span>new(endpoint: <span class="kw-2">&amp;</span>str, root: <span class="kw-2">&amp;</span>str, path: <span class="kw-2">&amp;</span>str, multistates: Multistatus) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(endpoint: <span class="kw-2">&amp;</span>str, root: <span class="kw-2">&amp;</span>str, path: <span class="kw-2">&amp;</span>str, response: Vec&lt;ListOpResponse&gt;) -&gt; <span class="self">Self </span>{
         <span class="comment">// Some services might return the path with suffix `/remote.php/webdav/`, we need to trim them.
         </span><span class="kw">let </span>server_path = http::Uri::from_str(endpoint)
             .expect(<span class="string">"must be valid http uri"</span>)
@@ -608,7 +621,7 @@
             server_path,
             root: root.into(),
             path: path.into(),
-            multistates,
+            response,
         }
     }
 }
@@ -616,21 +629,26 @@
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::PageList <span class="kw">for </span>WebdavLister {
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="comment">// Build request instead of clone here.
-        </span><span class="kw">let </span>oes = <span class="self">self</span>.multistates.response.clone();
-
-        <span class="kw">for </span>res <span class="kw">in </span>oes {
-            <span class="kw">let </span>path = res
+        <span class="kw">for </span>res <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.response {
+            <span class="kw">let </span><span class="kw-2">mut </span>path = res
                 .href
                 .strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.server_path)
-                .unwrap_or(<span class="kw-2">&amp;</span>res.href);
+                .unwrap_or(<span class="kw-2">&amp;</span>res.href)
+                .to_string();
+
+            <span class="kw">let </span>meta = res.parse_into_metadata()<span class="question-mark">?</span>;
+
+            <span class="comment">// Append `/` to path if it's a dir
+            </span><span class="kw">if </span>!path.ends_with(<span class="string">'/'</span>) &amp;&amp; meta.is_dir() {
+                path += <span class="string">"/"
+            </span>}
 
             <span class="comment">// Ignore the root path itself.
             </span><span class="kw">if </span><span class="self">self</span>.root == path {
                 <span class="kw">continue</span>;
             }
 
-            <span class="kw">let </span>normalized_path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+            <span class="kw">let </span>normalized_path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>path);
             <span class="kw">let </span>decoded_path = percent_decode_path(normalized_path.as_str());
 
             <span class="kw">if </span>normalized_path == <span class="self">self</span>.path || decoded_path == <span class="self">self</span>.path {
@@ -638,7 +656,16 @@
                 </span><span class="kw">continue</span>;
             }
 
-            <span class="kw">let </span>meta = res.parse_into_metadata()<span class="question-mark">?</span>;
+            <span class="comment">// Mark files complete if it's an `application/x-checksum` file.
+            //
+            // AFAIK, this content type is only used by jfrog artifactory. And this file is
+            // a shadow file that can't be stat, so we mark it as complete.
+            </span><span class="kw">if </span>meta.contains_metakey(Metakey::ContentType)
+                &amp;&amp; meta.content_type() == <span class="prelude-val">Some</span>(<span class="string">"application/x-checksum"</span>)
+            {
+                <span class="kw">continue</span>;
+            }
+
             ctx.entries.push_back(oio::Entry::new(<span class="kw-2">&amp;</span>decoded_path, meta))
         }
         ctx.done = <span class="bool-val">true</span>;
@@ -649,11 +676,6 @@
 
 <span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
 </span><span class="kw">pub struct </span>Multistatus {
-    <span class="kw">pub </span>response: Vec&lt;ListOpResponse&gt;,
-}
-
-<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
-</span><span class="kw">pub struct </span>MultistatusOptional {
     <span class="kw">pub </span>response: <span class="prelude-ty">Option</span>&lt;Vec&lt;ListOpResponse&gt;&gt;,
 }
 
@@ -899,10 +921,12 @@
         &lt;/D:multistatus&gt;"#</span>;
 
         <span class="kw">let </span>multistatus = from_str::&lt;Multistatus&gt;(xml).unwrap();
-        <span class="macro">assert_eq!</span>(multistatus.response.len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(multistatus.response[<span class="number">0</span>].href, <span class="string">"/"</span>);
+
+        <span class="kw">let </span>response = multistatus.response.unwrap();
+        <span class="macro">assert_eq!</span>(response.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(response[<span class="number">0</span>].href, <span class="string">"/"</span>);
         <span class="macro">assert_eq!</span>(
-            multistatus.response[<span class="number">0</span>].propstat.prop.getlastmodified,
+            response[<span class="number">0</span>].propstat.prop.getlastmodified,
             <span class="string">"Tue, 01 May 2022 06:39:47 GMT"
         </span>);
     }
@@ -986,22 +1010,23 @@
 
         <span class="kw">let </span>multistatus = from_str::&lt;Multistatus&gt;(xml).unwrap();
 
-        <span class="macro">assert_eq!</span>(multistatus.response.len(), <span class="number">3</span>);
-        <span class="kw">let </span>first_response = <span class="kw-2">&amp;</span>multistatus.response[<span class="number">0</span>];
+        <span class="kw">let </span>response = multistatus.response.unwrap();
+        <span class="macro">assert_eq!</span>(response.len(), <span class="number">3</span>);
+        <span class="kw">let </span>first_response = <span class="kw-2">&amp;</span>response[<span class="number">0</span>];
         <span class="macro">assert_eq!</span>(first_response.href, <span class="string">"/"</span>);
         <span class="macro">assert_eq!</span>(
             first_response.propstat.prop.getlastmodified,
             <span class="string">"Tue, 07 May 2022 06:39:47 GMT"
         </span>);
 
-        <span class="kw">let </span>second_response = <span class="kw-2">&amp;</span>multistatus.response[<span class="number">1</span>];
+        <span class="kw">let </span>second_response = <span class="kw-2">&amp;</span>response[<span class="number">1</span>];
         <span class="macro">assert_eq!</span>(second_response.href, <span class="string">"/testdir/"</span>);
         <span class="macro">assert_eq!</span>(
             second_response.propstat.prop.getlastmodified,
             <span class="string">"Tue, 07 May 2022 06:40:10 GMT"
         </span>);
 
-        <span class="kw">let </span>third_response = <span class="kw-2">&amp;</span>multistatus.response[<span class="number">2</span>];
+        <span class="kw">let </span>third_response = <span class="kw-2">&amp;</span>response[<span class="number">2</span>];
         <span class="macro">assert_eq!</span>(third_response.href, <span class="string">"/test_file"</span>);
         <span class="macro">assert_eq!</span>(
             third_response.propstat.prop.getlastmodified,
@@ -1118,9 +1143,10 @@
 
         <span class="kw">let </span>multistatus: Multistatus = from_str(xml).unwrap();
 
-        <span class="macro">assert_eq!</span>(multistatus.response.len(), <span class="number">9</span>);
+        <span class="kw">let </span>response = multistatus.response.unwrap();
+        <span class="macro">assert_eq!</span>(response.len(), <span class="number">9</span>);
 
-        <span class="kw">let </span>first_response = <span class="kw-2">&amp;</span>multistatus.response[<span class="number">0</span>];
+        <span class="kw">let </span>first_response = <span class="kw-2">&amp;</span>response[<span class="number">0</span>];
         <span class="macro">assert_eq!</span>(first_response.href, <span class="string">"/"</span>);
         <span class="macro">assert_eq!</span>(
             first_response.propstat.prop.getlastmodified,
