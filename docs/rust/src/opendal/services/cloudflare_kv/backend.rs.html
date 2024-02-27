@@ -362,6 +362,29 @@
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -395,9 +418,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
-</span><span class="kw">pub struct </span>CloudflareKvBuilder {
+<span class="doccomment">/// Cloudflare Kv Service Support.
+</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="kw">pub struct </span>CloudflareKvConfig {
     <span class="doccomment">/// The token used to authenticate with CloudFlare.
     </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// The account ID used to authenticate with CloudFlare. Used as URI path parameter.
@@ -405,18 +428,39 @@
     <span class="doccomment">/// The namespace ID. Used as URI path parameter.
     </span>namespace_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
-    <span class="doccomment">/// The HTTP client used to communicate with CloudFlare.
-    </span>http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
     <span class="doccomment">/// Root within this backend.
     </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>CloudflareKvConfig {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"CloudflareKvConfig"</span>);
+
+        ds.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
+        ds.field(<span class="string">"account_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.account_id);
+        ds.field(<span class="string">"namespace_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.namespace_id);
+
+        <span class="kw">if </span><span class="self">self</span>.token.is_some() {
+            ds.field(<span class="string">"token"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;redacted&gt;"</span>);
+        }
+
+        ds.finish()
+    }
+}
+
+<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[derive(Default)]
+</span><span class="kw">pub struct </span>CloudflareKvBuilder {
+    config: CloudflareKvConfig,
+
+    <span class="doccomment">/// The HTTP client used to communicate with CloudFlare.
+    </span>http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>CloudflareKvBuilder {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         f.debug_struct(<span class="string">"CloudFlareKvBuilder"</span>)
-            .field(<span class="string">"account_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.account_id)
-            .field(<span class="string">"namespace_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.namespace_id)
-            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
             .finish()
     }
 }
@@ -425,7 +469,7 @@
     <span class="doccomment">/// Set the token used to authenticate with CloudFlare.
     </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
-            <span class="self">self</span>.token = <span class="prelude-val">Some</span>(token.to_string())
+            <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string())
         }
         <span class="self">self
     </span>}
@@ -433,7 +477,7 @@
     <span class="doccomment">/// Set the account ID used to authenticate with CloudFlare.
     </span><span class="kw">pub fn </span>account_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!account_id.is_empty() {
-            <span class="self">self</span>.account_id = <span class="prelude-val">Some</span>(account_id.to_string())
+            <span class="self">self</span>.config.account_id = <span class="prelude-val">Some</span>(account_id.to_string())
         }
         <span class="self">self
     </span>}
@@ -441,7 +485,7 @@
     <span class="doccomment">/// Set the namespace ID.
     </span><span class="kw">pub fn </span>namespace_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, namespace_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!namespace_id.is_empty() {
-            <span class="self">self</span>.namespace_id = <span class="prelude-val">Some</span>(namespace_id.to_string())
+            <span class="self">self</span>.config.namespace_id = <span class="prelude-val">Some</span>(namespace_id.to_string())
         }
         <span class="self">self
     </span>}
@@ -449,7 +493,7 @@
     <span class="doccomment">/// Set the root within this backend.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.root = <span class="prelude-val">Some</span>(root.to_string())
+            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }
         <span class="self">self
     </span>}
@@ -461,28 +505,29 @@
     <span class="kw">type </span>Accessor = CloudflareKvBackend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">Self</span>::default();
-        map.get(<span class="string">"token"</span>).map(|v| builder.token(v));
-        map.get(<span class="string">"account_id"</span>).map(|v| builder.account_id(v));
-        map.get(<span class="string">"namespace_id"</span>).map(|v| builder.namespace_id(v));
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        builder
+        <span class="kw">let </span>config = CloudflareKvConfig::deserialize(ConfigDeserializer::new(map))
+            .expect(<span class="string">"config deserialize must succeed"</span>);
+
+        <span class="self">Self </span>{
+            config,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>authorization = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.token {
+        <span class="kw">let </span>authorization = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.token {
             <span class="prelude-val">Some</span>(token) =&gt; format_authorization_by_bearer(token)<span class="question-mark">?</span>,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"token is required"</span>)),
         };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(account_id) = <span class="self">self</span>.account_id.clone() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(account_id) = <span class="self">self</span>.config.account_id.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
                 <span class="string">"account_id is required"</span>,
             ));
         };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(namespace_id) = <span class="self">self</span>.namespace_id.clone() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(namespace_id) = <span class="self">self</span>.config.namespace_id.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
                 <span class="string">"namespace_id is required"</span>,
@@ -499,7 +544,8 @@
         </span>};
 
         <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.root
+            <span class="self">self</span>.config
+                .root
                 .clone()
                 .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
                 .as_str(),
@@ -635,7 +681,7 @@
                 <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>response: CfKvScanResponse = serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(|e| {
                     Error::new(
-                        <span class="kw">crate</span>::ErrorKind::Unexpected,
+                        ErrorKind::Unexpected,
                         <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
                     )
                 })<span class="question-mark">?</span>;

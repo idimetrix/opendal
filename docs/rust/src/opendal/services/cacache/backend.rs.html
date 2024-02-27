@@ -155,6 +155,13 @@
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -179,8 +186,10 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>cacache;
+<span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
+<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
 <span class="kw">use </span><span class="kw">crate</span>::Builder;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
@@ -188,17 +197,23 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// cacache service support.
+</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="kw">pub struct </span>CacacheConfig {
+    <span class="doccomment">/// That path to the cacache data directory.
+    </span>datadir: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="doccomment">/// cacache service support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>CacacheBuilder {
-    <span class="doccomment">/// That path to the cacache data directory.
-    </span>datadir: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: CacacheConfig,
 }
 
 <span class="kw">impl </span>CacacheBuilder {
     <span class="doccomment">/// Set the path to the cacache data directory. Will create if not exists.
     </span><span class="kw">pub fn </span>datadir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.datadir = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.datadir = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 }
@@ -208,15 +223,14 @@
     <span class="kw">type </span>Accessor = CacacheBackend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = CacacheBuilder::default();
+        <span class="kw">let </span>config = CacacheConfig::deserialize(ConfigDeserializer::new(map))
+            .expect(<span class="string">"config deserialize must succeed"</span>);
 
-        map.get(<span class="string">"datadir"</span>).map(|v| builder.datadir(v));
-
-        builder
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>datadir_path = <span class="self">self</span>.datadir.take().ok_or_else(|| {
+        <span class="kw">let </span>datadir_path = <span class="self">self</span>.config.datadir.take().ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"datadir is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Cacache)
         })<span class="question-mark">?</span>;

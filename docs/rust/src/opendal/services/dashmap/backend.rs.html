@@ -152,6 +152,13 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -175,21 +182,29 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>dashmap::DashMap;
+<span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
+<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// [dashmap](https://github.com/xacrimon/dashmap) backend support.
+</span><span class="attr">#[derive(Default, Deserialize, Clone, Debug)]
+</span><span class="kw">pub struct </span>DashmapConfig {
+    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
 
 <span class="doccomment">/// [dashmap](https://github.com/xacrimon/dashmap) backend support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>DashmapBuilder {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: DashmapConfig,
 }
 
 <span class="kw">impl </span>DashmapBuilder {
     <span class="doccomment">/// Set the root for dashmap.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 }
@@ -199,18 +214,17 @@
     <span class="kw">type </span>Accessor = DashmapBackend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">Self</span>::default();
+        <span class="kw">let </span>config = DashmapConfig::deserialize(ConfigDeserializer::new(map))
+            .expect(<span class="string">"config deserialize must succeed"</span>);
 
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-
-        builder
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="prelude-val">Ok</span>(DashmapBackend::new(Adapter {
             inner: DashMap::default(),
         })
-        .with_root(<span class="self">self</span>.root.as_deref().unwrap_or_default()))
+        .with_root(<span class="self">self</span>.config.root.as_deref().unwrap_or_default()))
     }
 }
 
