@@ -65,6 +65,7 @@
 <a href="#63" id="63">63</a>
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -84,23 +85,24 @@
 
 </span><span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>http::StatusCode;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::WebdavBackend;
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>WebdavWriter {
-    backend: WebdavBackend,
+    core: Arc&lt;WebdavCore&gt;,
 
     op: OpWrite,
     path: String,
 }
 
 <span class="kw">impl </span>WebdavWriter {
-    <span class="kw">pub fn </span>new(backend: WebdavBackend, op: OpWrite, path: String) -&gt; <span class="self">Self </span>{
-        WebdavWriter { backend, op, path }
+    <span class="kw">pub fn </span>new(core: Arc&lt;WebdavCore&gt;, op: OpWrite, path: String) -&gt; <span class="self">Self </span>{
+        WebdavWriter { core, op, path }
     }
 }
 
@@ -110,7 +112,7 @@
         <span class="kw">let </span>bs = oio::ChunkedBytes::from_vec(bs.vectored_bytes(bs.remaining()));
 
         <span class="kw">let </span>resp = <span class="self">self
-            </span>.backend
+            </span>.core
             .webdav_put(
                 <span class="kw-2">&amp;</span><span class="self">self</span>.path,
                 <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
