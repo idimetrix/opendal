@@ -388,6 +388,13 @@
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -618,6 +625,13 @@
 </span><span class="kw">mod </span>gdrive;
 <span class="attr">#[cfg(feature = <span class="string">"services-gdrive"</span>)]
 </span><span class="kw">pub use </span>gdrive::Gdrive;
+
+<span class="attr">#[cfg(feature = <span class="string">"services-github"</span>)]
+</span><span class="kw">mod </span>github;
+<span class="attr">#[cfg(feature = <span class="string">"services-github"</span>)]
+</span><span class="kw">pub use </span>github::Github;
+<span class="attr">#[cfg(feature = <span class="string">"services-github"</span>)]
+</span><span class="kw">pub use </span>github::GithubConfig;
 
 <span class="attr">#[cfg(feature = <span class="string">"services-dropbox"</span>)]
 </span><span class="kw">mod </span>dropbox;
