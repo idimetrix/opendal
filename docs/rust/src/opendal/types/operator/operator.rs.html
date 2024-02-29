@@ -2258,6 +2258,31 @@
 <a href="#2256" id="2256">2256</a>
 <a href="#2257" id="2257">2257</a>
 <a href="#2258" id="2258">2258</a>
+<a href="#2259" id="2259">2259</a>
+<a href="#2260" id="2260">2260</a>
+<a href="#2261" id="2261">2261</a>
+<a href="#2262" id="2262">2262</a>
+<a href="#2263" id="2263">2263</a>
+<a href="#2264" id="2264">2264</a>
+<a href="#2265" id="2265">2265</a>
+<a href="#2266" id="2266">2266</a>
+<a href="#2267" id="2267">2267</a>
+<a href="#2268" id="2268">2268</a>
+<a href="#2269" id="2269">2269</a>
+<a href="#2270" id="2270">2270</a>
+<a href="#2271" id="2271">2271</a>
+<a href="#2272" id="2272">2272</a>
+<a href="#2273" id="2273">2273</a>
+<a href="#2274" id="2274">2274</a>
+<a href="#2275" id="2275">2275</a>
+<a href="#2276" id="2276">2276</a>
+<a href="#2277" id="2277">2277</a>
+<a href="#2278" id="2278">2278</a>
+<a href="#2279" id="2279">2279</a>
+<a href="#2280" id="2280">2280</a>
+<a href="#2281" id="2281">2281</a>
+<a href="#2282" id="2282">2282</a>
+<a href="#2283" id="2283">2283</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2978,7 +3003,13 @@
     /// ## Streaming Write
     ///
     /// This function will write all bytes at once. For more precise memory control or
-    /// writing data lazily, please use [`Operator::writer`].
+    /// writing data continuously, please use [`Operator::writer`].
+    ///
+    /// ## Multipart Uploads Write
+    ///
+    /// OpenDAL abstracts the multipart uploads into [`Writer`]. It will automatically
+    /// handle the multipart uploads for you. You can control the behavior of multipart uploads
+    /// by setting `buffer`, `concurrent` via [`Operator::writer_with`]
     ///
     /// # Examples
     ///
@@ -3127,6 +3158,17 @@
     /// extra options like `content_type` and `cache_control`, please use [`Operator::write_with`]
     /// instead.
     ///
+    /// ## Buffer
+    ///
+    /// OpenDAL is designed to write files directly without buffering by default, giving users
+    /// control over the exact size of their writes and helping avoid unnecessary costs.
+    ///
+    /// This is not efficient for cases when users write small chunks of data. Some storage services
+    /// like `s3` could even return hard errors like `EntityTooSmall`. Besides, cloud storage services
+    /// will cost more money if we write data in small chunks.
+    ///
+    /// Users can use [`Operator::write_with`] to set a good buffer size might improve the performance,
+    ///
     /// # Examples
     ///
     /// ```
@@ -3183,12 +3225,14 @@
     ///
     /// Set `buffer` for the writer.
     ///
-    /// OpenDAL by default to write file without buffer. This is not efficient for cases when users
-    /// write small chunks of data. Some storage services like `s3` could even return hard errors
-    /// like `EntityTooSmall`. To improve performance, we can set a buffer.
+    /// OpenDAL is designed to write files directly without buffering by default, giving users
+    /// control over the exact size of their writes and helping avoid unnecessary costs.
     ///
-    /// Besides, cloud storage services will cost more money if we write data in small chunks. Set
-    /// a good buffer size might reduce the API calls and save money.
+    /// This is not efficient for cases when users write small chunks of data. Some storage services
+    /// like `s3` could even return hard errors like `EntityTooSmall`. Besides, cloud storage services
+    /// will cost more money if we write data in small chunks.
+    ///
+    /// Set a good buffer size might improve the performance, reduce the API calls and save money.
     ///
     /// The following example will set the writer buffer to 8MiB. Only one API call will be sent at
     /// `close` instead.
@@ -3373,6 +3417,12 @@
     ///
     /// This function will write all bytes at once. For more precise memory control or
     /// writing data lazily, please use [`Operator::writer_with`].
+    ///
+    /// ## Multipart Uploads Write
+    ///
+    /// OpenDAL abstracts the multipart uploads into [`Writer`]. It will automatically
+    /// handle the multipart uploads for you. You can control the behavior of multipart uploads
+    /// by setting `buffer`, `concurrent` via [`Operator::writer_with`]
     ///
     /// # Options
     ///
