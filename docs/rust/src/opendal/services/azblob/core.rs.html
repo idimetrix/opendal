@@ -924,6 +924,8 @@
 <a href="#922" id="922">922</a>
 <a href="#923" id="923">923</a>
 <a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -941,7 +943,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>base64::prelude::BASE64_STANDARD;
+</span><span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::fmt::Write;
+<span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header::HeaderName;
@@ -955,12 +963,8 @@
 <span class="kw">use </span>reqsign::AzureStorageCredential;
 <span class="kw">use </span>reqsign::AzureStorageLoader;
 <span class="kw">use </span>reqsign::AzureStorageSigner;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::fmt;
-<span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::fmt::Write;
-<span class="kw">use </span>std::time::Duration;
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;

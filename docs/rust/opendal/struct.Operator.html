@@ -770,7 +770,7 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-2" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1938-2151">source</a><a href="#impl-Operator-2" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><p>Operator presign API.</p>
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-2" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1938-2258">source</a><a href="#impl-Operator-2" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><p>Operator presign API.</p>
 </div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.presign_stat" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1960-1967">source</a><h4 class="code-header">pub async fn <a href="#method.presign_stat" class="fn">presign_stat</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
@@ -804,11 +804,15 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>signed_req = op.presign_stat_with(<span class="string">"test"</span>,Duration::from_secs(<span class="number">3600</span>)).override_content_disposition(<span class="string">"attachment; filename=\"othertext.txt\""</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2030-2037">source</a><h4 class="code-header">pub async fn <a href="#method.presign_read" class="fn">presign_read</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2038-2045">source</a><h4 class="code-header">pub async fn <a href="#method.presign_read" class="fn">presign_read</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>
 ) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for read.</p>
+<h5 id="notes-20"><a href="#notes-20">Notes</a></h5><h6 id="extra-options-6"><a href="#extra-options-6">Extra Options</a></h6>
+<p><code>presign_read</code> is a wrapper of <a href="struct.Operator.html#method.presign_read_with" title="method opendal::Operator::presign_read_with"><code>Self::presign_read_with</code></a> without any options. To use
+extra options like <code>override_content_disposition</code>, please use <a href="struct.Operator.html#method.presign_read_with" title="method opendal::Operator::presign_read_with"><code>Self::presign_read_with</code></a>
+instead.</p>
 <h5 id="example-3"><a href="#example-3">Example</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>futures::io;
@@ -825,38 +829,77 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
 </ul>
 <p>We can download this file via <code>curl</code> or other tools without credentials:</p>
 <div class="example-wrap"><pre class="language-shell"><code>curl &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -O /tmp/test.txt
-</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2060-2077">source</a><h4 class="code-header">pub fn <a href="#method.presign_read_with" class="fn">presign_read_with</a>(
+</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2108-2125">source</a><h4 class="code-header">pub fn <a href="#method.presign_read_with" class="fn">presign_read_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>
-) -&gt; <a class="type" href="operator_futures/type.FuturePresignRead.html" title="type opendal::operator_futures::FuturePresignRead">FuturePresignRead</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for read option described in OpenDAL <a href="docs/rfcs/rfc_1735_operation_extension/index.html" title="mod opendal::docs::rfcs::rfc_1735_operation_extension">RFC-1735</a>.</p>
-<p>You can pass <code>OpRead</code> to this method to specify the content disposition.</p>
-<h5 id="example-4"><a href="#example-4">Example</a></h5>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>futures::io;
-<span class="kw">use </span>opendal::Operator;
-<span class="kw">use </span>std::time::Duration;
+) -&gt; <a class="type" href="operator_futures/type.FuturePresignRead.html" title="type opendal::operator_futures::FuturePresignRead">FuturePresignRead</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for read with extra options.</p>
+<h5 id="options-7"><a href="#options-7">Options</a></h5><h6 id="override_content_disposition"><a href="#override_content_disposition"><code>override_content_disposition</code></a></h6>
+<p>Override the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition"><code>content-disposition</code></a> header returned by storage services.</p>
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>signed_req = op
         .presign_read_with(<span class="string">"test.txt"</span>, Duration::from_secs(<span class="number">3600</span>))
         .override_content_disposition(<span class="string">"attachment; filename=\"othertext.txt\""</span>)
-        .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2105-2107">source</a><h4 class="code-header">pub async fn <a href="#method.presign_write" class="fn">presign_write</a>(
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h6 id="override_cache_control"><a href="#override_cache_control"><code>override_cache_control</code></a></h6>
+<p>Override the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control"><code>cache-control</code></a> header returned by storage services.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_read_with(<span class="string">"test.txt"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .override_cache_control(<span class="string">"no-store"</span>)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h6 id="override_content_type"><a href="#override_content_type"><code>override_content_type</code></a></h6>
+<p>Override the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type"><code>content-type</code></a> header returned by storage services.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>futures::io;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_read_with(<span class="string">"test.txt"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .override_content_type(<span class="string">"text/plain"</span>)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2161-2163">source</a><h4 class="code-header">pub async fn <a href="#method.presign_write" class="fn">presign_write</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>
 ) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for write.</p>
-<h5 id="example-5"><a href="#example-5">Example</a></h5>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>futures::io;
-<span class="kw">use </span>opendal::Operator;
-<span class="kw">use </span>std::time::Duration;
+<h5 id="notes-21"><a href="#notes-21">Notes</a></h5><h6 id="extra-options-7"><a href="#extra-options-7">Extra Options</a></h6>
+<p><code>presign_write</code> is a wrapper of <a href="struct.Operator.html#method.presign_write_with" title="method opendal::Operator::presign_write_with"><code>Self::presign_write_with</code></a> without any options. To use
+extra options like <code>content_type</code>, please use <a href="struct.Operator.html#method.presign_write_with" title="method opendal::Operator::presign_write_with"><code>Self::presign_write_with</code></a> instead.</p>
+<h5 id="example-4"><a href="#example-4">Example</a></h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>signed_req = op.presign_write(<span class="string">"test.txt"</span>, Duration::from_secs(<span class="number">3600</span>)).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_write(<span class="string">"test.txt"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
 <ul>
 <li><code>signed_req.method()</code>: <code>PUT</code></li>
 <li><code>signed_req.uri()</code>: <code>https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;</code></li>
@@ -864,27 +907,71 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
 </ul>
 <p>We can upload file as this file via <code>curl</code> or other tools without credential:</p>
 <div class="example-wrap"><pre class="language-shell"><code>curl -X PUT &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -d &quot;Hello, World!&quot;
-</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2133-2150">source</a><h4 class="code-header">pub fn <a href="#method.presign_write_with" class="fn">presign_write_with</a>(
+</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2240-2257">source</a><h4 class="code-header">pub fn <a href="#method.presign_write_with" class="fn">presign_write_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>
-) -&gt; <a class="type" href="operator_futures/type.FuturePresignWrite.html" title="type opendal::operator_futures::FuturePresignWrite">FuturePresignWrite</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for write with option described in OpenDAL <a href="docs/rfcs/rfc_0661_path_in_accessor/index.html" title="mod opendal::docs::rfcs::rfc_0661_path_in_accessor">RFC-0661</a></p>
-<p>You can pass <code>OpWrite</code> to this method to specify the content length and content type.</p>
-<h5 id="example-6"><a href="#example-6">Example</a></h5>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>futures::io;
-<span class="kw">use </span>opendal::Operator;
-<span class="kw">use </span>std::time::Duration;
+) -&gt; <a class="type" href="operator_futures/type.FuturePresignWrite.html" title="type opendal::operator_futures::FuturePresignWrite">FuturePresignWrite</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="raw/struct.PresignedRequest.html" title="struct opendal::raw::PresignedRequest">PresignedRequest</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>Presign an operation for write with extra options.</p>
+<h5 id="options-8"><a href="#options-8">Options</a></h5><h6 id="content_type-2"><a href="#content_type-2"><code>content_type</code></a></h6>
+<p>Set the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type"><code>content-type</code></a> header returned by storage services.</p>
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>signed_req = op.presign_write_with(<span class="string">"test"</span>, Duration::from_secs(<span class="number">3600</span>))
-                       .content_type(<span class="string">"text/csv"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_write_with(<span class="string">"test"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .content_type(<span class="string">"text/csv"</span>)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>req = http::Request::builder()
         .method(signed_req.method())
         .uri(signed_req.uri())
         .body(())<span class="question-mark">?</span>;
-</code></pre></div>
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h6 id="content_disposition-2"><a href="#content_disposition-2"><code>content_disposition</code></a></h6>
+<p>Set the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition"><code>content-disposition</code></a> header returned by storage services.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_write_with(<span class="string">"test"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .content_disposition(<span class="string">"attachment; filename=\"cool.html\""</span>)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>req = http::Request::builder()
+        .method(signed_req.method())
+        .uri(signed_req.uri())
+        .body(())<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h6 id="cache_control-2"><a href="#cache_control-2"><code>cache_control</code></a></h6>
+<p>Set the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control"><code>cache-control</code></a> header returned by storage services.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>opendal::Operator;
+
+<span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>signed_req = op
+        .presign_write_with(<span class="string">"test"</span>, Duration::from_secs(<span class="number">3600</span>))
+        .cache_control(<span class="string">"no-store"</span>)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>req = http::Request::builder()
+        .method(signed_req.method())
+        .uri(signed_req.uri())
+        .body(())<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
 </div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-3" class="impl"><a class="src rightside" href="../src/opendal/types/operator/builder.rs.html#48-319">source</a><a href="#impl-Operator-3" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><h4 id="operator-build-api"><a href="#operator-build-api">Operator build API</a></h4>
 <p>Operator should be built via <a href="struct.OperatorBuilder.html" title="struct opendal::OperatorBuilder"><code>OperatorBuilder</code></a>. We recommend to use <a href="struct.Operator.html#method.new" title="associated function opendal::Operator::new"><code>Operator::new</code></a> to get started:</p>
 
@@ -929,7 +1016,7 @@ to import <code>opendal::Builder</code> trait.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.from_map" class="method"><a class="src rightside" href="../src/opendal/types/operator/builder.rs.html#115-120">source</a><h4 class="code-header">pub fn <a href="#method.from_map" class="fn">from_map</a>&lt;B: <a class="trait" href="trait.Builder.html" title="trait opendal::Builder">Builder</a>&gt;(
     map: <a class="struct" href="https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html" title="struct std::collections::hash::map::HashMap">HashMap</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;
 ) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.OperatorBuilder.html" title="struct opendal::OperatorBuilder">OperatorBuilder</a>&lt;impl <a class="trait" href="raw/trait.Accessor.html" title="trait opendal::raw::Accessor">Accessor</a>&gt;&gt;</h4></section></summary><div class="docblock"><p>Create a new operator from given map.</p>
-<h5 id="notes-20"><a href="#notes-20">Notes</a></h5>
+<h5 id="notes-22"><a href="#notes-22">Notes</a></h5>
 <p>from_map is using static dispatch layers which is zero cost. via_map is
 using dynamic dispatch layers which has a bit runtime overhead with an
 extra vtable lookup and unable to inline. But from_map requires generic
@@ -954,7 +1041,7 @@ type parameter which is not always easy to be used.</p>
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.via_map" class="method"><a class="src rightside" href="../src/opendal/types/operator/builder.rs.html#154-282">source</a><h4 class="code-header">pub fn <a href="#method.via_map" class="fn">via_map</a>(scheme: <a class="enum" href="enum.Scheme.html" title="enum opendal::Scheme">Scheme</a>, map: <a class="struct" href="https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html" title="struct std::collections::hash::map::HashMap">HashMap</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a>&gt;</h4></section></summary><div class="docblock"><p>Create a new operator from given scheme and map.</p>
-<h5 id="notes-21"><a href="#notes-21">Notes</a></h5>
+<h5 id="notes-23"><a href="#notes-23">Notes</a></h5>
 <p>from_map is using static dispatch layers which is zero cost. via_map is
 using dynamic dispatch layers which has a bit runtime overhead with an
 extra vtable lookup and unable to inline. But from_map requires generic
@@ -979,7 +1066,7 @@ type parameter which is not always easy to be used.</p>
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.layer" class="method"><a class="src rightside" href="../src/opendal/types/operator/builder.rs.html#314-318">source</a><h4 class="code-header">pub fn <a href="#method.layer" class="fn">layer</a>&lt;L: <a class="trait" href="raw/trait.Layer.html" title="trait opendal::raw::Layer">Layer</a>&lt;<a class="type" href="raw/type.FusedAccessor.html" title="type opendal::raw::FusedAccessor">FusedAccessor</a>&gt;&gt;(self, layer: L) -&gt; Self</h4></section></summary><div class="docblock"><p>Create a new layer with dynamic dispatch.</p>
-<h5 id="notes-22"><a href="#notes-22">Notes</a></h5>
+<h5 id="notes-24"><a href="#notes-24">Notes</a></h5>
 <p><code>OperatorBuilder::layer()</code> is using static dispatch which is zero
 cost. <code>Operator::layer()</code> is using dynamic dispatch which has a
 bit runtime overhead with an extra vtable lookup and unable to
