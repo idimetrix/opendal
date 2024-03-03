@@ -294,8 +294,6 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -527,8 +525,8 @@
         bytes: u64,
         hash: String,
         name: String,
-        content_type: String,
         last_modified: String,
+        content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     },
 }
 
@@ -568,10 +566,8 @@
                 bytes: <span class="number">147</span>,
                 hash: <span class="string">"5e6b5b70b0426b1cc1968003e1afa5ad"</span>.to_string(),
                 name: <span class="string">"test.txt"</span>.to_string(),
-                content_type:
-                    <span class="string">"multipart/form-data;boundary=------------------------25004a866ee9c0cb"
-                        </span>.to_string(),
                 last_modified: <span class="string">"2023-11-01T03:00:23.147480"</span>.to_string(),
+                content_type: <span class="prelude-val">Some</span>(<span class="string">"text/plain"</span>.to_string()),
             }
         );
 

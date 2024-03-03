@@ -110,6 +110,13 @@
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -207,10 +214,17 @@
                     meta.set_content_length(bytes);
                     meta.set_content_md5(hash.as_str());
 
-                    <span class="comment">// we'll change "2023-10-28T19:18:11.682610" to "2023-10-28T19:18:11.682610Z"
-                    </span>last_modified.push(<span class="string">'Z'</span>);
+                    <span class="comment">// OpenStack Swift returns time without 'Z' at the end,
+                    // which causes an error in parse_datetime_from_rfc3339.
+                    // we'll change "2023-10-28T19:18:11.682610" to "2023-10-28T19:18:11.682610Z".
+                    </span><span class="kw">if </span>!last_modified.ends_with(<span class="string">'Z'</span>) {
+                        last_modified.push(<span class="string">'Z'</span>);
+                    }
                     meta.set_last_modified(parse_datetime_from_rfc3339(last_modified.as_str())<span class="question-mark">?</span>);
-                    meta.set_content_type(content_type.as_str());
+
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(content_type) = content_type {
+                        meta.set_content_type(content_type.as_str());
+                    }
 
                     oio::Entry::with(name, meta)
                 }
