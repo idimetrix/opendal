@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkopendal_website=self.webpackChunkopendal_website||[]).push([[8992],{5830:e=>{e.exports=JSON.parse('{"label":"owo","permalink":"/blog/tags/owo","allTagsPath":"/blog/tags","count":1,"unlisted":false}')}}]);

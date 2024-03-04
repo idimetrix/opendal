@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkopendal_website=self.webpackChunkopendal_website||[]).push([[5606],{5809:e=>{e.exports=JSON.parse('{"label":"internal","permalink":"/blog/tags/internal","allTagsPath":"/blog/tags","count":1}')}}]);
