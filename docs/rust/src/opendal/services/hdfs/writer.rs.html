@@ -128,6 +128,16 @@
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -166,7 +176,7 @@
     tmp_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
     f: <span class="prelude-ty">Option</span>&lt;F&gt;,
     client: Arc&lt;hdrs::Client&gt;,
-    fut: <span class="prelude-ty">Option</span>&lt;BoxFuture&lt;<span class="lifetime">'static</span>, <span class="prelude-ty">Result</span>&lt;()&gt;&gt;&gt;,
+    fut: <span class="prelude-ty">Option</span>&lt;BoxFuture&lt;<span class="lifetime">'static</span>, (F, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;&gt;,
 }
 
 <span class="doccomment">/// # Safety
@@ -206,7 +216,11 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(fut) = <span class="self">self</span>.fut.as_mut() {
                 <span class="kw">let </span>res = <span class="macro">ready!</span>(fut.poll_unpin(cx));
                 <span class="self">self</span>.fut = <span class="prelude-val">None</span>;
-                <span class="kw">return </span>Poll::Ready(res);
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = res.<span class="number">1 </span>{
+                    <span class="self">self</span>.f = <span class="prelude-val">Some</span>(res.<span class="number">0</span>);
+                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(e));
+                }
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>f = <span class="self">self</span>.f.take().expect(<span class="string">"HdfsWriter must be initialized"</span>);
@@ -216,15 +230,21 @@
             </span><span class="kw">let </span>client = <span class="self">self</span>.client.clone();
 
             <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(<span class="kw">async move </span>{
-                f.close().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(tmp_path) = tmp_path {
-                    client
-                        .rename_file(<span class="kw-2">&amp;</span>tmp_path, <span class="kw-2">&amp;</span>target_path)
-                        .map_err(new_std_io_error)<span class="question-mark">?</span>;
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = f.close().<span class="kw">await</span>.map_err(new_std_io_error) {
+                    <span class="comment">// Reserve the original file handle for retry.
+                    </span><span class="kw">return </span>(f, <span class="prelude-val">Err</span>(e));
                 }
 
-                <span class="prelude-val">Ok</span>(())
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(tmp_path) = tmp_path {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client
+                        .rename_file(<span class="kw-2">&amp;</span>tmp_path, <span class="kw-2">&amp;</span>target_path)
+                        .map_err(new_std_io_error)
+                    {
+                        <span class="kw">return </span>(f, <span class="prelude-val">Err</span>(e));
+                    }
+                }
+
+                (f, <span class="prelude-val">Ok</span>(()))
             }));
         }
     }
