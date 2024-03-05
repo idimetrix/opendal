@@ -423,6 +423,7 @@
 <a href="#421" id="421">421</a>
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -576,6 +577,7 @@
     ///     Ok(())
     /// }
     /// ```
+    </span><span class="attr">#[allow(unused_variables, unreachable_code)]
     </span><span class="kw">pub fn </span>via_map(scheme: Scheme, map: HashMap&lt;String, String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Operator&gt; {
         <span class="kw">let </span>op = <span class="kw">match </span>scheme {
             <span class="attr">#[cfg(feature = <span class="string">"services-atomicserver"</span>)]
