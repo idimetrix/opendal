@@ -301,6 +301,8 @@
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -335,7 +337,9 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// [OpenStack Swift](https://docs.openstack.org/api-ref/object-store/#)'s REST API support.
+/// For more information about swift-compatible services, refer to [Compatible Services](#compatible-services).
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[doc = <span class="macro">include_str!</span>(<span class="string">"compatible_services.md"</span>)]
 #[derive(Default, Clone)]
 </span><span class="kw">pub struct </span>SwiftBuilder {
     endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
