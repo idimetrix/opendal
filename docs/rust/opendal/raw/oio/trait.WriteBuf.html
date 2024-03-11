@@ -44,13 +44,13 @@ length between 0 and Buf::remaining().</p>
 <h5 id="notes-for-users"><a href="#notes-for-users">Notes for Users</a></h5>
 <p>This functions is used to return a vectored bytes from underlying chunks.
 Use <code>bytes</code> if you just want to get a continuous bytes.</p>
-<h5 id="notes-for-implementors"><a href="#notes-for-implementors">Notes for implementors</a></h5>
+<h5 id="notes-for-implementers"><a href="#notes-for-implementers">Notes for implementers</a></h5>
 <p>It’s better to align the vectored bytes with underlying chunks to avoid copy.</p>
 <h5 id="panics-2"><a href="#panics-2">Panics</a></h5>
 <p>This function will panic if size &gt; self.remaining().</p>
 </div></details></div><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.is_bytes_optimized" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/buf/write_buf.rs.html#88-91">source</a><h4 class="code-header">fn <a href="#method.is_bytes_optimized" class="fn">is_bytes_optimized</a>(&amp;self, size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns true if the underlying buffer is optimized for bytes with given size.</p>
 <h5 id="notes-4"><a href="#notes-4">Notes</a></h5>
-<p>This function is used to avoid copy when possible. Implementors should return <code>true</code>
+<p>This function is used to avoid copy when possible. Implementers should return <code>true</code>
 the given <code>self.bytes(size)</code> could be done without cost. For example, the underlying
 buffer is <code>Bytes</code>.</p>
 <h5 id="panics-3"><a href="#panics-3">Panics</a></h5>

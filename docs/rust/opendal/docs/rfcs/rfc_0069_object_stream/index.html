@@ -83,7 +83,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.meta)
 }</code></pre></div>
-<p>The backend implementor must make sure <code>complete</code> is correctly set.</p>
+<p>The backend implementer must make sure <code>complete</code> is correctly set.</p>
 <p><code>Metadata</code> will be immutable outsides, so all <code>set_xxx</code> APIs will be set to crate public only:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_content_length(<span class="kw-2">&amp;mut </span><span class="self">self</span>, content_length: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{

@@ -74,7 +74,7 @@ w.close().<span class="kw">await</span><span class="question-mark">?</span>;</co
 +    async fn write(&amp;self, path: &amp;str, args: OpWrite) -&gt; Result&lt;(RpWrite, Self::Writer)&gt;
 }
 </code></pre></div><h2 id="drawbacks"><a href="#drawbacks">Drawbacks</a></h2>
-<p>More heavy work for service implementors.</p>
+<p>More heavy work for service implementers.</p>
 <h2 id="rationale-and-alternatives"><a href="#rationale-and-alternatives">Rationale and alternatives</a></h2><h3 id="why-accept-bytes"><a href="#why-accept-bytes">Why accept <code>Bytes</code>?</a></h3>
 <p>OpenDAL’s write is similar to <code>io::Write::write_all</code> which will always consume the whole input and return errors if something is wrong. By accepting <code>Bytes</code>, we can reduce the extra <code>Clone</code> between user land to OpenDAL’s services/layers.</p>
 <h2 id="prior-art"><a href="#prior-art">Prior art</a></h2>

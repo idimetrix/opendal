@@ -7,7 +7,7 @@
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Layer is used to intercept the operations on the underlying storage.</p>
 <p>Struct that implement this trait must accept input <code>Arc&lt;dyn Accessor&gt;</code> as inner,
 and returns a new <code>Arc&lt;dyn Accessor&gt;</code> as output.</p>
-<p>All functions in <code>Accessor</code> requires <code>&amp;self</code>, so it’s implementor’s responsibility
+<p>All functions in <code>Accessor</code> requires <code>&amp;self</code>, so it’s implementer’s responsibility
 to maintain the internal mutability. Please also keep in mind that <code>Accessor</code>
 requires <code>Send</code> and <code>Sync</code>.</p>
 <h2 id="notes"><a href="#notes">Notes</a></h2><h3 id="inner"><a href="#inner">Inner</a></h3>

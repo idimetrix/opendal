@@ -10,7 +10,7 @@
 <h2 id="summary"><a href="#summary">Summary</a></h2>
 <p>Use <code>Stream</code>/<code>Sink</code> instead of <code>AsyncRead</code> in <code>Accessor</code>.</p>
 <h2 id="motivation"><a href="#motivation">Motivation</a></h2>
-<p><code>Accessor</code> intends to be the <code>underlying trait of all backends for implementors</code>. However, it’s not so underlying enough.</p>
+<p><code>Accessor</code> intends to be the <code>underlying trait of all backends for implementers</code>. However, it’s not so underlying enough.</p>
 <h3 id="over-wrapped"><a href="#over-wrapped">Over-wrapped</a></h3>
 <p><code>Accessor</code> returns a <code>BoxedAsyncReader</code> for <code>read</code> operation:</p>
 

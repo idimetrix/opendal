@@ -55,7 +55,7 @@
         <span class="macro">error!</span>(<span class="string">"{e}"</span>);
     }
 }</code></pre></div>
-<p>For a backend implementor, we can provide as much information as possible. For example, we can return <code>bucket is empty</code> to let the user know:</p>
+<p>For a backend implementer, we can provide as much information as possible. For example, we can return <code>bucket is empty</code> to let the user know:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">return </span><span class="prelude-val">Err</span>(Error::Backend {
     kind: Kind::BackendConfigurationInvalid,
@@ -121,7 +121,7 @@
         Error::Unexpected(<span class="kw">_</span>) =&gt; Kind::Unexpected,
     }
 }</code></pre></div>
-<p>The implementor should do their best to carry as much context as possible. Such as, they should return <code>Error::Object</code> to carry the <code>op</code> and <code>path</code>, instead of just returns <code>Error::Unexpected(anyhow::Error::from(err))</code>.</p>
+<p>The implementer should do their best to carry as much context as possible. Such as, they should return <code>Error::Object</code> to carry the <code>op</code> and <code>path</code>, instead of just returns <code>Error::Unexpected(anyhow::Error::from(err))</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>Error::Object {
     kind: Kind::Unexpected,
