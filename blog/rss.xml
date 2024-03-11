@@ -91,7 +91,7 @@
 <li>Add integration tests for newly added services.</li>
 </ul>
 <h3 class="anchor anchorWithStickyNavbar_VwHQ" id="more-useful-documents">More Useful Documents<a href="https://opendal.apache.org/blog/apache-opendal-graduated#more-useful-documents" class="hash-link" aria-label="Direct link to More Useful Documents" title="Direct link to More Useful Documents">​</a></h3>
-<p>OpenDAL have good docs for it's rust core, but not for other language bindings.</p>
+<p>OpenDAL have good docs for its rust core, but not for other language bindings.</p>
 <p>The lack of comprehensive documentation makes OpenDAL challenging for users to operate in Java or Python. Without user feedback, the community is unable to enhance this documentation, leading to a detrimental cycle that must be broken.</p>
 <p>After graduation, the OpenDAL community will improve the documentation of other language bindings.</p>
 <p>We plan to:</p>
@@ -99,7 +99,7 @@
 <li>Introduce code generation to automatically create documentation for the service builder due to its numerous configurations.</li>
 <li>Add more API Docs and examples for other language bindings.</li>
 </ul>
-<p>OpenDAL have good docs for it's public API, but not for its internal design.</p>
+<p>OpenDAL have good docs for its public API, but not for its internal design.</p>
 <p>OpenDAL is proud of its elegant design, but it is not well documented. This makes it difficult for new contributors to understand the codebase and make contributions.</p>
 <p>After graduation, the OpenDAL community will improve the documentation of its internal design.</p>
 <p>We plan to:</p>
