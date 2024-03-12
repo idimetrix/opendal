@@ -105,26 +105,6 @@
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -143,16 +123,13 @@
 // under the License.
 
 </span><span class="kw">use </span>std::io;
-<span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>bb8::PooledConnection;
-<span class="kw">use </span>futures::future::BoxFuture;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::AsyncRead;
-<span class="kw">use </span>futures::FutureExt;
+<span class="kw">use </span>futures::AsyncReadExt;
 <span class="kw">use </span>suppaftp::Status;
+<span class="kw">use </span>tokio::io::ReadBuf;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::Manager;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -162,92 +139,75 @@
 <span class="doccomment">/// Wrapper for ftp data stream and command stream.
 </span><span class="kw">pub struct </span>FtpReader {
     reader: Box&lt;<span class="kw">dyn </span>AsyncRead + Send + Unpin&gt;,
-    state: State,
+    conn: <span class="prelude-ty">Option</span>&lt;PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;&gt;,
+    buf: Vec&lt;u8&gt;,
 }
 
 <span class="kw">unsafe impl </span>Sync <span class="kw">for </span>FtpReader {}
 
-<span class="kw">pub enum </span>State {
-    Reading(<span class="prelude-ty">Option</span>&lt;PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;&gt;),
-    Finalize(BoxFuture&lt;<span class="lifetime">'static</span>, <span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
-}
-
 <span class="kw">impl </span>FtpReader {
     <span class="doccomment">/// Create an instance of FtpReader.
     </span><span class="kw">pub fn </span>new(
-        r: Box&lt;<span class="kw">dyn </span>AsyncRead + Send + Unpin&gt;,
-        c: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;,
+        reader: Box&lt;<span class="kw">dyn </span>AsyncRead + Send + Unpin&gt;,
+        conn: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            reader: r,
-            state: State::Reading(<span class="prelude-val">Some</span>(c)),
+            reader,
+            conn: <span class="prelude-val">Some</span>(conn),
+            buf: Vec::with_capacity(<span class="number">64 </span>* <span class="number">1024</span>),
         }
     }
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>FtpReader {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>data = Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.reader).poll_read(cx, buf);
-
-        <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-            <span class="comment">// Reading state, try to poll some data.
-            </span>State::Reading(stream) =&gt; {
-                <span class="kw">match </span>stream {
-                    <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="comment">// when hit Err or EOF, consume ftpstream, change state to Finalize and send fut.
-                        </span><span class="kw">if let </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) | Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>)) = data {
-                            <span class="kw">let </span><span class="kw-2">mut </span>ft = stream.take().unwrap();
-
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                                ft.read_response_in(<span class="kw-2">&amp;</span>[
-                                    Status::ClosingDataConnection,
-                                    Status::RequestedFileActionOk,
-                                ])
-                                .<span class="kw">await
-                                </span>.map_err(parse_error)<span class="question-mark">?</span>;
-
-                                <span class="prelude-val">Ok</span>(())
-                            };
-                            <span class="self">self</span>.state = State::Finalize(Box::pin(fut));
-                        } <span class="kw">else </span>{
-                            <span class="comment">// Otherwise, exit and return data.
-                            </span><span class="kw">return </span>data.map_err(|err| {
-                                Error::new(ErrorKind::Unexpected, <span class="string">"read data from ftp data stream"</span>)
-                                    .set_source(err)
-                            });
-                        }
-
-                        <span class="self">self</span>.poll_read(cx, buf)
-                    }
-                    <span class="comment">// We could never reach this branch because we will change to Finalize state once we consume ftp stream.
-                    </span><span class="prelude-val">None </span>=&gt; <span class="macro">unreachable!</span>(),
-                }
-            }
-
-            <span class="comment">// Finalize state, wait for finalization of stream.
-            </span>State::Finalize(fut) =&gt; <span class="kw">match </span><span class="macro">ready!</span>(Pin::new(fut).poll_unpin(cx)) {
-                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>)),
-                <span class="prelude-val">Err</span>(e) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(e)),
-            },
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">if </span><span class="self">self</span>.conn.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">"ftp reader is already closed"</span>,
+            ));
         }
+
+        <span class="comment">// Make sure buf has enough space.
+        </span><span class="kw">if </span><span class="self">self</span>.buf.capacity() &lt; size {
+            <span class="self">self</span>.buf.reserve(size);
+        }
+        <span class="kw">let </span>buf = <span class="self">self</span>.buf.spare_capacity_mut();
+        <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
+
+        <span class="comment">// SAFETY: Read at most `size` bytes into `read_buf`.
+        </span><span class="kw">unsafe </span>{
+            read_buf.assume_init(size);
+        }
+
+        <span class="kw">let </span>data = <span class="self">self</span>.reader.read(read_buf.initialize_unfilled()).<span class="kw">await</span>;
+
+        <span class="comment">// Data read with success, copy and return it.
+        </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(n) = data {
+            <span class="kw">if </span>n &gt; <span class="number">0 </span>{
+                read_buf.set_filled(n);
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[..n]));
+            }
+        }
+
+        <span class="comment">// While hitting Error or EOF, we should end this ftp stream.
+        </span><span class="kw">let _ </span>= <span class="self">self
+            </span>.conn
+            .take()
+            .expect(<span class="string">"connection must be valid during read"</span>)
+            .read_response_in(<span class="kw-2">&amp;</span>[Status::ClosingDataConnection, Status::RequestedFileActionOk])
+            .<span class="kw">await
+            </span>.map_err(parse_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Bytes::new())
     }
 
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (cx, pos);
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">let _ </span>= pos;
 
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        )))
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;bytes::Bytes&gt;&gt;&gt; {
-        <span class="kw">let _ </span>= cx;
-
-        Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        ))))
+            <span class="string">"ftp reader doesn't support seeking"</span>,
+        ))
     }
 }
 </code></pre></div></section></main></body></html>

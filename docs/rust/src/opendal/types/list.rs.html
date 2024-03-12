@@ -407,7 +407,7 @@
     <span class="doccomment">/// Stating is used to store the join handle of spawned task.
     ///
     /// TODO: Replace with static future type after rust supported.
-    </span>Stating(BoxedFuture&lt;(String, <span class="prelude-ty">Result</span>&lt;Metadata&gt;)&gt;),
+    </span>Stating(BoxedStaticFuture&lt;(String, <span class="prelude-ty">Result</span>&lt;Metadata&gt;)&gt;),
     <span class="doccomment">/// Known is used to store the entry that already contains the required metakey.
     </span>Known(<span class="prelude-ty">Option</span>&lt;(String, Metadata)&gt;),
 }

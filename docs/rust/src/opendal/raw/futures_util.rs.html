@@ -281,6 +281,14 @@
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
 <a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -312,9 +320,17 @@
 ///
 /// We will switch to [`futures::future::LocalBoxFuture`] on wasm32 target.
 </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-</span><span class="kw">pub type </span>BoxedFuture&lt;T&gt; = futures::future::BoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
+</span><span class="kw">pub type </span>BoxedFuture&lt;<span class="lifetime">'a</span>, T&gt; = futures::future::BoxFuture&lt;<span class="lifetime">'a</span>, T&gt;;
 <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-</span><span class="kw">pub type </span>BoxedFuture&lt;T&gt; = futures::future::LocalBoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
+</span><span class="kw">pub type </span>BoxedFuture&lt;<span class="lifetime">'a</span>, T&gt; = futures::future::LocalBoxFuture&lt;<span class="lifetime">'a</span>, T&gt;;
+
+<span class="doccomment">/// BoxedStaticFuture is the type alias of [`futures::future::BoxFuture`].
+///
+/// We will switch to [`futures::future::LocalBoxFuture`] on wasm32 target.
+</span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+</span><span class="kw">pub type </span>BoxedStaticFuture&lt;T&gt; = futures::future::BoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
+<span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+</span><span class="kw">pub type </span>BoxedStaticFuture&lt;T&gt; = futures::future::LocalBoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
 
 <span class="doccomment">/// CONCURRENT_LARGE_THRESHOLD is the threshold to determine whether to use
 /// [`FuturesOrdered`] or not.

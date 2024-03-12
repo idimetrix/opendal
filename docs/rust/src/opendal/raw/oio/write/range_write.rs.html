@@ -581,7 +581,7 @@
 /// The error part will carries input `(offset, bytes, err)` so caller can retry them.
 </span><span class="kw">type </span>WriteRangeResult = std::result::Result&lt;(), (u64, oio::ChunkedBytes, Error)&gt;;
 
-<span class="kw">struct </span>WriteRangeFuture(BoxedFuture&lt;WriteRangeResult&gt;);
+<span class="kw">struct </span>WriteRangeFuture(BoxedStaticFuture&lt;WriteRangeResult&gt;);
 
 <span class="doccomment">/// # Safety
 ///
@@ -635,9 +635,9 @@
 
 <span class="kw">enum </span>State {
     Idle,
-    Init(BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;String&gt;&gt;),
-    Complete(BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
-    Abort(BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
+    Init(BoxedStaticFuture&lt;<span class="prelude-ty">Result</span>&lt;String&gt;&gt;),
+    Complete(BoxedStaticFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
+    Abort(BoxedStaticFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
 }
 
 <span class="doccomment">/// # Safety

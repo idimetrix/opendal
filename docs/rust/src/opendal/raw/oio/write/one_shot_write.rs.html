@@ -181,7 +181,7 @@
 
 <span class="kw">enum </span>State&lt;W&gt; {
     Idle(<span class="prelude-ty">Option</span>&lt;W&gt;),
-    Write(BoxedFuture&lt;(W, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
+    Write(BoxedStaticFuture&lt;(W, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
 }
 
 <span class="doccomment">/// # Safety

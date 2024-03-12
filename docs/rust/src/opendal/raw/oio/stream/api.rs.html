@@ -221,13 +221,13 @@
     }
 }
 
-<span class="kw">impl </span>Stream <span class="kw">for dyn </span>raw::oio::Read {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        raw::oio::Read::poll_next(<span class="self">self</span>, cx)
-    }
-}
+<span class="comment">// impl&lt;T: raw::oio::Read&gt; Stream for T {
+//     fn poll_next(&amp;mut self, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Option&lt;Result&lt;Bytes&gt;&gt;&gt; {
+//         raw::oio::Read::poll_next(self, cx)
+//     }
+// }
 
-<span class="kw">impl </span>futures::Stream <span class="kw">for dyn </span>Stream {
+</span><span class="kw">impl </span>futures::Stream <span class="kw">for dyn </span>Stream {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Bytes&gt;;
 
     <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {

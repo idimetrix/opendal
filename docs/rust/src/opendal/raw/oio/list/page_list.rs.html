@@ -213,7 +213,7 @@
 
 <span class="kw">enum </span>State&lt;L&gt; {
     Idle(<span class="prelude-ty">Option</span>&lt;(L, PageContext)&gt;),
-    Fetch(BoxedFuture&lt;((L, PageContext), <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
+    Fetch(BoxedStaticFuture&lt;((L, PageContext), <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
 }
 
 <span class="doccomment">/// # Safety

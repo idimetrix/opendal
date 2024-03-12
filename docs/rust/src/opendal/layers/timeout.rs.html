@@ -526,10 +526,6 @@
 <a href="#524" id="524">524</a>
 <a href="#525" id="525">525</a>
 <a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -819,6 +815,20 @@
     }
 
     <span class="attr">#[inline]
+    </span><span class="kw">async fn </span>io_timeout&lt;F: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;T&gt;&gt;, T&gt;(
+        timeout: Duration,
+        op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+        fut: F,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
+        tokio::time::timeout(timeout, fut).<span class="kw">await</span>.map_err(|<span class="kw">_</span>| {
+            Error::new(ErrorKind::Unexpected, <span class="string">"io operation timeout reached"</span>)
+                .with_operation(op)
+                .with_context(<span class="string">"timeout"</span>, timeout.as_secs_f64().to_string())
+                .set_temporary()
+        })<span class="question-mark">?
+    </span>}
+
+    <span class="attr">#[inline]
     </span><span class="kw">fn </span>poll_timeout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>sleep = <span class="self">self
             </span>.sleep
@@ -840,29 +850,15 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="self">self</span>.poll_timeout(cx, ReadOperation::Read.into_static())<span class="question-mark">?</span>;
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">let </span>fut = <span class="self">self</span>.inner.seek(pos);
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ReadOperation::Seek.into_static(), fut).<span class="kw">await
+    </span>}
 
-        <span class="kw">let </span>v = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_read(cx, buf));
-        <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        Poll::Ready(v)
-    }
-
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="self">self</span>.poll_timeout(cx, ReadOperation::Seek.into_static())<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>v = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_seek(cx, pos));
-        <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        Poll::Ready(v)
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="self">self</span>.poll_timeout(cx, ReadOperation::Next.into_static())<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>v = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx));
-        <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        Poll::Ready(v)
-    }
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">let </span>fut = <span class="self">self</span>.inner.read(size);
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ReadOperation::Next.into_static(), fut).<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
@@ -903,6 +899,7 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>std::future::{pending, Future};
     <span class="kw">use </span>std::io::SeekFrom;
     <span class="kw">use </span>std::sync::Arc;
     <span class="kw">use </span>std::task::Context;
@@ -917,7 +914,6 @@
 
     <span class="kw">use </span><span class="kw">crate</span>::layers::TimeoutLayer;
     <span class="kw">use </span><span class="kw">crate</span>::layers::TypeEraseLayer;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadExt;
     <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -966,16 +962,12 @@
     </span><span class="kw">struct </span>MockReader;
 
     <span class="kw">impl </span>oio::Read <span class="kw">for </span>MockReader {
-        <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-            Poll::Pending
+        <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: SeekFrom) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
+            pending()
         }
 
-        <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-            Poll::Pending
-        }
-
-        <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-            Poll::Pending
+        <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
+            pending()
         }
     }
 
@@ -1015,7 +1007,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>reader = op.reader(<span class="string">"test"</span>).<span class="kw">await</span>.unwrap();
 
-        <span class="kw">let </span>res = reader.read(<span class="kw-2">&amp;mut </span>[<span class="number">0</span>; <span class="number">4</span>]).<span class="kw">await</span>;
+        <span class="kw">let </span>res = reader.read(<span class="number">4</span>).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.is_err());
         <span class="kw">let </span>err = res.unwrap_err();
         <span class="macro">assert_eq!</span>(err.kind(), ErrorKind::Unexpected);

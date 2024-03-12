@@ -865,28 +865,6 @@
 <a href="#863" id="863">863</a>
 <a href="#864" id="864">864</a>
 <a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
-<a href="#872" id="872">872</a>
-<a href="#873" id="873">873</a>
-<a href="#874" id="874">874</a>
-<a href="#875" id="875">875</a>
-<a href="#876" id="876">876</a>
-<a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1575,57 +1553,35 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
             Operation::Read.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
-        <span class="self">self</span>.inner.poll_read(cx, buf).map(|res| <span class="kw">match </span>res {
+        <span class="kw">match </span><span class="self">self</span>.inner.read(size).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bytes) =&gt; {
                 <span class="self">self</span>.stats
                     .bytes_total
                     .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes <span class="kw">as </span>f64);
+                    .observe(bytes.len() <span class="kw">as </span>f64);
                 <span class="prelude-val">Ok</span>(bytes)
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
                 <span class="prelude-val">Err</span>(e)
             }
-        })
+        }
     }
 
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="self">self</span>.inner.poll_seek(cx, pos).map(|res| <span class="kw">match </span>res {
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.seek(pos).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(n) =&gt; <span class="prelude-val">Ok</span>(n),
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
                 <span class="prelude-val">Err</span>(e)
             }
-        })
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Read.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner.poll_next(cx).map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bytes)) =&gt; {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes.len() <span class="kw">as </span>f64);
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bytes))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e))
-            }
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
-        })
+        }
     }
 }
 

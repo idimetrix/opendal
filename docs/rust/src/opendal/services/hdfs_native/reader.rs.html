@@ -51,15 +51,6 @@
 <a href="#49" id="49">49</a>
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
-<a href="#52" id="52">52</a>
-<a href="#53" id="53">53</a>
-<a href="#54" id="54">54</a>
-<a href="#55" id="55">55</a>
-<a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -78,8 +69,6 @@
 // under the License.
 
 </span><span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>hdfs_native::file::FileReader;
@@ -98,26 +87,19 @@
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>HdfsNativeReader {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, _buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">let _ </span>= size;
+
         <span class="macro">todo!</span>()
     }
 
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (cx, pos);
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">let _ </span>= pos;
 
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"HdfsNativeReader doesn't support seeking"</span>,
-        )))
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">let _ </span>= cx;
-
-        Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"HdfsNativeReader doesn't support iterating"</span>,
-        ))))
+        ))
     }
 }
 </code></pre></div></section></main></body></html>

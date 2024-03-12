@@ -2312,7 +2312,6 @@
 
 <span class="kw">use </span><span class="kw">super</span>::BlockingOperator;
 <span class="kw">use </span><span class="kw">crate</span>::operator_futures::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadExt;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteExt;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -2825,9 +2824,10 @@
                     (range.size().unwrap(), range)
                 };
 
-                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>s) = inner.read(<span class="kw-2">&amp;</span>path, args.with_range(range)).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>(<span class="kw">_</span>, r) = inner.read(<span class="kw-2">&amp;</span>path, args.with_range(range)).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
                 <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint <span class="kw">as </span>usize);
-                s.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
+                r.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(buf)
             },

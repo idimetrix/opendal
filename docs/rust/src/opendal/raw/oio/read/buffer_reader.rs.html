@@ -831,21 +831,6 @@
 <a href="#829" id="829">829</a>
 <a href="#830" id="830">830</a>
 <a href="#831" id="831">831</a>
-<a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
-<a href="#834" id="834">834</a>
-<a href="#835" id="835">835</a>
-<a href="#836" id="836">836</a>
-<a href="#837" id="837">837</a>
-<a href="#838" id="838">838</a>
-<a href="#839" id="839">839</a>
-<a href="#840" id="840">840</a>
-<a href="#841" id="841">841</a>
-<a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -865,9 +850,6 @@
 
 </span><span class="kw">use </span>std::cmp::min;
 <span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>bytes::BufMut;
 <span class="kw">use </span>bytes::Bytes;
@@ -883,7 +865,8 @@
     r: R,
     cur: u64,
 
-    buf: Vec&lt;u8&gt;,
+    <span class="doccomment">/// TODO: maybe we can use chunked bytes here?
+    </span>buf: Vec&lt;u8&gt;,
     filled: usize,
     pos: usize,
 }
@@ -948,7 +931,7 @@
 <span class="kw">where
     </span>R: oio::Read,
 {
-    <span class="kw">fn </span>poll_fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; {
+    <span class="kw">async fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
         <span class="comment">// If we've reached the end of our internal buffer then we need to fetch
         // some more data from the underlying reader.
         // Branch using `&gt;=` instead of the more correct `==`
@@ -962,22 +945,23 @@
             <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadBuf::uninit(dst);
             <span class="kw">unsafe </span>{ buf.assume_init(cap) };
 
-            <span class="kw">let </span>n = <span class="macro">ready!</span>(<span class="self">self</span>.r.poll_read(cx, buf.initialized_mut()))<span class="question-mark">?</span>;
-            <span class="kw">unsafe </span>{ <span class="self">self</span>.buf.set_len(n) }
+            <span class="kw">let </span>bs = <span class="self">self</span>.r.read(cap).<span class="kw">await</span><span class="question-mark">?</span>;
+            buf.put_slice(<span class="kw-2">&amp;</span>bs);
+            <span class="kw">unsafe </span>{ <span class="self">self</span>.buf.set_len(bs.len()) }
 
             <span class="self">self</span>.pos = <span class="number">0</span>;
-            <span class="self">self</span>.filled = n;
+            <span class="self">self</span>.filled = bs.len();
         }
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[<span class="self">self</span>.pos..<span class="self">self</span>.filled]))
+        <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[<span class="self">self</span>.pos..<span class="self">self</span>.filled])
     }
 
-    <span class="kw">fn </span>poll_inner_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">let </span>cur = <span class="macro">ready!</span>(<span class="self">self</span>.r.poll_seek(cx, pos))<span class="question-mark">?</span>;
+    <span class="kw">async fn </span>inner_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">let </span>cur = <span class="self">self</span>.r.seek(pos).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.discard_buffer();
         <span class="self">self</span>.cur = cur;
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(cur))
+        <span class="prelude-val">Ok</span>(cur)
     }
 }
 
@@ -985,69 +969,59 @@
 <span class="kw">where
     </span>R: oio::Read,
 {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw-2">mut </span>dst: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="comment">// Sanity check for normal cases.
-        </span><span class="kw">if </span>dst.is_empty() {
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>));
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="kw">match </span>pos {
+            SeekFrom::Start(new_pos) =&gt; {
+                <span class="comment">// TODO(weny): Check the overflowing.
+                </span><span class="kw">let </span><span class="prelude-val">Some</span>(offset) = (new_pos <span class="kw">as </span>i64).checked_sub(<span class="self">self</span>.cur <span class="kw">as </span>i64) <span class="kw">else </span>{
+                    <span class="kw">return </span><span class="self">self</span>.inner_seek(pos).<span class="kw">await</span>;
+                };
+
+                <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
+                    <span class="prelude-val">Some</span>(cur) =&gt; <span class="prelude-val">Ok</span>(cur),
+                    <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.inner_seek(pos).<span class="kw">await</span>,
+                }
+            }
+            SeekFrom::Current(offset) =&gt; <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
+                <span class="prelude-val">Some</span>(cur) =&gt; <span class="prelude-val">Ok</span>(cur),
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="self">self</span>.inner_seek(SeekFrom::Current(offset - <span class="self">self</span>.unconsumed_buffer_len()))
+                        .<span class="kw">await
+                </span>}
+            },
+            SeekFrom::End(<span class="kw">_</span>) =&gt; <span class="self">self</span>.inner_seek(pos).<span class="kw">await</span>,
+        }
+    }
+
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">if </span>size == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
         }
 
         <span class="comment">// If we don't have any buffered data and we're doing a massive read
         // (larger than our internal buffer), bypass our internal buffer
         // entirely.
-        </span><span class="kw">if </span><span class="self">self</span>.pos == <span class="self">self</span>.filled &amp;&amp; dst.len() &gt;= <span class="self">self</span>.capacity() {
-            <span class="kw">let </span>res = <span class="macro">ready!</span>(<span class="self">self</span>.r.poll_read(cx, dst));
+        </span><span class="kw">if </span><span class="self">self</span>.pos == <span class="self">self</span>.filled &amp;&amp; size &gt;= <span class="self">self</span>.capacity() {
+            <span class="kw">let </span>res = <span class="self">self</span>.r.read(size).<span class="kw">await</span>;
             <span class="self">self</span>.discard_buffer();
             <span class="kw">return match </span>res {
-                <span class="prelude-val">Ok</span>(nread) =&gt; {
-                    <span class="self">self</span>.cur += nread <span class="kw">as </span>u64;
-                    Poll::Ready(<span class="prelude-val">Ok</span>(nread))
+                <span class="prelude-val">Ok</span>(bs) =&gt; {
+                    <span class="self">self</span>.cur += bs.len() <span class="kw">as </span>u64;
+                    <span class="prelude-val">Ok</span>(bs)
                 }
-                <span class="prelude-val">Err</span>(err) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(err)),
+                <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(err),
             };
         }
 
-        <span class="kw">let </span>rem = <span class="macro">ready!</span>(<span class="self">self</span>.poll_fill_buf(cx))<span class="question-mark">?</span>;
-        <span class="kw">let </span>amt = min(rem.len(), dst.len());
-        dst.put(<span class="kw-2">&amp;</span>rem[..amt]);
-        <span class="self">self</span>.consume(amt);
-        Poll::Ready(<span class="prelude-val">Ok</span>(amt))
-    }
+        <span class="kw">let </span>bytes = <span class="self">self</span>.fill_buf().<span class="kw">await</span><span class="question-mark">?</span>;
 
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">match </span>pos {
-            SeekFrom::Start(new_pos) =&gt; {
-                <span class="comment">// TODO(weny): Check the overflowing.
-                </span><span class="kw">let </span><span class="prelude-val">Some</span>(offset) = (new_pos <span class="kw">as </span>i64).checked_sub(<span class="self">self</span>.cur <span class="kw">as </span>i64) <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="self">self</span>.poll_inner_seek(cx, pos);
-                };
-
-                <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
-                    <span class="prelude-val">Some</span>(cur) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(cur)),
-                    <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.poll_inner_seek(cx, pos),
-                }
-            }
-            SeekFrom::Current(offset) =&gt; <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
-                <span class="prelude-val">Some</span>(cur) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(cur)),
-                <span class="prelude-val">None </span>=&gt; <span class="self">self
-                    </span>.poll_inner_seek(cx, SeekFrom::Current(offset - <span class="self">self</span>.unconsumed_buffer_len())),
-            },
-            SeekFrom::End(<span class="kw">_</span>) =&gt; <span class="self">self</span>.poll_inner_seek(cx, pos),
+        <span class="kw">if </span>bytes.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
         }
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.poll_fill_buf(cx)) {
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="kw">if </span>bytes.is_empty() {
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">None</span>);
-                }
-
-                <span class="kw">let </span>bytes = Bytes::copy_from_slice(bytes);
-                <span class="self">self</span>.consume(bytes.len());
-                Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bytes)))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err))),
-        }
+        <span class="kw">let </span>size = min(bytes.len(), size);
+        <span class="kw">let </span>bytes = Bytes::copy_from_slice(<span class="kw-2">&amp;</span>bytes[..size]);
+        <span class="self">self</span>.consume(bytes.len());
+        <span class="prelude-val">Ok</span>(bytes)
     }
 }
 
@@ -1055,7 +1029,7 @@
 <span class="kw">where
     </span>R: BlockingRead,
 {
-    <span class="kw">fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
+    <span class="kw">fn </span>blocking_fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
         <span class="comment">// If we've reached the end of our internal buffer then we need to fetch
         // some more data from the underlying reader.
         // Branch using `&gt;=` instead of the more correct `==`
@@ -1079,7 +1053,7 @@
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[<span class="self">self</span>.pos..<span class="self">self</span>.filled])
     }
 
-    <span class="kw">fn </span>inner_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+    <span class="kw">fn </span>blocking_inner_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
         <span class="kw">let </span>cur = <span class="self">self</span>.r.seek(pos)<span class="question-mark">?</span>;
         <span class="self">self</span>.discard_buffer();
         <span class="self">self</span>.cur = cur;
@@ -1113,7 +1087,7 @@
             };
         }
 
-        <span class="kw">let </span>rem = <span class="self">self</span>.fill_buf()<span class="question-mark">?</span>;
+        <span class="kw">let </span>rem = <span class="self">self</span>.blocking_fill_buf()<span class="question-mark">?</span>;
         <span class="kw">let </span>amt = min(rem.len(), dst.len());
         dst.put(<span class="kw-2">&amp;</span>rem[..amt]);
         <span class="self">self</span>.consume(amt);
@@ -1125,24 +1099,25 @@
             SeekFrom::Start(new_pos) =&gt; {
                 <span class="comment">// TODO(weny): Check the overflowing.
                 </span><span class="kw">let </span><span class="prelude-val">Some</span>(offset) = (new_pos <span class="kw">as </span>i64).checked_sub(<span class="self">self</span>.cur <span class="kw">as </span>i64) <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="self">self</span>.inner_seek(pos);
+                    <span class="kw">return </span><span class="self">self</span>.blocking_inner_seek(pos);
                 };
 
                 <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
                     <span class="prelude-val">Some</span>(cur) =&gt; <span class="prelude-val">Ok</span>(cur),
-                    <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.inner_seek(pos),
+                    <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.blocking_inner_seek(pos),
                 }
             }
             SeekFrom::Current(offset) =&gt; <span class="kw">match </span><span class="self">self</span>.seek_relative(offset) {
                 <span class="prelude-val">Some</span>(cur) =&gt; <span class="prelude-val">Ok</span>(cur),
-                <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.inner_seek(SeekFrom::Current(offset - <span class="self">self</span>.unconsumed_buffer_len())),
+                <span class="prelude-val">None </span>=&gt; <span class="self">self
+                    </span>.blocking_inner_seek(SeekFrom::Current(offset - <span class="self">self</span>.unconsumed_buffer_len())),
             },
-            SeekFrom::End(<span class="kw">_</span>) =&gt; <span class="self">self</span>.inner_seek(pos),
+            SeekFrom::End(<span class="kw">_</span>) =&gt; <span class="self">self</span>.blocking_inner_seek(pos),
         }
     }
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="kw">match </span><span class="self">self</span>.fill_buf() {
+        <span class="kw">match </span><span class="self">self</span>.blocking_fill_buf() {
             <span class="prelude-val">Ok</span>(bytes) =&gt; {
                 <span class="kw">if </span>bytes.is_empty() {
                     <span class="kw">return </span><span class="prelude-val">None</span>;
@@ -1164,8 +1139,6 @@
 
     <span class="kw">use </span>async_trait::async_trait;
     <span class="kw">use </span>bytes::Bytes;
-    <span class="kw">use </span>futures::AsyncReadExt;
-    <span class="kw">use </span>futures::AsyncSeekExt;
     <span class="kw">use </span>rand::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>sha2::Digest;
     <span class="kw">use </span>sha2::Sha256;
@@ -1242,22 +1215,18 @@
     }
 
     <span class="kw">impl </span>oio::Read <span class="kw">for </span>MockReader {
-        <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-            <span class="self">self</span>.inner.poll_read(cx, buf)
-        }
+        <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+            <span class="kw">let _ </span>= pos;
 
-        <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-            <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (cx, pos);
-
-            Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+            <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
                 <span class="string">"output reader doesn't support seeking"</span>,
-            )))
+            ))
         }
 
-        <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-            <span class="self">self</span>.inner.poll_next(cx)
-        }
+        <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+            oio::Read::read(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner, size).<span class="kw">await
+        </span>}
     }
 
     <span class="kw">impl </span>BlockingRead <span class="kw">for </span>MockReader {
@@ -1285,22 +1254,20 @@
         <span class="kw">let </span>r = Box::new(RangeReader::new(acc, <span class="string">"x"</span>, OpRead::default())) <span class="kw">as </span>oio::Reader;
 
         <span class="kw">let </span>buf_cap = <span class="number">10</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::Reader;
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(nread, dst.len());
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst, <span class="string">b"Hello"</span>);
+        <span class="kw">let </span>bs = r.read(<span class="number">5</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(bs.len(), <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(bs.as_ref(), <span class="string">b"Hello"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(nread, dst.len());
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst, <span class="string">b", Wor"</span>);
+        <span class="kw">let </span>bs = r.read(<span class="number">5</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(bs.len(), <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(bs.as_ref(), <span class="string">b", Wor"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">3</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(nread, dst.len());
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst, <span class="string">b"ld!"</span>);
+        <span class="kw">let </span>bs = r.read(<span class="number">3</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(bs.len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(bs.as_ref(), <span class="string">b"ld!"</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1312,36 +1279,33 @@
         <span class="kw">let </span>r = Box::new(RangeReader::new(acc, <span class="string">"x"</span>, OpRead::default())) <span class="kw">as </span>oio::Reader;
 
         <span class="kw">let </span>buf_cap = <span class="number">10</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
         <span class="comment">// The underlying reader buffers the b"Hello, Wor".
-        </span><span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(nread, dst.len());
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst, <span class="string">b"Hello"</span>);
+        </span><span class="kw">let </span>buf = r.read(<span class="number">5</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(buf.len(), <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(buf.as_ref(), <span class="string">b"Hello"</span>);
 
         <span class="kw">let </span>pos = r.seek(SeekFrom::Start(<span class="number">7</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(pos, <span class="number">7</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..nread], <span class="kw-2">&amp;</span>bs[<span class="number">7</span>..<span class="number">10</span>]);
-        <span class="macro">assert_eq!</span>(nread, <span class="number">3</span>);
+        <span class="kw">let </span>buf = r.read(<span class="number">5</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf, <span class="kw-2">&amp;</span>bs[<span class="number">7</span>..<span class="number">10</span>]);
+        <span class="macro">assert_eq!</span>(buf.len(), <span class="number">3</span>);
 
         <span class="comment">// Should perform a relative seek.
         </span><span class="kw">let </span>pos = r.seek(SeekFrom::Start(<span class="number">0</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(pos, <span class="number">0</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">9</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..nread], <span class="kw-2">&amp;</span>bs[<span class="number">0</span>..<span class="number">9</span>]);
-        <span class="macro">assert_eq!</span>(nread, <span class="number">9</span>);
+        <span class="kw">let </span>buf = r.read(<span class="number">9</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf, <span class="kw-2">&amp;</span>bs[<span class="number">0</span>..<span class="number">9</span>]);
+        <span class="macro">assert_eq!</span>(buf.len(), <span class="number">9</span>);
 
         <span class="comment">// Should perform a non-relative seek.
         </span><span class="kw">let </span>pos = r.seek(SeekFrom::Start(<span class="number">11</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(pos, <span class="number">11</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">9</span>];
-        <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..nread], <span class="kw-2">&amp;</span>bs[<span class="number">11</span>..<span class="number">13</span>]);
-        <span class="macro">assert_eq!</span>(nread, <span class="number">2</span>);
+        <span class="kw">let </span>buf = r.read(<span class="number">9</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf, <span class="kw-2">&amp;</span>bs[<span class="number">11</span>..<span class="number">13</span>]);
+        <span class="macro">assert_eq!</span>(buf.len(), <span class="number">2</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1357,7 +1321,8 @@
             OpRead::default().with_range(BytesRange::from(..)),
         )) <span class="kw">as </span>oio::Reader;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         r.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1394,13 +1359,13 @@
             <span class="string">"x"</span>,
             OpRead::default().with_range(BytesRange::from(..)),
         )) <span class="kw">as </span>oio::Reader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">10</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">10</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="number">0</span>;
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
-            <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">assert_eq!</span>(nread, <span class="number">5</span>);
+            <span class="kw">let </span>bs = r.read(<span class="number">5</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="macro">assert_eq!</span>(bs.len(), <span class="number">5</span>);
             cur += <span class="number">5</span>;
         }
 
@@ -1421,13 +1386,13 @@
             <span class="string">"x"</span>,
             OpRead::default().with_range(BytesRange::from(..)),
         )) <span class="kw">as </span>oio::Reader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">5</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">5</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="number">0</span>;
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">6</span>];
-            <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">assert_eq!</span>(nread, <span class="number">6</span>);
+            <span class="kw">let </span>bs = r.read(<span class="number">6</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="macro">assert_eq!</span>(bs.len(), <span class="number">6</span>);
             cur += <span class="number">6</span>;
         }
 
@@ -1447,7 +1412,8 @@
             <span class="string">"x"</span>,
             OpRead::default().with_range(BytesRange::from(<span class="number">4096</span>..<span class="number">4096 </span>+ <span class="number">4096</span>)),
         )) <span class="kw">as </span>oio::Reader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::Reader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = Reader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         r.read_to_end(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1473,8 +1439,7 @@
         <span class="kw">let </span>n = r.seek(SeekFrom::Start(<span class="number">1024</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(<span class="number">1024</span>, n, <span class="string">"seek to 1024"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">1024</span>];
-        r.read_exact(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>buf = r.read_exact(<span class="number">1024</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(
             <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Sha256::digest(<span class="kw-2">&amp;</span>bs[<span class="number">4096 </span>+ <span class="number">1024</span>..<span class="number">4096 </span>+ <span class="number">2048</span>])),
             <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Sha256::digest(<span class="kw-2">&amp;</span>buf)),
@@ -1484,8 +1449,7 @@
         <span class="kw">let </span>n = r.seek(SeekFrom::Current(<span class="number">1024</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(<span class="number">3072</span>, n, <span class="string">"seek to 3072"</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">1024</span>];
-        r.read_exact(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>buf = r.read_exact(<span class="number">1024</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(
             <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Sha256::digest(<span class="kw-2">&amp;</span>bs[<span class="number">4096 </span>+ <span class="number">3072</span>..<span class="number">4096 </span>+ <span class="number">3072 </span>+ <span class="number">1024</span>])),
             <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Sha256::digest(<span class="kw-2">&amp;</span>buf)),
@@ -1500,7 +1464,8 @@
         <span class="kw">let </span>bs = Bytes::copy_from_slice(<span class="kw-2">&amp;</span><span class="string">b"Hello, World!"</span>[..]);
         <span class="kw">let </span>r = Box::new(oio::Cursor::from(bs.clone())) <span class="kw">as </span>oio::BlockingReader;
         <span class="kw">let </span>buf_cap = <span class="number">10</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
         <span class="kw">let </span>nread = r.read(<span class="kw-2">&amp;mut </span>dst)<span class="question-mark">?</span>;
@@ -1525,7 +1490,8 @@
         <span class="kw">let </span>bs = Bytes::copy_from_slice(<span class="kw-2">&amp;</span><span class="string">b"Hello, World!"</span>[..]);
         <span class="kw">let </span>r = Box::new(oio::Cursor::from(bs.clone())) <span class="kw">as </span>oio::BlockingReader;
         <span class="kw">let </span>buf_cap = <span class="number">10</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, buf_cap)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="comment">// The underlying reader buffers the b"Hello, Wor".
         </span><span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">5</span>];
@@ -1563,7 +1529,8 @@
     </span><span class="kw">async fn </span>test_blocking_read_all() -&gt; anyhow::Result&lt;()&gt; {
         <span class="kw">let </span>(bs, <span class="kw">_</span>) = gen_bytes();
         <span class="kw">let </span>r = Box::new(oio::Cursor::from(bs.clone())) <span class="kw">as </span>oio::BlockingReader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         r.read_to_end(<span class="kw-2">&amp;mut </span>buf)<span class="question-mark">?</span>;
@@ -1595,7 +1562,8 @@
             <span class="kw-2">&amp;</span><span class="string">b"Hello, World! I'm going to tests a seek relative related bug!"</span>[..],
         );
         <span class="kw">let </span>r = Box::new(oio::Cursor::from(bs.clone())) <span class="kw">as </span>oio::BlockingReader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">10</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">10</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="number">0</span>;
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
@@ -1617,7 +1585,8 @@
             <span class="kw-2">&amp;</span><span class="string">b"Hello, World! I'm going to tests a seek relative related bug!"</span>[..],
         );
         <span class="kw">let </span>r = Box::new(oio::Cursor::from(bs.clone())) <span class="kw">as </span>oio::BlockingReader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">5</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">5</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="number">0</span>;
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
@@ -1644,7 +1613,8 @@
             <span class="string">"x"</span>,
             OpRead::default().with_range(BytesRange::from(<span class="number">4096</span>..<span class="number">4096 </span>+ <span class="number">4096</span>)),
         )) <span class="kw">as </span>oio::BlockingReader;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span>r = Box::new(BufferReader::new(r, <span class="number">4096 </span>* <span class="number">1024</span>)) <span class="kw">as </span>oio::BlockingReader;
+        <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         BlockingRead::read_to_end(<span class="kw-2">&amp;mut </span>r, <span class="kw-2">&amp;mut </span>buf)<span class="question-mark">?</span>;

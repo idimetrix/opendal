@@ -324,7 +324,7 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// ListFuture is the future returned while calling async list.
-</span><span class="kw">type </span>ListFuture&lt;A, L&gt; = BoxedFuture&lt;(A, oio::Entry, <span class="prelude-ty">Result</span>&lt;(RpList, L)&gt;)&gt;;
+</span><span class="kw">type </span>ListFuture&lt;A, L&gt; = BoxedStaticFuture&lt;(A, oio::Entry, <span class="prelude-ty">Result</span>&lt;(RpList, L)&gt;)&gt;;
 
 <span class="doccomment">/// FlatLister will walk dir in bottom up way:
 ///
