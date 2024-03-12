@@ -636,7 +636,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.cur)
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">if </span><span class="self">self</span>.reader.is_none() {
             <span class="comment">// FileReader doesn't support range, we will always use full range to open a file.
             </span><span class="kw">let </span>op = <span class="self">self</span>.op.clone().with_range(BytesRange::from(..));
@@ -651,7 +651,7 @@
             (<span class="self">self</span>.offset, <span class="self">self</span>.size) = <span class="self">Self</span>::offset(r, <span class="self">self</span>.op.range()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
-        r.read(size).<span class="kw">await
+        r.read(limit).<span class="kw">await
     </span>}
 }
 

@@ -201,8 +201,8 @@
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>DbfsReader {}
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>DbfsReader {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">let _ </span>= size;
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">let _ </span>= limit;
 
         <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,

@@ -940,7 +940,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.cur)
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="comment">// Sanity check for normal cases.
         </span><span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.size.unwrap_or(u64::MAX) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
@@ -965,7 +965,7 @@
         }
 
         <span class="kw">let </span>r = <span class="self">self</span>.reader.as_mut().expect(<span class="string">"reader must be valid"</span>);
-        <span class="kw">match </span>r.read(size).<span class="kw">await </span>{
+        <span class="kw">match </span>r.read(limit).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bs) =&gt; {
                 <span class="self">self</span>.cur += bs.len() <span class="kw">as </span>u64;
                 <span class="prelude-val">Ok</span>(bs)
@@ -1185,8 +1185,8 @@
             ))
         }
 
-        <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-            <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="macro">vec!</span>[<span class="number">0</span>; size];
+        <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="macro">vec!</span>[<span class="number">0</span>; limit];
             <span class="kw">let </span>n = <span class="self">self</span>.inner.read(<span class="kw-2">&amp;mut </span>bs).<span class="kw">await</span>.map_err(|err| {
                 Error::new(ErrorKind::Unexpected, <span class="string">"read data from mock"</span>).set_source(err)
             })<span class="question-mark">?</span>;

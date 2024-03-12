@@ -548,6 +548,16 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -584,25 +594,35 @@
 ///
 /// # Usage
 ///
-/// Reader implements the following APIs:
+/// [`Reader`] provides multiple ways to read data from given reader. Please note that it's
+/// undefined behavior to use `Reader` in different ways.
 ///
-/// - `AsyncRead`
-/// - `AsyncSeek`
-/// - `Stream&lt;Item = &lt;io::Result&lt;Bytes&gt;&gt;&gt;`
+/// ## Direct
 ///
-/// For reading data, we can use `AsyncRead` and `Stream`. The mainly
-/// different is where the `copy` happens.
+/// [`Reader`] provides public API including [`Reader::read`], [`Reader::seek`] and
+/// [`Reader::read_to_end`]. You can use those APIs directly without extra copy.
 ///
-/// `AsyncRead` requires user to prepare a buffer for `Reader` to fill.
-/// And `Stream` will stream out a `Bytes` for user to decide when to copy
-/// it's content.
+/// ## Bytes Stream
 ///
-/// For example, users may have their only CPU/IO bound workers and don't
-/// want to do copy inside IO workers. They can use `Stream` to get a `Bytes`
-/// and consume it in side CPU workers inside.
+/// [`Reader`] can be used as `Stream&lt;Item = &lt;io::Result&lt;Bytes&gt;&gt;&gt;`.
 ///
-/// Besides, `Stream` **COULD** reduce an extra copy if underlying reader is
-/// stream based (like services s3, azure which based on HTTP).
+/// It also implements [`Send`], [`Sync`] and [`Unpin`].
+///
+/// ## Futures AsyncRead
+///
+/// [`Reader`] can be used as [`futures::AsyncRead`] and [`futures::AsyncSeek`].
+///
+/// It also implements [`Send`], [`Sync`] and [`Unpin`].
+///
+/// [`Reader`] provides [`Reader::into_futures_read`] to remove extra APIs upon self.
+///
+/// ## Tokio AsyncRead
+///
+/// [`Reader`] can be used as [`tokio::io::AsyncRead`] and [`tokio::io::AsyncSeek`].
+///
+/// It also implements [`Send`], [`Sync`] and [`Unpin`].
+///
+/// [`Reader`] provides [`Reader::into_tokio_read`] to remove extra APIs upon self.
 </span><span class="kw">pub struct </span>Reader {
     state: State,
 }
@@ -671,11 +691,11 @@
 
     <span class="doccomment">/// Read at most `size` bytes of data from reader.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">let </span>State::Idle(<span class="prelude-val">Some</span>(r)) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.state <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"reader must be valid"</span>));
         };
-        r.read_dyn(size).<span class="kw">await
+        r.read_dyn(limit).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Read exact `size` bytes of data from reader.

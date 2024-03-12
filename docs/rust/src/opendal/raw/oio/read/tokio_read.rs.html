@@ -141,17 +141,17 @@
         })
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="comment">// Make sure buf has enough space.
-        </span><span class="kw">if </span><span class="self">self</span>.buf.capacity() &lt; size {
-            <span class="self">self</span>.buf.reserve(size);
+        </span><span class="kw">if </span><span class="self">self</span>.buf.capacity() &lt; limit {
+            <span class="self">self</span>.buf.reserve(limit);
         }
         <span class="kw">let </span>buf = <span class="self">self</span>.buf.spare_capacity_mut();
         <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
 
         <span class="comment">// SAFETY: Read at most `size` bytes into `read_buf`.
         </span><span class="kw">unsafe </span>{
-            read_buf.assume_init(size);
+            read_buf.assume_init(limit);
         }
 
         <span class="kw">let </span>n = <span class="self">self

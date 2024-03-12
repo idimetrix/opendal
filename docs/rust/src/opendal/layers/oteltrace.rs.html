@@ -620,8 +620,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>OtelTraceWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="self">self</span>.inner.read(size).<span class="kw">await
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="self">self</span>.inner.read(limit).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {

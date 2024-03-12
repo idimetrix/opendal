@@ -580,8 +580,8 @@
         <span class="self">self</span>.inner.seek(pos).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="self">self</span>.inner.read(size).<span class="kw">await
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="self">self</span>.inner.read(limit).<span class="kw">await
     </span>}
 }
 

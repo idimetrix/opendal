@@ -2043,14 +2043,14 @@
         res
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">use </span>backon::RetryableWithContext;
 
         <span class="kw">let </span>inner = <span class="self">self</span>.inner.take().expect(<span class="string">"inner must be valid"</span>);
 
         <span class="kw">let </span>(inner, res) = {
             |<span class="kw-2">mut </span>r: R| <span class="kw">async move </span>{
-                <span class="kw">let </span>res = r.read(size).<span class="kw">await</span>;
+                <span class="kw">let </span>res = r.read(limit).<span class="kw">await</span>;
 
                 (r, res)
             }
@@ -2063,7 +2063,7 @@
                 err,
                 dur,
                 <span class="kw-2">&amp;</span>[
-                    (<span class="string">"operation"</span>, ReadOperation::Next.into_static()),
+                    (<span class="string">"operation"</span>, ReadOperation::Read.into_static()),
                     (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
                 ],
             )

@@ -193,9 +193,9 @@
         <span class="self">self</span>.reader().<span class="kw">await</span><span class="question-mark">?</span>.seek(pos).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">let </span>r = <span class="self">self</span>.reader().<span class="kw">await</span><span class="question-mark">?</span>;
-        r.read(size).<span class="kw">await
+        r.read(limit).<span class="kw">await
     </span>}
 }
 

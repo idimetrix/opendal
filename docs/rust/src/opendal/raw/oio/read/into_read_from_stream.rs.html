@@ -116,7 +116,7 @@
         ))
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">if </span><span class="self">self</span>.buf.is_empty() {
             <span class="self">self</span>.buf = <span class="kw">match </span><span class="self">self</span>.inner.next().<span class="kw">await</span>.transpose()<span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(v) =&gt; v.into(),
@@ -124,7 +124,7 @@
             };
         }
 
-        <span class="kw">let </span>bs = <span class="self">self</span>.buf.split_to(min(size, <span class="self">self</span>.buf.len()));
+        <span class="kw">let </span>bs = <span class="self">self</span>.buf.split_to(min(limit, <span class="self">self</span>.buf.len()));
         <span class="prelude-val">Ok</span>(bs)
     }
 }

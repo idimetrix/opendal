@@ -192,8 +192,8 @@
         <span class="self">self</span>.r.seek(pos).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">let </span>size = min(<span class="self">self</span>.buf.capacity(), size);
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">let </span>size = min(<span class="self">self</span>.buf.capacity(), limit);
 
         <span class="kw">let </span>dst = <span class="self">self</span>.buf.spare_capacity_mut();
         <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadBuf::uninit(dst);
