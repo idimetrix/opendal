@@ -151,16 +151,6 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -179,7 +169,6 @@
 // under the License.
 
 </span><span class="kw">use </span>std::cmp::min;
-<span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
@@ -235,6 +224,18 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>Cursor {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_empty() {
+            <span class="prelude-val">Ok</span>(Bytes::new())
+        } <span class="kw">else </span>{
+            <span class="comment">// The clone here is required as we don't want to change it.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.inner.clone().split_off(<span class="self">self</span>.pos <span class="kw">as </span>usize);
+            <span class="kw">let </span>bs = bs.split_to(min(bs.len(), limit));
+            <span class="self">self</span>.pos += bs.len() <span class="kw">as </span>u64;
+            <span class="prelude-val">Ok</span>(bs)
+        }
+    }
+
     <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
         <span class="kw">let </span>(base, amt) = <span class="kw">match </span>pos {
             SeekFrom::Start(n) =&gt; (<span class="number">0</span>, n <span class="kw">as </span>i64),
@@ -254,8 +255,10 @@
         <span class="self">self</span>.pos = n;
         <span class="prelude-val">Ok</span>(n)
     }
+}
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+<span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>Cursor {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_empty() {
             <span class="prelude-val">Ok</span>(Bytes::new())
         } <span class="kw">else </span>{
@@ -265,18 +268,6 @@
             <span class="self">self</span>.pos += bs.len() <span class="kw">as </span>u64;
             <span class="prelude-val">Ok</span>(bs)
         }
-    }
-}
-
-<span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>Cursor {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>n = Read::read(<span class="kw-2">&amp;mut </span><span class="self">self</span>.remaining_slice(), buf).map_err(|err| {
-            Error::new(ErrorKind::Unexpected, <span class="string">"read data from Cursor"</span>)
-                .with_context(<span class="string">"source"</span>, <span class="string">"Cursor"</span>)
-                .set_source(err)
-        })<span class="question-mark">?</span>;
-        <span class="self">self</span>.pos += n <span class="kw">as </span>u64;
-        <span class="prelude-val">Ok</span>(n)
     }
 
     <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
@@ -297,17 +288,6 @@
         };
         <span class="self">self</span>.pos = n;
         <span class="prelude-val">Ok</span>(n)
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="kw">if </span><span class="self">self</span>.is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="comment">// The clone here is required as we don't want to change it.
-            </span><span class="kw">let </span>bs = <span class="self">self</span>.inner.clone().split_off(<span class="self">self</span>.pos <span class="kw">as </span>usize);
-            <span class="self">self</span>.pos += bs.len() <span class="kw">as </span>u64;
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs))
-        }
     }
 }
 

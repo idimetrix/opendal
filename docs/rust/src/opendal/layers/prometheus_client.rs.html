@@ -655,20 +655,6 @@
 <a href="#653" id="653">653</a>
 <a href="#654" id="654">654</a>
 <a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1237,12 +1223,12 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="self">self</span>.inner
-            .read(buf)
-            .map(|n| {
-                <span class="self">self</span>.bytes_total += n;
-                n
+            .read(limit)
+            .map(|bs| {
+                <span class="self">self</span>.bytes_total += bs.len();
+                bs
             })
             .map_err(|e| {
                 <span class="self">self</span>.metrics
@@ -1256,20 +1242,6 @@
             <span class="self">self</span>.metrics
                 .increment_errors_total(<span class="self">self</span>.scheme, <span class="self">self</span>.op, err.kind());
             err
-        })
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="self">self</span>.inner.next().map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="self">self</span>.bytes_total += bytes.len();
-                <span class="prelude-val">Ok</span>(bytes)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(<span class="self">self</span>.scheme, <span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
         })
     }
 }

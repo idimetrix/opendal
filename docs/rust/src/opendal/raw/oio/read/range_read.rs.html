@@ -603,48 +603,6 @@
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -899,6 +857,43 @@
     </span>A: Accessor&lt;Reader = R&gt;,
     R: oio::Read,
 {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="comment">// Sanity check for normal cases.
+        </span><span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.size.unwrap_or(u64::MAX) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
+        }
+
+        <span class="kw">if </span><span class="self">self</span>.offset.is_none() {
+            <span class="kw">let </span>rp = <span class="kw">match </span><span class="self">self</span>.stat_future().<span class="kw">await </span>{
+                <span class="prelude-val">Ok</span>(v) =&gt; v,
+                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
+            };
+            <span class="kw">let </span>length = rp.into_metadata().content_length();
+            <span class="self">self</span>.ensure_offset(length)<span class="question-mark">?
+        </span>}
+        <span class="kw">if </span><span class="self">self</span>.reader.is_none() {
+            <span class="kw">let </span>(rp, r) = <span class="kw">match </span><span class="self">self</span>.read_future().<span class="kw">await </span>{
+                <span class="prelude-val">Ok</span>((rp, r)) =&gt; (rp, r),
+                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
+            };
+
+            <span class="self">self</span>.ensure_size(rp.range().unwrap_or_default().size(), rp.size());
+            <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(r);
+        }
+
+        <span class="kw">let </span>r = <span class="self">self</span>.reader.as_mut().expect(<span class="string">"reader must be valid"</span>);
+        <span class="kw">match </span>r.read(limit).<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(bs) =&gt; {
+                <span class="self">self</span>.cur += bs.len() <span class="kw">as </span>u64;
+                <span class="prelude-val">Ok</span>(bs)
+            }
+            <span class="prelude-val">Err</span>(err) =&gt; {
+                <span class="self">self</span>.reader = <span class="prelude-val">None</span>;
+                <span class="prelude-val">Err</span>(err)
+            }
+        }
+    }
+
     <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
         <span class="comment">// There is an optimization here that we can calculate if users trying to seek
         // the same position, for example, `reader.seek(SeekFrom::Current(0))`.
@@ -939,15 +934,21 @@
         <span class="self">self</span>.cur = seek_pos;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.cur)
     }
+}
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+<span class="kw">impl</span>&lt;A, R&gt; oio::BlockingRead <span class="kw">for </span>RangeReader&lt;A, R&gt;
+<span class="kw">where
+    </span>A: Accessor&lt;BlockingReader = R&gt;,
+    R: oio::BlockingRead,
+{
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="comment">// Sanity check for normal cases.
         </span><span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.size.unwrap_or(u64::MAX) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
         }
 
         <span class="kw">if </span><span class="self">self</span>.offset.is_none() {
-            <span class="kw">let </span>rp = <span class="kw">match </span><span class="self">self</span>.stat_future().<span class="kw">await </span>{
+            <span class="kw">let </span>rp = <span class="kw">match </span><span class="self">self</span>.stat_action() {
                 <span class="prelude-val">Ok</span>(v) =&gt; v,
                 <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
             };
@@ -955,7 +956,7 @@
             <span class="self">self</span>.ensure_offset(length)<span class="question-mark">?
         </span>}
         <span class="kw">if </span><span class="self">self</span>.reader.is_none() {
-            <span class="kw">let </span>(rp, r) = <span class="kw">match </span><span class="self">self</span>.read_future().<span class="kw">await </span>{
+            <span class="kw">let </span>(rp, r) = <span class="kw">match </span><span class="self">self</span>.read_action() {
                 <span class="prelude-val">Ok</span>((rp, r)) =&gt; (rp, r),
                 <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
             };
@@ -965,7 +966,7 @@
         }
 
         <span class="kw">let </span>r = <span class="self">self</span>.reader.as_mut().expect(<span class="string">"reader must be valid"</span>);
-        <span class="kw">match </span>r.read(limit).<span class="kw">await </span>{
+        <span class="kw">match </span>r.read(limit) {
             <span class="prelude-val">Ok</span>(bs) =&gt; {
                 <span class="self">self</span>.cur += bs.len() <span class="kw">as </span>u64;
                 <span class="prelude-val">Ok</span>(bs)
@@ -973,48 +974,6 @@
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="self">self</span>.reader = <span class="prelude-val">None</span>;
                 <span class="prelude-val">Err</span>(err)
-            }
-        }
-    }
-}
-
-<span class="kw">impl</span>&lt;A, R&gt; oio::BlockingRead <span class="kw">for </span>RangeReader&lt;A, R&gt;
-<span class="kw">where
-    </span>A: Accessor&lt;BlockingReader = R&gt;,
-    R: oio::BlockingRead,
-{
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="comment">// Sanity check for normal cases.
-        </span><span class="kw">if </span>buf.is_empty() || <span class="self">self</span>.cur &gt;= <span class="self">self</span>.size.unwrap_or(u64::MAX) {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>);
-        }
-
-        <span class="kw">if </span><span class="self">self</span>.offset.is_none() {
-            <span class="kw">let </span>rp = <span class="self">self</span>.stat_action()<span class="question-mark">?</span>;
-            <span class="kw">let </span>length = rp.into_metadata().content_length();
-            <span class="self">self</span>.ensure_offset(length)<span class="question-mark">?</span>;
-        }
-        <span class="kw">if </span><span class="self">self</span>.reader.is_none() {
-            <span class="kw">let </span>(rp, r) = <span class="self">self</span>.read_action()<span class="question-mark">?</span>;
-
-            <span class="self">self</span>.ensure_size(rp.range().unwrap_or_default().size(), rp.size());
-            <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(r);
-        }
-
-        <span class="kw">let </span>r = <span class="self">self</span>.reader.as_mut().expect(<span class="string">"reader must be valid"</span>);
-        <span class="kw">match </span>r.read(buf) {
-            <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; {
-                <span class="comment">// Reset state to Idle after all data has been consumed.
-                </span><span class="self">self</span>.reader = <span class="prelude-val">None</span>;
-                <span class="prelude-val">Ok</span>(<span class="number">0</span>)
-            }
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                <span class="self">self</span>.cur += n <span class="kw">as </span>u64;
-                <span class="prelude-val">Ok</span>(n)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.reader = <span class="prelude-val">None</span>;
-                <span class="prelude-val">Err</span>(e)
             }
         }
     }
@@ -1058,49 +1017,6 @@
 
         <span class="self">self</span>.cur = seek_pos;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.cur)
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="comment">// Sanity check for normal cases.
-        </span><span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.size.unwrap_or(u64::MAX) {
-            <span class="kw">return </span><span class="prelude-val">None</span>;
-        }
-
-        <span class="kw">if </span><span class="self">self</span>.offset.is_none() {
-            <span class="kw">let </span>rp = <span class="kw">match </span><span class="self">self</span>.stat_action() {
-                <span class="prelude-val">Ok</span>(rp) =&gt; rp,
-                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
-            };
-            <span class="kw">let </span>length = rp.into_metadata().content_length();
-            <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.ensure_offset(length) {
-                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err));
-            }
-        }
-        <span class="kw">if </span><span class="self">self</span>.reader.is_none() {
-            <span class="kw">let </span>(rp, r) = <span class="kw">match </span><span class="self">self</span>.read_action() {
-                <span class="prelude-val">Ok</span>((rp, r)) =&gt; (rp, r),
-                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
-            };
-
-            <span class="self">self</span>.ensure_size(rp.range().unwrap_or_default().size(), rp.size());
-            <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(r);
-        }
-
-        <span class="kw">let </span>r = <span class="self">self</span>.reader.as_mut().expect(<span class="string">"reader must be valid"</span>);
-        <span class="kw">match </span>r.next() {
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)) =&gt; {
-                <span class="self">self</span>.cur += bs.len() <span class="kw">as </span>u64;
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; {
-                <span class="self">self</span>.reader = <span class="prelude-val">None</span>;
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="self">self</span>.reader = <span class="prelude-val">None</span>;
-                <span class="prelude-val">None
-            </span>}
-        }
     }
 }
 

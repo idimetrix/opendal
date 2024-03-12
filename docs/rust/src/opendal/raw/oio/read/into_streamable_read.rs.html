@@ -131,20 +131,6 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -175,7 +161,6 @@
 </span><span class="kw">pub fn </span>into_streamable_read&lt;R&gt;(r: R, capacity: usize) -&gt; StreamableReader&lt;R&gt; {
     StreamableReader {
         r,
-        cap: capacity,
         buf: Vec::with_capacity(capacity),
     }
 }
@@ -183,7 +168,6 @@
 <span class="doccomment">/// Make given read streamable.
 </span><span class="kw">pub struct </span>StreamableReader&lt;R&gt; {
     r: R,
-    cap: usize,
     buf: Vec&lt;u8&gt;,
 }
 
@@ -210,27 +194,12 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>StreamableReader&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.r.read(buf)
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="self">self</span>.r.read(limit)
     }
 
     <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
         <span class="self">self</span>.r.seek(pos)
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="kw">let </span>dst = <span class="self">self</span>.buf.spare_capacity_mut();
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadBuf::uninit(dst);
-        <span class="kw">unsafe </span>{ buf.assume_init(<span class="self">self</span>.cap) };
-
-        <span class="kw">match </span><span class="self">self</span>.r.read(buf.initialized_mut()) {
-            <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
-            <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; <span class="prelude-val">None</span>,
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                buf.set_filled(n);
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from(buf.filled().to_vec())))
-            }
-        }
     }
 }
 
@@ -282,10 +251,13 @@
         <span class="kw">let </span>r = oio::Cursor::from(content.clone());
         <span class="kw">let </span><span class="kw-2">mut </span>s = into_streamable_read(Box::new(r) <span class="kw">as </span>oio::BlockingReader, cap);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = BytesMut::new();
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(b) = s.next() {
-            <span class="kw">let </span>b = b.expect(<span class="string">"read must success"</span>);
-            bs.put_slice(<span class="kw-2">&amp;</span>b);
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = BytesMut::with_capacity(size);
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>buf = s.read(size).expect(<span class="string">"read must success"</span>);
+            <span class="kw">if </span>buf.is_empty() {
+                <span class="kw">break</span>;
+            }
+            bs.put_slice(<span class="kw-2">&amp;</span>buf)
         }
         <span class="macro">assert_eq!</span>(bs.freeze().to_vec(), content)
     }

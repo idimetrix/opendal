@@ -65,6 +65,18 @@
 <a href="#63" id="63">63</a>
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -82,11 +94,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::io::Read;
+</span><span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::io::Seek;
 <span class="kw">use </span>std::io::SeekFrom;
-
-<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>tokio::io::ReadBuf;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -94,12 +106,16 @@
 <span class="doccomment">/// FuturesReader implements [`oio::BlockingRead`] via [`Read`] + [`Seek`].
 </span><span class="kw">pub struct </span>StdReader&lt;R: Read + Seek&gt; {
     inner: R,
+    buf: Vec&lt;u8&gt;,
 }
 
 <span class="kw">impl</span>&lt;R: Read + Seek&gt; StdReader&lt;R&gt; {
     <span class="doccomment">/// Create a new std reader.
     </span><span class="kw">pub fn </span>new(inner: R) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ inner }
+        <span class="self">Self </span>{
+            inner,
+            buf: Vec::with_capacity(<span class="number">64 </span>* <span class="number">1024</span>),
+        }
     }
 }
 
@@ -107,12 +123,27 @@
 <span class="kw">where
     </span>R: Read + Seek + Send + Sync,
 {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.read(buf).map_err(|err| {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+        <span class="comment">// Make sure buf has enough space.
+        </span><span class="kw">if </span><span class="self">self</span>.buf.capacity() &lt; limit {
+            <span class="self">self</span>.buf.reserve(limit);
+        }
+        <span class="kw">let </span>buf = <span class="self">self</span>.buf.spare_capacity_mut();
+        <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
+
+        <span class="comment">// SAFETY: Read at most `size` bytes into `read_buf`.
+        </span><span class="kw">unsafe </span>{
+            read_buf.assume_init(limit);
+        }
+
+        <span class="kw">let </span>n = <span class="self">self</span>.inner.read(read_buf.initialized_mut()).map_err(|err| {
             new_std_io_error(err)
-                .with_operation(oio::ReadOperation::BlockingRead)
-                .with_context(<span class="string">"source"</span>, <span class="string">"StdReader"</span>)
-        })
+                .with_operation(oio::ReadOperation::Read)
+                .with_context(<span class="string">"source"</span>, <span class="string">"TokioReader"</span>)
+        })<span class="question-mark">?</span>;
+        read_buf.set_filled(n);
+
+        <span class="prelude-val">Ok</span>(Bytes::copy_from_slice(read_buf.filled()))
     }
 
     <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
@@ -121,13 +152,6 @@
                 .with_operation(oio::ReadOperation::BlockingSeek)
                 .with_context(<span class="string">"source"</span>, <span class="string">"StdReader"</span>)
         })
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"StdReader doesn't support poll_next"</span>,
-        )))
     }
 }
 </code></pre></div></section></main></body></html>

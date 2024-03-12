@@ -844,27 +844,6 @@
 <a href="#842" id="842">842</a>
 <a href="#843" id="843">843</a>
 <a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1586,20 +1565,20 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
             Operation::BlockingRead.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
         <span class="self">self</span>.inner
-            .read(buf)
-            .map(|n| {
+            .read(limit)
+            .map(|bs| {
                 <span class="self">self</span>.stats
                     .bytes_total
                     .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                n
+                    .observe(bs.len() <span class="kw">as </span>f64);
+                bs
             })
             .map_err(|e| {
                 <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
@@ -1611,27 +1590,6 @@
         <span class="self">self</span>.inner.seek(pos).map_err(|err| {
             <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
             err
-        })
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingRead.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner.next().map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes.len() <span class="kw">as </span>f64);
-                <span class="prelude-val">Ok</span>(bytes)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
         })
     }
 }

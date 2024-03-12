@@ -133,14 +133,6 @@
 <span class="kw">where
     </span>R: AsyncRead + AsyncSeek + Unpin + Send + Sync,
 {
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos).<span class="kw">await</span>.map_err(|err| {
-            new_std_io_error(err)
-                .with_operation(oio::ReadOperation::Seek)
-                .with_context(<span class="string">"source"</span>, <span class="string">"TokioReader"</span>)
-        })
-    }
-
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="comment">// Make sure buf has enough space.
         </span><span class="kw">if </span><span class="self">self</span>.buf.capacity() &lt; limit {
@@ -166,6 +158,14 @@
         read_buf.set_filled(n);
 
         <span class="prelude-val">Ok</span>(Bytes::copy_from_slice(read_buf.filled()))
+    }
+
+    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="self">self</span>.inner.seek(pos).<span class="kw">await</span>.map_err(|err| {
+            new_std_io_error(err)
+                .with_operation(oio::ReadOperation::Seek)
+                .with_context(<span class="string">"source"</span>, <span class="string">"TokioReader"</span>)
+        })
     }
 }
 </code></pre></div></section></main></body></html>
