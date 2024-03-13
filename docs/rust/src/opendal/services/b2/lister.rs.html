@@ -113,8 +113,6 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -134,7 +132,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Buf;
 
 <span class="kw">use </span><span class="kw">super</span>::core::parse_file_info;
@@ -175,8 +172,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::PageList <span class="kw">for </span>B2Lister {
+<span class="kw">impl </span>oio::PageList <span class="kw">for </span>B2Lister {
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core

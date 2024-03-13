@@ -451,6 +451,7 @@
 <a href="#449" id="449">449</a>
 <a href="#450" id="450">450</a>
 <a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -478,6 +479,7 @@
 <span class="kw">use </span>std::cmp::min;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::io::Result;
 <span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::net::SocketAddr;
@@ -778,11 +780,11 @@
 <span class="kw">pub struct </span>MadsimLister {}
 
 <span class="kw">impl </span>oio::List <span class="kw">for </span>MadsimLister {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"will be supported in the future"</span>,
-        )))
+        ))
     }
 }
 

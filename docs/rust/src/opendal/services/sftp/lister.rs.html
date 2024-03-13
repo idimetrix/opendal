@@ -81,6 +81,7 @@
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -99,17 +100,14 @@
 // under the License.
 
 </span><span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>openssh_sftp_client::fs::DirEntry;
 <span class="kw">use </span>openssh_sftp_client::fs::ReadDir;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_sftp_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Entry;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 
 <span class="kw">pub struct </span>SftpLister {
@@ -128,22 +126,26 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::List <span class="kw">for </span>SftpLister {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">let </span>item = <span class="macro">ready!</span>(<span class="self">self</span>.dir.poll_next_unpin(cx))
-            .transpose()
-            .map_err(parse_sftp_error)<span class="question-mark">?</span>;
+<span class="kw">impl </span>oio::List <span class="kw">for </span>SftpLister {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>item = <span class="self">self
+                </span>.dir
+                .next()
+                .<span class="kw">await
+                </span>.transpose()
+                .map_err(parse_sftp_error)<span class="question-mark">?</span>;
 
-        <span class="kw">match </span>item {
-            <span class="prelude-val">Some</span>(e) =&gt; {
-                <span class="kw">if </span>e.filename().to_str() == <span class="prelude-val">Some</span>(<span class="string">"."</span>) || e.filename().to_str() == <span class="prelude-val">Some</span>(<span class="string">".."</span>) {
-                    <span class="self">self</span>.poll_next(cx)
-                } <span class="kw">else </span>{
-                    Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(map_entry(<span class="self">self</span>.prefix.as_str(), e))))
+            <span class="kw">match </span>item {
+                <span class="prelude-val">Some</span>(e) =&gt; {
+                    <span class="kw">if </span>e.filename().to_str() == <span class="prelude-val">Some</span>(<span class="string">"."</span>) || e.filename().to_str() == <span class="prelude-val">Some</span>(<span class="string">".."</span>) {
+                        <span class="kw">continue</span>;
+                    } <span class="kw">else </span>{
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(map_entry(<span class="self">self</span>.prefix.as_str(), e)));
+                    }
                 }
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             }
-            <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
         }
     }
 }

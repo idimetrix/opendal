@@ -109,42 +109,6 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -162,15 +126,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fs::FileType;
-<span class="kw">use </span>std::path::Path;
+</span><span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
-
-<span class="kw">use </span>futures::future::BoxFuture;
-<span class="kw">use </span>futures::FutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
@@ -181,8 +138,6 @@
     root: PathBuf,
 
     rd: P,
-
-    fut: <span class="prelude-ty">Option</span>&lt;BoxFuture&lt;<span class="lifetime">'static</span>, (tokio::fs::DirEntry, <span class="prelude-ty">Result</span>&lt;FileType&gt;)&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;P&gt; FsLister&lt;P&gt; {
@@ -190,8 +145,6 @@
         <span class="self">Self </span>{
             root: root.to_owned(),
             rd,
-
-            fut: <span class="prelude-val">None</span>,
         }
     }
 }
@@ -202,57 +155,32 @@
 </span><span class="kw">unsafe impl</span>&lt;P&gt; Sync <span class="kw">for </span>FsLister&lt;P&gt; {}
 
 <span class="kw">impl </span>oio::List <span class="kw">for </span>FsLister&lt;tokio::fs::ReadDir&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(fut) = <span class="self">self</span>.fut.as_mut() {
-            <span class="kw">let </span>(de, ft) = <span class="macro">futures::ready!</span>(fut.poll_unpin(cx));
-            <span class="kw">let </span>ft = <span class="kw">match </span>ft {
-                <span class="prelude-val">Ok</span>(ft) =&gt; {
-                    <span class="self">self</span>.fut = <span class="prelude-val">None</span>;
-                    ft
-                }
-                <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                        <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error);
-                        (de, ft)
-                    };
-                    <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(fut));
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(e));
-                }
-            };
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(de) = <span class="self">self</span>.rd.next_entry().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
 
-            <span class="kw">let </span>entry_path = de.path();
-            <span class="kw">let </span>rel_path = normalize_path(
-                <span class="kw-2">&amp;</span>entry_path
-                    .strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
-                    .expect(<span class="string">"cannot fail because the prefix is iterated"</span>)
-                    .to_string_lossy()
-                    .replace(<span class="string">'\\'</span>, <span class="string">"/"</span>),
-            );
+        <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>d = <span class="kw">if </span>ft.is_file() {
-                oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::FILE))
-            } <span class="kw">else if </span>ft.is_dir() {
-                <span class="comment">// Make sure we are returning the correct path.
-                </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), Metadata::new(EntryMode::DIR))
-            } <span class="kw">else </span>{
-                oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::Unknown))
-            };
+        <span class="kw">let </span>entry_path = de.path();
+        <span class="kw">let </span>rel_path = normalize_path(
+            <span class="kw-2">&amp;</span>entry_path
+                .strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
+                .expect(<span class="string">"cannot fail because the prefix is iterated"</span>)
+                .to_string_lossy()
+                .replace(<span class="string">'\\'</span>, <span class="string">"/"</span>),
+        );
 
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(d)));
-        }
+        <span class="kw">let </span>d = <span class="kw">if </span>ft.is_file() {
+            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::FILE))
+        } <span class="kw">else if </span>ft.is_dir() {
+            <span class="comment">// Make sure we are returning the correct path.
+            </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), Metadata::new(EntryMode::DIR))
+        } <span class="kw">else </span>{
+            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::Unknown))
+        };
 
-        <span class="kw">let </span>de = <span class="macro">ready!</span>(<span class="self">self</span>.rd.poll_next_entry(cx)).map_err(new_std_io_error)<span class="question-mark">?</span>;
-        <span class="kw">match </span>de {
-            <span class="prelude-val">Some</span>(de) =&gt; {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error);
-                    (de, ft)
-                };
-                <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(fut));
-                <span class="self">self</span>.poll_next(cx)
-            }
-            <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
-        }
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(d))
     }
 }
 

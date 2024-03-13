@@ -1443,7 +1443,6 @@
 <a href="#1441" id="1441">1441</a>
 <a href="#1442" id="1442">1442</a>
 <a href="#1443" id="1443">1443</a>
-<a href="#1444" id="1444">1444</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1462,6 +1461,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
+
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::task::ready;
 <span class="kw">use </span>std::task::Context;
@@ -2799,11 +2799,9 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;P: oio::List&gt; oio::List <span class="kw">for </span>LoggingLister&lt;P&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">let </span>res = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx));
+<span class="kw">impl</span>&lt;P: oio::List&gt; oio::List <span class="kw">for </span>LoggingLister&lt;P&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="kw">let </span>res = <span class="self">self</span>.inner.next().<span class="kw">await</span>;
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>res {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de)) =&gt; {
@@ -2841,7 +2839,7 @@
             }
         };
 
-        Poll::Ready(res)
+        res
     }
 }
 

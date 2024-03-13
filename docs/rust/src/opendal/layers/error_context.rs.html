@@ -474,6 +474,7 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+
 <span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
@@ -890,10 +891,9 @@
     }
 }
 
-<span class="attr">#[async_trait::async_trait]
-</span><span class="kw">impl</span>&lt;T: oio::List&gt; oio::List <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx).map_err(|err| {
+<span class="kw">impl</span>&lt;T: oio::List&gt; oio::List <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="self">self</span>.inner.next().<span class="kw">await</span>.map_err(|err| {
             err.with_operation(ListOperation::Next)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)

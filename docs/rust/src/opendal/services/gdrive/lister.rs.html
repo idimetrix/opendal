@@ -99,9 +99,6 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -121,7 +118,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::GdriveCore;
@@ -141,9 +137,7 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>oio::PageList <span class="kw">for </span>GdriveLister {
+<span class="kw">impl </span>oio::PageList <span class="kw">for </span>GdriveLister {
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>file_id = <span class="self">self</span>.core.path_cache.get(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 

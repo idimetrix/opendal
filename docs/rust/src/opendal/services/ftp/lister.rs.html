@@ -68,7 +68,6 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -88,8 +87,7 @@
 
 </span><span class="kw">use </span>std::str;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+
 <span class="kw">use </span>std::vec::IntoIter;
 
 <span class="kw">use </span>suppaftp::list::File;
@@ -112,12 +110,12 @@
 }
 
 <span class="kw">impl </span>oio::List <span class="kw">for </span>FtpLister {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">let </span>de = <span class="kw">match </span><span class="self">self</span>.file_iter.next() {
             <span class="prelude-val">Some</span>(file_str) =&gt; File::from_str(file_str.as_str()).map_err(|e| {
                 Error::new(ErrorKind::Unexpected, <span class="string">"parse file from response"</span>).set_source(e)
             })<span class="question-mark">?</span>,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         };
 
         <span class="kw">let </span>path = <span class="self">self</span>.path.to_string() + de.name();
@@ -135,7 +133,7 @@
             oio::Entry::new(<span class="kw-2">&amp;</span>path, Metadata::new(EntryMode::Unknown))
         };
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(entry)))
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(entry))
     }
 }
 </code></pre></div></section></main></body></html>

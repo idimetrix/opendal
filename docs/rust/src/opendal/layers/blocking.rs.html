@@ -669,7 +669,7 @@
 
 <span class="kw">impl</span>&lt;I: oio::List&gt; oio::BlockingList <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        <span class="self">self</span>.handle.block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_next(cx)))
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.next())
     }
 }
 

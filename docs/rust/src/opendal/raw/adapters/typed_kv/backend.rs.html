@@ -656,8 +656,8 @@
 }
 
 <span class="kw">impl </span>oio::List <span class="kw">for </span>KvLister {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Ok</span>(<span class="self">self</span>.inner_next()))
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.inner_next())
     }
 }
 

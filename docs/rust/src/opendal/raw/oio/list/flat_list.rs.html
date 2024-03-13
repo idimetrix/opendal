@@ -270,33 +270,6 @@
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
 <a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -314,17 +287,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
-
-<span class="kw">use </span>futures::FutureExt;
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// ListFuture is the future returned while calling async list.
-</span><span class="kw">type </span>ListFuture&lt;A, L&gt; = BoxedStaticFuture&lt;(A, oio::Entry, <span class="prelude-ty">Result</span>&lt;(RpList, L)&gt;)&gt;;
 
 <span class="doccomment">/// FlatLister will walk dir in bottom up way:
 ///
@@ -363,12 +327,11 @@
 /// may output parent dirs' files before nested dirs, this is expected because files
 /// always output directly while listing.
 </span><span class="kw">pub struct </span>FlatLister&lt;A: Accessor, L&gt; {
-    acc: <span class="prelude-ty">Option</span>&lt;A&gt;,
+    acc: A,
     root: String,
 
     next_dir: <span class="prelude-ty">Option</span>&lt;oio::Entry&gt;,
     active_lister: Vec&lt;(<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;, L)&gt;,
-    list_future: <span class="prelude-ty">Option</span>&lt;ListFuture&lt;A, L&gt;&gt;,
 }
 
 <span class="doccomment">/// # Safety
@@ -387,11 +350,10 @@
     <span class="doccomment">/// Create a new flat lister
     </span><span class="kw">pub fn </span>new(acc: A, path: <span class="kw-2">&amp;</span>str) -&gt; FlatLister&lt;A, L&gt; {
         FlatLister {
-            acc: <span class="prelude-val">Some</span>(acc),
+            acc,
             root: path.to_string(),
             next_dir: <span class="prelude-val">Some</span>(oio::Entry::new(path, Metadata::new(EntryMode::DIR))),
             active_lister: <span class="macro">vec!</span>[],
-            list_future: <span class="prelude-val">None</span>,
         }
     }
 }
@@ -401,44 +363,30 @@
     </span>A: Accessor&lt;Lister = L&gt;,
     L: oio::List,
 {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">loop </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(fut) = <span class="self">self</span>.list_future.as_mut() {
-                <span class="kw">let </span>(acc, de, res) = <span class="macro">ready!</span>(fut.poll_unpin(cx));
-                <span class="self">self</span>.acc = <span class="prelude-val">Some</span>(acc);
-                <span class="self">self</span>.list_future = <span class="prelude-val">None</span>;
-
-                <span class="kw">let </span>(<span class="kw">_</span>, l) = res<span class="question-mark">?</span>;
-                <span class="self">self</span>.active_lister.push((<span class="prelude-val">Some</span>(de), l))
-            }
-
             <span class="kw">if let </span><span class="prelude-val">Some</span>(de) = <span class="self">self</span>.next_dir.take() {
-                <span class="kw">let </span>acc = <span class="self">self</span>.acc.take().expect(<span class="string">"Accessor must be valid"</span>);
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>res = acc.list(de.path(), OpList::new()).<span class="kw">await</span>;
-                    (acc, de, res)
-                };
-                <span class="self">self</span>.list_future = <span class="prelude-val">Some</span>(Box::pin(fut));
-                <span class="kw">continue</span>;
+                <span class="kw">let </span>(<span class="kw">_</span>, l) = <span class="self">self</span>.acc.list(de.path(), OpList::new()).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="self">self</span>.active_lister.push((<span class="prelude-val">Some</span>(de), l));
             }
 
             <span class="kw">let </span>(de, lister) = <span class="kw">match </span><span class="self">self</span>.active_lister.last_mut() {
                 <span class="prelude-val">Some</span>((de, lister)) =&gt; (de, lister),
-                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             };
 
-            <span class="kw">match </span><span class="macro">ready!</span>(lister.poll_next(cx))<span class="question-mark">? </span>{
+            <span class="kw">match </span>lister.next().<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(v) <span class="kw">if </span>v.mode().is_dir() =&gt; {
                     <span class="self">self</span>.next_dir = <span class="prelude-val">Some</span>(v);
                     <span class="kw">continue</span>;
                 }
-                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v))),
+                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">match </span>de.take() {
                         <span class="prelude-val">Some</span>(de) =&gt; {
                             <span class="comment">// Only push entry if it's not root dir
                             </span><span class="kw">if </span>de.path() != <span class="self">self</span>.root {
-                                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de)));
+                                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
                             }
                             <span class="kw">continue</span>;
                         }
@@ -461,10 +409,8 @@
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(de) = <span class="self">self</span>.next_dir.take() {
-                <span class="kw">let </span>acc = <span class="self">self</span>.acc.take().expect(<span class="string">"Accessor must be valid"</span>);
-                <span class="kw">let </span>(<span class="kw">_</span>, l) = acc.blocking_list(de.path(), OpList::new())<span class="question-mark">?</span>;
+                <span class="kw">let </span>(<span class="kw">_</span>, l) = <span class="self">self</span>.acc.blocking_list(de.path(), OpList::new())<span class="question-mark">?</span>;
 
-                <span class="self">self</span>.acc = <span class="prelude-val">Some</span>(acc);
                 <span class="self">self</span>.active_lister.push((<span class="prelude-val">Some</span>(de), l))
             }
 

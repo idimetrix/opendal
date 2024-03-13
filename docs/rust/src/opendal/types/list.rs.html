@@ -308,6 +308,23 @@
 <a href="#306" id="306">306</a>
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -336,7 +353,6 @@
 <span class="kw">use </span>futures::Stream;
 <span class="kw">use </span>futures::StreamExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::List;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -355,7 +371,11 @@
     <span class="doccomment">/// required_metakey is the metakey required by users.
     </span>required_metakey: FlagSet&lt;Metakey&gt;,
 
+    fut: <span class="prelude-ty">Option</span>&lt;BoxedStaticFuture&lt;(oio::Lister, <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;)&gt;&gt;,
+
     <span class="doccomment">/// tasks is used to store tasks that are run in concurrent.
+    ///
+    /// TODO: maybe we should move logic inside?
     </span>tasks: ConcurrentFutures&lt;StatTask&gt;,
     errored: bool,
 }
@@ -444,6 +464,7 @@
             lister: <span class="prelude-val">Some</span>(lister),
             required_metakey,
 
+            fut: <span class="prelude-val">None</span>,
             tasks: ConcurrentFutures::new(concurrent),
             errored: <span class="bool-val">false</span>,
         })
@@ -461,31 +482,44 @@
 
         <span class="comment">// Trying to pull more tasks if there are more space.
         </span><span class="kw">if </span><span class="self">self</span>.tasks.has_remaining() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(lister) = <span class="self">self</span>.lister.as_mut() {
-                <span class="kw">match </span>lister.poll_next(cx) {
-                    Poll::Pending =&gt; {}
-                    Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(oe))) =&gt; {
-                        <span class="kw">let </span>(path, metadata) = oe.into_entry().into_parts();
-                        <span class="kw">if </span>metadata.contains_metakey(<span class="self">self</span>.required_metakey) {
-                            <span class="self">self</span>.tasks
-                                .push_back(StatTask::Known(<span class="prelude-val">Some</span>((path, metadata))));
-                        } <span class="kw">else </span>{
-                            <span class="kw">let </span>acc = <span class="self">self</span>.acc.clone();
-                            <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                                <span class="kw">let </span>res = acc.stat(<span class="kw-2">&amp;</span>path, OpStat::default()).<span class="kw">await</span>;
-                                (path, res.map(|rp| rp.into_metadata()))
-                            };
-                            <span class="self">self</span>.tasks.push_back(StatTask::Stating(Box::pin(fut)));
+            <span class="comment">// Building future is we have a lister available.
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>lister) = <span class="self">self</span>.lister.take() {
+                <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                    <span class="kw">let </span>res = lister.next_dyn().<span class="kw">await</span>;
+                    (lister, res)
+                };
+                <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(fut));
+            }
+
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(fut) = <span class="self">self</span>.fut.as_mut() {
+                <span class="kw">if let </span>Poll::Ready((lister, entry)) = fut.as_mut().poll(cx) {
+                    <span class="self">self</span>.lister = <span class="prelude-val">Some</span>(lister);
+                    <span class="self">self</span>.fut = <span class="prelude-val">None</span>;
+
+                    <span class="kw">match </span>entry {
+                        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(oe)) =&gt; {
+                            <span class="kw">let </span>(path, metadata) = oe.into_entry().into_parts();
+                            <span class="kw">if </span>metadata.contains_metakey(<span class="self">self</span>.required_metakey) {
+                                <span class="self">self</span>.tasks
+                                    .push_back(StatTask::Known(<span class="prelude-val">Some</span>((path, metadata))));
+                            } <span class="kw">else </span>{
+                                <span class="kw">let </span>acc = <span class="self">self</span>.acc.clone();
+                                <span class="kw">let </span>fut = <span class="kw">async move </span>{
+                                    <span class="kw">let </span>res = acc.stat(<span class="kw-2">&amp;</span>path, OpStat::default()).<span class="kw">await</span>;
+                                    (path, res.map(|rp| rp.into_metadata()))
+                                };
+                                <span class="self">self</span>.tasks.push_back(StatTask::Stating(Box::pin(fut)));
+                            }
+                        }
+                        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {
+                            <span class="self">self</span>.lister = <span class="prelude-val">None</span>;
+                        }
+                        <span class="prelude-val">Err</span>(err) =&gt; {
+                            <span class="self">self</span>.errored = <span class="bool-val">true</span>;
+                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)));
                         }
                     }
-                    Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; {
-                        <span class="self">self</span>.lister = <span class="prelude-val">None</span>;
-                    }
-                    Poll::Ready(<span class="prelude-val">Err</span>(err)) =&gt; {
-                        <span class="self">self</span>.errored = <span class="bool-val">true</span>;
-                        <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)));
-                    }
-                };
+                }
             }
         }
 
@@ -495,7 +529,7 @@
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Entry::new(path, metadata))));
         }
 
-        <span class="kw">if </span><span class="self">self</span>.lister.is_some() {
+        <span class="kw">if </span><span class="self">self</span>.lister.is_some() || <span class="self">self</span>.fut.is_some() {
             Poll::Pending
         } <span class="kw">else </span>{
             Poll::Ready(<span class="prelude-val">None</span>)

@@ -523,9 +523,6 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -888,13 +885,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.poll_timeout(cx, ListOperation::Next.into_static())<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>v = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx));
-        <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        Poll::Ready(v)
-    }
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="kw">let </span>fut = <span class="self">self</span>.inner.next();
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ListOperation::Next.into_static(), fut).<span class="kw">await
+    </span>}
 }
 
 <span class="attr">#[cfg(test)]
@@ -902,8 +896,7 @@
     <span class="kw">use </span>std::future::{pending, Future};
     <span class="kw">use </span>std::io::SeekFrom;
     <span class="kw">use </span>std::sync::Arc;
-    <span class="kw">use </span>std::task::Context;
-    <span class="kw">use </span>std::task::Poll;
+
     <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use </span>async_trait::async_trait;
@@ -975,8 +968,8 @@
     </span><span class="kw">struct </span>MockLister;
 
     <span class="kw">impl </span>oio::List <span class="kw">for </span>MockLister {
-        <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-            Poll::Pending
+        <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
+            pending()
         }
     }
 
@@ -1034,6 +1027,8 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_list_timeout_raw() {
+        <span class="kw">use </span>oio::List;
+
         <span class="kw">let </span>acc = MockService;
         <span class="kw">let </span>timeout_layer = TimeoutLayer::new()
             .with_timeout(Duration::from_secs(<span class="number">1</span>))
@@ -1044,7 +1039,6 @@
             .<span class="kw">await
             </span>.unwrap();
 
-        <span class="kw">use </span>oio::ListExt;
         <span class="kw">let </span>res = lister.next().<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.is_err());
         <span class="kw">let </span>err = res.unwrap_err();

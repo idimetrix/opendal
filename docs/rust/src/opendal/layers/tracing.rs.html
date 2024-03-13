@@ -362,6 +362,7 @@
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -380,6 +381,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
+
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
@@ -713,9 +715,9 @@
 
 <span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>TracingWrapper&lt;R&gt; {
     <span class="attr">#[tracing::instrument(parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span, level = <span class="string">"debug"</span>, skip_all)]
-    </span><span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx)
-    }
+    </span><span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="self">self</span>.inner.next().<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>TracingWrapper&lt;R&gt; {

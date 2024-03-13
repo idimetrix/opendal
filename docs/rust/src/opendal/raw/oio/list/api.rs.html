@@ -139,19 +139,6 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -172,18 +159,18 @@
 </span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+
+<span class="kw">use </span>std::ops::DerefMut;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Entry;
+<span class="kw">use </span><span class="kw">crate</span>::raw::BoxedFuture;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// PageOperation is the name for APIs of lister.
 </span><span class="attr">#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>ListOperation {
-    <span class="doccomment">/// Operation for [`List::poll_next`]
+    <span class="doccomment">/// Operation for [`List::next`]
     </span>Next,
     <span class="doccomment">/// Operation for [`BlockingList::next`]
     </span>BlockingNext,
@@ -213,67 +200,54 @@
     }
 }
 
+<span class="doccomment">/// The boxed version of [`List`]
+</span><span class="kw">pub type </span>Lister = Box&lt;<span class="kw">dyn </span>ListDyn&gt;;
+
 <span class="doccomment">/// Page trait is used by [`raw::Accessor`] to implement `list` operation.
-</span><span class="kw">pub trait </span>List: Unpin + Send + Sync + <span class="lifetime">'static </span>{
+</span><span class="kw">pub trait </span>List: Unpin + Send + Sync {
     <span class="doccomment">/// Fetch a new page of [`Entry`]
     ///
     /// `Ok(None)` means all pages have been returned. Any following call
     /// to `next` will always get the same result.
-    </span><span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt;;
-}
-
-<span class="doccomment">/// The boxed version of [`List`]
-</span><span class="kw">pub type </span>Lister = Box&lt;<span class="kw">dyn </span>List&gt;;
-
-<span class="kw">impl</span>&lt;P: List + <span class="question-mark">?</span>Sized&gt; List <span class="kw">for </span>Box&lt;P&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_next(cx)
-    }
+    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; + Send;
+    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt;;
 }
 
 <span class="kw">impl </span>List <span class="kw">for </span>() {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>))
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 
 <span class="kw">impl</span>&lt;P: List&gt; List <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;P&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="prelude-val">Some</span>(p) =&gt; p.poll_next(cx),
-            <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
+            <span class="prelude-val">Some</span>(p) =&gt; p.next().<span class="kw">await</span>,
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }
     }
 }
 
-<span class="doccomment">/// Impl ListExt for all T: List
-</span><span class="kw">impl</span>&lt;T: List&gt; ListExt <span class="kw">for </span>T {}
+<span class="kw">pub trait </span>ListDyn: Unpin + Send + Sync {
+    <span class="kw">fn </span>next_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt;;
+}
 
-<span class="doccomment">/// Extension of [`List`] to make it easier for use.
-</span><span class="kw">pub trait </span>ListExt: List {
-    <span class="doccomment">/// Build a future for `poll_next`.
-    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; NextFuture&lt;<span class="self">Self</span>&gt; {
-        NextFuture { lister: <span class="self">self </span>}
+<span class="kw">impl</span>&lt;T: List + <span class="question-mark">?</span>Sized&gt; ListDyn <span class="kw">for </span>T {
+    <span class="kw">fn </span>next_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; {
+        Box::pin(<span class="self">self</span>.next())
     }
 }
 
-<span class="kw">pub struct </span>NextFuture&lt;<span class="lifetime">'a</span>, L: List + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    lister: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>L,
-}
-
-<span class="kw">impl</span>&lt;L&gt; Future <span class="kw">for </span>NextFuture&lt;<span class="lifetime">'_</span>, L&gt;
-<span class="kw">where
-    </span>L: List + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;;
-
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.lister.poll_next(cx)
-    }
+<span class="kw">impl</span>&lt;T: ListDyn + <span class="question-mark">?</span>Sized&gt; List <span class="kw">for </span>Box&lt;T&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Entry&gt;&gt; {
+        <span class="self">self</span>.deref_mut().next_dyn().<span class="kw">await
+    </span>}
 }
 
 <span class="doccomment">/// BlockingList is the blocking version of [`List`].
-</span><span class="kw">pub trait </span>BlockingList: Send + <span class="lifetime">'static </span>{
+</span><span class="kw">pub trait </span>BlockingList: Send {
     <span class="doccomment">/// Fetch a new page of [`Entry`]
     ///
     /// `Ok(None)` means all pages have been returned. Any following call

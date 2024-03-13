@@ -391,6 +391,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
+
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
@@ -732,11 +733,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ListOperation::Next.into_static());
-        <span class="self">self</span>.inner.poll_next(cx)
-    }
+    <span class="attr">#[trace(enter_on_poll = <span class="bool-val">true</span>)]
+    </span><span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="self">self</span>.inner.next().<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {

@@ -95,8 +95,6 @@
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -116,7 +114,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>serde::Deserialize;
 
@@ -136,8 +133,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::PageList <span class="kw">for </span>DbfsLister {
+<span class="kw">impl </span>oio::PageList <span class="kw">for </span>DbfsLister {
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>response = <span class="self">self</span>.core.dbfs_list(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 

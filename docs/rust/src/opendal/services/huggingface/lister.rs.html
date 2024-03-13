@@ -89,9 +89,6 @@
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -110,8 +107,6 @@
 // under the License.
 
 </span><span class="kw">use </span>std::sync::Arc;
-
-<span class="kw">use </span>async_trait::async_trait;
 
 <span class="kw">use </span><span class="kw">super</span>::core::HuggingfaceCore;
 <span class="kw">use </span><span class="kw">super</span>::core::HuggingfaceStatus;
@@ -135,8 +130,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::PageList <span class="kw">for </span>HuggingfaceLister {
+<span class="kw">impl </span>oio::PageList <span class="kw">for </span>HuggingfaceLister {
     <span class="kw">async fn </span>next_page(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>oio::PageContext) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>response = <span class="self">self</span>.core.hf_list(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="self">self</span>.recursive).<span class="kw">await</span><span class="question-mark">?</span>;
 
