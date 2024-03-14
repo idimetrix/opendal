@@ -446,6 +446,8 @@
 <a href="#444" id="444">444</a>
 <a href="#445" id="445">445</a>
 <a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -470,6 +472,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::Future;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::StreamExt;
@@ -586,7 +589,8 @@
     w: Arc&lt;W&gt;,
 
     block_ids: Vec&lt;Uuid&gt;,
-    cache: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
+    <span class="doccomment">/// TODO: use Bytes directly.
+    </span>cache: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
     futures: ConcurrentFutures&lt;WriteBlockFuture&gt;,
 }
 
@@ -618,9 +622,9 @@
         }
     }
 
-    <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; usize {
-        <span class="kw">let </span>size = bs.remaining();
-        <span class="kw">let </span>bs = oio::ChunkedBytes::from_vec(bs.vectored_bytes(size));
+    <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; usize {
+        <span class="kw">let </span>size = bs.len();
+        <span class="kw">let </span>bs = oio::ChunkedBytes::from_vec(<span class="macro">vec!</span>[bs]);
         <span class="macro">assert!</span>(<span class="self">self</span>.cache.is_none());
         <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(bs);
         size
@@ -631,7 +635,7 @@
 <span class="kw">where
     </span>W: BlockWrite,
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
                 State::Idle =&gt; {
@@ -867,7 +871,7 @@
             expected_content.extend_from_slice(<span class="kw-2">&amp;</span>bs);
 
             <span class="kw">loop </span>{
-                <span class="kw">match </span>w.write(<span class="kw-2">&amp;</span>bs.as_slice()).<span class="kw">await </span>{
+                <span class="kw">match </span>w.write(Bytes::copy_from_slice(<span class="kw-2">&amp;</span>bs)).<span class="kw">await </span>{
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">break</span>,
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
                 }

@@ -668,7 +668,7 @@
 </span><span class="kw">unsafe impl</span>&lt;S: Adapter&gt; Sync <span class="kw">for </span>KvWriter&lt;S&gt; {}
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::Write <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">if </span><span class="self">self</span>.future.is_some() {
             <span class="self">self</span>.future = <span class="prelude-val">None</span>;
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
@@ -679,8 +679,8 @@
 
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
             Buffer::Active(buf) =&gt; {
-                buf.extend_from_slice(bs.chunk());
-                Poll::Ready(<span class="prelude-val">Ok</span>(bs.chunk().len()))
+                buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
+                Poll::Ready(<span class="prelude-val">Ok</span>(bs.len()))
             }
             Buffer::Frozen(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>),
         }
@@ -728,11 +728,11 @@
 }
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::BlockingWrite <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
             Buffer::Active(buf) =&gt; {
-                buf.extend_from_slice(bs.chunk());
-                <span class="prelude-val">Ok</span>(bs.chunk().len())
+                buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
+                <span class="prelude-val">Ok</span>(bs.len())
             }
             Buffer::Frozen(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>),
         }

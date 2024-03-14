@@ -137,7 +137,6 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -163,6 +162,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::future::BoxFuture;
 <span class="kw">use </span>futures::AsyncWrite;
 <span class="kw">use </span>futures::AsyncWriteExt;
@@ -203,12 +203,10 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::Write <span class="kw">for </span>HdfsWriter&lt;hdrs::AsyncFile&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
 
-        Pin::new(f)
-            .poll_write(cx, bs.chunk())
-            .map_err(new_std_io_error)
+        Pin::new(f).poll_write(cx, <span class="kw-2">&amp;</span>bs).map_err(new_std_io_error)
     }
 
     <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
@@ -258,9 +256,9 @@
 }
 
 <span class="kw">impl </span>oio::BlockingWrite <span class="kw">for </span>HdfsWriter&lt;hdrs::File&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
-        f.write(bs.chunk()).map_err(new_std_io_error)
+        f.write(<span class="kw-2">&amp;</span>bs).map_err(new_std_io_error)
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

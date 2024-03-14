@@ -656,9 +656,9 @@
 }
 
 <span class="kw">impl</span>&lt;I: oio::Write + <span class="lifetime">'static</span>&gt; oio::BlockingWrite <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.handle
-            .block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_write(cx, bs)))
+            .block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_write(cx, bs.clone())))
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

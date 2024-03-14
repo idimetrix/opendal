@@ -383,7 +383,7 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write&gt; oio::Write <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.poll_write(cx, bs),
             <span class="self">Self</span>::Two(v) =&gt; v.poll_write(cx, bs),
@@ -458,7 +458,7 @@
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write, THREE: oio::Write&gt; oio::Write
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.poll_write(cx, bs),
             <span class="self">Self</span>::Two(v) =&gt; v.poll_write(cx, bs),

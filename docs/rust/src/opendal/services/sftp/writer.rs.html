@@ -68,6 +68,7 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -90,6 +91,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>openssh_sftp_client::file::File;
 <span class="kw">use </span>openssh_sftp_client::file::TokioCompatFile;
 <span class="kw">use </span>tokio::io::AsyncWrite;
@@ -111,10 +113,10 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::Write <span class="kw">for </span>SftpWriter {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="self">self</span>.file
             .as_mut()
-            .poll_write(cx, bs.chunk())
+            .poll_write(cx, <span class="kw-2">&amp;</span>bs)
             .map_err(new_std_io_error)
     }
 

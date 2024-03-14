@@ -479,8 +479,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>buf_length = NonZeroU32::new(bs.remaining() <span class="kw">as </span>u32).unwrap();
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+        <span class="kw">let </span>buf_length = NonZeroU32::new(bs.len() <span class="kw">as </span>u32).unwrap();
 
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.limiter.check_n(buf_length) {
@@ -514,8 +514,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>buf_length = NonZeroU32::new(bs.remaining() <span class="kw">as </span>u32).unwrap();
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">let </span>buf_length = NonZeroU32::new(bs.len() <span class="kw">as </span>u32).unwrap();
 
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.limiter.check_n(buf_length) {

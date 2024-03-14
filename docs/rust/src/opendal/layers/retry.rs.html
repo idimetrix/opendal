@@ -2078,13 +2078,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
             <span class="macro">ready!</span>(sleep.poll_unpin(cx));
             <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
         }
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.as_mut().unwrap().poll_write(cx, bs)) {
+        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.as_mut().unwrap().poll_write(cx, bs.clone())) {
             <span class="prelude-val">Ok</span>(v) =&gt; {
                 <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
                 Poll::Ready(<span class="prelude-val">Ok</span>(v))
@@ -2117,7 +2117,7 @@
                             ],
                         );
                         <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_write(cx, bs)
+                        <span class="self">self</span>.poll_write(cx, bs.clone())
                     }
                 }
             }
@@ -2218,8 +2218,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs) }
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {

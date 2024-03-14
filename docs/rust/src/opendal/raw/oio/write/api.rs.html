@@ -256,14 +256,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Display;
+</span><span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// WriteOperation is the name for APIs of Writer.
@@ -325,7 +325,7 @@
     ///
     /// It's possible that `n &lt; bs.len()`, caller should pass the remaining bytes
     /// repeatedly until all bytes has been written.
-    </span><span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+    </span><span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
@@ -335,7 +335,7 @@
 }
 
 <span class="kw">impl </span>Write <span class="kw">for </span>() {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::Write"</span>)
     }
 
@@ -358,7 +358,7 @@
 ///
 /// To make Writer work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).poll_write(cx, bs)
     }
 
@@ -377,7 +377,7 @@
 <span class="doccomment">/// Extension of [`Read`] to make it easier for use.
 </span><span class="kw">pub trait </span>WriteExt: Write {
     <span class="doccomment">/// Build a future for `poll_write`.
-    </span><span class="kw">fn </span>write&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>oio::WriteBuf) -&gt; WriteFuture&lt;<span class="lifetime">'a</span>, <span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: Bytes) -&gt; WriteFuture&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>&gt; {
         WriteFuture { writer: <span class="self">self</span>, buf }
     }
 
@@ -394,7 +394,7 @@
 
 <span class="kw">pub struct </span>WriteFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
     writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-    buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>oio::WriteBuf,
+    buf: Bytes,
 }
 
 <span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>WriteFuture&lt;<span class="lifetime">'_</span>, W&gt;
@@ -405,7 +405,7 @@
 
     <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">let </span>this = <span class="self">self</span>.get_mut();
-        this.writer.poll_write(cx, this.buf)
+        this.writer.poll_write(cx, this.buf.clone())
     }
 }
 
@@ -445,14 +445,14 @@
 <span class="doccomment">/// BlockingWrite is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>BlockingWrite: Send + Sync + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Write whole content at once.
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
 <span class="kw">impl </span>BlockingWrite <span class="kw">for </span>() {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let _ </span>= bs;
 
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::BlockingWrite"</span>)
@@ -470,7 +470,7 @@
 ///
 /// To make BlockingWriter work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: BlockingWrite + <span class="question-mark">?</span>Sized&gt; BlockingWrite <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).write(bs)
     }
 

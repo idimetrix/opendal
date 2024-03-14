@@ -174,10 +174,11 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::future::BoxFuture;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AlluxioCore;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
+
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -216,13 +217,12 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::Write <span class="kw">for </span>AlluxioWriter {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
                 State::Idle(w) =&gt; <span class="kw">match </span><span class="self">self</span>.stream_id.as_ref() {
                     <span class="prelude-val">Some</span>(stream_id) =&gt; {
-                        <span class="kw">let </span>size = bs.remaining();
-                        <span class="kw">let </span>cb = oio::ChunkedBytes::from_vec(bs.vectored_bytes(size)).clone();
+                        <span class="kw">let </span>cb = oio::ChunkedBytes::from_vec(<span class="macro">vec!</span>[bs.clone()]);
 
                         <span class="kw">let </span>stream_id = <span class="kw-2">*</span>stream_id;
 

@@ -3554,8 +3554,8 @@
                 }
 
                 <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-                    <span class="kw">let </span>n = w.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">while </span>!bs.is_empty() {
+                    <span class="kw">let </span>n = w.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                     bs.advance(n);
                 }
 

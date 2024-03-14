@@ -329,6 +329,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
@@ -584,7 +585,7 @@
     </span><span class="kw">pub async fn </span>ipmfs_write(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        body: oio::ChunkedBytes,
+        body: Bytes,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -594,8 +595,7 @@
             percent_encode_path(<span class="kw-2">&amp;</span>p)
         );
 
-        <span class="kw">let </span>multipart = Multipart::new()
-            .part(FormDataPart::new(<span class="string">"data"</span>).stream(body.len() <span class="kw">as </span>u64, Box::new(body)));
+        <span class="kw">let </span>multipart = Multipart::new().part(FormDataPart::new(<span class="string">"data"</span>).content(body));
 
         <span class="kw">let </span>req: http::request::Builder = Request::post(url);
         <span class="kw">let </span>req = multipart.apply(req)<span class="question-mark">?</span>;

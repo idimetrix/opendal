@@ -985,6 +985,7 @@
 <a href="#983" id="983">983</a>
 <a href="#984" id="984">984</a>
 <a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1011,6 +1012,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::BufferReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::FileReader;
@@ -1698,7 +1700,7 @@
 <span class="kw">where
     </span>W: oio::Write,
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
@@ -1734,7 +1736,7 @@
 <span class="kw">where
     </span>W: oio::BlockingWrite,
 {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;

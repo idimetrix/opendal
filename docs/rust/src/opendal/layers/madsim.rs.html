@@ -448,10 +448,6 @@
 <a href="#446" id="446">446</a>
 <a href="#447" id="447">447</a>
 <a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -745,11 +741,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>MadsimWriter {
-    <span class="kw">fn </span>poll_write(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
-        bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf,
-    ) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;usize&gt;&gt; {
         <span class="attr">#[cfg(madsim)]
         </span>{
             <span class="kw">let </span>req = Request::Write(<span class="self">self</span>.path.to_string(), bs);

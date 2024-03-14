@@ -398,8 +398,8 @@
     <span class="doccomment">/// Write into inner writer.
     </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
-        <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">while </span>!bs.is_empty() {
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -444,8 +444,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>written = <span class="number">0</span>;
         <span class="kw">while let </span><span class="prelude-val">Some</span>(bs) = sink_from.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
-            <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-                <span class="kw">let </span>n = <span class="self">self</span>.inner.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">while </span>!bs.is_empty() {
+                <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                 bs.advance(n);
                 written += n <span class="kw">as </span>u64;
             }
@@ -522,7 +522,7 @@
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.inner
-            .poll_write(cx, <span class="kw-2">&amp;</span>buf)
+            .poll_write(cx, Bytes::copy_from_slice(buf))
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
     }
 
@@ -545,7 +545,7 @@
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.inner
-            .poll_write(cx, <span class="kw-2">&amp;</span>buf)
+            .poll_write(cx, Bytes::copy_from_slice(buf))
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
     }
 
@@ -583,8 +583,8 @@
     <span class="doccomment">/// Write into inner writer.
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
-        <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(<span class="kw-2">&amp;</span>bs)<span class="question-mark">?</span>;
+        <span class="kw">while </span>!bs.is_empty() {
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone())<span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -600,7 +600,7 @@
 <span class="kw">impl </span>io::Write <span class="kw">for </span>BlockingWriter {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner
-            .write(<span class="kw-2">&amp;</span>buf)
+            .write(Bytes::copy_from_slice(buf))
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
     }
 

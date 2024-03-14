@@ -154,6 +154,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -170,13 +171,13 @@
     <span class="doccomment">/// write_once write all data at once.
     ///
     /// Implementations should make sure that the data is written correctly at once.
-    </span><span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
 <span class="doccomment">/// OneShotWrite is used to implement [`Write`] based on one shot.
 </span><span class="kw">pub struct </span>OneShotWriter&lt;W: OneShotWrite&gt; {
     state: State&lt;W&gt;,
-    buffer: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
+    buffer: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
 }
 
 <span class="kw">enum </span>State&lt;W&gt; {
@@ -205,7 +206,7 @@
 }
 
 <span class="kw">impl</span>&lt;W: OneShotWrite&gt; oio::Write <span class="kw">for </span>OneShotWriter&lt;W&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
             State::Idle(<span class="kw">_</span>) =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.buffer {
                 <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
@@ -213,9 +214,8 @@
                     <span class="string">"OneShotWriter doesn't support multiple write"</span>,
                 ))),
                 <span class="prelude-val">None </span>=&gt; {
-                    <span class="kw">let </span>size = bs.remaining();
-                    <span class="kw">let </span>bs = bs.vectored_bytes(size);
-                    <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(oio::ChunkedBytes::from_vec(bs));
+                    <span class="kw">let </span>size = bs.len();
+                    <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(bs);
                     Poll::Ready(<span class="prelude-val">Ok</span>(size))
                 }
             },
@@ -234,7 +234,7 @@
                     <span class="kw">match </span><span class="self">self</span>.buffer.clone() {
                         <span class="prelude-val">Some</span>(bs) =&gt; {
                             <span class="kw">let </span>fut = Box::pin(<span class="kw">async move </span>{
-                                <span class="kw">let </span>res = w.write_once(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span>;
+                                <span class="kw">let </span>res = w.write_once(bs).<span class="kw">await</span>;
 
                                 (w, res)
                             });
@@ -242,7 +242,7 @@
                         }
                         <span class="prelude-val">None </span>=&gt; {
                             <span class="kw">let </span>fut = Box::pin(<span class="kw">async move </span>{
-                                <span class="kw">let </span>res = w.write_once(<span class="kw-2">&amp;</span><span class="string">""</span>.as_bytes()).<span class="kw">await</span>;
+                                <span class="kw">let </span>res = w.write_once(Bytes::new()).<span class="kw">await</span>;
 
                                 (w, res)
                             });
