@@ -74,83 +74,6 @@
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -169,13 +92,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>futures::future::BoxFuture;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AlluxioCore;
 
@@ -185,24 +103,17 @@
 <span class="kw">pub type </span>AlluxioWriters = AlluxioWriter;
 
 <span class="kw">pub struct </span>AlluxioWriter {
-    state: State,
+    core: Arc&lt;AlluxioCore&gt;,
 
     _op: OpWrite,
     path: String,
     stream_id: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 }
 
-<span class="kw">enum </span>State {
-    Idle(<span class="prelude-ty">Option</span>&lt;Arc&lt;AlluxioCore&gt;&gt;),
-    Init(BoxFuture&lt;<span class="lifetime">'static</span>, (Arc&lt;AlluxioCore&gt;, <span class="prelude-ty">Result</span>&lt;u64&gt;)&gt;),
-    Write(BoxFuture&lt;<span class="lifetime">'static</span>, (Arc&lt;AlluxioCore&gt;, <span class="prelude-ty">Result</span>&lt;usize&gt;)&gt;),
-    Close(BoxFuture&lt;<span class="lifetime">'static</span>, (Arc&lt;AlluxioCore&gt;, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
-}
-
 <span class="kw">impl </span>AlluxioWriter {
     <span class="kw">pub fn </span>new(core: Arc&lt;AlluxioCore&gt;, _op: OpWrite, path: String) -&gt; <span class="self">Self </span>{
         AlluxioWriter {
-            state: State::Idle(<span class="prelude-val">Some</span>(core)),
+            core,
             _op,
             path,
             stream_id: <span class="prelude-val">None</span>,
@@ -210,96 +121,31 @@
     }
 }
 
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for State.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>State {}
-
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::Write <span class="kw">for </span>AlluxioWriter {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-                State::Idle(w) =&gt; <span class="kw">match </span><span class="self">self</span>.stream_id.as_ref() {
-                    <span class="prelude-val">Some</span>(stream_id) =&gt; {
-                        <span class="kw">let </span>cb = oio::ChunkedBytes::from_vec(<span class="macro">vec!</span>[bs.clone()]);
-
-                        <span class="kw">let </span>stream_id = <span class="kw-2">*</span>stream_id;
-
-                        <span class="kw">let </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
-
-                        <span class="self">self</span>.state = State::Write(Box::pin(<span class="kw">async move </span>{
-                            <span class="kw">let </span>part = w.write(stream_id, AsyncBody::ChunkedBytes(cb)).<span class="kw">await</span>;
-
-                            (w, part)
-                        }));
-                    }
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">let </span>path = <span class="self">self</span>.path.clone();
-                        <span class="kw">let </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
-                        <span class="self">self</span>.state = State::Init(Box::pin(<span class="kw">async move </span>{
-                            <span class="kw">let </span>upload_id = w.create_file(<span class="kw-2">&amp;</span>path).<span class="kw">await</span>;
-                            (w, upload_id)
-                        }));
-                    }
-                },
-                State::Init(fut) =&gt; {
-                    <span class="kw">let </span>(w, stream_id) = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
-                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
-                    <span class="self">self</span>.stream_id = <span class="prelude-val">Some</span>(stream_id<span class="question-mark">?</span>);
-                }
-                State::Write(fut) =&gt; {
-                    <span class="kw">let </span>(w, part) = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
-                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(part<span class="question-mark">?</span>));
-                }
-                State::Close(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"MultipartWriter must not go into State::Close during poll_write"</span>)
-                }
+<span class="kw">impl </span>oio::Write <span class="kw">for </span>AlluxioWriter {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">let </span>stream_id = <span class="kw">match </span><span class="self">self</span>.stream_id {
+            <span class="prelude-val">Some</span>(stream_id) =&gt; stream_id,
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">let </span>stream_id = <span class="self">self</span>.core.create_file(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="self">self</span>.stream_id = <span class="prelude-val">Some</span>(stream_id);
+                stream_id
             }
-        }
-    }
+        };
+        <span class="self">self</span>.core.write(stream_id, AsyncBody::Bytes(bs)).<span class="kw">await
+    </span>}
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-                State::Idle(w) =&gt; {
-                    <span class="kw">let </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
-                    <span class="kw">match </span><span class="self">self</span>.stream_id {
-                        <span class="prelude-val">Some</span>(stream_id) =&gt; {
-                            <span class="self">self</span>.state = State::Close(Box::pin(<span class="kw">async move </span>{
-                                <span class="kw">let </span>res = w.close(stream_id).<span class="kw">await</span>;
-                                (w, res)
-                            }));
-                        }
-                        <span class="prelude-val">None </span>=&gt; {
-                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
-                        }
-                    }
-                }
-                State::Close(fut) =&gt; {
-                    <span class="kw">let </span>(w, res) = <span class="macro">futures::ready!</span>(fut.as_mut().poll(cx));
-                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(stream_id) = <span class="self">self</span>.stream_id <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+        <span class="self">self</span>.core.close(stream_id).<span class="kw">await
+    </span>}
 
-                    res<span class="question-mark">?</span>;
-
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
-                }
-                State::Init(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"AlluxioWriter must not go into State::Init during poll_close"</span>)
-                }
-                State::Write(<span class="kw">_</span>) =&gt; <span class="macro">unreachable! </span>{
-                    <span class="string">"AlluxioWriter must not go into State::Write during poll_close"
-                </span>},
-            }
-        }
-    }
-
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"AlluxioWriter doesn't support abort"</span>,
-        )))
+        ))
     }
 }
 </code></pre></div></section></main></body></html>

@@ -484,6 +484,8 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -504,9 +506,8 @@
 </span><span class="kw">use </span>std::ffi::CString;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+
 <span class="kw">use </span>std::io;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
@@ -894,12 +895,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, writer_write_start, c_path.as_ptr());
         <span class="self">self</span>.inner
-            .poll_write(cx, bs)
-            .map_ok(|n| {
+            .write(bs)
+            .<span class="kw">await
+            </span>.map(|n| {
                 <span class="macro">probe_lazy!</span>(opendal, writer_write_ok, c_path.as_ptr(), n);
                 n
             })
@@ -909,12 +911,13 @@
             })
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, writer_poll_abort_start, c_path.as_ptr());
         <span class="self">self</span>.inner
-            .poll_abort(cx)
-            .map_ok(|<span class="kw">_</span>| {
+            .abort()
+            .<span class="kw">await
+            </span>.map(|<span class="kw">_</span>| {
                 <span class="macro">probe_lazy!</span>(opendal, writer_poll_abort_ok, c_path.as_ptr());
             })
             .map_err(|err| {
@@ -923,12 +926,13 @@
             })
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, writer_close_start, c_path.as_ptr());
         <span class="self">self</span>.inner
-            .poll_close(cx)
-            .map_ok(|<span class="kw">_</span>| {
+            .close()
+            .<span class="kw">await
+            </span>.map(|<span class="kw">_</span>| {
                 <span class="macro">probe_lazy!</span>(opendal, writer_close_ok, c_path.as_ptr());
             })
             .map_err(|err| {

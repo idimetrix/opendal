@@ -187,10 +187,6 @@
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -210,9 +206,6 @@
 
 </span><span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>std::cmp::min;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -249,32 +242,32 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>ExactBufWriter&lt;W&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">if </span><span class="self">self</span>.buffer.len() &gt;= <span class="self">self</span>.buffer_size {
             <span class="kw">let </span>bs = <span class="self">self</span>.buffer.bytes(<span class="self">self</span>.buffer.remaining());
-            <span class="kw">let </span>written = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_write(cx, bs)<span class="question-mark">?</span>);
+            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(bs).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(written);
         }
 
         <span class="kw">let </span>remaining = min(<span class="self">self</span>.buffer_size - <span class="self">self</span>.buffer.len(), bs.len());
         <span class="self">self</span>.buffer.push(bs.slice(<span class="number">0</span>..remaining));
-        Poll::Ready(<span class="prelude-val">Ok</span>(remaining))
+        <span class="prelude-val">Ok</span>(remaining)
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">while </span>!<span class="self">self</span>.buffer.is_empty() {
             <span class="kw">let </span>bs = <span class="self">self</span>.buffer.bytes(<span class="self">self</span>.buffer.remaining());
-            <span class="kw">let </span>n = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_write(cx, bs))<span class="question-mark">?</span>;
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(n);
         }
 
-        <span class="self">self</span>.inner.poll_close(cx)
-    }
+        <span class="self">self</span>.inner.close().<span class="kw">await
+    </span>}
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.buffer.clear();
-        <span class="self">self</span>.inner.poll_abort(cx)
-    }
+        <span class="self">self</span>.inner.abort().<span class="kw">await
+    </span>}
 }
 
 <span class="attr">#[cfg(test)]
@@ -290,26 +283,25 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteExt;
 
     <span class="kw">struct </span>MockWriter {
         buf: Vec&lt;u8&gt;,
     }
 
     <span class="kw">impl </span>Write <span class="kw">for </span>MockWriter {
-        <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
             <span class="macro">debug!</span>(<span class="string">"test_fuzz_exact_buf_writer: flush size: {}"</span>, <span class="kw-2">&amp;</span>bs.len());
 
             <span class="self">self</span>.buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
-            Poll::Ready(<span class="prelude-val">Ok</span>(bs.len()))
+            <span class="prelude-val">Ok</span>(bs.len())
         }
 
-        <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-            Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Ok</span>(())
         }
 
-        <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-            Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Ok</span>(())
         }
     }
 

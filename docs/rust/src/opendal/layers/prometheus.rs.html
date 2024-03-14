@@ -863,10 +863,9 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
@@ -1595,15 +1594,16 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
             Operation::Write.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
         <span class="self">self</span>.inner
-            .poll_write(cx, bs)
-            .map_ok(|n| {
+            .write(bs)
+            .<span class="kw">await
+            </span>.map(|n| {
                 <span class="self">self</span>.stats
                     .bytes_total
                     .with_label_values(<span class="kw-2">&amp;</span>labels)
@@ -1616,15 +1616,15 @@
             })
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_abort(cx).map_err(|err| {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
             err
         })
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_close(cx).map_err(|err| {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.close().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
             err
         })

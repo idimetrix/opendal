@@ -269,7 +269,6 @@
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -290,8 +289,7 @@
 </span><span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::num::NonZeroU32;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+
 <span class="kw">use </span>std::thread;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -479,13 +477,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>buf_length = NonZeroU32::new(bs.len() <span class="kw">as </span>u32).unwrap();
 
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.limiter.check_n(buf_length) {
                 <span class="prelude-val">Ok</span>(res) =&gt; <span class="kw">match </span>res {
-                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="self">self</span>.inner.poll_write(cx, bs),
+                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="self">self</span>.inner.write(bs).<span class="kw">await</span>,
                     <span class="comment">// the query is valid but the Decider can not accommodate them.
                     </span><span class="prelude-val">Err</span>(not_until) =&gt; {
                         <span class="kw">let _ </span>= not_until.wait_time_from(DefaultClock::default().now());
@@ -496,21 +494,21 @@
                     </span>}
                 },
                 <span class="comment">// the query was invalid as the rate limit parameters can "never" accommodate the number of cells queried for.
-                </span><span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+                </span><span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::RateLimited,
                     <span class="string">"InsufficientCapacity due to burst size being smaller than the request size"</span>,
-                ))),
+                )),
             }
         }
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_abort(cx)
-    }
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await
+    </span>}
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_close(cx)
-    }
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.close().<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {

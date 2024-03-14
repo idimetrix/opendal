@@ -2278,11 +2278,6 @@
 <a href="#2276" id="2276">2276</a>
 <a href="#2277" id="2277">2277</a>
 <a href="#2278" id="2278">2278</a>
-<a href="#2279" id="2279">2279</a>
-<a href="#2280" id="2280">2280</a>
-<a href="#2281" id="2281">2281</a>
-<a href="#2282" id="2282">2282</a>
-<a href="#2283" id="2283">2283</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2303,7 +2298,6 @@
 </span><span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::stream;
 <span class="kw">use </span>futures::Stream;
@@ -2312,7 +2306,6 @@
 
 <span class="kw">use </span><span class="kw">super</span>::BlockingOperator;
 <span class="kw">use </span><span class="kw">crate</span>::operator_futures::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteExt;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -3543,7 +3536,7 @@
             <span class="self">self</span>.inner().clone(),
             path,
             (OpWrite::default(), bs),
-            |inner, path, (args, <span class="kw-2">mut </span>bs)| <span class="kw">async move </span>{
+            |inner, path, (args, bs)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
@@ -3553,12 +3546,9 @@
                     );
                 }
 
-                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">while </span>!bs.is_empty() {
-                    <span class="kw">let </span>n = w.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-                    bs.advance(n);
-                }
-
+                <span class="kw">let </span>(<span class="kw">_</span>, w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>w = Writer::new(w);
+                w.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                 w.close().<span class="kw">await</span><span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(())

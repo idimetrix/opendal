@@ -60,8 +60,6 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -79,8 +77,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
+</span><span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::VercelArtifactsBackend;
@@ -105,8 +102,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>VercelArtifactsWriter {
+<span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>VercelArtifactsWriter {
     <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.backend

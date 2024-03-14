@@ -1440,9 +1440,6 @@
 <a href="#1438" id="1438">1438</a>
 <a href="#1439" id="1439">1439</a>
 <a href="#1440" id="1440">1440</a>
-<a href="#1441" id="1441">1441</a>
-<a href="#1442" id="1442">1442</a>
-<a href="#1443" id="1443">1443</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1463,9 +1460,6 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>std::io;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
@@ -2592,8 +2586,8 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_write(cx, bs.clone())) {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(n) =&gt; {
                 <span class="self">self</span>.written += n <span class="kw">as </span>u64;
                 <span class="macro">trace!</span>(
@@ -2606,7 +2600,7 @@
                     bs.len(),
                     n,
                 );
-                Poll::Ready(<span class="prelude-val">Ok</span>(n))
+                <span class="prelude-val">Ok</span>(n)
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
@@ -2621,13 +2615,13 @@
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
                     )
                 }
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
+                <span class="prelude-val">Err</span>(err)
             }
         }
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_abort(cx)) {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.abort().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">trace!</span>(
                     target: LOGGING_TARGET,
@@ -2637,7 +2631,7 @@
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
                 );
-                Poll::Ready(<span class="prelude-val">Ok</span>(()))
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
@@ -2652,13 +2646,13 @@
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
                     )
                 }
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
+                <span class="prelude-val">Err</span>(err)
             }
         }
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_close(cx)) {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.close().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">debug!</span>(
                     target: LOGGING_TARGET,
@@ -2668,7 +2662,7 @@
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written
                 );
-                Poll::Ready(<span class="prelude-val">Ok</span>(()))
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
@@ -2683,7 +2677,7 @@
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
                     )
                 }
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
+                <span class="prelude-val">Err</span>(err)
             }
         }
     }

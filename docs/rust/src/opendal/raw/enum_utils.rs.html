@@ -289,8 +289,6 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -332,8 +330,6 @@
 //! type_alias_impl_trait has been stabilized.
 
 </span><span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>bytes::Bytes;
 
@@ -383,24 +379,24 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write&gt; oio::Write <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_write(cx, bs),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_write(cx, bs),
+            <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,
         }
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_close(cx),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_close(cx),
+            <span class="self">Self</span>::One(v) =&gt; v.close().<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.close().<span class="kw">await</span>,
         }
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_abort(cx),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_abort(cx),
+            <span class="self">Self</span>::One(v) =&gt; v.abort().<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.abort().<span class="kw">await</span>,
         }
     }
 }
@@ -458,27 +454,27 @@
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write, THREE: oio::Write&gt; oio::Write
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_write(cx, bs),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_write(cx, bs),
-            <span class="self">Self</span>::Three(v) =&gt; v.poll_write(cx, bs),
+            <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,
+            <span class="self">Self</span>::Three(v) =&gt; v.write(bs).<span class="kw">await</span>,
         }
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_close(cx),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_close(cx),
-            <span class="self">Self</span>::Three(v) =&gt; v.poll_close(cx),
+            <span class="self">Self</span>::One(v) =&gt; v.close().<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.close().<span class="kw">await</span>,
+            <span class="self">Self</span>::Three(v) =&gt; v.close().<span class="kw">await</span>,
         }
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.poll_abort(cx),
-            <span class="self">Self</span>::Two(v) =&gt; v.poll_abort(cx),
-            <span class="self">Self</span>::Three(v) =&gt; v.poll_abort(cx),
+            <span class="self">Self</span>::One(v) =&gt; v.abort().<span class="kw">await</span>,
+            <span class="self">Self</span>::Two(v) =&gt; v.abort().<span class="kw">await</span>,
+            <span class="self">Self</span>::Three(v) =&gt; v.abort().<span class="kw">await</span>,
         }
     }
 }

@@ -983,9 +983,6 @@
 <a href="#981" id="981">981</a>
 <a href="#982" id="982">982</a>
 <a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1006,10 +1003,8 @@
 </span><span class="kw">use </span>std::cmp;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
@@ -1146,7 +1141,7 @@
         }
         <span class="kw">if </span>capability.write_can_empty &amp;&amp; capability.list {
             <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = <span class="self">self</span>.inner.write(path, OpWrite::default()).<span class="kw">await</span><span class="question-mark">?</span>;
-            oio::WriteExt::close(<span class="kw-2">&amp;mut </span>w).<span class="kw">await</span><span class="question-mark">?</span>;
+            oio::Write::close(<span class="kw-2">&amp;mut </span>w).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreateDir::default());
         }
 
@@ -1700,35 +1695,34 @@
 <span class="kw">where
     </span>W: oio::Write,
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
-            Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
-        })<span class="question-mark">?</span>;
-        <span class="kw">let </span>n = <span class="macro">ready!</span>(w.poll_write(cx, bs))<span class="question-mark">?</span>;
-
-        Poll::Ready(<span class="prelude-val">Ok</span>(n))
-    }
-
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
 
-        <span class="macro">ready!</span>(w.poll_close(cx))<span class="question-mark">?</span>;
+        w.write(bs).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
+            Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
+        })<span class="question-mark">?</span>;
+
+        w.close().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
 
-        <span class="macro">ready!</span>(w.poll_abort(cx))<span class="question-mark">?</span>;
+        w.abort().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="prelude-val">Ok</span>(())
     }
 }
 

@@ -146,9 +146,6 @@
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -168,7 +165,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
@@ -193,8 +189,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>AzdlsWriter {
+<span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>AzdlsWriter {
     <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req =
             <span class="self">self</span>.core
@@ -240,8 +235,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::AppendWrite <span class="kw">for </span>AzdlsWriter {
+<span class="kw">impl </span>oio::AppendWrite <span class="kw">for </span>AzdlsWriter {
     <span class="kw">async fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.core.azdls_get_properties(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 

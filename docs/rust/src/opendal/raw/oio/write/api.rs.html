@@ -198,47 +198,6 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -260,10 +219,9 @@
 <span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+<span class="kw">use </span>std::ops::DerefMut;
 
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// WriteOperation is the name for APIs of Writer.
@@ -312,7 +270,7 @@
 }
 
 <span class="doccomment">/// Writer is a type erased [`Write`]
-</span><span class="kw">pub type </span>Writer = Box&lt;<span class="kw">dyn </span>Write&gt;;
+</span><span class="kw">pub type </span>Writer = Box&lt;<span class="kw">dyn </span>WriteDyn&gt;;
 
 <span class="doccomment">/// Write is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>Write: Unpin + Send + Sync {
@@ -325,118 +283,78 @@
     ///
     /// It's possible that `n &lt; bs.len()`, caller should pass the remaining bytes
     /// repeatedly until all bytes has been written.
-    </span><span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + Send;
+    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
-    </span><span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
+    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 
     <span class="doccomment">/// Abort the pending writer.
-    </span><span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
+    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 }
 
 <span class="kw">impl </span>Write <span class="kw">for </span>() {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::Write"</span>)
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"output writer doesn't support close"</span>,
-        )))
+        ))
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"output writer doesn't support abort"</span>,
-        )))
+        ))
     }
 }
 
-<span class="doccomment">/// `Box&lt;dyn Write&gt;` won't implement `Write` automatically.
-///
-/// To make Writer work as expected, we must add this impl.
-</span><span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: Bytes) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_write(cx, bs)
+<span class="kw">pub trait </span>WriteDyn: Unpin + Send + Sync {
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+
+    <span class="kw">fn </span>close_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+
+    <span class="kw">fn </span>abort_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+}
+
+<span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; WriteDyn <span class="kw">for </span>T {
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+        Box::pin(<span class="self">self</span>.write(bs))
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_close(cx)
+    <span class="kw">fn </span>close_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        Box::pin(<span class="self">self</span>.close())
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_abort(cx)
+    <span class="kw">fn </span>abort_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        Box::pin(<span class="self">self</span>.abort())
     }
 }
 
-<span class="doccomment">/// Impl WriteExt for all T: Write
-</span><span class="kw">impl</span>&lt;T: Write&gt; WriteExt <span class="kw">for </span>T {}
+<span class="kw">impl</span>&lt;T: WriteDyn + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="self">self</span>.deref_mut().write_dyn(bs).<span class="kw">await
+    </span>}
 
-<span class="doccomment">/// Extension of [`Read`] to make it easier for use.
-</span><span class="kw">pub trait </span>WriteExt: Write {
-    <span class="doccomment">/// Build a future for `poll_write`.
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: Bytes) -&gt; WriteFuture&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>&gt; {
-        WriteFuture { writer: <span class="self">self</span>, buf }
-    }
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.deref_mut().close_dyn().<span class="kw">await
+    </span>}
 
-    <span class="doccomment">/// Build a future for `poll_close`.
-    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CloseFuture&lt;<span class="self">Self</span>&gt; {
-        CloseFuture { writer: <span class="self">self </span>}
-    }
-
-    <span class="doccomment">/// Build a future for `poll_abort`.
-    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; AbortFuture&lt;<span class="self">Self</span>&gt; {
-        AbortFuture { writer: <span class="self">self </span>}
-    }
-}
-
-<span class="kw">pub struct </span>WriteFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-    buf: Bytes,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>WriteFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;usize&gt;;
-
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.get_mut();
-        this.writer.poll_write(cx, this.buf.clone())
-    }
-}
-
-<span class="kw">pub struct </span>AbortFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>AbortFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;()&gt;;
-
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.writer.poll_abort(cx)
-    }
-}
-
-<span class="kw">pub struct </span>CloseFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>CloseFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;()&gt;;
-
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.writer.poll_close(cx)
-    }
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.deref_mut().abort_dyn().<span class="kw">await
+    </span>}
 }
 
 <span class="doccomment">/// BlockingWriter is a type erased [`BlockingWrite`]
