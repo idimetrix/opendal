@@ -608,6 +608,17 @@
 <a href="#606" id="606">606</a>
 <a href="#607" id="607">607</a>
 <a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -667,9 +678,9 @@
     </span>scope: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Service Account for gcs.
     </span>service_account: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// credential string for GCS service
+    <span class="doccomment">/// Credentials string for GCS service OAuth2 authentication.
     </span>credential: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// credential path for GCS service.
+    <span class="doccomment">/// Local path to credentials file for GCS service OAuth2 authentication.
     </span>credential_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// The predefined acl for GCS.
     </span>predefined_acl: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -760,7 +771,13 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// set the base64 hashed credentials string used for OAuth2
+    <span class="doccomment">/// set the base64 hashed credentials string used for OAuth2 authentication.
+    ///
+    /// this method allows to specify the credentials directly as a base64 hashed string.
+    /// alternatively, you can use `credential_path()` to provide the local path to a credentials file.
+    /// we will use one of `credential` and `credential_path` to complete the OAuth2 authentication.
+    ///
+    /// Reference: [Google Cloud Storage Authentication](https://cloud.google.com/docs/authentication).
     </span><span class="kw">pub fn </span>credential(<span class="kw-2">&amp;mut </span><span class="self">self</span>, credential: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!credential.is_empty() {
             <span class="self">self</span>.config.credential = <span class="prelude-val">Some</span>(credential.to_string())
@@ -768,7 +785,12 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// set the credentials path of GCS.
+    <span class="doccomment">/// set the local path to credentials file which is used for OAuth2 authentication.
+    ///
+    /// credentials file contains the original credentials that have not been base64 hashed.
+    /// we will use one of `credential` and `credential_path` to complete the OAuth2 authentication.
+    ///
+    /// Reference: [Google Cloud Storage Authentication](https://cloud.google.com/docs/authentication).
     </span><span class="kw">pub fn </span>credential_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!path.is_empty() {
             <span class="self">self</span>.config.credential_path = <span class="prelude-val">Some</span>(path.to_string())
