@@ -391,14 +391,6 @@
 <a href="#389" id="389">389</a>
 <a href="#390" id="390">390</a>
 <a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -512,7 +504,7 @@
 <span class="doccomment">/// WriteBlockResult is the result returned by [`WriteBlockFuture`].
 ///
 /// The error part will carries input `(block_id, bytes, err)` so caller can retry them.
-</span><span class="kw">type </span>WriteBlockResult = std::result::Result&lt;Uuid, (Uuid, oio::ChunkedBytes, Error)&gt;;
+</span><span class="kw">type </span>WriteBlockResult = std::result::Result&lt;Uuid, (Uuid, Bytes, Error)&gt;;
 
 <span class="kw">struct </span>WriteBlockFuture(BoxedStaticFuture&lt;WriteBlockResult&gt;);
 
@@ -534,12 +526,12 @@
 }
 
 <span class="kw">impl </span>WriteBlockFuture {
-    <span class="kw">pub fn </span>new&lt;W: BlockWrite&gt;(w: Arc&lt;W&gt;, block_id: Uuid, bytes: oio::ChunkedBytes) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;W: BlockWrite&gt;(w: Arc&lt;W&gt;, block_id: Uuid, bytes: Bytes) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>fut = <span class="kw">async move </span>{
             w.write_block(
                 block_id,
                 bytes.len() <span class="kw">as </span>u64,
-                AsyncBody::ChunkedBytes(bytes.clone()),
+                AsyncBody::Bytes(bytes.clone()),
             )
             .<span class="kw">await
             </span><span class="comment">// Return bytes while we got an error to allow retry.
@@ -558,16 +550,11 @@
     w: Arc&lt;W&gt;,
 
     block_ids: Vec&lt;Uuid&gt;,
-    <span class="doccomment">/// TODO: use Bytes directly.
-    </span>cache: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
+    cache: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
     futures: ConcurrentFutures&lt;WriteBlockFuture&gt;,
 }
 
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this state.
-
-</span><span class="kw">impl</span>&lt;W: BlockWrite&gt; BlockWriter&lt;W&gt; {
+<span class="kw">impl</span>&lt;W: BlockWrite&gt; BlockWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new BlockWriter.
     </span><span class="kw">pub fn </span>new(inner: W, concurrent: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -580,7 +567,6 @@
 
     <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; usize {
         <span class="kw">let </span>size = bs.len();
-        <span class="kw">let </span>bs = oio::ChunkedBytes::from_vec(<span class="macro">vec!</span>[bs]);
         <span class="macro">assert!</span>(<span class="self">self</span>.cache.is_none());
         <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(bs);
         size
@@ -632,7 +618,7 @@
         <span class="comment">// No write block has been sent.
         </span><span class="kw">if </span><span class="self">self</span>.futures.is_empty() &amp;&amp; <span class="self">self</span>.block_ids.is_empty() {
             <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
-                <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), AsyncBody::ChunkedBytes(cache)),
+                <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), AsyncBody::Bytes(cache)),
                 <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, AsyncBody::Empty),
             };
             <span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -694,7 +680,6 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::StreamExt;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
 
     <span class="kw">struct </span>TestWrite {
         length: u64,
@@ -728,7 +713,6 @@
             <span class="kw">let </span>bs = <span class="kw">match </span>body {
                 AsyncBody::Empty =&gt; Bytes::new(),
                 AsyncBody::Bytes(bs) =&gt; bs,
-                AsyncBody::ChunkedBytes(cb) =&gt; cb.bytes(cb.remaining()),
                 AsyncBody::Stream(s) =&gt; s.collect().<span class="kw">await</span>.unwrap(),
             };
 

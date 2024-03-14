@@ -771,9 +771,6 @@
 <a href="#769" id="769">769</a>
 <a href="#770" id="770">770</a>
 <a href="#771" id="771">771</a>
-<a href="#772" id="772">772</a>
-<a href="#773" id="773">773</a>
-<a href="#774" id="774">774</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1063,9 +1060,6 @@
                 AsyncBody::Empty =&gt; {}
                 AsyncBody::Bytes(bytes) =&gt; {
                     media_part = media_part.content(bytes);
-                }
-                AsyncBody::ChunkedBytes(bs) =&gt; {
-                    media_part = media_part.stream(bs.len() <span class="kw">as </span>u64, Box::new(bs));
                 }
                 AsyncBody::Stream(stream) =&gt; {
                     media_part = media_part.stream(size.unwrap(), stream);

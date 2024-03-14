@@ -1195,7 +1195,6 @@
 <a href="#1193" id="1193">1193</a>
 <a href="#1194" id="1194">1194</a>
 <a href="#1195" id="1195">1195</a>
-<a href="#1196" id="1196">1196</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1213,10 +1212,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Bytes;
+</span><span class="kw">use </span>bytes::{Buf, Bytes};
 
 <span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
