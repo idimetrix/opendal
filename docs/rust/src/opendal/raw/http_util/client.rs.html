@@ -184,21 +184,6 @@
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -220,7 +205,6 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>http::Request;
@@ -234,8 +218,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
-
-<span class="kw">const </span>DEFAULT_CONNECT_TIMEOUT: Duration = Duration::from_secs(<span class="number">60</span>);
 
 <span class="doccomment">/// HttpClient that used across opendal.
 </span><span class="attr">#[derive(Clone)]
@@ -258,22 +240,10 @@
 
     <span class="doccomment">/// Build a new http client in async context.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">pub fn </span>build(<span class="kw-2">mut </span>builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="comment">// Make sure we don't enable auto gzip decompress.
-        </span>builder = builder.no_gzip();
-        <span class="comment">// Make sure we don't enable auto brotli decompress.
-        </span>builder = builder.no_brotli();
-        <span class="comment">// Make sure we don't enable auto deflate decompress.
-        </span>builder = builder.no_deflate();
-        <span class="comment">// Make sure we don't wait a connection establishment forever.
-        </span>builder = builder.connect_timeout(DEFAULT_CONNECT_TIMEOUT);
-
-        <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
-        </span><span class="kw">let </span>builder = builder.trust_dns(<span class="bool-val">true</span>);
-
+    </span><span class="kw">pub fn </span>build(builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             client: builder.build().map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"async client build failed"</span>).set_source(err)
+                Error::new(ErrorKind::Unexpected, <span class="string">"http client build failed"</span>).set_source(err)
             })<span class="question-mark">?</span>,
         })
     }
@@ -283,7 +253,7 @@
     </span><span class="kw">pub fn </span>build(<span class="kw-2">mut </span>builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             client: builder.build().map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"async client build failed"</span>).set_source(err)
+                Error::new(ErrorKind::Unexpected, <span class="string">"http client build failed"</span>).set_source(err)
             })<span class="question-mark">?</span>,
         })
     }
