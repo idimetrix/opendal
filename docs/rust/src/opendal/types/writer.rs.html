@@ -405,8 +405,6 @@
 <a href="#403" id="403">403</a>
 <a href="#404" id="404">404</a>
 <a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -535,14 +533,13 @@
     /// # Examples
     ///
     /// ```no_run
-    /// use std::io::Result;
+    /// use opendal::Result;
     ///
     /// use bytes::Bytes;
     /// use futures::stream;
     /// use futures::StreamExt;
     /// use opendal::Operator;
     ///
-    /// #[tokio::main]
     /// async fn sink_example(op: Operator) -&gt; Result&lt;()&gt; {
     ///     let mut w = op.writer_with("path/to/file").await?;
     ///     let stream = stream::iter(vec![vec![0; 4096], vec![1; 4096]]).map(Ok);
@@ -586,7 +583,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// use std::io::Result;
+    /// use opendal::Result;
     ///
     /// use bytes::Bytes;
     /// use futures::io::Cursor;
@@ -594,7 +591,6 @@
     /// use futures::StreamExt;
     /// use opendal::Operator;
     ///
-    /// #[tokio::main]
     /// async fn copy_example(op: Operator) -&gt; Result&lt;()&gt; {
     ///     let mut w = op.writer_with("path/to/file").await?;
     ///     let reader = Cursor::new(vec![0; 4096]);

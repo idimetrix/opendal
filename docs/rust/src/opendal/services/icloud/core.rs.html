@@ -876,6 +876,7 @@
 <a href="#874" id="874">874</a>
 <a href="#875" id="875">875</a>
 <a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1479,6 +1480,7 @@
 }
 
 <span class="attr">#[derive(Default, Deserialize, Clone)]
+#[serde(rename_all = <span class="string">"camelCase"</span>)]
 </span><span class="kw">pub struct </span>IcloudWebservicesResponse {
     <span class="attr">#[serde(default)]
     </span><span class="kw">pub </span>hsa_challenge_required: bool,
@@ -1494,17 +1496,17 @@
 }
 
 <span class="attr">#[derive(Deserialize, Default, Clone, Debug)]
+#[serde(rename_all = <span class="string">"camelCase"</span>)]
 </span><span class="kw">pub struct </span>Drivews {
-    <span class="attr">#[serde(rename = <span class="string">"pcsRequired"</span>)]
-    </span><span class="kw">pub </span>pcs_required: bool,
+    <span class="kw">pub </span>pcs_required: bool,
     <span class="kw">pub </span>status: String,
     <span class="kw">pub </span>url: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="attr">#[derive(Deserialize, Default, Clone, Debug)]
+#[serde(rename_all = <span class="string">"camelCase"</span>)]
 </span><span class="kw">pub struct </span>Docws {
-    <span class="attr">#[serde(rename = <span class="string">"pcsRequired"</span>)]
-    </span><span class="kw">pub </span>pcs_required: bool,
+    <span class="kw">pub </span>pcs_required: bool,
     <span class="kw">pub </span>status: String,
     <span class="kw">pub </span>url: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
@@ -1590,6 +1592,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::IcloudRoot;
     <span class="kw">use </span><span class="kw">super</span>::IcloudWebservicesResponse;
+    <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_icloud_drive_root_json() {
@@ -1677,7 +1680,6 @@
           "etag": "w9",
           "fileCount": 22,
           "items": [
-            {
             {
               "dateChanged": "2021-02-18T14:10:46Z",
               "dateCreated": "2021-02-10T07:01:34Z",

@@ -475,7 +475,6 @@
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -502,7 +501,6 @@
 //! # use opendal::EntryMode;
 //! # use opendal::Operator;
 //! use opendal::ErrorKind;
-//! # #[tokio::main]
 //! # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
 //! if let Err(e) = op.stat("test_file").await {
 //!     if e.kind() == ErrorKind::NotFound {

@@ -11,48 +11,47 @@
 <p>For a more detailed explanation of these metrics and how they are used, please refer to the <a href="https://prometheus.io/docs/introduction/overview/">Prometheus documentation</a>.</p>
 <h2 id="histogram-configuration"><a href="#histogram-configuration">Histogram Configuration</a></h2>
 <p>The metric buckets for these histograms are automatically generated based on the <code>exponential_buckets(0.01, 2.0, 16)</code> configuration.</p>
-<h2 id="examples"><a href="#examples">Examples</a></h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>log::debug;
-<span class="kw">use </span>log::info;
-<span class="kw">use </span>opendal::layers::PrometheusLayer;
-<span class="kw">use </span>opendal::services;
-<span class="kw">use </span>opendal::Operator;
-<span class="kw">use </span>opendal::Result;
-<span class="kw">use </span>prometheus::Encoder;
+<h2 id="examples"><a href="#examples">Examples</a></h2><div class="example-wrap"><pre class="language-no_build"><code>use log::debug;
+use log::info;
+use opendal::layers::PrometheusLayer;
+use opendal::services;
+use opendal::Operator;
+use opendal::Result;
+use prometheus::Encoder;
 
-<span class="doccomment">/// Visit [`opendal::services`] for more service related config.
+/// Visit [`opendal::services`] for more service related config.
 /// Visit [`opendal::Operator`] for more operator level APIs.
-</span><span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="comment">// Pick a builder and configure it.
-    </span><span class="kw">let </span>builder = services::Memory::default();
-    <span class="kw">let </span>registry = prometheus::default_registry();
+#[tokio::main]
+async fn main() -&gt; Result&lt;()&gt; {
+    // Pick a builder and configure it.
+    let builder = services::Memory::default();
+    let registry = prometheus::default_registry();
 
-    <span class="kw">let </span>op = Operator::new(builder)
-        .expect(<span class="string">"must init"</span>)
+    let op = Operator::new(builder)
+        .expect(&quot;must init&quot;)
         .layer(PrometheusLayer::with_registry(registry.clone()))
         .finish();
-    <span class="macro">debug!</span>(<span class="string">"operator: {op:?}"</span>);
+    debug!(&quot;operator: {op:?}&quot;);
 
-    <span class="comment">// Write data into object test.
-    </span>op.write(<span class="string">"test"</span>, <span class="string">"Hello, World!"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="comment">// Read data from object.
-    </span><span class="kw">let </span>bs = op.read(<span class="string">"test"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="macro">info!</span>(<span class="string">"content: {}"</span>, String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs));
+    // Write data into object test.
+    op.write(&quot;test&quot;, &quot;Hello, World!&quot;).await?;
+    // Read data from object.
+    let bs = op.read(&quot;test&quot;).await?;
+    info!(&quot;content: {}&quot;, String::from_utf8_lossy(&amp;bs));
 
-    <span class="comment">// Get object metadata.
-    </span><span class="kw">let </span>meta = op.stat(<span class="string">"test"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="macro">info!</span>(<span class="string">"meta: {:?}"</span>, meta);
+    // Get object metadata.
+    let meta = op.stat(&quot;test&quot;).await?;
+    info!(&quot;meta: {:?}&quot;, meta);
 
-    <span class="comment">// Export prometheus metrics.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>buffer = Vec::&lt;u8&gt;::new();
-    <span class="kw">let </span>encoder = prometheus::TextEncoder::new();
-    encoder.encode(<span class="kw-2">&amp;</span>prometheus::gather(), <span class="kw-2">&amp;mut </span>buffer).unwrap();
-    <span class="macro">println!</span>(<span class="string">"## Prometheus Metrics"</span>);
-    <span class="macro">println!</span>(<span class="string">"{}"</span>, String::from_utf8(buffer.clone()).unwrap());
-    <span class="prelude-val">Ok</span>(())
-}</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-PrometheusLayer" class="impl"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#113-147">source</a><a href="#impl-PrometheusLayer" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.PrometheusLayer.html" title="struct opendal::layers::PrometheusLayer">PrometheusLayer</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_registry" class="method"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#115-122">source</a><h4 class="code-header">pub fn <a href="#method.with_registry" class="fn">with_registry</a>(registry: Registry) -&gt; Self</h4></section></summary><div class="docblock"><p>create PrometheusLayer by incoming registry.</p>
+    // Export prometheus metrics.
+    let mut buffer = Vec::&lt;u8&gt;::new();
+    let encoder = prometheus::TextEncoder::new();
+    encoder.encode(&amp;prometheus::gather(), &amp;mut buffer).unwrap();
+    println!(&quot;## Prometheus Metrics&quot;);
+    println!(&quot;{}&quot;, String::from_utf8(buffer.clone()).unwrap());
+    Ok(())
+}
+</code></pre></div></div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-PrometheusLayer" class="impl"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#113-147">source</a><a href="#impl-PrometheusLayer" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.PrometheusLayer.html" title="struct opendal::layers::PrometheusLayer">PrometheusLayer</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_registry" class="method"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#115-122">source</a><h4 class="code-header">pub fn <a href="#method.with_registry" class="fn">with_registry</a>(registry: Registry) -&gt; Self</h4></section></summary><div class="docblock"><p>create PrometheusLayer by incoming registry.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.requests_duration_seconds_buckets" class="method"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#125-130">source</a><h4 class="code-header">pub fn <a href="#method.requests_duration_seconds_buckets" class="fn">requests_duration_seconds_buckets</a>(self, buckets: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f64.html">f64</a>&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>set buckets for requests_duration_seconds</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.bytes_total_buckets" class="method"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#133-138">source</a><h4 class="code-header">pub fn <a href="#method.bytes_total_buckets" class="fn">bytes_total_buckets</a>(self, buckets: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f64.html">f64</a>&gt;) -&gt; Self</h4></section></summary><div class="docblock"><p>set buckets for bytes_total</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.enable_path_label" class="method"><a class="src rightside" href="../../src/opendal/layers/prometheus.rs.html#143-146">source</a><h4 class="code-header">pub fn <a href="#method.enable_path_label" class="fn">enable_path_label</a>(self, level: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>set path label level

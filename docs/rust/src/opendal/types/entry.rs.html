@@ -189,9 +189,6 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -227,7 +224,6 @@
 /// use opendal::EntryMode;
 /// use opendal::Metakey;
 /// use opendal::Operator;
-/// # #[tokio::main]
 /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
 /// let mut entries = op
 ///     .list_with("dir/")
@@ -310,7 +306,6 @@
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// use opendal::Operator;
-    /// # #[tokio::main]
     /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
     /// let mut entries = op
     ///     .list_with("dir/")
@@ -359,7 +354,6 @@
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// use opendal::Operator;
-    /// # #[tokio::main]
     /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
     /// let mut entries = op
     ///     .list_with("dir/")

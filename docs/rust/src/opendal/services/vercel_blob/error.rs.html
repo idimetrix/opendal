@@ -147,13 +147,13 @@
 
 <span class="doccomment">/// VercelBlobError is the error returned by VercelBlob service.
 </span><span class="attr">#[derive(Default, Debug, Deserialize)]
-#[serde(default, rename_all = <span class="string">"PascalCase"</span>)]
+#[serde(default)]
 </span><span class="kw">struct </span>VercelBlobError {
     error: VercelBlobErrorDetail,
 }
 
 <span class="attr">#[derive(Default, Debug, Deserialize)]
-#[serde(default, rename_all = <span class="string">"PascalCase"</span>)]
+#[serde(default)]
 </span><span class="kw">struct </span>VercelBlobErrorDetail {
     code: String,
     message: <span class="prelude-ty">Option</span>&lt;String&gt;,
