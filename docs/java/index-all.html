@@ -59,6 +59,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Operator.html#append(java.lang.String,java.lang.String)" class="member-name-link">append(String, String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/AsyncExecutor.html" class="type-name-link" title="class in org.apache.opendal">AsyncExecutor</a> - Class in <a href="org/apache/opendal/package-summary.html">org.apache.opendal</a></dt>
+<dd>
+<div class="block">AsyncExecutor represents an underneath OpenDAL executor that runs async tasks spawned in the Rust world.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
@@ -138,6 +142,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Operator.html#createDir(java.lang.String)" class="member-name-link">createDir(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/AsyncExecutor.html#createTokioExecutor(int)" class="member-name-link">createTokioExecutor(int)</a> - Static method in class org.apache.opendal.<a href="org/apache/opendal/AsyncExecutor.html" title="class in org.apache.opendal">AsyncExecutor</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
@@ -153,6 +159,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">DIR means the path can be listed.</div>
 </dd>
+<dt><a href="org/apache/opendal/AsyncExecutor.html#disposeInternal(long)" class="member-name-link">disposeInternal(long)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/AsyncExecutor.html" title="class in org.apache.opendal">AsyncExecutor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/BlockingOperator.html#disposeInternal(long)" class="member-name-link">disposeInternal(long)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/NativeObject.html#disposeInternal(long)" class="member-name-link">disposeInternal(long)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/NativeObject.html" title="class in org.apache.opendal">NativeObject</a></dt>
@@ -322,6 +330,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Construct an OpenDAL blocking operator:</div>
 </dd>
 <dt><a href="org/apache/opendal/Operator.html#of(java.lang.String,java.util.Map)" class="member-name-link">of(String, Map&lt;String, String&gt;)</a> - Static method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
+<dd>
+<div class="block">Construct an OpenDAL operator:</div>
+</dd>
+<dt><a href="org/apache/opendal/Operator.html#of(java.lang.String,java.util.Map,org.apache.opendal.AsyncExecutor)" class="member-name-link">of(String, Map&lt;String, String&gt;, AsyncExecutor)</a> - Static method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
 <dd>
 <div class="block">Construct an OpenDAL operator:</div>
 </dd>
