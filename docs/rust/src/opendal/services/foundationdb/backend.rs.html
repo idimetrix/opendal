@@ -174,6 +174,28 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -201,31 +223,54 @@
 <span class="kw">use </span>foundationdb::Database;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::Builder;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
+<span class="kw">use </span>serde::Deserialize;
+
 <span class="doccomment">/// [foundationdb](https://www.foundationdb.org/) service support.
-</span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+///Config for FoundationDB.
+</span><span class="attr">#[derive(Default, Deserialize)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>FoundationConfig {
+    <span class="doccomment">///root of the backend.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">///config_path for the backend.
+    </span><span class="kw">pub </span>config_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>FoundationConfig {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"FoundationConfig"</span>);
+
+        ds.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
+        ds.field(<span class="string">"config_path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config_path);
+
+        ds.finish()
+    }
+}
+
+<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>FoundationdbBuilder {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    config_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: FoundationConfig,
 }
 
 <span class="kw">impl </span>FoundationdbBuilder {
     <span class="doccomment">/// Set the root for Foundationdb.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the config path for Foundationdb. If not set, will fallback to use default
     </span><span class="kw">pub fn </span>config_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.config_path = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.config_path = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 }
@@ -235,18 +280,16 @@
     <span class="kw">type </span>Accessor = FoundationdbBackend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = FoundationdbBuilder::default();
+        <span class="kw">let </span>config = FoundationConfig::deserialize(ConfigDeserializer::new(map))
+            .expect(<span class="string">"config deserialize must succeed"</span>);
 
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"config_path"</span>).map(|v| builder.config_path(v));
-
-        builder
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="kw">let </span>_network = Arc::new(<span class="kw">unsafe </span>{ foundationdb::boot() });
         <span class="kw">let </span>db;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(cfg_path) = <span class="kw-2">&amp;</span><span class="self">self</span>.config_path {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cfg_path) = <span class="kw-2">&amp;</span><span class="self">self</span>.config.config_path {
             db = Database::from_path(cfg_path).map_err(|e| {
                 Error::new(ErrorKind::ConfigInvalid, <span class="string">"open foundation db"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Foundationdb)
@@ -263,7 +306,8 @@
         <span class="kw">let </span>db = Arc::new(db);
 
         <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.root
+            <span class="self">self</span>.config
+                .root
                 .clone()
                 .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
                 .as_str(),

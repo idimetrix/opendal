@@ -406,6 +406,8 @@
 <a href="#404" id="404">404</a>
 <a href="#405" id="405">405</a>
 <a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -676,6 +678,8 @@
 
 <span class="attr">#[cfg(feature = <span class="string">"services-foundationdb"</span>)]
 </span><span class="kw">mod </span>foundationdb;
+<span class="attr">#[cfg(feature = <span class="string">"services-foundationdb"</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::foundationdb::FoundationConfig;
 <span class="attr">#[cfg(feature = <span class="string">"services-foundationdb"</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::foundationdb::Foundationdb;
 
