@@ -399,6 +399,13 @@
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -798,4 +805,11 @@
 </span><span class="kw">pub use </span>vercel_blob::VercelBlob;
 <span class="attr">#[cfg(feature = <span class="string">"services-vercel-blob"</span>)]
 </span><span class="kw">pub use </span>vercel_blob::VercelBlobConfig;
+
+<span class="attr">#[cfg(feature = <span class="string">"services-surrealdb"</span>)]
+</span><span class="kw">mod </span>surrealdb;
+<span class="attr">#[cfg(feature = <span class="string">"services-surrealdb"</span>)]
+</span><span class="kw">pub use </span>surrealdb::Surrealdb;
+<span class="attr">#[cfg(feature = <span class="string">"services-surrealdb"</span>)]
+</span><span class="kw">pub use </span>surrealdb::SurrealdbConfig;
 </code></pre></div></section></main></body></html>
