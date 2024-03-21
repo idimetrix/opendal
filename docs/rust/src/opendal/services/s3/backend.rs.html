@@ -1322,6 +1322,14 @@
 <a href="#1320" id="1320">1320</a>
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1343,6 +1351,7 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::fmt::Write;
+<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::atomic::AtomicBool;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -1361,6 +1370,7 @@
 <span class="kw">use </span>reqsign::AwsCredentialLoad;
 <span class="kw">use </span>reqsign::AwsDefaultLoader;
 <span class="kw">use </span>reqsign::AwsV4Signer;
+<span class="kw">use </span>reqwest::Url;
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
@@ -1951,6 +1961,12 @@
 
         <span class="comment">// If endpoint contains bucket name, we should trim them.
         </span>endpoint = endpoint.replace(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"//{bucket}."</span>), <span class="string">"//"</span>);
+
+        <span class="comment">// Omit default ports if specified.
+        </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(url) = Url::from_str(<span class="kw-2">&amp;</span>endpoint) {
+            <span class="comment">// Remove the trailing `/` of root path.
+            </span>endpoint = url.to_string().trim_end_matches(<span class="string">'/'</span>).to_string();
+        }
 
         <span class="comment">// Update with endpoint templates.
         </span>endpoint = <span class="kw">if let </span><span class="prelude-val">Some</span>(template) = ENDPOINT_TEMPLATES.get(endpoint.as_str()) {
