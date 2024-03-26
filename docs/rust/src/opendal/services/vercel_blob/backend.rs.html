@@ -269,20 +269,6 @@
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -306,6 +292,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
@@ -318,6 +305,7 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::VercelBlobWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::VercelBlobWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::vercel_blob::reader::VercelBlobReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for backblaze VercelBlob services support.
@@ -463,7 +451,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>VercelBlobBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = VercelBlobReader;
     <span class="kw">type </span>Writer = VercelBlobWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;VercelBlobLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -478,8 +466,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
@@ -505,9 +491,10 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
-                <span class="kw">let </span>resp: Blob = serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>resp: Blob =
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 parse_blob(<span class="kw-2">&amp;</span>resp).map(RpStat::new)
             }
@@ -516,21 +503,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.download(path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            VercelBlobReader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -552,11 +528,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(RpCopy::default())
-            }
+            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }

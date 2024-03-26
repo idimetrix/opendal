@@ -459,7 +459,6 @@
 
 </span><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::fmt::Debug;
-
 <span class="kw">use </span>std::vec::IntoIter;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -686,6 +685,7 @@
 }
 
 <span class="attr">#[cfg(test)]
+#[cfg(feature = <span class="string">"services-http"</span>)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::collections::HashSet;

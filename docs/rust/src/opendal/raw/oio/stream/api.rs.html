@@ -165,6 +165,11 @@
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -188,6 +193,7 @@
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>bytes::BytesMut;
 
@@ -213,6 +219,16 @@
     }
 }
 
+<span class="kw">impl </span>Stream <span class="kw">for </span>Bytes {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.has_remaining() {
+            Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="self">self</span>.copy_to_bytes(<span class="self">self</span>.remaining()))))
+        } <span class="kw">else </span>{
+            Poll::Ready(<span class="prelude-val">None</span>)
+        }
+    }
+}
+
 <span class="doccomment">/// `Box&lt;dyn Stream&gt;` won't implement `Stream` automatically.
 /// To make Streamer work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: Stream + <span class="question-mark">?</span>Sized&gt; Stream <span class="kw">for </span>Box&lt;T&gt; {
@@ -221,13 +237,7 @@
     }
 }
 
-<span class="comment">// impl&lt;T: raw::oio::Read&gt; Stream for T {
-//     fn poll_next(&amp;mut self, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Option&lt;Result&lt;Bytes&gt;&gt;&gt; {
-//         raw::oio::Read::poll_next(self, cx)
-//     }
-// }
-
-</span><span class="kw">impl </span>futures::Stream <span class="kw">for dyn </span>Stream {
+<span class="kw">impl </span>futures::Stream <span class="kw">for dyn </span>Stream {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Bytes&gt;;
 
     <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {

@@ -914,18 +914,6 @@
 <a href="#912" id="912">912</a>
 <a href="#913" id="913">913</a>
 <a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1054,7 +1042,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -1091,7 +1079,12 @@
 }
 
 <span class="kw">impl </span>AzblobCore {
-    <span class="kw">pub fn </span>azblob_get_blob_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>azblob_get_blob_request(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
+        args: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -1118,18 +1111,7 @@
         <span class="comment">// Set SSE headers.
         </span>req = <span class="self">self</span>.insert_sse_headers(req);
 
-        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
-            <span class="comment">// azblob doesn't support read with suffix range.
-            //
-            // ref: https://learn.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-blob-service-operations
-            </span><span class="kw">if </span>range.offset().is_none() &amp;&amp; range.size().is_some() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::Unsupported,
-                    <span class="string">"azblob doesn't support read with suffix range"</span>,
-                ));
-            }
-
             req = req.header(http::header::RANGE, range.to_header());
         }
 
@@ -1151,9 +1133,10 @@
     <span class="kw">pub async fn </span>azblob_get_blob(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
         args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_get_blob_request(path, args)<span class="question-mark">?</span>;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_get_blob_request(path, range, args)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1351,7 +1334,7 @@
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_put_block_request(path, block_id, size, args, body)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1405,7 +1388,7 @@
         path: <span class="kw-2">&amp;</span>str,
         block_ids: Vec&lt;Uuid&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
             </span>.azblob_complete_put_block_list_request(path, block_ids, args)
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1453,7 +1436,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         args: <span class="kw-2">&amp;</span>OpStat,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_head_blob_request(path, args)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1477,18 +1460,14 @@
             .map_err(new_request_build_error)
     }
 
-    <span class="kw">pub async fn </span>azblob_delete_blob(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>azblob_delete_blob(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_delete_blob_request(path)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>azblob_copy_blob(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        from: <span class="kw-2">&amp;</span>str,
-        to: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>azblob_copy_blob(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>source = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>target = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -1521,7 +1500,7 @@
         next_marker: <span class="kw-2">&amp;</span>str,
         delimiter: <span class="kw-2">&amp;</span>str,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -1550,10 +1529,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>azblob_batch_delete(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        paths: <span class="kw-2">&amp;</span>[String],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>azblob_batch_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, paths: <span class="kw-2">&amp;</span>[String]) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/{}?restype=container&amp;comp=batch"</span>,
             <span class="self">self</span>.endpoint, <span class="self">self</span>.container

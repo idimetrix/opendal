@@ -696,9 +696,6 @@
 <a href="#694" id="694">694</a>
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -721,6 +718,7 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>chrono::Utc;
 <span class="kw">use </span>http::header;
@@ -771,7 +769,7 @@
 
 <span class="kw">impl </span>B2Core {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -806,9 +804,10 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>token = serde_json::from_slice::&lt;AuthorizeAccountResponse&gt;(resp_body)
-                        .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>resp_body = resp.into_body();
+                    <span class="kw">let </span>token: AuthorizeAccountResponse =
+                        serde_json::from_reader(resp_body.reader())
+                            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                     signer.auth_info = AuthInfo {
                         authorization_token: token.authorization_token.clone(),
                         api_url: token.api_url.clone(),
@@ -830,8 +829,9 @@
     <span class="kw">pub async fn </span>download_file_by_name(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        range: BytesRange,
+        _args: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -848,7 +848,6 @@
 
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
-        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
             req = req.header(header::RANGE, range.to_header());
         }
@@ -881,8 +880,8 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetUploadUrlResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
@@ -893,7 +892,6 @@
     <span class="kw">pub async fn </span>get_download_authorization(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpRead,
         expire: Duration,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;GetDownloadAuthorizationResponse&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -909,10 +907,6 @@
 
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
-        <span class="kw">let </span>range = args.range();
-        <span class="kw">if </span>!range.is_full() {
-            req = req.header(header::RANGE, range.to_header());
-        }
         <span class="kw">let </span>body = GetDownloadAuthorizationRequest {
             bucket_id: <span class="self">self</span>.bucket_id.clone(),
             file_name_prefix: path,
@@ -930,8 +924,8 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetDownloadAuthorizationResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
@@ -945,7 +939,7 @@
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.get_upload_url().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -982,7 +976,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         args: <span class="kw-2">&amp;</span>OpWrite,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1036,8 +1030,8 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetUploadPartUrlResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
@@ -1051,7 +1045,7 @@
         part_number: usize,
         size: u64,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.get_upload_part_url(file_id).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(resp.upload_url);
@@ -1074,7 +1068,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file_id: <span class="kw-2">&amp;</span>str,
         part_sha1_array: Vec&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/b2api/v2/b2_finish_large_file"</span>, auth_info.api_url);
@@ -1098,7 +1092,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>cancel_large_file(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>cancel_large_file(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/b2api/v2/b2_cancel_large_file"</span>, auth_info.api_url);
@@ -1127,7 +1121,7 @@
         delimiter: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         start_after: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -1171,7 +1165,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         source_file_id: String,
         to: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1198,7 +1192,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>hide_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>hide_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;

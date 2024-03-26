@@ -548,8 +548,6 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -575,6 +573,7 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>backon::ExponentialBuilder;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>chrono::Utc;
@@ -653,10 +652,10 @@
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(request).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
 
         <span class="kw">let </span>token: DropboxTokenResponse =
-            serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(body.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Update signer after token refreshed.
         </span>signer.access_token = token.access_token.clone();
@@ -676,8 +675,9 @@
     <span class="kw">pub async fn </span>dropbox_get(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        range: BytesRange,
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url: String = <span class="string">"https://content.dropboxapi.com/2/files/download"</span>.to_string();
         <span class="kw">let </span>download_args = DropboxDownloadArgs {
             path: build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path),
@@ -689,7 +689,6 @@
             .header(<span class="string">"Dropbox-API-Arg"</span>, request_payload)
             .header(CONTENT_LENGTH, <span class="number">0</span>);
 
-        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
             req = req.header(header::RANGE, range.to_header());
         }
@@ -708,7 +707,7 @@
         size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="string">"https://content.dropboxapi.com/2/files/upload"</span>.to_string();
         <span class="kw">let </span>dropbox_update_args = DropboxUploadArgs {
             path: build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path),
@@ -735,7 +734,7 @@
         <span class="self">self</span>.client.send(request).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>dropbox_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>dropbox_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="string">"https://api.dropboxapi.com/2/files/delete_v2"</span>.to_string();
         <span class="kw">let </span>args = DropboxDeleteArgs {
             path: <span class="self">self</span>.build_path(path),
@@ -753,10 +752,7 @@
         <span class="self">self</span>.client.send(request).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>dropbox_delete_batch(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        paths: Vec&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>dropbox_delete_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, paths: Vec&lt;String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="string">"https://api.dropboxapi.com/2/files/delete_batch"</span>.to_string();
         <span class="kw">let </span>args = DropboxDeleteBatchArgs {
             entries: paths
@@ -798,10 +794,10 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;DropboxDeleteBatchResponse&gt;(<span class="kw-2">&amp;</span>bs)
-            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>decoded_response: DropboxDeleteBatchResponse =
+            serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
         <span class="kw">match </span>decoded_response.tag.as_str() {
             <span class="string">"in_progress" </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unexpected,
@@ -852,7 +848,7 @@
         }
     }
 
-    <span class="kw">pub async fn </span>dropbox_get_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>dropbox_get_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="string">"https://api.dropboxapi.com/2/files/get_metadata"</span>.to_string();
         <span class="kw">let </span>args = DropboxMetadataArgs {
             path: <span class="self">self</span>.build_path(path),

@@ -260,16 +260,6 @@
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -287,10 +277,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::num::NonZeroU32;
+</span><span class="kw">use </span>std::num::NonZeroU32;
 <span class="kw">use </span>std::sync::Arc;
-
 <span class="kw">use </span>std::thread;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -457,24 +445,16 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
         <span class="comment">// TODO: How can we handle buffer reads with a limiter?
-        </span><span class="self">self</span>.inner.read(limit).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos).<span class="kw">await
+        </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await
     </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
         <span class="comment">// TODO: How can we handle buffer reads with a limiter?
-        </span><span class="self">self</span>.inner.read(limit)
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos)
+        </span><span class="self">self</span>.inner.read_at(offset, limit)
     }
 }
 

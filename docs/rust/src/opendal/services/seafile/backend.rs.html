@@ -328,19 +328,6 @@
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
 <a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -364,7 +351,6 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>tokio::sync::RwLock;
@@ -372,12 +358,12 @@
 <span class="kw">use </span><span class="kw">super</span>::core::parse_dir_detail;
 <span class="kw">use </span><span class="kw">super</span>::core::parse_file_detail;
 <span class="kw">use </span><span class="kw">super</span>::core::SeafileCore;
-<span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::SeafileLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::SeafileWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::SeafileWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::seafile::core::SeafileSigner;
+<span class="kw">use </span><span class="kw">crate</span>::services::seafile::reader::SeafileReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for backblaze seafile services support.
@@ -599,7 +585,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>SeafileBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = SeafileReader;
     <span class="kw">type </span>Writer = SeafileWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;SeafileLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -614,7 +600,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
@@ -646,22 +631,11 @@
         metadata.map(RpStat::new)
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, _args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.download_file(path).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            SeafileReader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

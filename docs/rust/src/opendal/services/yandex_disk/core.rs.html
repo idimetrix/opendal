@@ -320,7 +320,6 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -341,6 +340,7 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::request;
 <span class="kw">use </span>http::Request;
@@ -372,7 +372,7 @@
 
 <span class="kw">impl </span>YandexDiskCore {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -410,10 +410,10 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bytes = resp.into_body();
 
                 <span class="kw">let </span>resp: GetUploadUrlResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bytes).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(resp.href)
             }
@@ -444,10 +444,10 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bytes = resp.into_body();
 
                 <span class="kw">let </span>resp: GetUploadUrlResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bytes).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(resp.href)
             }
@@ -467,16 +467,14 @@
             <span class="kw">let </span>status = resp.status();
 
             <span class="kw">match </span>status {
-                StatusCode::CREATED | StatusCode::CONFLICT =&gt; {
-                    resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                }
+                StatusCode::CREATED | StatusCode::CONFLICT =&gt; {}
                 <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://cloud-api.yandex.net/v1/disk/resources?path=/{}"</span>,
             percent_encode_path(path),
@@ -494,7 +492,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -516,7 +514,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>move_object(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>move_object(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -538,7 +536,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -563,7 +561,7 @@
         path: <span class="kw-2">&amp;</span>str,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         offset: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(

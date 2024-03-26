@@ -85,6 +85,7 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -102,7 +103,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>http::Response;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde_json::de;
@@ -132,9 +134,9 @@
 /// &gt; (if no error, check the daemon logs).
 ///
 /// ref: https://docs.ipfs.tech/reference/kubo/rpc/#http-status-codes
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
+    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
     <span class="kw">let </span>ipfs_error = de::from_slice::&lt;IpfsError&gt;(<span class="kw-2">&amp;</span>bs).ok();
 

@@ -117,6 +117,7 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -134,7 +135,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>http::StatusCode;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::WebhdfsBackend;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -164,8 +166,8 @@
                 StatusCode::OK =&gt; {
                     ctx.done = <span class="bool-val">true</span>;
 
-                    <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    serde_json::from_slice::&lt;FileStatusesWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                    <span class="kw">let </span>bs = resp.into_body();
+                    serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusesWrapper&gt;(bs.reader())
                         .map_err(new_json_deserialize_error)<span class="question-mark">?
                         </span>.file_statuses
                         .file_status
@@ -183,10 +185,10 @@
                 .<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">match </span>resp.status() {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>directory_listing = serde_json::from_slice::&lt;DirectoryListingWrapper&gt;(<span class="kw-2">&amp;</span>bs)
-                        .map_err(new_json_deserialize_error)<span class="question-mark">?
-                        </span>.directory_listing;
+                    <span class="kw">let </span>bs = resp.into_body();
+                    <span class="kw">let </span>res: DirectoryListingWrapper =
+                        serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>directory_listing = res.directory_listing;
                     <span class="kw">let </span>file_statuses = directory_listing.partial_listing.file_statuses.file_status;
 
                     <span class="kw">if </span>directory_listing.remaining_entries == <span class="number">0 </span>{

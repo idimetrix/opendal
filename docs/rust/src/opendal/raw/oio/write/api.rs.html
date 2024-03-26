@@ -198,6 +198,7 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -215,11 +216,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>std::fmt::Display;
+</span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::ops::DerefMut;
+
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;

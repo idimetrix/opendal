@@ -221,11 +221,6 @@
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -248,10 +243,12 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>backon::Retryable;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::reader::DropboxReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::DropboxWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -263,7 +260,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>DropboxBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = DropboxReader;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;DropboxWriter&gt;;
     <span class="kw">type </span>Lister = ();
     <span class="kw">type </span>BlockingReader = ();
@@ -278,7 +275,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
 
@@ -298,9 +294,9 @@
         <span class="comment">// Check if the folder already exists.
         </span><span class="kw">let </span>resp = <span class="self">self</span>.core.dropbox_get_metadata(path).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>StatusCode::OK == resp.status() {
-            <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;DropboxMetadataResponse&gt;(<span class="kw-2">&amp;</span>bytes)
-                .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            <span class="kw">let </span>bytes = resp.into_body();
+            <span class="kw">let </span>decoded_response: DropboxMetadataResponse =
+                serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             <span class="kw">if </span><span class="string">"folder" </span>== decoded_response.tag {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreateDir::default());
             }
@@ -330,9 +326,9 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;DropboxMetadataResponse&gt;(<span class="kw-2">&amp;</span>bytes)
-                    .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>bytes = resp.into_body();
+                <span class="kw">let </span>decoded_response: DropboxMetadataResponse =
+                    serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">let </span>entry_mode: EntryMode = <span class="kw">match </span>decoded_response.tag.as_str() {
                     <span class="string">"file" </span>=&gt; EntryMode::FILE,
                     <span class="string">"folder" </span>=&gt; EntryMode::DIR,
@@ -364,16 +360,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.dropbox_get(path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>status = resp.status();
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; <span class="prelude-val">Ok</span>((RpRead::new(), resp.into_body())),
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            DropboxReader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -421,9 +411,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;DropboxDeleteBatchResponse&gt;(<span class="kw-2">&amp;</span>bs)
-            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
+        <span class="kw">let </span>decoded_response: DropboxDeleteBatchResponse =
+            serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">match </span>decoded_response.tag.as_str() {
             <span class="string">"complete" </span>=&gt; {

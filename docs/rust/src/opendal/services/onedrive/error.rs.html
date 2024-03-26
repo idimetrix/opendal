@@ -52,6 +52,7 @@
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -69,7 +70,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>http::Response;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -78,9 +80,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
+    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
     <span class="kw">let </span>(kind, retryable) = <span class="kw">match </span>parts.status {
         StatusCode::NOT_FOUND =&gt; (ErrorKind::NotFound, <span class="bool-val">false</span>),

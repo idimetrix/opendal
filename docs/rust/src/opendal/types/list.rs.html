@@ -325,6 +325,7 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -610,6 +611,7 @@
 }
 
 <span class="attr">#[cfg(test)]
+#[cfg(feature = <span class="string">"services-azblob"</span>)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>futures::future;
     <span class="kw">use </span>futures::StreamExt;

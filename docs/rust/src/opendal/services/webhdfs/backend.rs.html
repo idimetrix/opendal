@@ -684,47 +684,6 @@
 <a href="#682" id="682">682</a>
 <a href="#683" id="683">683</a>
 <a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -746,6 +705,7 @@
 <span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
 <span class="kw">use </span>http::Request;
@@ -756,7 +716,6 @@
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
-<span class="kw">use </span><span class="kw">super</span>::error::parse_error_msg;
 <span class="kw">use </span><span class="kw">super</span>::lister::WebhdfsLister;
 <span class="kw">use </span><span class="kw">super</span>::message::BooleanResp;
 <span class="kw">use </span><span class="kw">super</span>::message::FileStatusType;
@@ -764,6 +723,7 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::WebhdfsWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::WebhdfsWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::webhdfs::reader::WebhdfsReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">const </span>WEBHDFS_DEFAULT_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">"http://127.0.0.1:9870"</span>;
@@ -994,10 +954,10 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>resp =
-            serde_json::from_slice::&lt;LocationResponse&gt;(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>resp: LocationResponse =
+            serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>resp.location);
 
@@ -1034,9 +994,9 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
                 <span class="kw">let </span>resp: LocationResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(resp.location)
             }
@@ -1048,7 +1008,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         from: <span class="kw-2">&amp;</span>str,
         to: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -1135,17 +1095,7 @@
         }
 
         <span class="kw">if </span>!range.is_full() {
-            <span class="comment">// Webhdfs does not support read from end
-            </span><span class="kw">if </span>range.offset().is_none() &amp;&amp; range.size().is_some() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::Unsupported,
-                    <span class="string">"webhdfs doesn't support read with suffix range"</span>,
-                ));
-            };
-
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = range.offset() {
-                url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"&amp;offset={offset}"</span>);
-            }
+            url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"&amp;offset={}"</span>, range.offset());
             <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
                 url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"&amp;length={size}"</span>)
             }
@@ -1158,10 +1108,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>webhdfs_list_status_request(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webhdfs_list_status_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/webhdfs/v1/{}?op=LISTSTATUS"</span>,
@@ -1182,7 +1129,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         start_after: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -1203,11 +1150,11 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>webhdfs_read_file(
+    <span class="kw">pub async fn </span>webhdfs_read_file(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_open_request(path, <span class="kw-2">&amp;</span>range).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
@@ -1215,7 +1162,7 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>webhdfs_get_file_status(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/webhdfs/v1/{}?op=GETFILESTATUS"</span>,
@@ -1234,7 +1181,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webhdfs_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webhdfs_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/webhdfs/v1/{}?op=DELETE&amp;recursive=false"</span>,
@@ -1256,9 +1203,9 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_get_file_status(<span class="string">"/"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
-                <span class="kw">let </span>file_status = serde_json::from_slice::&lt;FileStatusWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                <span class="kw">let </span>file_status = serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusWrapper&gt;(bs.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?
                     </span>.file_status;
 
@@ -1280,7 +1227,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>WebhdfsBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = WebhdfsReader;
     <span class="kw">type </span>Writer = WebhdfsWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;WebhdfsLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -1295,8 +1242,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_append: <span class="bool-val">true</span>,
@@ -1326,9 +1271,9 @@
         // the redirection should be done automatically.
         </span><span class="kw">match </span>status {
             StatusCode::CREATED | StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;BooleanResp&gt;(<span class="kw-2">&amp;</span>bs)
+                <span class="kw">let </span>resp = serde_json::from_reader::&lt;<span class="kw">_</span>, BooleanResp&gt;(bs.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="kw">if </span>resp.boolean {
@@ -1354,9 +1299,9 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
-                <span class="kw">let </span>file_status = serde_json::from_slice::&lt;FileStatusWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                <span class="kw">let </span>file_status = serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusWrapper&gt;(bs.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?
                     </span>.file_status;
 
@@ -1377,34 +1322,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>range = args.range();
-        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_read_file(path, range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">match </span>resp.status() {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            <span class="comment">// WebHDFS will returns 403 when range is outside of the end.
-            </span>StatusCode::FORBIDDEN =&gt; {
-                <span class="kw">let </span>(parts, body) = resp.into_parts();
-                <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
-                <span class="kw">if </span>s.contains(<span class="string">"out of the range"</span>) {
-                    <span class="prelude-val">Ok</span>((RpRead::new(), IncomingAsyncBody::empty()))
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">Err</span>(parse_error_msg(parts, <span class="kw-2">&amp;</span>s)<span class="question-mark">?</span>)
-                }
-            }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            WebhdfsReader::new(<span class="self">self</span>.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1423,10 +1344,7 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">match </span>resp.status() {
-            StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(RpDelete::default())
-            }
+            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }

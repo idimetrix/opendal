@@ -80,8 +80,6 @@
 <a href="#78" id="78">78</a>
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -141,7 +139,6 @@
                 </span>.map(|err| err.with_operation(<span class="string">"Backend::ghac_upload"</span>))<span class="question-mark">?</span>);
         }
 
-        resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.size += size <span class="kw">as </span>u64;
         <span class="prelude-val">Ok</span>(size)
     }
@@ -155,7 +152,6 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
-            resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(parse_error(resp)

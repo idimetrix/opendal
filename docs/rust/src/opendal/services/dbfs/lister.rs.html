@@ -95,6 +95,7 @@
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -114,6 +115,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>serde::Deserialize;
 
@@ -147,9 +149,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(error);
         }
 
-        <span class="kw">let </span>bytes = response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>decoded_response =
-            serde_json::from_slice::&lt;DbfsOutputList&gt;(<span class="kw-2">&amp;</span>bytes).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = response.into_body();
+        <span class="kw">let </span>decoded_response: DbfsOutputList =
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         ctx.done = <span class="bool-val">true</span>;
 

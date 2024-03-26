@@ -75,6 +75,7 @@
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -94,6 +95,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::parse_info;
@@ -125,10 +127,10 @@
 
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
                 <span class="kw">let </span>output: Vec&lt;Info&gt; =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="kw">for </span>info <span class="kw">in </span>output {
                     <span class="kw">let </span><span class="kw-2">mut </span>path = build_abs_path(<span class="kw-2">&amp;</span>normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.path), <span class="kw-2">&amp;</span>info.name);

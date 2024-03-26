@@ -349,11 +349,6 @@
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
 <a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -374,7 +369,6 @@
 </span><span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes;
 <span class="kw">use </span>bytes::Bytes;
-
 <span class="kw">use </span>tokio::runtime::Handle;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -644,12 +638,8 @@
 }
 
 <span class="kw">impl</span>&lt;I: oio::Read + <span class="lifetime">'static</span>&gt; oio::BlockingRead <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.read(limit))
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: std::io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.seek(pos))
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.read_at(offset, limit))
     }
 }
 

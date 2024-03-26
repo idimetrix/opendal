@@ -49,10 +49,6 @@
 <a href="#47" id="47">47</a>
 <a href="#48" id="48">48</a>
 <a href="#49" id="49">49</a>
-<a href="#50" id="50">50</a>
-<a href="#51" id="51">51</a>
-<a href="#52" id="52">52</a>
-<a href="#53" id="53">53</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -75,7 +71,6 @@
 
 <span class="kw">use </span><span class="kw">super</span>::backend::IpmfsBackend;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
-
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -98,10 +93,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::CREATED | StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
+            StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }

@@ -99,6 +99,8 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -117,6 +119,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>bytes::Buf;
 
 <span class="kw">use </span><span class="kw">super</span>::core::ListObjectsResponse;
 <span class="kw">use </span><span class="kw">super</span>::core::UpyunCore;
@@ -167,10 +171,10 @@
             }
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>response = serde_json::from_slice::&lt;ListObjectsResponse&gt;(<span class="kw-2">&amp;</span>bs)
-            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>response: ListObjectsResponse =
+            serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="comment">// ref https://help.upyun.com/knowledge-base/rest_api/#e88eb7e58f96e79baee5bd95e69687e4bbb6e58897e8a1a8
         // when iter is "g2gCZAAEbmV4dGQAA2VvZg", it means the list is done.

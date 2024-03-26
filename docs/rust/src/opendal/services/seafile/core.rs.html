@@ -416,6 +416,7 @@
 <a href="#414" id="414">414</a>
 <a href="#415" id="415">415</a>
 <a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -437,6 +438,7 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
@@ -482,7 +484,7 @@
 
 <span class="kw">impl </span>SeafileCore {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -514,9 +516,10 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>auth_response = serde_json::from_slice::&lt;AuthTokenResponse&gt;(resp_body)
-                        .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>resp_body = resp.into_body();
+                    <span class="kw">let </span>auth_response: AuthTokenResponse =
+                        serde_json::from_reader(resp_body.reader())
+                            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                     signer.auth_info = AuthInfo {
                         token: auth_response.token,
                         repo_id: <span class="string">""</span>.to_string(),
@@ -543,9 +546,9 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>list_library_response =
-                        serde_json::from_slice::&lt;Vec&lt;ListLibraryResponse&gt;&gt;(resp_body)
+                    <span class="kw">let </span>resp_body = resp.into_body();
+                    <span class="kw">let </span>list_library_response: Vec&lt;ListLibraryResponse&gt; =
+                        serde_json::from_reader(resp_body.reader())
                             .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                     <span class="kw">for </span>library <span class="kw">in </span>list_library_response {
@@ -592,8 +595,8 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>upload_url = serde_json::from_slice::&lt;String&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>upload_url = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(upload_url)
             }
@@ -623,8 +626,8 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>download_url = serde_json::from_slice::&lt;String&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>download_url = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(download_url)
@@ -634,23 +637,22 @@
     }
 
     <span class="doccomment">/// download file
-    </span><span class="kw">pub async fn </span>download_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>download_file(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>download_url = <span class="self">self</span>.get_download_url(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::get(download_url);
 
         <span class="kw">let </span>req = req
+            .header(header::RANGE, range.to_header())
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(resp),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
-    }
+        <span class="self">self</span>.send(req).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// file detail
     </span><span class="kw">pub async fn </span>file_detail(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;FileDetail&gt; {
@@ -674,8 +676,8 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>file_detail = serde_json::from_slice::&lt;FileDetail&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>file_detail: FileDetail = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(file_detail)
             }
@@ -705,8 +707,8 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>dir_detail = serde_json::from_slice::&lt;DirDetail&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>dir_detail: DirDetail = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(dir_detail)
             }

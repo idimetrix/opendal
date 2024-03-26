@@ -184,6 +184,31 @@
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -201,16 +226,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::cmp::Ordering;
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::str::FromStr;
+<span class="kw">use </span>std::{future, mem};
 
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 
-<span class="kw">use </span><span class="kw">super</span>::body::IncomingAsyncBody;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_encoding;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_length;
 <span class="kw">use </span><span class="kw">super</span>::AsyncBody;
@@ -264,7 +291,7 @@
     }
 
     <span class="doccomment">/// Send a request in async way.
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="comment">// Uri stores all string alike data in `Bytes` which means
         // the clone here is cheap.
         </span><span class="kw">let </span>uri = req.uri().clone();
@@ -352,20 +379,43 @@
         <span class="comment">// Swap headers directly instead of copy the entire map.
         </span>mem::swap(hr.headers_mut().unwrap(), resp.headers_mut());
 
-        <span class="kw">let </span>stream = resp.bytes_stream().map_err(<span class="kw">move </span>|err| {
-            <span class="comment">// If stream returns a body related error, we can convert
-            // it to interrupt so we can retry it.
-            </span>Error::new(ErrorKind::Unexpected, <span class="string">"read data from http stream"</span>)
-                .map(|v| <span class="kw">if </span>err.is_body() { v.set_temporary() } <span class="kw">else </span>{ v })
-                .with_context(<span class="string">"url"</span>, uri.to_string())
-                .set_source(err)
-        });
+        <span class="kw">let </span>bs: Vec&lt;Bytes&gt; = resp
+            .bytes_stream()
+            .try_filter(|v| future::ready(!v.is_empty()))
+            .try_collect()
+            .<span class="kw">await
+            </span>.map_err(|err| {
+                Error::new(ErrorKind::Unexpected, <span class="string">"read data from http response"</span>)
+                    .with_context(<span class="string">"url"</span>, uri.to_string())
+                    .set_source(err)
+            })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>body = IncomingAsyncBody::new(Box::new(oio::into_stream(stream)), content_length);
+        <span class="kw">let </span>buffer = oio::Buffer::from(bs);
 
-        <span class="kw">let </span>resp = hr.body(body).expect(<span class="string">"response must build succeed"</span>);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(expect) = content_length {
+            check(expect, buffer.remaining() <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>resp = hr.body(buffer).expect(<span class="string">"response must build succeed"</span>);
 
         <span class="prelude-val">Ok</span>(resp)
+    }
+}
+
+<span class="attr">#[inline]
+</span><span class="kw">fn </span>check(expect: u64, actual: u64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">match </span>actual.cmp(<span class="kw-2">&amp;</span>expect) {
+        Ordering::Equal =&gt; <span class="prelude-val">Ok</span>(()),
+        Ordering::Less =&gt; <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::ContentIncomplete,
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"reader got too little data, expect: {expect}, actual: {actual}"</span>),
+        )
+        .set_temporary()),
+        Ordering::Greater =&gt; <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::ContentTruncated,
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"reader got too much data, expect: {expect}, actual: {actual}"</span>),
+        )
+        .set_temporary()),
     }
 }
 </code></pre></div></section></main></body></html>

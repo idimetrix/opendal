@@ -912,77 +912,6 @@
 <a href="#910" id="910">910</a>
 <a href="#911" id="911">911</a>
 <a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
-<a href="#942" id="942">942</a>
-<a href="#943" id="943">943</a>
-<a href="#944" id="944">944</a>
-<a href="#945" id="945">945</a>
-<a href="#946" id="946">946</a>
-<a href="#947" id="947">947</a>
-<a href="#948" id="948">948</a>
-<a href="#949" id="949">949</a>
-<a href="#950" id="950">950</a>
-<a href="#951" id="951">951</a>
-<a href="#952" id="952">952</a>
-<a href="#953" id="953">953</a>
-<a href="#954" id="954">954</a>
-<a href="#955" id="955">955</a>
-<a href="#956" id="956">956</a>
-<a href="#957" id="957">957</a>
-<a href="#958" id="958">958</a>
-<a href="#959" id="959">959</a>
-<a href="#960" id="960">960</a>
-<a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1003,19 +932,13 @@
 </span><span class="kw">use </span>std::cmp;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
-
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::BufferReader;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::FileReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::FlatLister;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::LazyReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::PrefixLister;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::RangeReader;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::StreamableReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::TwoWays;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -1265,92 +1188,6 @@
         })
     }
 
-    <span class="kw">async fn </span>complete_read(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::Reader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.native_capability();
-        <span class="kw">if </span>!capability.read {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
-        }
-
-        <span class="kw">let </span>seekable = capability.read_can_seek;
-        <span class="kw">let </span>streamable = capability.read_can_next;
-        <span class="kw">let </span>buffer_cap = args.buffer();
-
-        <span class="kw">let </span>r = <span class="kw">match </span>(seekable, streamable) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
-                <span class="kw">let </span>r = LazyReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::One(r)
-            }
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
-                <span class="kw">let </span>r = FileReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::Two(r)
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>r = RangeReader::new(<span class="self">self</span>.inner.clone(), path, args);
-
-                <span class="kw">if </span>streamable {
-                    InnerCompleteReader::Three(r)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>r = oio::into_streamable_read(r, <span class="number">256 </span>* <span class="number">1024</span>);
-                    InnerCompleteReader::Four(r)
-                }
-            }
-        };
-
-        <span class="kw">let </span>r = <span class="kw">match </span>buffer_cap {
-            <span class="prelude-val">None </span>=&gt; CompleteReader::One(r),
-            <span class="prelude-val">Some</span>(cap) =&gt; CompleteReader::Two(BufferReader::new(r, cap)),
-        };
-
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
-    }
-
-    <span class="kw">fn </span>complete_blocking_read(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::BlockingReader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
-        <span class="kw">if </span>!capability.read || !capability.blocking {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingRead));
-        }
-
-        <span class="kw">let </span>seekable = capability.read_can_seek;
-        <span class="kw">let </span>streamable = capability.read_can_next;
-        <span class="kw">let </span>buffer_cap = args.buffer();
-
-        <span class="kw">let </span>r = <span class="kw">match </span>(seekable, streamable) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
-                <span class="kw">let </span>r = LazyReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::One(r)
-            }
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
-                <span class="kw">let </span>r = FileReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::Two(r)
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>r = RangeReader::new(<span class="self">self</span>.inner.clone(), path, args);
-
-                <span class="kw">if </span>streamable {
-                    InnerCompleteReader::Three(r)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>r = oio::into_streamable_read(r, <span class="number">256 </span>* <span class="number">1024</span>);
-                    InnerCompleteReader::Four(r)
-                }
-            }
-        };
-
-        <span class="kw">let </span>r = <span class="kw">match </span>buffer_cap {
-            <span class="prelude-val">None </span>=&gt; CompleteReader::One(r),
-            <span class="prelude-val">Some</span>(cap) =&gt; CompleteReader::Two(BufferReader::new(r, cap)),
-        };
-
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
-    }
-
     <span class="kw">async fn </span>complete_list(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
@@ -1452,8 +1289,8 @@
 #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
 </span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = CompleteReader&lt;A, A::Reader&gt;;
-    <span class="kw">type </span>BlockingReader = CompleteReader&lt;A, A::BlockingReader&gt;;
+    <span class="kw">type </span>Reader = CompleteReader&lt;A::Reader&gt;;
+    <span class="kw">type </span>BlockingReader = CompleteReader&lt;A::BlockingReader&gt;;
     <span class="kw">type </span>Writer =
         TwoWays&lt;CompleteWriter&lt;A::Writer&gt;, oio::ExactBufWriter&lt;CompleteWriter&lt;A::Writer&gt;&gt;&gt;;
     <span class="kw">type </span>BlockingWriter = CompleteWriter&lt;A::BlockingWriter&gt;;
@@ -1467,10 +1304,6 @@
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
         <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.meta.clone();
         <span class="kw">let </span>cap = meta.full_capability_mut();
-        <span class="kw">if </span>cap.read {
-            cap.read_can_next = <span class="bool-val">true</span>;
-            cap.read_can_seek = <span class="bool-val">true</span>;
-        }
         <span class="kw">if </span>cap.list &amp;&amp; cap.write_can_empty {
             cap.create_dir = <span class="bool-val">true</span>;
         }
@@ -1482,8 +1315,15 @@
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="self">self</span>.complete_read(path, args).<span class="kw">await
-    </span>}
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.read {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
+        }
+        <span class="self">self</span>.inner
+            .read(path, args)
+            .<span class="kw">await
+            </span>.map(|(rp, r)| (rp, CompleteReader(r)))
+    }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
@@ -1591,7 +1431,13 @@
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="self">self</span>.complete_blocking_read(path, args)
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.read || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
+        }
+        <span class="self">self</span>.inner
+            .blocking_read(path, args)
+            .map(|(rp, r)| (rp, CompleteReader(r)))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
@@ -1656,18 +1502,30 @@
     }
 }
 
-<span class="kw">pub type </span>CompleteReader&lt;A, R&gt; =
-    TwoWays&lt;InnerCompleteReader&lt;A, R&gt;, BufferReader&lt;InnerCompleteReader&lt;A, R&gt;&gt;&gt;;
-
-<span class="kw">type </span>InnerCompleteReader&lt;A, R&gt; = FourWays&lt;
-    LazyReader&lt;A, R&gt;,
-    FileReader&lt;A, R&gt;,
-    RangeReader&lt;A, R&gt;,
-    StreamableReader&lt;RangeReader&lt;A, R&gt;&gt;,
-&gt;;
-
 <span class="kw">pub type </span>CompleteLister&lt;A, P&gt; =
     FourWays&lt;P, FlatLister&lt;Arc&lt;A&gt;, P&gt;, PrefixLister&lt;P&gt;, PrefixLister&lt;FlatLister&lt;Arc&lt;A&gt;, P&gt;&gt;&gt;;
+
+<span class="kw">pub struct </span>CompleteReader&lt;R&gt;(R);
+
+<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>CompleteReader&lt;R&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">if </span>limit == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+        }
+
+        <span class="self">self</span>.<span class="number">0</span>.read_at(offset, limit).<span class="kw">await
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>CompleteReader&lt;R&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">if </span>limit == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+        }
+
+        <span class="self">self</span>.<span class="number">0</span>.read_at(offset, limit)
+    }
+}
 
 <span class="kw">pub struct </span>CompleteWriter&lt;W&gt; {
     inner: <span class="prelude-ty">Option</span>&lt;W&gt;,
@@ -1791,7 +1649,7 @@
         }
 
         <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-            <span class="prelude-val">Ok</span>((RpRead::new(), Box::new(oio::Cursor::new())))
+            <span class="prelude-val">Ok</span>((RpRead::new(), Box::new(Bytes::new())))
         }
 
         <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

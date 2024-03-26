@@ -877,6 +877,15 @@
 <a href="#875" id="875">875</a>
 <a href="#876" id="876">876</a>
 <a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -955,6 +964,12 @@
     cookies: BTreeMap&lt;String, String&gt;,
     drivews_url: String,
     docws_url: String,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>SessionData {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
 }
 
 <span class="kw">impl </span>SessionData {
@@ -1071,9 +1086,9 @@
         <span class="comment">// Updata SessionData cookies.We need obtain `X-APPLE-WEBAUTH-USER` cookie to get file.
         </span><span class="self">self</span>.update(<span class="kw-2">&amp;</span>resp)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
         <span class="kw">let </span>auth_info: IcloudWebservicesResponse =
-            serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Check if we have extra challenge to take.
         </span><span class="kw">if </span>auth_info.hsa_challenge_required &amp;&amp; !auth_info.hsa_trusted_browser {
@@ -1148,7 +1163,7 @@
     }
 
     <span class="doccomment">/// Update signer's data after request sent out.
-    </span><span class="kw">fn </span>update(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resp: <span class="kw-2">&amp;</span>Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">fn </span>update(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resp: <span class="kw-2">&amp;</span>Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(account_country) = parse_header_to_str(resp.headers(), ACCOUNT_COUNTRY_HEADER)<span class="question-mark">?
         </span>{
             <span class="self">self</span>.data.account_country = <span class="prelude-val">Some</span>(account_country.to_string());
@@ -1185,10 +1200,7 @@
     /// - Init the signer if it's not initiated.
     /// - Sign the request.
     /// - Update the session data if needed.
-    </span><span class="kw">pub async fn </span>send(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>req: Request&lt;AsyncBody&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1238,7 +1250,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
         <span class="kw">let </span>drive_node: Vec&lt;IcloudRoot&gt; =
             serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(drive_node[<span class="number">0</span>].clone())
@@ -1248,8 +1260,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         id: <span class="kw-2">&amp;</span>str,
         zone: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
         args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
 
         <span class="kw">let </span>uri = <span class="macro">format!</span>(
@@ -1268,7 +1281,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
         <span class="kw">let </span>object: IcloudObject =
             serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
@@ -1280,8 +1293,7 @@
             req = req.header(IF_MATCH, if_match);
         }
 
-        <span class="kw">let </span>range = args.range();
-        <span class="kw">if </span>!range.is_full() {
+        <span class="kw">if </span>range.is_full() {
             req = req.header(header::RANGE, range.to_header())
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
@@ -1297,7 +1309,12 @@
         <span class="prelude-val">Ok</span>(resp)
     }
 
-    <span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>read(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
+        args: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>base = get_basename(<span class="kw-2">&amp;</span>path);
 
@@ -1308,7 +1325,7 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(docwsid) = path_id.strip_prefix(<span class="string">"FILE::com.apple.CloudDocs::"</span>) {
             <span class="prelude-val">Ok</span>(<span class="self">self
-                </span>.get_file(docwsid, <span class="string">"com.apple.CloudDocs"</span>, args.clone())
+                </span>.get_file(docwsid, <span class="string">"com.apple.CloudDocs"</span>, range, args.clone())
                 .<span class="kw">await</span><span class="question-mark">?</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(Error::new(
@@ -1395,7 +1412,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
         <span class="kw">let </span>root: Vec&lt;IcloudRoot&gt; =
             serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
@@ -1436,16 +1453,16 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
         <span class="kw">let </span>create_folder: IcloudCreateFolder =
             serde_json::from_slice(body.chunk()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(create_folder.destination_drivews_id)
     }
 }
 
-<span class="kw">pub async fn </span>parse_error(resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
+    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
     <span class="kw">let </span><span class="kw-2">mut </span>kind = <span class="kw">match </span>parts.status.as_u16() {
         <span class="number">421 </span>| <span class="number">450 </span>| <span class="number">500 </span>=&gt; ErrorKind::NotFound,
@@ -1590,9 +1607,10 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>pretty_assertions::assert_eq;
+
     <span class="kw">use </span><span class="kw">super</span>::IcloudRoot;
     <span class="kw">use </span><span class="kw">super</span>::IcloudWebservicesResponse;
-    <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_icloud_drive_root_json() {

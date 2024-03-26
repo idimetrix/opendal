@@ -1183,17 +1183,6 @@
 <a href="#1181" id="1181">1181</a>
 <a href="#1182" id="1182">1182</a>
 <a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
-<a href="#1193" id="1193">1193</a>
-<a href="#1194" id="1194">1194</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1211,7 +1200,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::{Buf, Bytes};
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -1580,8 +1570,8 @@
         FunctionRead(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpRead::default(),
-            |inner, path, args| {
+            (OpRead::default(), BytesRange::default()),
+            |inner, path, (args, range)| {
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
@@ -1591,23 +1581,11 @@
                     );
                 }
 
-                <span class="kw">let </span>range = args.range();
-                <span class="kw">let </span>(size_hint, range) = <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
-                    (size, range)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>size = inner
-                        .blocking_stat(<span class="kw-2">&amp;</span>path, OpStat::default())<span class="question-mark">?
-                        </span>.into_metadata()
-                        .content_length();
-                    <span class="kw">let </span>range = range.complete(size);
-                    (range.size().unwrap(), range)
-                };
+                <span class="kw">let </span>size_hint = range.size();
 
-                <span class="kw">let </span>(<span class="kw">_</span>, r) = inner.blocking_read(<span class="kw-2">&amp;</span>path, args.with_range(range))<span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>r = BlockingReader::new(r);
-                <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint <span class="kw">as </span>usize);
-                r.read_to_end(<span class="kw-2">&amp;mut </span>buf)<span class="question-mark">?</span>;
-
+                <span class="kw">let </span>r = BlockingReader::create(inner, <span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint.unwrap_or_default() <span class="kw">as _</span>);
+                r.read_range(<span class="kw-2">&amp;mut </span>buf, range.to_range())<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
         ))
@@ -1640,7 +1618,7 @@
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
-    /// let r = op.reader_with("path/to/file").range(0..10).call()?;
+    /// let r = op.reader_with("path/to/file").version("version_id").call()?;
     /// # Ok(())
     /// # }
     /// ```

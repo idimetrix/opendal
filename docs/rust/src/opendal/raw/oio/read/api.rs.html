@@ -188,30 +188,6 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -231,13 +207,12 @@
 
 </span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::io;
-<span class="kw">use </span>std::ops::DerefMut;
+<span class="kw">use </span>std::ops::Deref;
 
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::Future;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::BoxedFuture;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// PageOperation is the name for APIs of lister.
@@ -301,63 +276,52 @@
 /// an additional layer of indirection and an extra allocation. Ideally, `ReadDyn` should occur only
 /// once, at the outermost level of our API.
 </span><span class="kw">pub trait </span>Read: Unpin + Send + Sync {
-    <span class="doccomment">/// Fetch more bytes from underlying reader.
+    <span class="doccomment">/// Read at the given offset with the given limit.
     ///
-    /// `limit` is used to hint the data that user want to read at most. Implementer
-    /// MUST NOT return more than `limit` bytes. However, implementer can decide
-    /// whether to split or merge the read requests underground.
+    /// # Notes
     ///
-    /// Returning `bytes`'s `length == 0` means:
-    ///
-    /// - This reader has reached its “end of file” and will likely no longer be able to produce bytes.
-    /// - The `limit` specified was `0`.
+    /// Storage services should try to read as much as possible, only return bytes less than the
+    /// limit while reaching the end of the file.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; + Send;
+    </span><span class="kw">fn </span>read_at(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        offset: u64,
+        limit: usize,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;;
-
-    <span class="doccomment">/// Seek asynchronously.
-    ///
-    /// Returns `Unsupported` error if underlying reader doesn't support seek.
-    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;u64&gt;&gt; + Send;
-    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;u64&gt;&gt;;
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt;;
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>() {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">let _ </span>= limit;
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (offset, limit);
 
         <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"output reader doesn't support streaming"</span>,
         ))
     }
+}
 
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">let _ </span>= pos;
-
-        <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        ))
+<span class="kw">impl </span>Read <span class="kw">for </span>Bytes {
+    <span class="doccomment">/// TODO: we can check if the offset is out of range.
+    </span><span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() <span class="kw">as </span>u64 {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+        }
+        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
+        <span class="kw">let </span>limit = limit.min(<span class="self">self</span>.len() - offset);
+        <span class="prelude-val">Ok</span>(oio::Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
     }
 }
 
 <span class="kw">pub trait </span>ReadDyn: Unpin + Send + Sync {
-    <span class="kw">fn </span>read_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;;
-
-    <span class="kw">fn </span>seek_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt;;
+    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt;;
 }
 
 <span class="kw">impl</span>&lt;T: Read + <span class="question-mark">?</span>Sized&gt; ReadDyn <span class="kw">for </span>T {
-    <span class="kw">fn </span>read_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        Box::pin(<span class="self">self</span>.read(limit))
-    }
-
-    <span class="kw">fn </span>seek_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        Box::pin(<span class="self">self</span>.seek(pos))
+    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt; {
+        Box::pin(<span class="self">self</span>.read_at(offset, limit))
     }
 }
 
@@ -366,12 +330,8 @@
 /// Take care about the `deref_mut()` here. This makes sure that we are calling functions
 /// upon `&amp;mut T` instead of `&amp;mut Box&lt;T&gt;`. The later could result in infinite recursion.
 </span><span class="kw">impl</span>&lt;T: ReadDyn + <span class="question-mark">?</span>Sized&gt; Read <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="self">self</span>.deref_mut().read_dyn(limit).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.deref_mut().seek_dyn(pos).<span class="kw">await
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="self">self</span>.deref().read_at_dyn(offset, limit).<span class="kw">await
     </span>}
 }
 
@@ -379,49 +339,41 @@
 </span><span class="kw">pub type </span>BlockingReader = Box&lt;<span class="kw">dyn </span>BlockingRead&gt;;
 
 <span class="doccomment">/// Read is the trait that OpenDAL returns to callers.
-///
-/// Read is compose of the following trait
-///
-/// - `Read`
-/// - `Seek`
-/// - `Iterator&lt;Item = Result&lt;Bytes&gt;&gt;`
-///
-/// `Read` is required to be implemented, `Seek` and `Iterator`
-/// is optional. We use `Read` to make users life easier.
 </span><span class="kw">pub trait </span>BlockingRead: Send + Sync {
-    <span class="doccomment">/// Read synchronously.
-    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt;;
-
-    <span class="doccomment">/// Seek synchronously.
-    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt;;
+    <span class="doccomment">/// Read data from the reader at the given offset with the given limit.
+    ///
+    /// # Notes
+    ///
+    /// Storage services should try to read as much as possible, only return bytes less than the
+    /// limit while reaching the end of the file.
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;;
 }
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>() {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">let _ </span>= limit;
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">let _ </span>= (offset, limit);
 
         <span class="macro">unimplemented!</span>(<span class="string">"read is required to be implemented for oio::BlockingRead"</span>)
     }
+}
 
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">let _ </span>= pos;
-
-        <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output blocking reader doesn't support seeking"</span>,
-        ))
+<span class="kw">impl </span>BlockingRead <span class="kw">for </span>Bytes {
+    <span class="doccomment">/// TODO: we can check if the offset is out of range.
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() <span class="kw">as </span>u64 {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+        }
+        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
+        <span class="kw">let </span>limit = limit.min(<span class="self">self</span>.len() - offset);
+        <span class="prelude-val">Ok</span>(oio::Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
     }
 }
 
 <span class="doccomment">/// `Box&lt;dyn BlockingRead&gt;` won't implement `BlockingRead` automatically.
 /// To make BlockingReader work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).read(limit)
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).seek(pos)
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).read_at(offset, limit)
     }
 }
 </code></pre></div></section></main></body></html>

@@ -591,40 +591,6 @@
 <a href="#589" id="589">589</a>
 <a href="#590" id="590">590</a>
 <a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -662,6 +628,7 @@
 <span class="kw">use </span><span class="kw">super</span>::lister::OssLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::OssWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::oss::reader::OssReader;
 <span class="kw">use </span><span class="kw">crate</span>::services::oss::writer::OssWriters;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1003,7 +970,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>OssBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = OssReader;
     <span class="kw">type </span>Writer = OssWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;OssLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -1021,8 +988,7 @@
                 stat_with_if_none_match: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
+
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
 
@@ -1083,34 +1049,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self
-            </span>.core
-            .oss_get_object(
-                path,
-                args.range(),
-                args.if_match(),
-                args.if_none_match(),
-                args.override_content_disposition(),
-            )
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            OssReader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1129,10 +1071,7 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_delete_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
-            StatusCode::NO_CONTENT | StatusCode::NOT_FOUND =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(RpDelete::default())
-            }
+            StatusCode::NO_CONTENT | StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
@@ -1153,10 +1092,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(RpCopy::default())
-            }
+            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
@@ -1168,14 +1104,10 @@
                 <span class="self">self</span>.core
                     .oss_head_object_request(path, <span class="bool-val">true</span>, v.if_match(), v.if_none_match())<span class="question-mark">?
             </span>}
-            PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.oss_get_object_request(
-                path,
-                v.range(),
-                <span class="bool-val">true</span>,
-                v.if_match(),
-                v.if_none_match(),
-                v.override_content_disposition(),
-            )<span class="question-mark">?</span>,
+            PresignOperation::Read(v) =&gt; {
+                <span class="self">self</span>.core
+                    .oss_get_object_request(path, BytesRange::default(), <span class="bool-val">true</span>, v)<span class="question-mark">?
+            </span>}
             PresignOperation::Write(v) =&gt; {
                 <span class="self">self</span>.core
                     .oss_put_object_request(path, <span class="prelude-val">None</span>, v, AsyncBody::Empty, <span class="bool-val">true</span>)<span class="question-mark">?
@@ -1222,7 +1154,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if let </span>StatusCode::OK = status {
-            <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>bs = resp.into_body();
 
             <span class="kw">let </span>result: DeleteObjectsResult =
                 quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;

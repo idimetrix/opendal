@@ -526,21 +526,6 @@
 <a href="#524" id="524">524</a>
 <a href="#525" id="525">525</a>
 <a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -564,6 +549,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
@@ -580,6 +566,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::b2::core::B2Signer;
 <span class="kw">use </span><span class="kw">crate</span>::services::b2::core::ListFileNamesResponse;
+<span class="kw">use </span><span class="kw">crate</span>::services::b2::reader::B2Reader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for backblaze b2 services support.
@@ -810,7 +797,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>B2Backend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = B2Reader;
     <span class="kw">type </span>Writer = B2Writers;
     <span class="kw">type </span>Lister = oio::PageLister&lt;B2Lister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -825,8 +812,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
@@ -882,10 +867,10 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
                 <span class="kw">let </span>resp: ListFileNamesResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">if </span>resp.files.is_empty() {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="string">"no such file or directory"</span>));
                 }
@@ -897,25 +882,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.download_file_by_name(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            B2Reader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -969,10 +939,10 @@
 
         <span class="kw">let </span>source_file_id = <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
                 <span class="kw">let </span>resp: ListFileNamesResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">if </span>resp.files.is_empty() {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="string">"no such file or directory"</span>));
                 }
@@ -1002,7 +972,7 @@
             PresignOperation::Stat(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>resp = <span class="self">self
                     </span>.core
-                    .get_download_authorization(path, <span class="kw-2">&amp;</span>OpRead::default(), args.expire())
+                    .get_download_authorization(path, args.expire())
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path);
 
@@ -1028,10 +998,10 @@
                     parts.headers,
                 )))
             }
-            PresignOperation::Read(op) =&gt; {
+            PresignOperation::Read(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>resp = <span class="self">self
                     </span>.core
-                    .get_download_authorization(path, op, args.expire())
+                    .get_download_authorization(path, args.expire())
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path);
 

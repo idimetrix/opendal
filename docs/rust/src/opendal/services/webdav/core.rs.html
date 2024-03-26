@@ -850,10 +850,6 @@
 <a href="#848" id="848">848</a>
 <a href="#849" id="849">849</a>
 <a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -972,9 +968,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>result: Multistatus = deserialize_multistatus(<span class="kw-2">&amp;</span>bs)<span class="question-mark">?</span>;
+        <span class="kw">let </span>result: Multistatus = deserialize_multistatus(<span class="kw-2">&amp;</span>bs.to_bytes())<span class="question-mark">?</span>;
         <span class="kw">let </span>propfind_resp = result.response.first().ok_or_else(|| {
             Error::new(
                 ErrorKind::NotFound,
@@ -989,8 +985,9 @@
     <span class="kw">pub async fn </span>webdav_get(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        range: BytesRange,
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>path));
 
@@ -1000,7 +997,6 @@
             req = req.header(header::AUTHORIZATION, auth.clone())
         }
 
-        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
             req = req.header(header::RANGE, range.to_header());
         }
@@ -1018,7 +1014,7 @@
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>path));
 
@@ -1045,7 +1041,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webdav_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webdav_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>path));
 
@@ -1062,7 +1058,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webdav_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webdav_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="comment">// Check if source file exists.
         </span><span class="kw">let _ </span>= <span class="self">self</span>.webdav_stat(from).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Make sure target's dir is exist.
@@ -1090,7 +1086,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webdav_move(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webdav_move(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="comment">// Check if source file exists.
         </span><span class="kw">let _ </span>= <span class="self">self</span>.webdav_stat(from).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Make sure target's dir is exist.
@@ -1118,11 +1114,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webdav_list(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpList,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>webdav_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpList) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>path));
 
@@ -1213,7 +1205,7 @@
             // The MKCOL method can only be performed on a deleted or non-existent resource.
             // This error means the directory already exists which is allowed by create_dir.
             </span>| StatusCode::METHOD_NOT_ALLOWED =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
+
                 <span class="prelude-val">Ok</span>(())
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),

@@ -485,9 +485,6 @@
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -513,6 +510,7 @@
 <span class="kw">use </span>atomic_lib::agents::Agent;
 <span class="kw">use </span>atomic_lib::client::get_authentication_headers;
 <span class="kw">use </span>atomic_lib::commit::sign_message;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header::CONTENT_DISPOSITION;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
@@ -865,9 +863,9 @@
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>bytes_file = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>bytes_file = resp.into_body();
 
-        <span class="prelude-val">Ok</span>(bytes_file)
+        <span class="prelude-val">Ok</span>(bytes_file.copy_to_bytes(bytes_file.remaining()))
     }
 }
 
@@ -879,10 +877,9 @@
         </span><span class="kw">for </span>_i <span class="kw">in </span><span class="number">0</span>..<span class="number">1000 </span>{
             <span class="kw">let </span>req = <span class="self">self</span>.atomic_get_object_request(path)<span class="question-mark">?</span>;
             <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>bytes = resp.into_body();
             <span class="kw">let </span>query_result: QueryResultStruct =
-                serde_json::from_str(std::str::from_utf8(<span class="kw-2">&amp;</span>bytes).unwrap())
-                    .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             <span class="kw">if </span>!expect_exist &amp;&amp; query_result.results.is_empty() {
                 <span class="kw">break</span>;
             }
@@ -914,11 +911,10 @@
     <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.atomic_get_object_request(path)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = resp.into_body();
 
         <span class="kw">let </span>query_result: QueryResultStruct =
-            serde_json::from_str(std::str::from_utf8(<span class="kw-2">&amp;</span>bytes).unwrap())
-                .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>query_result.results.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
@@ -937,11 +933,10 @@
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.atomic_get_object_request(path)<span class="question-mark">?</span>;
         <span class="kw">let </span>res = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>bytes = res.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = res.into_body();
 
         <span class="kw">let </span>query_result: QueryResultStruct =
-            serde_json::from_str(std::str::from_utf8(<span class="kw-2">&amp;</span>bytes).unwrap())
-                .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">for </span>result <span class="kw">in </span>query_result.results {
             <span class="kw">let </span>req = <span class="self">self</span>.atomic_delete_object_request(<span class="kw-2">&amp;</span>result.id)<span class="question-mark">?</span>;
@@ -960,11 +955,10 @@
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.atomic_get_object_request(path)<span class="question-mark">?</span>;
         <span class="kw">let </span>res = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>bytes = res.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = res.into_body();
 
         <span class="kw">let </span>query_result: QueryResultStruct =
-            serde_json::from_str(std::str::from_utf8(<span class="kw-2">&amp;</span>bytes).unwrap())
-                .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">for </span>result <span class="kw">in </span>query_result.results {
             <span class="kw">let </span>req = <span class="self">self</span>.atomic_delete_object_request(<span class="kw-2">&amp;</span>result.id)<span class="question-mark">?</span>;

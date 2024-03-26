@@ -194,22 +194,6 @@
 <a href="#192" id="192">192</a>
 <a href="#193" id="193">193</a>
 <a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -227,10 +211,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::io;
+</span><span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::sync::Mutex;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>rand::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>rand::rngs::StdRng;
@@ -357,7 +341,7 @@
 <span class="doccomment">/// ChaosReader will inject error into read operations.
 </span><span class="kw">pub struct </span>ChaosReader&lt;R&gt; {
     inner: R,
-    rng: StdRng,
+    rng: Arc&lt;Mutex&lt;StdRng&gt;&gt;,
 
     error_ratio: f64,
 }
@@ -366,15 +350,15 @@
     <span class="kw">fn </span>new(inner: R, rng: StdRng, error_ratio: f64) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner,
-            rng,
+            rng: Arc::new(Mutex::new(rng)),
             error_ratio,
         }
     }
 
     <span class="doccomment">/// If I feel lucky, we can return the correct response. Otherwise,
     /// we need to generate an error.
-    </span><span class="kw">fn </span>i_feel_lucky(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">let </span>point = <span class="self">self</span>.rng.gen_range(<span class="number">0</span>..=<span class="number">100</span>);
+    </span><span class="kw">fn </span>i_feel_lucky(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">let </span>point = <span class="self">self</span>.rng.lock().unwrap().gen_range(<span class="number">0</span>..=<span class="number">100</span>);
         point &gt;= (<span class="self">self</span>.error_ratio * <span class="number">100.0</span>) <span class="kw">as </span>i32
     }
 
@@ -386,17 +370,9 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>ChaosReader&lt;R&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
         <span class="kw">if </span><span class="self">self</span>.i_feel_lucky() {
-            <span class="self">self</span>.inner.read(limit).<span class="kw">await
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(<span class="self">Self</span>::unexpected_eof())
-        }
-    }
-
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">if </span><span class="self">self</span>.i_feel_lucky() {
-            <span class="self">self</span>.inner.seek(pos).<span class="kw">await
+            <span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(<span class="self">Self</span>::unexpected_eof())
         }
@@ -404,17 +380,9 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ChaosReader&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
         <span class="kw">if </span><span class="self">self</span>.i_feel_lucky() {
-            <span class="self">self</span>.inner.read(limit)
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(<span class="self">Self</span>::unexpected_eof())
-        }
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">if </span><span class="self">self</span>.i_feel_lucky() {
-            <span class="self">self</span>.inner.seek(pos)
+            <span class="self">self</span>.inner.read_at(offset, limit)
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(<span class="self">Self</span>::unexpected_eof())
         }

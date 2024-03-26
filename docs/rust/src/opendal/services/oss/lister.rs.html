@@ -194,7 +194,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
         <span class="kw">let </span>output: ListObjectsOutput = de::from_reader(bs.reader())
             .map_err(|e| Error::new(ErrorKind::Unexpected, <span class="string">"deserialize xml"</span>).set_source(e))<span class="question-mark">?</span>;

@@ -111,6 +111,8 @@
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -129,6 +131,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>bytes::Buf;
 
 <span class="kw">use </span><span class="kw">super</span>::core::parse_info;
 <span class="kw">use </span><span class="kw">super</span>::core::MetainformationResponse;
@@ -175,10 +179,10 @@
 
         <span class="kw">match </span>resp.status() {
             http::StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>body = resp.into_body();
 
                 <span class="kw">let </span>resp: MetainformationResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(body.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(embedded) = resp.embedded {
                     <span class="kw">let </span>n = embedded.items.len();

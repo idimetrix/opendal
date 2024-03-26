@@ -173,8 +173,6 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -199,13 +197,11 @@
 <span class="kw">use </span>std::sync::Mutex;
 
 <span class="kw">use </span>async_trait::async_trait;
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="self">self</span>::raw::ConfigDeserializer;
+<span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">///Config for memory.
 </span><span class="attr">#[derive(Default, Deserialize)]

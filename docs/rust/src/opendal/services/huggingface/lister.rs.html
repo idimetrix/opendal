@@ -89,6 +89,8 @@
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -107,6 +109,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>bytes::Buf;
 
 <span class="kw">use </span><span class="kw">super</span>::core::HuggingfaceCore;
 <span class="kw">use </span><span class="kw">super</span>::core::HuggingfaceStatus;
@@ -140,9 +144,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(error);
         }
 
-        <span class="kw">let </span>bytes = response.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;Vec&lt;HuggingfaceStatus&gt;&gt;(<span class="kw-2">&amp;</span>bytes)
-            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = response.into_body();
+        <span class="kw">let </span>decoded_response: Vec&lt;HuggingfaceStatus&gt; =
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         ctx.done = <span class="bool-val">true</span>;
 

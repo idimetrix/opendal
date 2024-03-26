@@ -495,9 +495,9 @@
 <span class="attr">#[cfg(feature = <span class="string">"services-hdfs"</span>)]
 </span><span class="kw">mod </span>hdfs;
 <span class="attr">#[cfg(feature = <span class="string">"services-hdfs"</span>)]
-</span><span class="kw">pub use </span>hdfs::Hdfs;
+</span><span class="kw">pub use </span><span class="self">self</span>::hdfs::Hdfs;
 <span class="attr">#[cfg(feature = <span class="string">"services-hdfs"</span>)]
-</span><span class="kw">pub use </span>hdfs::HdfsConfig;
+</span><span class="kw">pub use </span><span class="self">self</span>::hdfs::HdfsConfig;
 
 <span class="attr">#[cfg(feature = <span class="string">"services-http"</span>)]
 </span><span class="kw">mod </span>http;

@@ -367,11 +367,6 @@
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -392,6 +387,7 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
@@ -406,6 +402,7 @@
 <span class="kw">use </span><span class="kw">super</span>::lister::OnedriveLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::OneDriveWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::onedrive::reader::OnedriveReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[derive(Clone)]
@@ -436,7 +433,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>OnedriveBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = OnedriveReader;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;OneDriveWriter&gt;;
     <span class="kw">type </span>Lister = oio::PageLister&lt;OnedriveLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -494,9 +491,9 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if </span>status.is_success() {
-            <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;OnedriveGetItemBody&gt;(<span class="kw-2">&amp;</span>bytes)
-                .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            <span class="kw">let </span>bytes = resp.into_body();
+            <span class="kw">let </span>decoded_response: OnedriveGetItemBody =
+                serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
             <span class="kw">let </span>entry_mode: EntryMode = <span class="kw">match </span>decoded_response.item_type {
                 ItemType::Folder { .. } =&gt; EntryMode::DIR,
@@ -523,22 +520,11 @@
         }
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, _args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.onedrive_get_content(path).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            OnedriveReader::new(<span class="self">self</span>.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -573,7 +559,7 @@
 <span class="kw">impl </span>OnedriveBackend {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>BASE_URL: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"https://graph.microsoft.com/v1.0/me"</span>;
 
-    <span class="kw">async fn </span>onedrive_get_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>onedrive_get_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
             <span class="string">"https://graph.microsoft.com/v1.0/me/drive/root:{}{}"</span>,
@@ -596,7 +582,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>onedrive_get_next_list_page(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         url: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(url);
 
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.access_token);
@@ -609,7 +595,11 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>onedrive_get_content(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>onedrive_get_content(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
             <span class="string">"https://graph.microsoft.com/v1.0/me/drive/root:{}{}"</span>,
@@ -617,7 +607,7 @@
             <span class="string">":/content"
         </span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url);
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url).header(header::RANGE, range.to_header());
 
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.access_token);
         req = req.header(header::AUTHORIZATION, auth_header_content);
@@ -635,7 +625,7 @@
         size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://graph.microsoft.com/v1.0/me/drive/root:{}:/content"</span>,
             percent_encode_path(path)
@@ -667,7 +657,7 @@
         chunk_end: usize,
         total_len: usize,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(url);
 
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.access_token);
@@ -692,7 +682,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         url: <span class="kw-2">&amp;</span>str,
         body: OneDriveUploadSessionCreationRequestBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(url);
 
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.access_token);
@@ -711,7 +701,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         url: <span class="kw-2">&amp;</span>str,
         body: CreateDirPayload,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(url);
 
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.access_token);
@@ -725,7 +715,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>onedrive_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>onedrive_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://graph.microsoft.com/v1.0/me/drive/root:/{}"</span>,

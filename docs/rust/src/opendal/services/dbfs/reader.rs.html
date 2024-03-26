@@ -91,28 +91,6 @@
 <a href="#89" id="89">89</a>
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -130,8 +108,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>base64::engine::general_purpose;
 <span class="kw">use </span>base64::Engine;
@@ -139,6 +116,7 @@
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::DbfsCore;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Buffer;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -150,24 +128,16 @@
 </span><span class="kw">pub struct </span>DbfsReader {
     core: Arc&lt;DbfsCore&gt;,
     path: String,
-    offset: u64,
     has_filled: u64,
 }
 
 <span class="kw">impl </span>DbfsReader {
-    <span class="kw">pub fn </span>new(core: Arc&lt;DbfsCore&gt;, op: OpRead, path: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(core: Arc&lt;DbfsCore&gt;, path: String) -&gt; <span class="self">Self </span>{
         DbfsReader {
             core,
             path,
-            offset: op.range().offset().unwrap_or(<span class="number">0</span>),
             has_filled: <span class="number">0</span>,
         }
-    }
-
-    <span class="attr">#[inline]
-    #[allow(dead_code)]
-    </span><span class="kw">fn </span>set_offset(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u64) {
-        <span class="self">self</span>.offset = offset;
     }
 
     <span class="attr">#[allow(dead_code)]
@@ -201,22 +171,8 @@
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>DbfsReader {}
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>DbfsReader {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">let _ </span>= limit;
-
-        <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        ))
-    }
-
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">let _ </span>= pos;
-
-        <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        ))
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, _offset: u64, _limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="macro">todo!</span>()
     }
 }
 

@@ -178,6 +178,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde_json::de;
 
@@ -208,7 +209,6 @@
 
         <span class="comment">// azdls will return not found for not-exist path.
         </span><span class="kw">if </span>resp.status() == http::StatusCode::NOT_FOUND {
-            resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
             ctx.done = <span class="bool-val">true</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
@@ -229,9 +229,9 @@
             ctx.done = <span class="bool-val">true</span>;
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>output: Output = de::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>output: Output = de::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">for </span>object <span class="kw">in </span>output.paths {
             <span class="comment">// Azdls will return `"true"` and `"false"` for is_directory.

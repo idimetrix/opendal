@@ -461,23 +461,6 @@
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
 <a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -495,16 +478,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::ops::Range;
-<span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
-
-<span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::stream::BoxStream;
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::Stream;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>object_store::path::Path;
@@ -522,7 +499,7 @@
 <span class="kw">use </span>opendal::Metadata;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
-<span class="kw">use </span>opendal::Reader;
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>tokio::io::AsyncWrite;
 
 <span class="attr">#[derive(Debug)]
@@ -620,8 +597,15 @@
             .<span class="kw">await
             </span>.map_err(|err| format_object_store_error(err, location.as_ref()))<span class="question-mark">?</span>;
 
+        <span class="kw">let </span>stream = r
+            .into_futures_bytes_stream(<span class="number">0</span>..meta.size <span class="kw">as </span>u64)
+            .map_err(|err| object_store::Error::Generic {
+                store: <span class="string">"IoError"</span>,
+                source: Box::new(err),
+            });
+
         <span class="prelude-val">Ok</span>(GetResult {
-            payload: GetResultPayload::Stream(Box::pin(OpendalReader { inner: r })),
+            payload: GetResultPayload::Stream(Box::pin(stream)),
             range: (<span class="number">0</span>..meta.size),
             meta,
         })
@@ -818,24 +802,6 @@
     <span class="kw">let </span>meta = entry.metadata();
 
     <span class="prelude-val">Ok</span>(format_object_meta(entry.path(), meta))
-}
-
-<span class="kw">struct </span>OpendalReader {
-    inner: Reader,
-}
-
-<span class="kw">impl </span>Stream <span class="kw">for </span>OpendalReader {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Bytes&gt;;
-
-    <span class="kw">fn </span>poll_next(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
-        <span class="kw">let </span>inner = Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.get_mut().inner);
-        inner
-            .poll_next(cx)
-            .map_err(|err| object_store::Error::Generic {
-                store: <span class="string">"IoError"</span>,
-                source: Box::new(err),
-            })
-    }
 }
 
 <span class="attr">#[cfg(test)]

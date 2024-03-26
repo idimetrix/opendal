@@ -135,6 +135,7 @@
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -154,6 +155,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>serde_json;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
@@ -216,10 +218,10 @@
         <span class="kw">if </span>!resp.status().is_success() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
-        <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = resp.into_body();
 
         <span class="kw">let </span>output: ListResponse =
-            serde_json::from_slice(<span class="kw-2">&amp;</span>bytes).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span>output.next_page_token {
             ctx.token = token.clone();

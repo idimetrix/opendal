@@ -209,6 +209,8 @@
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -228,8 +230,9 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>quick_xml::de::from_str;
+<span class="kw">use </span>quick_xml::de;
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AzfileCore;
@@ -266,11 +269,10 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>text = String::from_utf8(bs.to_vec()).expect(<span class="string">"response convert to string must success"</span>);
-
-        <span class="kw">let </span>results: EnumerationResults = from_str(<span class="kw-2">&amp;</span>text).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>results: EnumerationResults =
+            de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>results.next_marker.is_empty() {
             ctx.done = <span class="bool-val">true</span>;
@@ -359,6 +361,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>quick_xml::de::from_str;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]

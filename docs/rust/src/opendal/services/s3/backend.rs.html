@@ -1312,24 +1312,6 @@
 <a href="#1310" id="1310">1310</a>
 <a href="#1311" id="1311">1311</a>
 <a href="#1312" id="1312">1312</a>
-<a href="#1313" id="1313">1313</a>
-<a href="#1314" id="1314">1314</a>
-<a href="#1315" id="1315">1315</a>
-<a href="#1316" id="1316">1316</a>
-<a href="#1317" id="1317">1317</a>
-<a href="#1318" id="1318">1318</a>
-<a href="#1319" id="1319">1319</a>
-<a href="#1320" id="1320">1320</a>
-<a href="#1321" id="1321">1321</a>
-<a href="#1322" id="1322">1322</a>
-<a href="#1323" id="1323">1323</a>
-<a href="#1324" id="1324">1324</a>
-<a href="#1325" id="1325">1325</a>
-<a href="#1326" id="1326">1326</a>
-<a href="#1327" id="1327">1327</a>
-<a href="#1328" id="1328">1328</a>
-<a href="#1329" id="1329">1329</a>
-<a href="#1330" id="1330">1330</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1377,6 +1359,7 @@
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_s3_error_code;
 <span class="kw">use </span><span class="kw">super</span>::lister::S3Lister;
+<span class="kw">use </span><span class="kw">super</span>::reader::S3Reader;
 <span class="kw">use </span><span class="kw">super</span>::writer::S3Writer;
 <span class="kw">use </span><span class="kw">super</span>::writer::S3Writers;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -2324,7 +2307,7 @@
 <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
 #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>S3Backend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = S3Reader;
     <span class="kw">type </span>Writer = S3Writers;
     <span class="kw">type </span>Lister = oio::PageLister&lt;S3Lister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -2345,8 +2328,7 @@
                 stat_with_override_content_type: !<span class="self">self</span>.core.disable_stat_with_override,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
+
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
                 read_with_override_cache_control: <span class="bool-val">true</span>,
@@ -2405,25 +2387,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_get_object(path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
-            }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            S3Reader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -2467,13 +2434,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="comment">// According to the documentation, when using copy_object, a 200 error may occur and we need to detect it.
-                // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html#API_CopyObject_RequestSyntax
-                </span>resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(RpCopy::default())
-            }
+            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
@@ -2484,7 +2445,10 @@
         <span class="comment">// We will not send this request out, just for signing.
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = <span class="kw">match </span>op {
             PresignOperation::Stat(v) =&gt; <span class="self">self</span>.core.s3_head_object_request(path, v)<span class="question-mark">?</span>,
-            PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.s3_get_object_request(path, v)<span class="question-mark">?</span>,
+            PresignOperation::Read(v) =&gt; {
+                <span class="self">self</span>.core
+                    .s3_get_object_request(path, BytesRange::default(), <span class="kw-2">&amp;</span>v)<span class="question-mark">?
+            </span>}
             PresignOperation::Write(<span class="kw">_</span>) =&gt; <span class="self">self</span>.core.s3_put_object_request(
                 path,
                 <span class="prelude-val">None</span>,
@@ -2522,7 +2486,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if let </span>StatusCode::OK = status {
-            <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>bs = resp.into_body();
 
             <span class="kw">let </span>result: DeleteObjectsResult =
                 quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;

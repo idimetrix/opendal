@@ -524,27 +524,6 @@
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
 <a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
-<a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -567,28 +546,28 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
-<span class="kw">use </span>std::pin::Pin;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>bb8::{PooledConnection, RunError};
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>openssh::KnownHosts;
 <span class="kw">use </span>openssh::SessionBuilder;
-<span class="kw">use </span>openssh_sftp_client::file::TokioCompatFile;
 <span class="kw">use </span>openssh_sftp_client::Sftp;
 <span class="kw">use </span>openssh_sftp_client::SftpOptions;
 <span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">super</span>::error::is_not_found;
 <span class="kw">use </span><span class="kw">super</span>::error::is_sftp_protocol_error;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_sftp_error;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_ssh_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::SftpLister;
+<span class="kw">use </span><span class="kw">super</span>::reader::SftpReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::SftpWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Sftpservices support.
+<span class="doccomment">/// Config for Sftp Service support.
 </span><span class="attr">#[derive(Default, Deserialize)]
 #[serde(default)]
 #[non_exhaustive]
@@ -618,7 +597,7 @@
 
 <span class="doccomment">/// SFTP services support. (only works on unix)
 ///
-/// If you are interested in working on windows, please refer to [this](https://github.com/apache/opendal/issues/2963) issue.
+/// If you are interested in working on windows, pl ease refer to [this](https://github.com/apache/opendal/issues/2963) issue.
 /// Welcome to leave your comments or make contributions.
 ///
 /// Warning: Maximum number of file holdings is depending on the remote system configuration.
@@ -758,7 +737,8 @@
             key: <span class="self">self</span>.config.key.clone(),
             known_hosts_strategy,
             copyable: <span class="self">self</span>.config.enable_copy,
-            client: tokio::sync::OnceCell::new(),
+
+            client: OnceCell::new(),
         })
     }
 
@@ -771,14 +751,87 @@
 }
 
 <span class="doccomment">/// Backend is used to serve `Accessor` support for sftp.
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>SftpBackend {
+    copyable: bool,
     endpoint: String,
     root: String,
     user: <span class="prelude-ty">Option</span>&lt;String&gt;,
     key: <span class="prelude-ty">Option</span>&lt;String&gt;,
     known_hosts_strategy: KnownHosts,
-    copyable: bool,
-    client: tokio::sync::OnceCell&lt;Sftp&gt;,
+
+    client: OnceCell&lt;bb8::Pool&lt;Manager&gt;&gt;,
+}
+
+<span class="kw">pub struct </span>Manager {
+    endpoint: String,
+    root: String,
+    user: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    key: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    known_hosts_strategy: KnownHosts,
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>bb8::ManageConnection <span class="kw">for </span>Manager {
+    <span class="kw">type </span>Connection = Sftp;
+    <span class="kw">type </span>Error = Error;
+
+    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::result::Result&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>session = SessionBuilder::default();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(user) = <span class="kw-2">&amp;</span><span class="self">self</span>.user {
+            session.user(user.clone());
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = <span class="kw-2">&amp;</span><span class="self">self</span>.key {
+            session.keyfile(key);
+        }
+
+        session.known_hosts_check(<span class="self">self</span>.known_hosts_strategy.clone());
+
+        <span class="kw">let </span>session = session
+            .connect(<span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
+            .<span class="kw">await
+            </span>.map_err(parse_ssh_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>sftp = Sftp::from_session(session, SftpOptions::default())
+            .<span class="kw">await
+            </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>!<span class="self">self</span>.root.is_empty() {
+            <span class="kw">let </span><span class="kw-2">mut </span>fs = sftp.fs();
+
+            <span class="kw">let </span>paths = Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root).components();
+            <span class="kw">let </span><span class="kw-2">mut </span>current = PathBuf::new();
+            <span class="kw">for </span>p <span class="kw">in </span>paths {
+                current.push(p);
+                <span class="kw">let </span>res = fs.create_dir(p).<span class="kw">await</span>;
+
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = res {
+                    <span class="comment">// ignore error if dir already exists
+                    </span><span class="kw">if </span>!is_sftp_protocol_error(<span class="kw-2">&amp;</span>e) {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(parse_sftp_error(e));
+                    }
+                }
+                fs.set_cwd(<span class="kw-2">&amp;</span>current);
+            }
+        }
+
+        <span class="macro">debug!</span>(<span class="string">"sftp connection created at {}"</span>, <span class="self">self</span>.root);
+        <span class="prelude-val">Ok</span>(sftp)
+    }
+
+    <span class="comment">// Check if connect valid by checking the root path.
+    </span><span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; std::result::Result&lt;(), <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let _ </span>= conn.fs().metadata(<span class="string">"./"</span>).<span class="kw">await</span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Always allow reuse conn.
+    </span><span class="kw">fn </span>has_broken(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>SftpBackend {
@@ -787,9 +840,36 @@
     }
 }
 
+<span class="kw">impl </span>SftpBackend {
+    <span class="kw">pub async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;&gt; {
+        <span class="kw">let </span>client = <span class="self">self
+            </span>.client
+            .get_or_try_init(|| <span class="kw">async </span>{
+                bb8::Pool::builder()
+                    .max_size(<span class="number">64</span>)
+                    .build(Manager {
+                        endpoint: <span class="self">self</span>.endpoint.clone(),
+                        root: <span class="self">self</span>.root.clone(),
+                        user: <span class="self">self</span>.user.clone(),
+                        key: <span class="self">self</span>.key.clone(),
+                        known_hosts_strategy: <span class="self">self</span>.known_hosts_strategy.clone(),
+                    })
+                    .<span class="kw">await
+            </span>})
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        client.get_owned().<span class="kw">await</span>.map_err(|err| <span class="kw">match </span>err {
+            RunError::User(err) =&gt; err,
+            RunError::TimedOut =&gt; {
+                Error::new(ErrorKind::Unexpected, <span class="string">"connection request: timeout"</span>).set_temporary()
+            }
+        })
+    }
+}
+
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>SftpBackend {
-    <span class="kw">type </span>Reader = oio::TokioReader&lt;Pin&lt;Box&lt;TokioCompatFile&gt;&gt;&gt;;
+    <span class="kw">type </span>Reader = SftpReader;
     <span class="kw">type </span>Writer = SftpWriter;
     <span class="kw">type </span>Lister = <span class="prelude-ty">Option</span>&lt;SftpLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -804,7 +884,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_seek: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_multi: <span class="bool-val">true</span>,
@@ -858,26 +937,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
-        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
-        <span class="kw">let </span>path = fs.canonicalize(path).<span class="kw">await</span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>f = client
-            .open(path.as_path())
-            .<span class="kw">await
-            </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
-
-        <span class="comment">// Sorry for the ugly code...
-        //
-        // - `f` is a openssh file.
-        // - `TokioCompatFile::new(f)` makes it implements tokio AsyncRead + AsyncSeek for openssh File.
-        // - `Box::pin(x)` to make sure this reader implements `Unpin`, since `TokioCompatFile` is not.
-        // - `oio::TokioReader::new(x)` makes it a `oio::TokioReader` which implements `oio::Read`.
-        </span><span class="kw">let </span>r = oio::TokioReader::new(Box::pin(TokioCompatFile::new(f)));
-
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            SftpReader::new(<span class="self">self</span>.clone(), <span class="self">self</span>.root.clone(), path.to_owned()),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -910,54 +973,17 @@
         <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
         fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
 
-        <span class="kw">if </span>path.ends_with(<span class="string">'/'</span>) {
-            <span class="kw">let </span>file_path = <span class="macro">format!</span>(<span class="string">"./{}"</span>, path);
-            <span class="kw">let </span><span class="kw-2">mut </span>dir = <span class="kw">match </span>fs.open_dir(<span class="kw-2">&amp;</span>file_path).<span class="kw">await </span>{
-                <span class="prelude-val">Ok</span>(dir) =&gt; dir,
-                <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="kw">if </span>is_not_found(<span class="kw-2">&amp;</span>e) {
-                        <span class="kw">return </span><span class="prelude-val">Ok</span>(RpDelete::default());
-                    } <span class="kw">else </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(parse_sftp_error(e));
-                    }
-                }
-            }
-            .read_dir()
-            .boxed();
+        <span class="kw">let </span>res = <span class="kw">if </span>path.ends_with(<span class="string">'/'</span>) {
+            fs.remove_dir(path).<span class="kw">await
+        </span>} <span class="kw">else </span>{
+            fs.remove_file(path).<span class="kw">await
+        </span>};
 
-            <span class="kw">while let </span><span class="prelude-val">Some</span>(file) = dir.next().<span class="kw">await </span>{
-                <span class="kw">let </span>file = file.map_err(parse_sftp_error)<span class="question-mark">?</span>;
-                <span class="kw">let </span>file_name = file.filename().to_str();
-                <span class="kw">if </span>file_name == <span class="prelude-val">Some</span>(<span class="string">"."</span>) || file_name == <span class="prelude-val">Some</span>(<span class="string">".."</span>) {
-                    <span class="kw">continue</span>;
-                }
-                <span class="kw">let </span>file_path = Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root).join(file.filename());
-                <span class="self">self</span>.delete(
-                    file_path.to_str().ok_or(Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="string">"unable to convert file path to str"</span>,
-                    ))<span class="question-mark">?</span>,
-                    OpDelete::default(),
-                )
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            }
-
-            <span class="kw">match </span>fs.remove_dir(path).<span class="kw">await </span>{
-                <span class="prelude-val">Err</span>(e) <span class="kw">if </span>!is_not_found(<span class="kw-2">&amp;</span>e) =&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_sftp_error(e));
-                }
-                <span class="kw">_ </span>=&gt; {}
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">match </span>fs.remove_file(path).<span class="kw">await </span>{
-                <span class="prelude-val">Err</span>(e) <span class="kw">if </span>!is_not_found(<span class="kw-2">&amp;</span>e) =&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_sftp_error(e));
-                }
-                <span class="kw">_ </span>=&gt; {}
-            }
-        };
-
-        <span class="prelude-val">Ok</span>(RpDelete::default())
+        <span class="kw">match </span>res {
+            <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
+            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>is_not_found(<span class="kw-2">&amp;</span>e) =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(parse_sftp_error(e)),
+        }
     }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
@@ -1021,73 +1047,5 @@
 
         <span class="prelude-val">Ok</span>(RpRename::default())
     }
-}
-
-<span class="kw">impl </span>SftpBackend {
-    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>Sftp&gt; {
-        <span class="kw">let </span>sftp = <span class="self">self
-            </span>.client
-            .get_or_try_init(|| {
-                Box::pin(connect_sftp(
-                    <span class="self">self</span>.endpoint.as_str(),
-                    <span class="self">self</span>.root.clone(),
-                    <span class="self">self</span>.user.clone(),
-                    <span class="self">self</span>.key.clone(),
-                    <span class="self">self</span>.known_hosts_strategy.clone(),
-                ))
-            })
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(sftp)
-    }
-}
-
-<span class="kw">async fn </span>connect_sftp(
-    endpoint: <span class="kw-2">&amp;</span>str,
-    root: String,
-    user: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    known_hosts_strategy: KnownHosts,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Sftp&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>session = SessionBuilder::default();
-
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(user) = user {
-        session.user(user);
-    }
-
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = <span class="kw-2">&amp;</span>key {
-        session.keyfile(key);
-    }
-
-    session.known_hosts_check(known_hosts_strategy);
-
-    <span class="kw">let </span>session = session.connect(<span class="kw-2">&amp;</span>endpoint).<span class="kw">await</span>.map_err(parse_ssh_error)<span class="question-mark">?</span>;
-
-    <span class="kw">let </span>sftp = Sftp::from_session(session, SftpOptions::default())
-        .<span class="kw">await
-        </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
-
-    <span class="kw">if </span>!root.is_empty() {
-        <span class="kw">let </span><span class="kw-2">mut </span>fs = sftp.fs();
-
-        <span class="kw">let </span>paths = Path::new(<span class="kw-2">&amp;</span>root).components();
-        <span class="kw">let </span><span class="kw-2">mut </span>current = PathBuf::new();
-        <span class="kw">for </span>p <span class="kw">in </span>paths {
-            current.push(p);
-            <span class="kw">let </span>res = fs.create_dir(p).<span class="kw">await</span>;
-
-            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = res {
-                <span class="comment">// ignore error if dir already exists
-                </span><span class="kw">if </span>!is_sftp_protocol_error(<span class="kw-2">&amp;</span>e) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_sftp_error(e));
-                }
-            }
-            fs.set_cwd(<span class="kw-2">&amp;</span>current);
-        }
-    }
-
-    <span class="macro">debug!</span>(<span class="string">"sftp connection created at {}"</span>, root);
-
-    <span class="prelude-val">Ok</span>(sftp)
 }
 </code></pre></div></section></main></body></html>

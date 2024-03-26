@@ -385,6 +385,8 @@
 <a href="#383" id="383">383</a>
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -407,6 +409,7 @@
 <span class="kw">use </span>std::fmt::Formatter;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::StatusCode;
@@ -623,8 +626,8 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(body.into()))
+                <span class="kw">let </span><span class="kw-2">mut </span>body = resp.into_body();
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(body.copy_to_bytes(body.remaining()).to_vec()))
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
@@ -678,13 +681,14 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>response: CfKvScanResponse = serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(|e| {
-                    Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
-                    )
-                })<span class="question-mark">?</span>;
+                <span class="kw">let </span>body = resp.into_body();
+                <span class="kw">let </span>response: CfKvScanResponse =
+                    serde_json::from_reader(body.reader()).map_err(|e| {
+                        Error::new(
+                            ErrorKind::Unexpected,
+                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
+                        )
+                    })<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(response.result.into_iter().map(|r| r.name).collect())
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),

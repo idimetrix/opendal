@@ -78,7 +78,6 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -98,6 +97,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
@@ -145,12 +145,10 @@
             StatusCode::OK | StatusCode::CREATED =&gt; {
                 <span class="comment">// If we don't have the file id before, let's update the cache to avoid re-fetching.
                 </span><span class="kw">if </span><span class="self">self</span>.file_id.is_none() {
-                    <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>bs = resp.into_body();
                     <span class="kw">let </span>file: GdriveFile =
-                        serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                        serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                     <span class="self">self</span>.core.path_cache.insert(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span>file.id).<span class="kw">await</span>;
-                } <span class="kw">else </span>{
-                    resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
                 }
                 <span class="prelude-val">Ok</span>(())
             }

@@ -127,9 +127,6 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -147,7 +144,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>http::response::Parts;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::response::Parts;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>serde::Deserialize;
@@ -171,9 +169,9 @@
     java_class_name: String,
 }
 
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>parse_error(resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
+    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
     <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
     parse_error_msg(parts, <span class="kw-2">&amp;</span>s)
 }
@@ -211,7 +209,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>bytes::Buf;
-    <span class="kw">use </span>futures::stream;
     <span class="kw">use </span>serde_json::from_reader;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -231,10 +228,7 @@
 }
     "#</span>,
         );
-        <span class="kw">let </span>body = IncomingAsyncBody::new(
-            Box::new(oio::into_stream(stream::iter(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(ill_args.clone())]))),
-            <span class="prelude-val">None</span>,
-        );
+        <span class="kw">let </span>body = oio::Buffer::from(ill_args.clone());
         <span class="kw">let </span>resp = Response::builder()
             .status(StatusCode::BAD_REQUEST)
             .body(body)

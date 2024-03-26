@@ -106,10 +106,6 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -150,9 +146,9 @@
 }
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
+    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
     <span class="kw">let </span>(kind, retryable) = <span class="kw">match </span>parts.status.as_u16() {
         <span class="number">401 </span>| <span class="number">403 </span>=&gt; (ErrorKind::PermissionDenied, <span class="bool-val">false</span>),
@@ -187,7 +183,6 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use </span>futures::stream;
     <span class="kw">use </span>http::StatusCode;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -207,10 +202,7 @@
 
         <span class="kw">for </span>res <span class="kw">in </span>err_res {
             <span class="kw">let </span>bs = bytes::Bytes::from(res.<span class="number">0</span>);
-            <span class="kw">let </span>body = IncomingAsyncBody::new(
-                Box::new(oio::into_stream(stream::iter(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(bs.clone())]))),
-                <span class="prelude-val">None</span>,
-            );
+            <span class="kw">let </span>body = oio::Buffer::from(bs);
             <span class="kw">let </span>resp = Response::builder().status(res.<span class="number">2</span>).body(body).unwrap();
 
             <span class="kw">let </span>err = parse_error(resp).<span class="kw">await</span>;

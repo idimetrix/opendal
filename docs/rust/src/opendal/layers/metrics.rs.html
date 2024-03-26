@@ -845,32 +845,6 @@
 <a href="#843" id="843">843</a>
 <a href="#844" id="844">844</a>
 <a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -890,13 +864,11 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::io;
 <span class="kw">use </span>std::sync::Arc;
-
 <span class="kw">use </span>std::time::Instant;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::TryFutureExt;
@@ -1329,7 +1301,7 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="self">self</span>.handle.requests_total_read.increment(<span class="number">1</span>);
 
-        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>_start = Instant::now();
 
         <span class="self">self</span>.inner
             .read(path, args)
@@ -1343,7 +1315,6 @@
                             <span class="self">self</span>.handle.clone(),
                             <span class="self">self</span>.handle.bytes_total_read.clone(),
                             <span class="self">self</span>.handle.requests_duration_seconds_read.clone(),
-                            <span class="prelude-val">Some</span>(start),
                         ),
                     )
                 })
@@ -1359,7 +1330,7 @@
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="self">self</span>.handle.requests_total_write.increment(<span class="number">1</span>);
 
-        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>_start = Instant::now();
 
         <span class="self">self</span>.inner
             .write(path, args)
@@ -1372,7 +1343,6 @@
                         <span class="self">self</span>.handle.clone(),
                         <span class="self">self</span>.handle.bytes_total_write.clone(),
                         <span class="self">self</span>.handle.requests_duration_seconds_write.clone(),
-                        <span class="prelude-val">Some</span>(start),
                     ),
                 )
             })
@@ -1493,7 +1463,7 @@
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="self">self</span>.handle.requests_total_blocking_read.increment(<span class="number">1</span>);
 
-        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>_start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_read(path, args).map(|(rp, r)| {
             (
                 rp,
@@ -1503,7 +1473,6 @@
                     <span class="self">self</span>.handle.clone(),
                     <span class="self">self</span>.handle.bytes_total_blocking_read.clone(),
                     <span class="self">self</span>.handle.requests_duration_seconds_blocking_read.clone(),
-                    <span class="prelude-val">Some</span>(start),
                 ),
             )
         });
@@ -1536,7 +1505,6 @@
                         <span class="self">self</span>.handle.clone(),
                         <span class="self">self</span>.handle.bytes_total_write.clone(),
                         <span class="self">self</span>.handle.requests_duration_seconds_write.clone(),
-                        <span class="prelude-val">Some</span>(start),
                     ),
                 )
             })
@@ -1609,9 +1577,6 @@
     bytes_counter: Counter,
     requests_duration_seconds: Histogram,
     handle: Arc&lt;MetricsHandler&gt;,
-
-    start: <span class="prelude-ty">Option</span>&lt;Instant&gt;,
-    bytes: u64,
 }
 
 <span class="kw">impl</span>&lt;R&gt; MetricWrapper&lt;R&gt; {
@@ -1621,7 +1586,6 @@
         handle: Arc&lt;MetricsHandler&gt;,
         bytes_counter: Counter,
         requests_duration_seconds: Histogram,
-        start: <span class="prelude-ty">Option</span>&lt;Instant&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner,
@@ -1629,39 +1593,21 @@
             handle,
             bytes_counter,
             requests_duration_seconds,
-            start,
-            bytes: <span class="number">0</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span>&lt;R&gt; Drop <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.bytes_counter.increment(<span class="self">self</span>.bytes);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(instant) = <span class="self">self</span>.start {
-            <span class="kw">let </span>dur = instant.elapsed().as_secs_f64();
-            <span class="self">self</span>.requests_duration_seconds.record(dur);
         }
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.read(limit).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="self">self</span>.bytes += bytes.len() <span class="kw">as </span>u64;
-                <span class="prelude-val">Ok</span>(bytes)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
-        }
-    }
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">let </span>start = Instant::now();
 
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.seek(pos).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(n) =&gt; <span class="prelude-val">Ok</span>(n),
+        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(bs) =&gt; {
+                <span class="self">self</span>.bytes_counter.increment(bs.remaining() <span class="kw">as </span>u64);
+                <span class="self">self</span>.requests_duration_seconds
+                    .record(start.elapsed().as_secs_f64());
+                <span class="prelude-val">Ok</span>(bs)
+            }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, e.kind());
                 <span class="prelude-val">Err</span>(e)
@@ -1671,11 +1617,15 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">let </span>start = Instant::now();
+
         <span class="self">self</span>.inner
-            .read(limit)
+            .read_at(offset, limit)
             .map(|bs| {
-                <span class="self">self</span>.bytes += bs.len() <span class="kw">as </span>u64;
+                <span class="self">self</span>.bytes_counter.increment(bs.remaining() <span class="kw">as </span>u64);
+                <span class="self">self</span>.requests_duration_seconds
+                    .record(start.elapsed().as_secs_f64());
                 bs
             })
             .map_err(|e| {
@@ -1683,21 +1633,19 @@
                 e
             })
     }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos).map_err(|err| {
-            <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
-            err
-        })
-    }
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + Send {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">let </span>start = Instant::now();
+
         <span class="self">self</span>.inner
             .write(bs)
-            .map_ok(|n| {
-                <span class="self">self</span>.bytes += n <span class="kw">as </span>u64;
+            .<span class="kw">await
+            </span>.map(|n| {
+                <span class="self">self</span>.bytes_counter.increment(n <span class="kw">as </span>u64);
+                <span class="self">self</span>.requests_duration_seconds
+                    .record(start.elapsed().as_secs_f64());
                 n
             })
             .map_err(|err| {
@@ -1706,15 +1654,15 @@
             })
     }
 
-    <span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send {
-        <span class="self">self</span>.inner.abort().map_err(|err| {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
             err
         })
     }
 
-    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send {
-        <span class="self">self</span>.inner.close().map_err(|err| {
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.close().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
             err
         })
@@ -1726,7 +1674,7 @@
         <span class="self">self</span>.inner
             .write(bs)
             .map(|n| {
-                <span class="self">self</span>.bytes += n <span class="kw">as </span>u64;
+                <span class="self">self</span>.bytes_counter.increment(n <span class="kw">as </span>u64);
                 n
             })
             .map_err(|err| {

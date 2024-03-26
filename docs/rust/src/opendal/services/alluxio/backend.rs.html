@@ -286,6 +286,9 @@
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -317,6 +320,7 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::alluxio::reader::AlluxioReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for alluxio services support.
@@ -469,7 +473,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>AlluxioBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = AlluxioReader;
     <span class="kw">type </span>Writer = AlluxioWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;AlluxioLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -483,7 +487,11 @@
             .set_native_capability(Capability {
                 stat: <span class="bool-val">true</span>,
 
-                read: <span class="bool-val">true</span>,
+                <span class="comment">// FIXME:
+                //
+                // alluxio's read support is not implemented correctly
+                // We need to refactor by use [page_read](https://github.com/Alluxio/alluxio-py/blob/main/alluxio/const.py#L18)
+                </span>read: <span class="bool-val">false</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_multi: <span class="bool-val">true</span>,
@@ -513,10 +521,8 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>stream_id = <span class="self">self</span>.core.open_file(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.read(stream_id, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((RpRead::new().with_size(size), resp.into_body()))
+        <span class="kw">let </span>r = AlluxioReader::new(<span class="self">self</span>.core.clone(), stream_id, args.clone());
+        <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

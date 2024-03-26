@@ -613,12 +613,6 @@
 <a href="#611" id="611">611</a>
 <a href="#612" id="612">612</a>
 <a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -642,6 +636,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>reqsign::GoogleCredentialLoader;
@@ -654,6 +649,7 @@
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::GcsLister;
+<span class="kw">use </span><span class="kw">super</span>::reader::GcsReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::GcsWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::GcsWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -953,7 +949,7 @@
 <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
 #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>GcsBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+    <span class="kw">type </span>Reader = GcsReader;
     <span class="kw">type </span>Writer = GcsWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;GcsLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -971,8 +967,7 @@
                 stat_with_if_none_match: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
+
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
 
@@ -1014,10 +1009,10 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>slc = resp.into_body();
 
         <span class="kw">let </span>meta: GetObjectJsonResponse =
-            serde_json::from_slice(<span class="kw-2">&amp;</span>slc).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+            serde_json::from_reader(slc.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>m = Metadata::new(EntryMode::FILE);
 
@@ -1039,16 +1034,10 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_get_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">if </span>resp.status().is_success() {
-            <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>((RpRead::new().with_size(size), resp.into_body()))
-        } <span class="kw">else if </span>resp.status() == StatusCode::RANGE_NOT_SATISFIABLE {
-            <span class="prelude-val">Ok</span>((RpRead::new(), IncomingAsyncBody::empty()))
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
-        }
+        <span class="prelude-val">Ok</span>((
+            RpRead::default(),
+            GcsReader::new(<span class="self">self</span>.core.clone(), path, args),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1086,7 +1075,6 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_copy_object(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
-            resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(RpCopy::default())
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
@@ -1149,7 +1137,7 @@
                 </span>.trim_matches(<span class="string">'"'</span>);
             <span class="kw">let </span>multipart: Multipart&lt;MixedPart&gt; = Multipart::new()
                 .with_boundary(boundary)
-                .parse(resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>)<span class="question-mark">?</span>;
+                .parse(resp.into_body().to_bytes())<span class="question-mark">?</span>;
             <span class="kw">let </span>parts = multipart.into_parts();
 
             <span class="kw">let </span><span class="kw-2">mut </span>batched_result = Vec::with_capacity(parts.len());

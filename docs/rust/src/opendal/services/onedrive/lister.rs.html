@@ -115,6 +115,8 @@
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -132,7 +134,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">super</span>::backend::OnedriveBackend;
+</span><span class="kw">use </span>bytes::Buf;
+
+<span class="kw">use </span><span class="kw">super</span>::backend::OnedriveBackend;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::graph_model::GraphApiOnedriveListResponse;
 <span class="kw">use </span><span class="kw">super</span>::graph_model::ItemType;
@@ -193,9 +197,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(error);
         }
 
-        <span class="kw">let </span>bytes = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>decoded_response = serde_json::from_slice::&lt;GraphApiOnedriveListResponse&gt;(<span class="kw-2">&amp;</span>bytes)
-            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bytes = resp.into_body();
+        <span class="kw">let </span>decoded_response: GraphApiOnedriveListResponse =
+            serde_json::from_reader(bytes.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(next_link) = decoded_response.next_link {
             ctx.token = next_link;

@@ -156,10 +156,6 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -177,7 +173,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Bytes;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::OnedriveBackend;
@@ -230,10 +227,7 @@
         <span class="kw">match </span>status {
             <span class="comment">// Typical response code: 201 Created
             // Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_put_content?view=odsp-graph-online#response
-            </span>StatusCode::CREATED | StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
+            </span>StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
@@ -275,9 +269,7 @@
             <span class="kw">match </span>status {
                 <span class="comment">// Typical response code: 202 Accepted
                 // Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_put_content?view=odsp-graph-online#response
-                </span>StatusCode::ACCEPTED | StatusCode::CREATED | StatusCode::OK =&gt; {
-                    resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                }
+                </span>StatusCode::ACCEPTED | StatusCode::CREATED | StatusCode::OK =&gt; {}
                 <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
             }
 
@@ -311,9 +303,9 @@
         <span class="kw">match </span>status {
             <span class="comment">// Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_createuploadsession?view=odsp-graph-online#response
             </span>StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
                 <span class="kw">let </span>result: OneDriveUploadSessionCreationResponseBody =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(result)
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),

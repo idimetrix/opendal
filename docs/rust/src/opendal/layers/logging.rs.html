@@ -1372,74 +1372,6 @@
 <a href="#1370" id="1370">1370</a>
 <a href="#1371" id="1371">1371</a>
 <a href="#1372" id="1372">1372</a>
-<a href="#1373" id="1373">1373</a>
-<a href="#1374" id="1374">1374</a>
-<a href="#1375" id="1375">1375</a>
-<a href="#1376" id="1376">1376</a>
-<a href="#1377" id="1377">1377</a>
-<a href="#1378" id="1378">1378</a>
-<a href="#1379" id="1379">1379</a>
-<a href="#1380" id="1380">1380</a>
-<a href="#1381" id="1381">1381</a>
-<a href="#1382" id="1382">1382</a>
-<a href="#1383" id="1383">1383</a>
-<a href="#1384" id="1384">1384</a>
-<a href="#1385" id="1385">1385</a>
-<a href="#1386" id="1386">1386</a>
-<a href="#1387" id="1387">1387</a>
-<a href="#1388" id="1388">1388</a>
-<a href="#1389" id="1389">1389</a>
-<a href="#1390" id="1390">1390</a>
-<a href="#1391" id="1391">1391</a>
-<a href="#1392" id="1392">1392</a>
-<a href="#1393" id="1393">1393</a>
-<a href="#1394" id="1394">1394</a>
-<a href="#1395" id="1395">1395</a>
-<a href="#1396" id="1396">1396</a>
-<a href="#1397" id="1397">1397</a>
-<a href="#1398" id="1398">1398</a>
-<a href="#1399" id="1399">1399</a>
-<a href="#1400" id="1400">1400</a>
-<a href="#1401" id="1401">1401</a>
-<a href="#1402" id="1402">1402</a>
-<a href="#1403" id="1403">1403</a>
-<a href="#1404" id="1404">1404</a>
-<a href="#1405" id="1405">1405</a>
-<a href="#1406" id="1406">1406</a>
-<a href="#1407" id="1407">1407</a>
-<a href="#1408" id="1408">1408</a>
-<a href="#1409" id="1409">1409</a>
-<a href="#1410" id="1410">1410</a>
-<a href="#1411" id="1411">1411</a>
-<a href="#1412" id="1412">1412</a>
-<a href="#1413" id="1413">1413</a>
-<a href="#1414" id="1414">1414</a>
-<a href="#1415" id="1415">1415</a>
-<a href="#1416" id="1416">1416</a>
-<a href="#1417" id="1417">1417</a>
-<a href="#1418" id="1418">1418</a>
-<a href="#1419" id="1419">1419</a>
-<a href="#1420" id="1420">1420</a>
-<a href="#1421" id="1421">1421</a>
-<a href="#1422" id="1422">1422</a>
-<a href="#1423" id="1423">1423</a>
-<a href="#1424" id="1424">1424</a>
-<a href="#1425" id="1425">1425</a>
-<a href="#1426" id="1426">1426</a>
-<a href="#1427" id="1427">1427</a>
-<a href="#1428" id="1428">1428</a>
-<a href="#1429" id="1429">1429</a>
-<a href="#1430" id="1430">1430</a>
-<a href="#1431" id="1431">1431</a>
-<a href="#1432" id="1432">1432</a>
-<a href="#1433" id="1433">1433</a>
-<a href="#1434" id="1434">1434</a>
-<a href="#1435" id="1435">1435</a>
-<a href="#1436" id="1436">1436</a>
-<a href="#1437" id="1437">1437</a>
-<a href="#1438" id="1438">1438</a>
-<a href="#1439" id="1439">1439</a>
-<a href="#1440" id="1440">1440</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1458,10 +1390,11 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
-
-<span class="kw">use </span>std::io;
+<span class="kw">use </span>std::sync::atomic::AtomicU64;
+<span class="kw">use </span>std::sync::atomic::Ordering;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::TryFutureExt;
@@ -1726,14 +1659,11 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="macro">debug!</span>(
             target: LOGGING_TARGET,
-            <span class="string">"service={} operation={} path={} range={} -&gt; started"</span>,
+            <span class="string">"service={} operation={} path={} -&gt; started"</span>,
             <span class="self">self</span>.ctx.scheme,
             Operation::Read,
             path,
-            args.range()
         );
-
-        <span class="kw">let </span>range = args.range();
 
         <span class="self">self</span>.inner
             .read(path, args)
@@ -1741,11 +1671,10 @@
             </span>.map(|(rp, r)| {
                 <span class="macro">debug!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} range={} -&gt; got reader"</span>,
+                    <span class="string">"service={} operation={} path={} -&gt; got reader"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     Operation::Read,
                     path,
-                    range
                 );
                 (
                     rp,
@@ -1757,11 +1686,10 @@
                     <span class="macro">log!</span>(
                         target: LOGGING_TARGET,
                         lvl,
-                        <span class="string">"service={} operation={} path={} range={} -&gt; {}"</span>,
+                        <span class="string">"service={} operation={} path={} -&gt; {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
                         Operation::Read,
                         path,
-                        range,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err)
                     )
                 }
@@ -2125,11 +2053,10 @@
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="macro">debug!</span>(
             target: LOGGING_TARGET,
-            <span class="string">"service={} operation={} path={} range={} -&gt; started"</span>,
+            <span class="string">"service={} operation={} path={} -&gt; started"</span>,
             <span class="self">self</span>.ctx.scheme,
             Operation::BlockingRead,
             path,
-            args.range(),
         );
 
         <span class="self">self</span>.inner
@@ -2137,11 +2064,10 @@
             .map(|(rp, r)| {
                 <span class="macro">debug!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} range={} -&gt; got reader"</span>,
+                    <span class="string">"service={} operation={} path={} -&gt; got reader"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     Operation::BlockingRead,
                     path,
-                    args.range(),
                 );
                 <span class="kw">let </span>r = LoggingReader::new(<span class="self">self</span>.ctx.clone(), Operation::BlockingRead, path, r);
                 (rp, r)
@@ -2151,11 +2077,10 @@
                     <span class="macro">log!</span>(
                         target: LOGGING_TARGET,
                         lvl,
-                        <span class="string">"service={} operation={} path={} range={} -&gt; {}"</span>,
+                        <span class="string">"service={} operation={} path={} -&gt; {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
                         Operation::BlockingRead,
                         path,
-                        args.range(),
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err)
                     );
                 }
@@ -2400,7 +2325,7 @@
     path: String,
     op: Operation,
 
-    read: u64,
+    read: AtomicU64,
     inner: R,
 }
 
@@ -2411,7 +2336,7 @@
             op,
             path: path.to_string(),
 
-            read: <span class="number">0</span>,
+            read: AtomicU64::new(<span class="number">0</span>),
             inner: reader,
         }
     }
@@ -2425,24 +2350,25 @@
             <span class="self">self</span>.ctx.scheme,
             <span class="self">self</span>.op,
             <span class="self">self</span>.path,
-            <span class="self">self</span>.read
+            <span class="self">self</span>.read.load(Ordering::Relaxed)
         );
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>LoggingReader&lt;R&gt; {
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.read(limit).<span class="kw">await </span>{
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bs) =&gt; {
-                <span class="self">self</span>.read += bs.len() <span class="kw">as </span>u64;
+                <span class="self">self</span>.read
+                    .fetch_add(bs.remaining() <span class="kw">as </span>u64, Ordering::Relaxed);
                 <span class="macro">trace!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} read={} -&gt; next returns {}B"</span>,
+                    <span class="string">"service={} operation={} path={} read={} -&gt; read returns {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     ReadOperation::Read,
                     <span class="self">self</span>.path,
-                    <span class="self">self</span>.read,
-                    bs.len()
+                    <span class="self">self</span>.read.load(Ordering::Relaxed),
+                    bs.remaining()
                 );
                 <span class="prelude-val">Ok</span>(bs)
             }
@@ -2451,42 +2377,11 @@
                     <span class="macro">log!</span>(
                         target: LOGGING_TARGET,
                         lvl,
-                        <span class="string">"service={} operation={} path={} read={} -&gt; next failed: {}"</span>,
+                        <span class="string">"service={} operation={} path={} read={} -&gt; read failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
                         ReadOperation::Read,
                         <span class="self">self</span>.path,
-                        <span class="self">self</span>.read,
-                        <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
-                    )
-                }
-                <span class="prelude-val">Err</span>(err)
-            }
-        }
-    }
-
-    <span class="kw">async fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.seek(pos).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                <span class="macro">trace!</span>(
-                    target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} read={} -&gt; seek to {pos:?}, current offset {n}"</span>,
-                    <span class="self">self</span>.ctx.scheme,
-                    ReadOperation::Seek,
-                    <span class="self">self</span>.path,
-                    <span class="self">self</span>.read,
-                );
-                <span class="prelude-val">Ok</span>(n)
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
-                    <span class="macro">log!</span>(
-                        target: LOGGING_TARGET,
-                        lvl,
-                        <span class="string">"service={} operation={} path={} read={} -&gt; seek to {pos:?} failed: {}"</span>,
-                        <span class="self">self</span>.ctx.scheme,
-                        ReadOperation::Seek,
-                        <span class="self">self</span>.path,
-                        <span class="self">self</span>.read,
+                        <span class="self">self</span>.read.load(Ordering::Relaxed),
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
                     )
                 }
@@ -2497,18 +2392,19 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>LoggingReader&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.read(limit) {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, limit) {
             <span class="prelude-val">Ok</span>(bs) =&gt; {
-                <span class="self">self</span>.read += bs.len() <span class="kw">as </span>u64;
+                <span class="self">self</span>.read
+                    .fetch_add(bs.remaining() <span class="kw">as </span>u64, Ordering::Relaxed);
                 <span class="macro">trace!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} read={} -&gt; data read {}B"</span>,
+                    <span class="string">"service={} operation={} path={} read={} -&gt; read returns {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     ReadOperation::BlockingRead,
                     <span class="self">self</span>.path,
-                    <span class="self">self</span>.read,
-                    bs.len()
+                    <span class="self">self</span>.read.load(Ordering::Relaxed),
+                    bs.remaining()
                 );
                 <span class="prelude-val">Ok</span>(bs)
             }
@@ -2517,43 +2413,11 @@
                     <span class="macro">log!</span>(
                         target: LOGGING_TARGET,
                         lvl,
-                        <span class="string">"service={} operation={} path={} read={} -&gt; data read failed: {}"</span>,
+                        <span class="string">"service={} operation={} path={} read={} -&gt; read failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
                         ReadOperation::BlockingRead,
                         <span class="self">self</span>.path,
-                        <span class="self">self</span>.read,
-                        <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
-                    );
-                }
-                <span class="prelude-val">Err</span>(err)
-            }
-        }
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.seek(pos) {
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                <span class="macro">trace!</span>(
-                    target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} read={} -&gt; data seek to offset {n}"</span>,
-                    <span class="self">self</span>.ctx.scheme,
-                    ReadOperation::BlockingSeek,
-                    <span class="self">self</span>.path,
-                    <span class="self">self</span>.read,
-                );
-                <span class="prelude-val">Ok</span>(n)
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
-                    <span class="macro">log!</span>(
-                        target: LOGGING_TARGET,
-                        lvl,
-                        <span class="string">"service={} operation={} path={} read={} -&gt; data read failed: {}"</span>,
-                        <span class="self">self</span>.ctx.scheme,
-                        ReadOperation::BlockingSeek,
-                        <span class="self">self</span>.path,
-                        <span class="self">self</span>.read,
+                        <span class="self">self</span>.read.load(Ordering::Relaxed),
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
                     );
                 }

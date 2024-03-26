@@ -1179,38 +1179,6 @@
 <a href="#1177" id="1177">1177</a>
 <a href="#1178" id="1178">1178</a>
 <a href="#1179" id="1179">1179</a>
-<a href="#1180" id="1180">1180</a>
-<a href="#1181" id="1181">1181</a>
-<a href="#1182" id="1182">1182</a>
-<a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
-<a href="#1193" id="1193">1193</a>
-<a href="#1194" id="1194">1194</a>
-<a href="#1195" id="1195">1195</a>
-<a href="#1196" id="1196">1196</a>
-<a href="#1197" id="1197">1197</a>
-<a href="#1198" id="1198">1198</a>
-<a href="#1199" id="1199">1199</a>
-<a href="#1200" id="1200">1200</a>
-<a href="#1201" id="1201">1201</a>
-<a href="#1202" id="1202">1202</a>
-<a href="#1203" id="1203">1203</a>
-<a href="#1204" id="1204">1204</a>
-<a href="#1205" id="1205">1205</a>
-<a href="#1206" id="1206">1206</a>
-<a href="#1207" id="1207">1207</a>
-<a href="#1208" id="1208">1208</a>
-<a href="#1209" id="1209">1209</a>
-<a href="#1210" id="1210">1210</a>
-<a href="#1211" id="1211">1211</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1235,9 +1203,8 @@
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>bytes::BytesMut;
-<span class="kw">use </span>futures::stream;
+<span class="kw">use </span>bytes::{Buf, Bytes};
 <span class="kw">use </span>http::header::CONTENT_DISPOSITION;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
@@ -1254,10 +1221,8 @@
 
 <span class="kw">use </span><span class="kw">super</span>::new_request_build_error;
 <span class="kw">use </span><span class="kw">super</span>::AsyncBody;
-<span class="kw">use </span><span class="kw">super</span>::IncomingAsyncBody;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Stream;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Streamer;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Multipart is a builder for multipart/form-data.
@@ -1438,8 +1403,7 @@
 </span><span class="kw">pub struct </span>FormDataPart {
     headers: HeaderMap,
 
-    content_length: u64,
-    content: Streamer,
+    content: Bytes,
 }
 
 <span class="kw">impl </span>FormDataPart {
@@ -1458,8 +1422,7 @@
 
         <span class="self">Self </span>{
             headers,
-            content_length: <span class="number">0</span>,
-            content: Box::new(oio::Cursor::new()),
+            content: Bytes::new(),
         }
     }
 
@@ -1471,17 +1434,7 @@
 
     <span class="doccomment">/// Set the content for this part.
     </span><span class="kw">pub fn </span>content(<span class="kw-2">mut </span><span class="self">self</span>, content: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>content = content.into();
-
-        <span class="self">self</span>.content_length = content.len() <span class="kw">as </span>u64;
-        <span class="self">self</span>.content = Box::new(oio::Cursor::from(content));
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Set the stream content for this part.
-    </span><span class="kw">pub fn </span>stream(<span class="kw-2">mut </span><span class="self">self</span>, size: u64, content: Streamer) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.content_length = size;
-        <span class="self">self</span>.content = content;
+        <span class="self">self</span>.content = content.into();
         <span class="self">self
     </span>}
 }
@@ -1516,7 +1469,7 @@
         <span class="kw">let </span>bs = bs.freeze();
 
         <span class="comment">// pre-content + content + post-content (b`\r\n`)
-        </span><span class="kw">let </span>total_size = bs.len() <span class="kw">as </span>u64 + <span class="self">self</span>.content_length + <span class="number">2</span>;
+        </span><span class="kw">let </span>total_size = bs.len() <span class="kw">as </span>u64 + <span class="self">self</span>.content.len() <span class="kw">as </span>u64 + <span class="number">2</span>;
 
         (
             total_size,
@@ -1538,22 +1491,21 @@
 <span class="kw">pub struct </span>FormDataPartStream {
     <span class="doccomment">/// Including headers and the first `b\r\n`
     </span>pre_content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
-    content: <span class="prelude-ty">Option</span>&lt;Streamer&gt;,
+    content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
 }
 
 <span class="kw">impl </span>Stream <span class="kw">for </span>FormDataPartStream {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pre_content) = <span class="self">self</span>.pre_content.take() {
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(pre_content)));
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = <span class="self">self</span>.content.as_mut() {
-            <span class="kw">return match </span><span class="macro">ready!</span>(stream.poll_next(cx)) {
-                <span class="prelude-val">None </span>=&gt; {
-                    <span class="self">self</span>.content = <span class="prelude-val">None</span>;
-                    Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from_static(<span class="string">b"\r\n"</span>))))
-                }
-                <span class="prelude-val">Some</span>(v) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(v)),
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = <span class="self">self</span>.content.as_mut() {
+            <span class="kw">if </span>bs.has_remaining() {
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs.copy_to_bytes(bs.remaining()))));
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.content = <span class="prelude-val">None</span>;
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from_static(<span class="string">b"\r\n"</span>))));
             };
         }
 
@@ -1568,8 +1520,7 @@
     <span class="doccomment">/// Common
     </span>version: Version,
     headers: HeaderMap,
-    content_length: u64,
-    content: <span class="prelude-ty">Option</span>&lt;Streamer&gt;,
+    content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
 
     <span class="doccomment">/// Request only
     </span>method: <span class="prelude-ty">Option</span>&lt;Method&gt;,
@@ -1593,7 +1544,6 @@
 
             version: Version::HTTP_11,
             headers: HeaderMap::new(),
-            content_length: <span class="number">0</span>,
             content: <span class="prelude-val">None</span>,
 
             uri: <span class="prelude-val">Some</span>(uri),
@@ -1611,20 +1561,11 @@
 
         <span class="kw">let </span>(parts, body) = req.into_parts();
 
-        <span class="kw">let </span>(content_length, content) = <span class="kw">match </span>body {
-            AsyncBody::Empty =&gt; (<span class="number">0</span>, <span class="prelude-val">None</span>),
-            AsyncBody::Bytes(bs) =&gt; (
-                bs.len() <span class="kw">as </span>u64,
-                <span class="prelude-val">Some</span>(Box::new(oio::Cursor::from(bs)) <span class="kw">as </span>Streamer),
-            ),
-            AsyncBody::Stream(stream) =&gt; {
-                <span class="kw">let </span>len = parts
-                    .headers
-                    .get(CONTENT_LENGTH)
-                    .and_then(|v| v.to_str().ok())
-                    .and_then(|v| v.parse::&lt;u64&gt;().ok())
-                    .expect(<span class="string">"the content length of a mixed part must be valid"</span>);
-                (len, <span class="prelude-val">Some</span>(stream))
+        <span class="kw">let </span>content = <span class="kw">match </span>body {
+            AsyncBody::Empty =&gt; <span class="prelude-val">None</span>,
+            AsyncBody::Bytes(bs) =&gt; <span class="prelude-val">Some</span>(bs),
+            AsyncBody::Stream(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unimplemented!</span>(<span class="string">"multipart upload does not support streaming body"</span>)
             }
         };
 
@@ -1642,7 +1583,6 @@
             ),
             version: parts.version,
             headers: parts.headers,
-            content_length,
             content,
 
             method: <span class="prelude-val">Some</span>(parts.method),
@@ -1651,7 +1591,7 @@
     }
 
     <span class="doccomment">/// Consume a mixed part to build a response.
-    </span><span class="kw">pub fn </span>into_response(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; Response&lt;IncomingAsyncBody&gt; {
+    </span><span class="kw">pub fn </span>into_response(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; Response&lt;oio::Buffer&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = Response::builder();
 
         builder = builder.status(<span class="self">self</span>.status_code.unwrap_or(StatusCode::OK));
@@ -1659,10 +1599,9 @@
         <span class="comment">// Swap headers directly instead of copy the entire map.
         </span>mem::swap(builder.headers_mut().unwrap(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.headers);
 
-        <span class="kw">let </span>body = <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = <span class="self">self</span>.content {
-            IncomingAsyncBody::new(stream, <span class="prelude-val">Some</span>(<span class="self">self</span>.content_length))
-        } <span class="kw">else </span>{
-            IncomingAsyncBody::new(Box::new(oio::into_stream(stream::empty())), <span class="prelude-val">Some</span>(<span class="number">0</span>))
+        <span class="kw">let </span>body = <span class="kw">match </span><span class="self">self</span>.content {
+            <span class="prelude-val">None </span>=&gt; oio::Buffer::new(),
+            <span class="prelude-val">Some</span>(bs) =&gt; oio::Buffer::from(bs),
         };
 
         builder
@@ -1696,17 +1635,7 @@
 
     <span class="doccomment">/// Set the content for this part.
     </span><span class="kw">pub fn </span>content(<span class="kw-2">mut </span><span class="self">self</span>, content: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>content = content.into();
-
-        <span class="self">self</span>.content_length = content.len() <span class="kw">as </span>u64;
-        <span class="self">self</span>.content = <span class="prelude-val">Some</span>(Box::new(oio::Cursor::from(content)));
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Set the stream content for this part.
-    </span><span class="kw">pub fn </span>stream(<span class="kw-2">mut </span><span class="self">self</span>, size: u64, content: Streamer) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.content_length = size;
-        <span class="self">self</span>.content = <span class="prelude-val">Some</span>(content);
+        <span class="self">self</span>.content = <span class="prelude-val">Some</span>(content.into());
         <span class="self">self
     </span>}
 }
@@ -1779,8 +1708,8 @@
         <span class="comment">// pre-content + content + post-content;
         </span><span class="kw">let </span><span class="kw-2">mut </span>total_size = bs.len() <span class="kw">as </span>u64;
 
-        <span class="kw">if </span><span class="self">self</span>.content.is_some() {
-            total_size += <span class="self">self</span>.content_length + <span class="number">2</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = <span class="kw-2">&amp;</span><span class="self">self</span>.content {
+            total_size += bs.len() <span class="kw">as </span>u64 + <span class="number">2</span>;
         }
 
         (
@@ -1863,8 +1792,7 @@
             part_headers,
             version: Version::HTTP_11,
             headers,
-            content_length: body_bytes.len() <span class="kw">as </span>u64,
-            content: <span class="prelude-val">Some</span>(Box::new(oio::Cursor::from(body_bytes))),
+            content: <span class="prelude-val">Some</span>(body_bytes),
 
             method: <span class="prelude-val">None</span>,
             uri: <span class="prelude-val">None</span>,
@@ -1883,22 +1811,21 @@
 <span class="kw">pub struct </span>MixedPartStream {
     <span class="doccomment">/// Including headers and the first `b\r\n`
     </span>pre_content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
-    content: <span class="prelude-ty">Option</span>&lt;Streamer&gt;,
+    content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
 }
 
 <span class="kw">impl </span>Stream <span class="kw">for </span>MixedPartStream {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pre_content) = <span class="self">self</span>.pre_content.take() {
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(pre_content)));
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = <span class="self">self</span>.content.as_mut() {
-            <span class="kw">return match </span><span class="macro">ready!</span>(stream.poll_next(cx)) {
-                <span class="prelude-val">None </span>=&gt; {
-                    <span class="self">self</span>.content = <span class="prelude-val">None</span>;
-                    Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from_static(<span class="string">b"\r\n"</span>))))
-                }
-                <span class="prelude-val">Some</span>(v) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(v)),
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = <span class="self">self</span>.content.as_mut() {
+            <span class="kw">if </span>bs.has_remaining() {
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs.copy_to_bytes(bs.remaining()))));
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.content = <span class="prelude-val">None</span>;
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from_static(<span class="string">b"\r\n"</span>))));
             };
         }
 
@@ -2333,7 +2260,10 @@ Content-Length: 846
 
             h
         });
-        <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">0</span>].content_length, part0_bs.len() <span class="kw">as </span>u64);
+        <span class="macro">assert_eq!</span>(
+            multipart.parts[<span class="number">0</span>].content.as_ref().unwrap().len(),
+            part0_bs.len()
+        );
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">0</span>].uri, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">0</span>].method, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(
@@ -2373,7 +2303,10 @@ Content-Length: 846
 
             h
         });
-        <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">1</span>].content_length, part1_bs.len() <span class="kw">as </span>u64);
+        <span class="macro">assert_eq!</span>(
+            multipart.parts[<span class="number">1</span>].content.as_ref().unwrap().len(),
+            part1_bs.len()
+        );
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">1</span>].uri, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">1</span>].method, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(
@@ -2413,7 +2346,10 @@ Content-Length: 846
 
             h
         });
-        <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">2</span>].content_length, part2_bs.len() <span class="kw">as </span>u64);
+        <span class="macro">assert_eq!</span>(
+            multipart.parts[<span class="number">2</span>].content.as_ref().unwrap().len(),
+            part2_bs.len()
+        );
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">2</span>].uri, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(multipart.parts[<span class="number">2</span>].method, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(

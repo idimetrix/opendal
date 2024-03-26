@@ -357,6 +357,8 @@
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
 <a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -379,6 +381,7 @@
 <span class="kw">use </span>std::fmt::Formatter;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::StatusCode;
@@ -672,8 +675,9 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>d1_response = D1Response::parse(<span class="kw-2">&amp;</span>body)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>body = resp.into_body();
+                <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
+                <span class="kw">let </span>d1_response = D1Response::parse(<span class="kw-2">&amp;</span>bs)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(d1_response.get_result(<span class="kw-2">&amp;</span><span class="self">self</span>.value_field))
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
