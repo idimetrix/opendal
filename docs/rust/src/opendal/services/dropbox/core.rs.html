@@ -548,6 +548,8 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -661,8 +663,10 @@
         </span>signer.access_token = token.access_token.clone();
 
         <span class="comment">// Refresh it 2 minutes earlier.
-        </span>signer.expires_in = Utc::now() + chrono::Duration::seconds(token.expires_in <span class="kw">as </span>i64)
-            - chrono::Duration::seconds(<span class="number">120</span>);
+        </span>signer.expires_in = Utc::now()
+            + chrono::TimeDelta::try_seconds(token.expires_in <span class="kw">as </span>i64)
+                .expect(<span class="string">"expires_in must be valid seconds"</span>)
+            - chrono::TimeDelta::try_seconds(<span class="number">120</span>).expect(<span class="string">"120 must be valid seconds"</span>);
 
         <span class="kw">let </span>value = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, token.access_token)
             .parse()
