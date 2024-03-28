@@ -309,11 +309,6 @@
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -361,8 +356,10 @@
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Github access_token.
     ///
-    /// required.
-    </span><span class="kw">pub </span>token: String,
+    /// optional.
+    /// If not provided, the backend will only support read operations for public repositories.
+    /// And rate limit will be limited to 60 requests per hour.
+    </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Github repo owner.
     ///
     /// required.
@@ -421,7 +418,7 @@
     ///
     /// required.
     </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.config.token = token.to_string();
+        <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
 
         <span class="self">self
     </span>}
@@ -483,13 +480,6 @@
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
         <span class="macro">debug!</span>(<span class="string">"backend use root {}"</span>, <span class="kw-2">&amp;</span>root);
-
-        <span class="comment">// Handle token.
-        </span><span class="kw">if </span><span class="self">self</span>.config.token.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"token is empty"</span>)
-                .with_operation(<span class="string">"Builder::build"</span>)
-                .with_context(<span class="string">"service"</span>, Scheme::Github));
-        }
 
         <span class="comment">// Handle owner.
         </span><span class="kw">if </span><span class="self">self</span>.config.owner.is_empty() {

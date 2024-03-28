@@ -298,6 +298,19 @@
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -339,7 +352,7 @@
     <span class="doccomment">/// The root of this core.
     </span><span class="kw">pub </span>root: String,
     <span class="doccomment">/// Github access_token.
-    </span><span class="kw">pub </span>token: String,
+    </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Github repo owner.
     </span><span class="kw">pub </span>owner: String,
     <span class="doccomment">/// Github repo name.
@@ -365,19 +378,32 @@
     </span>}
 
     <span class="kw">pub fn </span>sign(<span class="kw-2">&amp;</span><span class="self">self</span>, req: request::Builder) -&gt; <span class="prelude-ty">Result</span>&lt;request::Builder&gt; {
-        <span class="kw">let </span>req = req
+        <span class="kw">let </span><span class="kw-2">mut </span>req = req
             .header(header::USER_AGENT, <span class="macro">format!</span>(<span class="string">"opendal-{}"</span>, VERSION))
             .header(<span class="string">"X-GitHub-Api-Version"</span>, <span class="string">"2022-11-28"</span>);
 
-        <span class="prelude-val">Ok</span>(req.header(
-            header::AUTHORIZATION,
-            format_authorization_by_bearer(<span class="kw-2">&amp;</span><span class="self">self</span>.token)<span class="question-mark">?</span>,
-        ))
+        <span class="comment">// Github access_token is optional.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span><span class="self">self</span>.token {
+            req = req.header(
+                header::AUTHORIZATION,
+                format_authorization_by_bearer(token)<span class="question-mark">?</span>,
+            )
+        }
+
+        <span class="prelude-val">Ok</span>(req)
     }
 }
 
 <span class="kw">impl </span>GithubCore {
     <span class="kw">pub async fn </span>get_file_sha(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
+        <span class="comment">// if the token is not set, we shhould not try to get the sha of the file.
+        </span><span class="kw">if </span><span class="self">self</span>.token.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::PermissionDenied,
+                <span class="string">"Github access_token is not set"</span>,
+            ));
+        }
+
         <span class="kw">let </span>resp = <span class="self">self</span>.stat(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">match </span>resp.status() {
