@@ -1183,6 +1183,9 @@
 <a href="#1181" id="1181">1181</a>
 <a href="#1182" id="1182">1182</a>
 <a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1618,7 +1621,10 @@
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
-    /// let r = op.reader_with("path/to/file").version("version_id").call()?;
+    /// let r = op
+    ///     .reader_with("path/to/file")
+    ///     .version("version_id")
+    ///     .call()?;
     /// # Ok(())
     /// # }
     /// ```
@@ -1826,7 +1832,7 @@
 
                 <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.blocking_write(<span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
                 <span class="kw">while </span>!bs.is_empty() {
-                    <span class="kw">let </span>n = w.write(bs.clone())<span class="question-mark">?</span>;
+                    <span class="kw">let </span>n = w.write(bs.clone().into())<span class="question-mark">?</span>;
                     bs.advance(n);
                 }
                 w.close()<span class="question-mark">?</span>;

@@ -306,6 +306,14 @@
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
 <a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -324,7 +332,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::collections::Bound;
-<span class="kw">use </span>std::ops::{Range, RangeBounds};
+<span class="kw">use </span>std::ops::Range;
+<span class="kw">use </span>std::ops::RangeBounds;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::BufMut;
@@ -437,13 +446,17 @@
 }
 
 <span class="kw">pub mod </span>into_std_read {
-    <span class="kw">use </span><span class="kw">crate</span>::raw::{format_std_io_error, oio};
-    <span class="kw">use </span>bytes::Buf;
     <span class="kw">use </span>std::io;
+    <span class="kw">use </span>std::io::BufRead;
     <span class="kw">use </span>std::io::Read;
     <span class="kw">use </span>std::io::Seek;
-    <span class="kw">use </span>std::io::{BufRead, SeekFrom};
+    <span class="kw">use </span>std::io::SeekFrom;
     <span class="kw">use </span>std::ops::Range;
+
+    <span class="kw">use </span>bytes::Buf;
+
+    <span class="kw">use </span><span class="kw">crate</span>::raw::format_std_io_error;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::oio;
 
     <span class="doccomment">/// StdReader is the adapter of [`Read`], [`Seek`] and [`BufRead`] for [`BlockingReader`][crate::BlockingReader].
     ///
@@ -552,9 +565,12 @@
 }
 
 <span class="kw">pub mod </span>into_std_iterator {
-    <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-    <span class="kw">use </span>bytes::{Buf, Bytes};
     <span class="kw">use </span>std::io;
+
+    <span class="kw">use </span>bytes::Buf;
+    <span class="kw">use </span>bytes::Bytes;
+
+    <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 
     <span class="doccomment">/// StdIterator is the adapter of [`Iterator`] for [`BlockingReader`][crate::BlockingReader].
     ///

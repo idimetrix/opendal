@@ -647,7 +647,6 @@
 <a href="#645" id="645">645</a>
 <a href="#646" id="646">646</a>
 <a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -673,7 +672,6 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>prometheus_client::metrics::counter::Counter;
@@ -1228,7 +1226,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
@@ -1265,7 +1263,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner
             .write(bs)
             .map(|n| {

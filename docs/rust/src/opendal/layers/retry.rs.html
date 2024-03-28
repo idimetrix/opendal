@@ -1168,7 +1168,6 @@
 <a href="#1166" id="1166">1166</a>
 <a href="#1167" id="1167">1167</a>
 <a href="#1168" id="1168">1168</a>
-<a href="#1169" id="1169">1169</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1195,7 +1194,6 @@
 <span class="kw">use </span>backon::BlockingRetryable;
 <span class="kw">use </span>backon::ExponentialBuilder;
 <span class="kw">use </span>backon::Retryable;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>log::warn;
 
@@ -1879,13 +1877,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">use </span>backon::RetryableWithContext;
 
         <span class="kw">let </span>inner = <span class="self">self</span>.inner.take().expect(<span class="string">"inner must be valid"</span>);
 
         <span class="kw">let </span>((inner, <span class="kw">_</span>), res) = {
-            |(<span class="kw-2">mut </span>r, bs): (R, Bytes)| <span class="kw">async move </span>{
+            |(<span class="kw-2">mut </span>r, bs): (R, oio::ReadableBuf)| <span class="kw">async move </span>{
                 <span class="kw">let </span>res = r.write(bs.clone()).<span class="kw">await</span>;
 
                 ((r, bs), res)
@@ -1977,7 +1975,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())

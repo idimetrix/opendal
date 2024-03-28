@@ -209,6 +209,7 @@
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -229,8 +230,9 @@
 </span><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::future;
+<span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::{future, mem};
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;

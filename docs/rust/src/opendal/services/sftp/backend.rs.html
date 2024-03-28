@@ -524,6 +524,7 @@
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
 <a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -548,7 +549,8 @@
 <span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bb8::{PooledConnection, RunError};
+<span class="kw">use </span>bb8::PooledConnection;
+<span class="kw">use </span>bb8::RunError;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>openssh::KnownHosts;
 <span class="kw">use </span>openssh::SessionBuilder;

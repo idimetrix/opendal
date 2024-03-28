@@ -575,12 +575,12 @@
 <span class="kw">where
     </span>W: BlockWrite,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
                 <span class="comment">// Fill cache with the first write.
                 </span><span class="kw">if </span><span class="self">self</span>.cache.is_none() {
-                    <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+                    <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs.to_bytes());
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
                 }
 
@@ -591,7 +591,7 @@
                     cache,
                 ));
 
-                <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+                <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs.to_bytes());
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
             } <span class="kw">else if let </span><span class="prelude-val">Some</span>(res) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
                 <span class="kw">match </span>res {
@@ -755,7 +755,7 @@
             expected_content.extend_from_slice(<span class="kw-2">&amp;</span>bs);
 
             <span class="kw">loop </span>{
-                <span class="kw">match </span>w.write(Bytes::copy_from_slice(<span class="kw-2">&amp;</span>bs)).<span class="kw">await </span>{
+                <span class="kw">match </span>w.write(bs.clone().into()).<span class="kw">await </span>{
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">break</span>,
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
                 }

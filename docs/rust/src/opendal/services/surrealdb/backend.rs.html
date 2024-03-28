@@ -393,6 +393,11 @@
 <a href="#391" id="391">391</a>
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -411,7 +416,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -422,8 +428,13 @@
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::{normalize_root, ConfigDeserializer};
-<span class="kw">use crate</span>::{Builder, Capability, Error, ErrorKind, Scheme};
+<span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
+<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
+<span class="kw">use </span><span class="kw">crate</span>::Builder;
+<span class="kw">use </span><span class="kw">crate</span>::Capability;
+<span class="kw">use </span><span class="kw">crate</span>::Error;
+<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
+<span class="kw">use </span><span class="kw">crate</span>::Scheme;
 
 <span class="doccomment">/// Config for Surrealdb services support.
 </span><span class="attr">#[derive(Default, Deserialize)]
@@ -482,7 +493,6 @@
     /// - `wss://ip:port`
     /// - `http://ip:port`
     /// - `https://ip:port`
-    ///
     </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, connection_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!connection_string.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(connection_string.to_string());

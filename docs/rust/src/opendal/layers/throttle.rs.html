@@ -259,7 +259,6 @@
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -282,7 +281,6 @@
 <span class="kw">use </span>std::thread;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>governor::clock::Clock;
 <span class="kw">use </span>governor::clock::DefaultClock;
 <span class="kw">use </span>governor::middleware::NoOpMiddleware;
@@ -459,7 +457,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>buf_length = NonZeroU32::new(bs.len() <span class="kw">as </span>u32).unwrap();
 
         <span class="kw">loop </span>{
@@ -494,7 +492,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>buf_length = NonZeroU32::new(bs.len() <span class="kw">as </span>u32).unwrap();
 
         <span class="kw">loop </span>{

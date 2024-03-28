@@ -197,8 +197,6 @@
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -220,8 +218,6 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::ops::DerefMut;
-
-<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -286,9 +282,9 @@
     /// It's possible that `n &lt; bs.len()`, caller should pass the remaining bytes
     /// repeatedly until all bytes has been written.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + Send;
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
@@ -304,7 +300,7 @@
 }
 
 <span class="kw">impl </span>Write <span class="kw">for </span>() {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::Write"</span>)
     }
 
@@ -324,7 +320,7 @@
 }
 
 <span class="kw">pub trait </span>WriteDyn: Unpin + Send + Sync {
-    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
 
     <span class="kw">fn </span>close_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 
@@ -332,7 +328,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; WriteDyn <span class="kw">for </span>T {
-    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         Box::pin(<span class="self">self</span>.write(bs))
     }
 
@@ -346,7 +342,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: WriteDyn + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.deref_mut().write_dyn(bs).<span class="kw">await
     </span>}
 
@@ -365,14 +361,14 @@
 <span class="doccomment">/// BlockingWrite is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>BlockingWrite: Send + Sync + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Write whole content at once.
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
 <span class="kw">impl </span>BlockingWrite <span class="kw">for </span>() {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let _ </span>= bs;
 
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::BlockingWrite"</span>)
@@ -390,7 +386,7 @@
 ///
 /// To make BlockingWriter work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: BlockingWrite + <span class="question-mark">?</span>Sized&gt; BlockingWrite <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).write(bs)
     }
 

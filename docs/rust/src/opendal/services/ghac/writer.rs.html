@@ -80,6 +80,9 @@
 <a href="#78" id="78">78</a>
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -97,9 +100,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Bytes;
-
-<span class="kw">use </span><span class="kw">super</span>::backend::GhacBackend;
+</span><span class="kw">use </span><span class="kw">super</span>::backend::GhacBackend;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -122,13 +123,18 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>GhacWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>size = bs.len();
         <span class="kw">let </span>offset = <span class="self">self</span>.size;
 
         <span class="kw">let </span>req = <span class="self">self
             </span>.backend
-            .ghac_upload(<span class="self">self</span>.cache_id, offset, size <span class="kw">as </span>u64, AsyncBody::Bytes(bs))
+            .ghac_upload(
+                <span class="self">self</span>.cache_id,
+                offset,
+                size <span class="kw">as </span>u64,
+                AsyncBody::Bytes(bs.to_bytes()),
+            )
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

@@ -347,8 +347,6 @@
 <a href="#345" id="345">345</a>
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -367,8 +365,6 @@
 // under the License.
 
 </span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>tokio::runtime::Handle;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -644,7 +640,7 @@
 }
 
 <span class="kw">impl</span>&lt;I: oio::Write + <span class="lifetime">'static</span>&gt; oio::BlockingWrite <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.write(bs))
     }
 

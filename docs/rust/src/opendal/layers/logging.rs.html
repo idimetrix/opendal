@@ -1371,7 +1371,6 @@
 <a href="#1369" id="1369">1369</a>
 <a href="#1370" id="1370">1370</a>
 <a href="#1371" id="1371">1371</a>
-<a href="#1372" id="1372">1372</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1395,7 +1394,6 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>log::debug;
@@ -2450,7 +2448,7 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(n) =&gt; {
                 <span class="self">self</span>.written += n <span class="kw">as </span>u64;
@@ -2548,7 +2546,7 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner.write(bs.clone()) {
             <span class="prelude-val">Ok</span>(n) =&gt; {
                 <span class="self">self</span>.written += n <span class="kw">as </span>u64;

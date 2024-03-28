@@ -195,7 +195,6 @@
 <a href="#193" id="193">193</a>
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -221,6 +220,7 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>foundationdb::api::NetworkAutoStop;
 <span class="kw">use </span>foundationdb::Database;
+<span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -229,8 +229,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="kw">use </span>serde::Deserialize;
 
 <span class="doccomment">/// [foundationdb](https://www.foundationdb.org/) service support.
 ///Config for FoundationDB.

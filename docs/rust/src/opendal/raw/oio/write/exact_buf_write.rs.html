@@ -208,23 +208,6 @@
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -242,11 +225,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::mem;
-
-<span class="kw">use </span>bytes::Buf;
+</span><span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::BufMut;
-<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>bytes::BytesMut;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -258,17 +239,12 @@
 /// `buffer_size` bytes. It's useful when the underlying storage requires the size to be written.
 ///
 /// For example, R2 requires all parts must be the same size except the last part.
-///
-/// ## Notes
-///
-/// ExactBufWriter is not a good choice for most cases, because it will cause more network requests.
 </span><span class="kw">pub struct </span>ExactBufWriter&lt;W: oio::Write&gt; {
     inner: W,
 
     <span class="doccomment">/// The size for buffer, we will flush the underlying storage at the size of this buffer.
     </span>buffer_size: usize,
-    buffer: Vec&lt;u8&gt;,
-    frozen: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
+    buffer: BytesMut,
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; ExactBufWriter&lt;W&gt; {
@@ -277,38 +253,36 @@
         <span class="self">Self </span>{
             inner,
             buffer_size,
-            buffer: Vec::new(),
-            frozen: <span class="prelude-val">None</span>,
+            buffer: BytesMut::with_capacity(buffer_size),
         }
     }
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>ExactBufWriter&lt;W&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(frozen) = <span class="self">self</span>.frozen.as_mut() {
-            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(frozen.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-            frozen.advance(written);
-            <span class="kw">if </span>!frozen.is_empty() {
-                <span class="comment">// Return remaining bytes back to buffer
-                </span><span class="self">self</span>.buffer = frozen.to_vec();
-            }
-            <span class="comment">// Clean up the frozen.
-            </span><span class="self">self</span>.frozen = <span class="prelude-val">None</span>;
-        }
-
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="comment">// Quick Path
         //
         // if buffer is empty and bs is larger than buffer_size, we can directly
         // freeze the first buffer_size bytes.
         </span><span class="kw">if </span><span class="self">self</span>.buffer.is_empty() &amp;&amp; bs.len() &gt;= <span class="self">self</span>.buffer_size {
-            <span class="self">self</span>.frozen = <span class="prelude-val">Some</span>(bs.slice(<span class="number">0</span>..<span class="self">self</span>.buffer_size));
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.buffer_size);
+            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(bs.take(<span class="self">self</span>.buffer_size)).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(written);
+        }
+
+        <span class="comment">// Slow Path
+        //
+        // If buffer is full, flush the buffer first.
+        </span><span class="kw">if </span><span class="self">self</span>.buffer.len() &gt;= <span class="self">self</span>.buffer_size {
+            <span class="kw">let </span>written = <span class="self">self
+                </span>.inner
+                .write(oio::ReadableBuf::from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.buffer))
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.buffer.advance(written);
         }
 
         <span class="kw">let </span>remaining = <span class="self">self</span>.buffer_size - <span class="self">self</span>.buffer.len();
         <span class="kw">if </span>bs.len() &gt;= remaining {
             <span class="self">self</span>.buffer.put_slice(<span class="kw-2">&amp;</span>bs[<span class="number">0</span>..remaining]);
-            <span class="self">self</span>.frozen = <span class="prelude-val">Some</span>(Bytes::from(mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer)));
             <span class="prelude-val">Ok</span>(remaining)
         } <span class="kw">else </span>{
             <span class="self">self</span>.buffer.put_slice(<span class="kw-2">&amp;</span>bs);
@@ -318,29 +292,21 @@
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">loop </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = <span class="self">self</span>.frozen.as_mut() {
-                <span class="kw">let </span>written = <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-                bs.advance(written);
-                <span class="kw">if </span>bs.is_empty() {
-                    <span class="self">self</span>.frozen = <span class="prelude-val">None</span>;
-                }
+            <span class="kw">if </span><span class="self">self</span>.buffer.is_empty() {
+                <span class="kw">break</span>;
             }
 
-            <span class="kw">if </span><span class="self">self</span>.frozen.is_none() {
-                <span class="kw">if </span>!<span class="self">self</span>.buffer.is_empty() {
-                    <span class="comment">// freeze the remaining buffer
-                    </span><span class="self">self</span>.frozen = <span class="prelude-val">Some</span>(Bytes::from(mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer)));
-                } <span class="kw">else </span>{
-                    <span class="kw">break</span>;
-                }
-            }
+            <span class="kw">let </span>written = <span class="self">self
+                </span>.inner
+                .write(oio::ReadableBuf::from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.buffer))
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.buffer.advance(written);
         }
 
         <span class="self">self</span>.inner.close().<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.frozen = <span class="prelude-val">None</span>;
         <span class="self">self</span>.buffer.clear();
         <span class="self">self</span>.inner.abort().<span class="kw">await
     </span>}
@@ -365,11 +331,11 @@
     }
 
     <span class="kw">impl </span>Write <span class="kw">for </span>MockWriter {
-        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
             <span class="macro">debug!</span>(<span class="string">"test_fuzz_exact_buf_writer: flush size: {}"</span>, <span class="kw-2">&amp;</span>bs.len());
 
             <span class="self">self</span>.buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
-            <span class="prelude-val">Ok</span>(bs.len())
+            <span class="prelude-val">Ok</span>(bs.remaining())
         }
 
         <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -397,7 +363,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>bs = Bytes::from(expected.clone());
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="kw">let </span>n = w.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>n = w.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -436,7 +402,7 @@
 
             <span class="kw">let </span><span class="kw-2">mut </span>bs = Bytes::from(content.clone());
             <span class="kw">while </span>!bs.is_empty() {
-                <span class="kw">let </span>n = writer.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>n = writer.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
                 bs.advance(n);
             }
         }

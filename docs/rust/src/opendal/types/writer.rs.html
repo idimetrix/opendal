@@ -325,6 +325,9 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -421,7 +424,7 @@
     </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -465,7 +468,7 @@
         <span class="kw">while let </span><span class="prelude-val">Some</span>(bs) = sink_from.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
             <span class="kw">while </span>!bs.is_empty() {
-                <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
                 bs.advance(n);
                 written += n <span class="kw">as </span>u64;
             }
@@ -506,7 +509,6 @@
     <span class="kw">use </span>std::task::Context;
     <span class="kw">use </span>std::task::Poll;
 
-    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>futures::AsyncWrite;
 
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
@@ -518,6 +520,10 @@
     /// Users can use this adapter in cases where they need to use [`AsyncWrite`] related trait.
     ///
     /// FuturesIoAsyncWriter also implements [`Unpin`], [`Send`] and [`Sync`]
+    ///
+    /// # TODO
+    ///
+    /// We should insert checks if the input slice changed after future created.
     </span><span class="kw">pub struct </span>FuturesIoAsyncWriter {
         state: State,
     }
@@ -552,7 +558,7 @@
             <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
                 State::Idle(w) =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
-                    <span class="kw">let </span>bs = Bytes::copy_from_slice(buf);
+                    <span class="kw">let </span>bs = oio::ReadableBuf::from_slice(buf);
                     <span class="kw">let </span>fut = <span class="kw">async move </span>{
                         <span class="kw">let </span>res = w.write(bs).<span class="kw">await</span>;
                         (w, res)
@@ -626,7 +632,7 @@
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone())<span class="question-mark">?</span>;
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into())<span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -642,7 +648,7 @@
 <span class="kw">impl </span>io::Write <span class="kw">for </span>BlockingWriter {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner
-            .write(Bytes::copy_from_slice(buf))
+            .write(buf.into())
             .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
     }
 

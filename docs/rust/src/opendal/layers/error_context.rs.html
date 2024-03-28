@@ -432,7 +432,6 @@
 <a href="#430" id="430">430</a>
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -454,7 +453,6 @@
 <span class="kw">use </span>std::fmt::Formatter;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::TryFutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
@@ -802,7 +800,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span>.map_err(|err| {
             err.with_operation(WriteOperation::Write)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
@@ -829,7 +827,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner.write(bs.clone()).map_err(|err| {
             err.with_operation(WriteOperation::BlockingWrite)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)

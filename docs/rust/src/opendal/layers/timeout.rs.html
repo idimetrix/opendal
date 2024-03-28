@@ -472,7 +472,6 @@
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
 <a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -494,7 +493,6 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
@@ -774,7 +772,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.write(bs);
         <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, WriteOperation::Write.into_static(), fut).<span class="kw">await
     </span>}

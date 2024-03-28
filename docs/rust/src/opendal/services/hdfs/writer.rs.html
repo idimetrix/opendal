@@ -101,7 +101,6 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -122,7 +121,6 @@
 </span><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::AsyncWriteExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -157,7 +155,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>HdfsWriter&lt;hdrs::AsyncFile&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
 
         f.write(<span class="kw-2">&amp;</span>bs).<span class="kw">await</span>.map_err(new_std_io_error)
@@ -186,7 +184,7 @@
 }
 
 <span class="kw">impl </span>oio::BlockingWrite <span class="kw">for </span>HdfsWriter&lt;hdrs::File&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
         f.write(<span class="kw-2">&amp;</span>bs).map_err(new_std_io_error)
     }
