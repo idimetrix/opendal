@@ -281,6 +281,32 @@
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
 <a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -305,12 +331,14 @@
 
 <span class="doccomment">/// ReadableBuf is the buf used in `oio::Write`.
 ///
-/// This API is used internally by the `oio` crate. Users should never use it directly.
+/// This API is used internally by the `oio` crate. Users SHOULD never use it in any way.
 ///
 /// # Safety
 ///
-/// Caller must make sure that input buffer lives longer than `ReadableBuf` otherwise `ReadableBuf`
-/// might point to invalid memory.
+/// - Caller MUST make sure that input buffer lives longer than `ReadableBuf`. Otherwise
+///   `ReadableBuf` might point to invalid memory.
+/// - Caller SHOULD NOT store `ReadableBuf` in anyway. The buf should only be passed to `oio::Write`
+///   or been copied out by [`ReadableBuf::to_bytes`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ReadableBuf(Inner);
 
@@ -467,7 +495,7 @@
                     <span class="string">"ptr of slice must be valid across the lifetime of ReadableBuf"
                 </span>);
                 <span class="macro">assert!</span>(
-                    <span class="kw-2">*</span>size &gt; <span class="kw-2">*</span>offset + cnt,
+                    <span class="kw-2">*</span>size &gt;= <span class="kw-2">*</span>offset + cnt,
                     <span class="string">"cnt {cnt} exceeds the remaining size {}"</span>,
                     <span class="kw-2">*</span>size - <span class="kw-2">*</span>offset
                 );
@@ -485,7 +513,7 @@
                     <span class="string">"ptr of slice must be valid across the lifetime of ReadableBuf"
                 </span>);
                 <span class="macro">assert!</span>(
-                    <span class="kw-2">*</span>size &gt; <span class="kw-2">*</span>offset + len,
+                    <span class="kw-2">*</span>size &gt;= <span class="kw-2">*</span>offset + len,
                     <span class="string">"len {len} exceeds the remaining size {}"</span>,
                     <span class="kw-2">*</span>size - <span class="kw-2">*</span>offset
                 );
@@ -516,6 +544,12 @@
         <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">6</span>);
         <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b" world"</span>);
         <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b" world"</span>));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadableBuf::from_slice(<span class="string">b"hello world"</span>);
+        <span class="macro">assert_eq!</span>(buf.copy_to_bytes(<span class="number">11</span>), Bytes::from_static(<span class="string">b"hello world"</span>));
+        <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b""</span>);
+        <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b""</span>));
     }
 
     <span class="attr">#[test]
@@ -530,6 +564,12 @@
         <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">6</span>);
         <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b" world"</span>);
         <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b" world"</span>));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadableBuf::from_bytes(<span class="string">"hello world"</span>);
+        <span class="macro">assert_eq!</span>(buf.copy_to_bytes(<span class="number">11</span>), Bytes::from_static(<span class="string">b"hello world"</span>));
+        <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b""</span>);
+        <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b""</span>));
     }
 
     <span class="attr">#[test]
@@ -545,6 +585,12 @@
         <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">6</span>);
         <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b" world"</span>);
         <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b" world"</span>));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadableBuf::from_slice(bs);
+        <span class="macro">assert_eq!</span>(buf.copy_to_bytes(<span class="number">11</span>), Bytes::from_static(<span class="string">b"hello world"</span>));
+        <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b""</span>);
+        <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b""</span>));
     }
 
     <span class="attr">#[test]
@@ -560,6 +606,12 @@
         <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">6</span>);
         <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b" world"</span>);
         <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b" world"</span>));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadableBuf::from_slice(<span class="kw-2">&amp;</span>bs);
+        <span class="macro">assert_eq!</span>(buf.copy_to_bytes(<span class="number">11</span>), Bytes::from_static(<span class="string">b"hello world"</span>));
+        <span class="macro">assert_eq!</span>(buf.remaining(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(buf.chunk(), <span class="string">b""</span>);
+        <span class="macro">assert_eq!</span>(buf.to_bytes(), Bytes::from_static(<span class="string">b""</span>));
     }
 }
 </code></pre></div></section></main></body></html>
