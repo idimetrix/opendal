@@ -460,6 +460,7 @@
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -766,6 +767,7 @@
 
         {
             <span class="kw">let </span>req = Request::post(url)
+                .header(header::CONTENT_LENGTH, <span class="number">0</span>)
                 .body(AsyncBody::Empty)
                 .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
