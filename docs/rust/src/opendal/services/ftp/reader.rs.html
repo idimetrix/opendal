@@ -104,7 +104,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>FtpReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ftp_stream = <span class="self">self</span>.core.ftp_connect(Operation::Read).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>offset != <span class="number">0 </span>{
@@ -121,7 +121,7 @@
             </span>.take(limit <span class="kw">as _</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(limit);
         ds.read_to_end(<span class="kw-2">&amp;mut </span>bs).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(bs))
+        <span class="prelude-val">Ok</span>(Buffer::from(bs))
     }
 }
 </code></pre></div></section></main></body></html>

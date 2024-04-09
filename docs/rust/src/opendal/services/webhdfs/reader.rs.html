@@ -68,6 +68,7 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -92,6 +93,7 @@
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error_msg;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::webhdfs::backend::WebhdfsBackend;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>WebhdfsReader {
     core: WebhdfsBackend,
@@ -111,7 +113,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>WebhdfsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>range = BytesRange::new(offset, <span class="prelude-val">Some</span>(limit <span class="kw">as </span>u64));
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.webhdfs_read_file(<span class="kw-2">&amp;</span><span class="self">self</span>.path, range).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -126,12 +128,12 @@
                 <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
                 <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
                 <span class="kw">if </span>s.contains(<span class="string">"out of the range"</span>) {
-                    <span class="prelude-val">Ok</span>(oio::Buffer::new())
+                    <span class="prelude-val">Ok</span>(Buffer::new())
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Err</span>(parse_error_msg(parts, <span class="kw-2">&amp;</span>s)<span class="question-mark">?</span>)
                 }
             }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; <span class="prelude-val">Ok</span>(oio::Buffer::new()),
+            StatusCode::RANGE_NOT_SATISFIABLE =&gt; <span class="prelude-val">Ok</span>(Buffer::new()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }

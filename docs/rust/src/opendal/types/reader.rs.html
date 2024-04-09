@@ -622,12 +622,12 @@
         cap: usize,
 
         cur: u64,
-        buf: oio::Buffer,
+        buf: Buffer,
     }
 
     <span class="kw">enum </span>State {
         Idle(<span class="prelude-ty">Option</span>&lt;oio::Reader&gt;),
-        Fill(BoxedStaticFuture&lt;(oio::Reader, <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;)&gt;),
+        Fill(BoxedStaticFuture&lt;(oio::Reader, <span class="prelude-ty">Result</span>&lt;Buffer&gt;)&gt;),
     }
 
     <span class="doccomment">/// # Safety
@@ -647,7 +647,7 @@
                 </span>cap: <span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
 
                 cur: <span class="number">0</span>,
-                buf: oio::Buffer::new(),
+                buf: Buffer::new(),
             }
         }
 
@@ -736,7 +736,7 @@
                 <span class="kw">let </span>cnt = new_pos - <span class="self">self</span>.cur;
                 <span class="self">self</span>.buf.advance(cnt <span class="kw">as _</span>);
             } <span class="kw">else </span>{
-                <span class="self">self</span>.buf = oio::Buffer::new()
+                <span class="self">self</span>.buf = Buffer::new()
             }
 
             <span class="self">self</span>.cur = new_pos;
@@ -776,7 +776,7 @@
 
     <span class="kw">enum </span>State {
         Idle(<span class="prelude-ty">Option</span>&lt;oio::Reader&gt;),
-        Next(BoxedStaticFuture&lt;(oio::Reader, <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;)&gt;),
+        Next(BoxedStaticFuture&lt;(oio::Reader, <span class="prelude-ty">Result</span>&lt;Buffer&gt;)&gt;),
     }
 
     <span class="doccomment">/// # Safety

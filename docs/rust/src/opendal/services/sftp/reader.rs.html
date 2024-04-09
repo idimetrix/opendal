@@ -122,7 +122,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>SftpReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.inner.connect().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
@@ -144,7 +144,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>size = limit;
         <span class="kw">if </span>size == <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = BytesMut::with_capacity(limit);
@@ -161,7 +161,7 @@
                 <span class="kw">break</span>;
             }
         }
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(buf.freeze()))
+        <span class="prelude-val">Ok</span>(Buffer::from(buf.freeze()))
     }
 }
 </code></pre></div></section></main></body></html>

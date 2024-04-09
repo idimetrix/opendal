@@ -776,7 +776,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::Read&gt; oio::Read <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await</span>.map_err(|err| {
             err.with_operation(ReadOperation::Read)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
@@ -788,7 +788,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.inner.read_at(offset, limit).map_err(|err| {
             err.with_operation(ReadOperation::BlockingRead)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
@@ -800,7 +800,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span>.map_err(|err| {
             err.with_operation(WriteOperation::Write)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
@@ -827,7 +827,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner.write(bs.clone()).map_err(|err| {
             err.with_operation(WriteOperation::BlockingWrite)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)

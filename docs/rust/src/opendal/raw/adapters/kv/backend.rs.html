@@ -317,6 +317,10 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -555,7 +559,7 @@
     kv: Arc&lt;S&gt;,
     path: String,
 
-    buffer: Buffer,
+    buffer: FlexBuffer,
 }
 
 <span class="kw">impl</span>&lt;S&gt; KvWriter&lt;S&gt; {
@@ -563,13 +567,13 @@
         KvWriter {
             kv,
             path,
-            buffer: Buffer::Active(BytesMut::new()),
+            buffer: FlexBuffer::Active(BytesMut::new()),
         }
     }
 }
 
-<span class="doccomment">/// TODO: replace with FlexBuf.
-</span><span class="kw">enum </span>Buffer {
+<span class="doccomment">/// TODO: replace with oio::FlexBuf.
+</span><span class="kw">enum </span>FlexBuffer {
     Active(BytesMut),
     Frozen(Bytes),
 }
@@ -580,54 +584,58 @@
 </span><span class="kw">unsafe impl</span>&lt;S: Adapter&gt; Sync <span class="kw">for </span>KvWriter&lt;S&gt; {}
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::Write <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
-            Buffer::Active(buf) =&gt; {
+            FlexBuffer::Active(buf) =&gt; {
                 buf.extend_from_slice(bs.chunk());
                 <span class="prelude-val">Ok</span>(bs.chunk().len())
             }
-            Buffer::Frozen(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>),
+            FlexBuffer::Frozen(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>)
+            }
         }
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>buf = <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
-            Buffer::Active(buf) =&gt; {
+            FlexBuffer::Active(buf) =&gt; {
                 <span class="kw">let </span>buf = buf.split().freeze();
-                <span class="self">self</span>.buffer = Buffer::Frozen(buf.clone());
+                <span class="self">self</span>.buffer = FlexBuffer::Frozen(buf.clone());
                 buf
             }
-            Buffer::Frozen(buf) =&gt; buf.clone(),
+            FlexBuffer::Frozen(buf) =&gt; buf.clone(),
         };
 
         <span class="self">self</span>.kv.set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span>buf).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.buffer = Buffer::Active(BytesMut::new());
+        <span class="self">self</span>.buffer = FlexBuffer::Active(BytesMut::new());
         <span class="prelude-val">Ok</span>(())
     }
 }
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::BlockingWrite <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
-            Buffer::Active(buf) =&gt; {
+            FlexBuffer::Active(buf) =&gt; {
                 buf.extend_from_slice(bs.chunk());
                 <span class="prelude-val">Ok</span>(bs.chunk().len())
             }
-            Buffer::Frozen(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>),
+            FlexBuffer::Frozen(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">"KvWriter should not be frozen during poll_write"</span>)
+            }
         }
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>buf = <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.buffer {
-            Buffer::Active(buf) =&gt; {
+            FlexBuffer::Active(buf) =&gt; {
                 <span class="kw">let </span>buf = buf.split().freeze();
-                <span class="self">self</span>.buffer = Buffer::Frozen(buf.clone());
+                <span class="self">self</span>.buffer = FlexBuffer::Frozen(buf.clone());
                 buf
             }
-            Buffer::Frozen(buf) =&gt; buf.clone(),
+            FlexBuffer::Frozen(buf) =&gt; buf.clone(),
         };
 
         <span class="self">self</span>.kv.blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span>buf)<span class="question-mark">?</span>;

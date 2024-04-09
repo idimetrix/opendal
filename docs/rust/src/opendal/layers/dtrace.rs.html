@@ -804,7 +804,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, reader_read_start, c_path.as_ptr());
         <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await </span>{
@@ -821,7 +821,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, blocking_reader_read_start, c_path.as_ptr());
         <span class="self">self</span>.inner
@@ -843,7 +843,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, writer_write_start, c_path.as_ptr());
         <span class="self">self</span>.inner
@@ -891,7 +891,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, blocking_writer_write_start, c_path.as_ptr());
         <span class="self">self</span>.inner

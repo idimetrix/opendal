@@ -169,7 +169,7 @@
     java_class_name: String,
 }
 
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
     <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
@@ -228,7 +228,7 @@
 }
     "#</span>,
         );
-        <span class="kw">let </span>body = oio::Buffer::from(ill_args.clone());
+        <span class="kw">let </span>body = Buffer::from(ill_args.clone());
         <span class="kw">let </span>resp = Response::builder()
             .status(StatusCode::BAD_REQUEST)
             .body(body)

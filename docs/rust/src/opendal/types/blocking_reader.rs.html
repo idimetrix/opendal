@@ -455,8 +455,8 @@
 
     <span class="kw">use </span>bytes::Buf;
 
-    <span class="kw">use </span><span class="kw">crate</span>::raw::format_std_io_error;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+    <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
     <span class="doccomment">/// StdReader is the adapter of [`Read`], [`Seek`] and [`BufRead`] for [`BlockingReader`][crate::BlockingReader].
     ///
@@ -470,7 +470,7 @@
         cap: usize,
 
         cur: u64,
-        buf: oio::Buffer,
+        buf: Buffer,
     }
 
     <span class="kw">impl </span>StdIoReader {
@@ -485,7 +485,7 @@
                 </span>cap: <span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
 
                 cur: <span class="number">0</span>,
-                buf: oio::Buffer::new(),
+                buf: Buffer::new(),
             }
         }
 
@@ -555,7 +555,7 @@
                 <span class="kw">let </span>cnt = new_pos - <span class="self">self</span>.cur;
                 <span class="self">self</span>.buf.advance(cnt <span class="kw">as _</span>);
             } <span class="kw">else </span>{
-                <span class="self">self</span>.buf = oio::Buffer::new()
+                <span class="self">self</span>.buf = Buffer::new()
             }
 
             <span class="self">self</span>.cur = new_pos;

@@ -138,7 +138,7 @@
     message: String,
 }
 
-<span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -197,7 +197,7 @@
 
         <span class="kw">for </span>res <span class="kw">in </span>err_res {
             <span class="kw">let </span>bs = bytes::Bytes::from(res.<span class="number">0</span>);
-            <span class="kw">let </span>body = oio::Buffer::from(bs);
+            <span class="kw">let </span>body = Buffer::from(bs);
             <span class="kw">let </span>resp = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(body)

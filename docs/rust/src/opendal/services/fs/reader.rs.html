@@ -163,7 +163,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>FsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>handle = <span class="self">self</span>.try_clone()<span class="question-mark">?</span>;
 
         <span class="kw">match </span>tokio::runtime::Handle::try_current() {
@@ -182,7 +182,7 @@
 }
 
 <span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>FsReader {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(limit);
 
         <span class="kw">let </span>buf = bs.spare_capacity_mut();
@@ -209,7 +209,7 @@
         <span class="comment">// Safety: We make sure that bs contains `n` more bytes.
         </span><span class="kw">let </span>filled = read_buf.filled().len();
         <span class="kw">unsafe </span>{ bs.set_len(filled) }
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(bs))
+        <span class="prelude-val">Ok</span>(Buffer::from(bs))
     }
 }
 </code></pre></div></section></main></body></html>

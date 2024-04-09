@@ -628,7 +628,7 @@
                         <span class="kw">let </span>bs = this.buf.get().expect(<span class="string">"frozen buffer must be valid"</span>);
                         <span class="kw">let </span><span class="kw-2">mut </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                            <span class="kw">let </span>res = w.write(oio::Buffer::from(bs)).<span class="kw">await</span>;
+                            <span class="kw">let </span>res = w.write(Buffer::from(bs)).<span class="kw">await</span>;
                             (w, res)
                         };
                         this.state = State::Writing(Box::pin(fut));
@@ -666,7 +666,7 @@
 
                         <span class="kw">let </span><span class="kw-2">mut </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                            <span class="kw">let </span>res = w.write(oio::Buffer::from(bs)).<span class="kw">await</span>;
+                            <span class="kw">let </span>res = w.write(Buffer::from(bs)).<span class="kw">await</span>;
                             (w, res)
                         };
                         this.state = State::Writing(Box::pin(fut));

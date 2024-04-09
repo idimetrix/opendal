@@ -575,7 +575,7 @@
 <span class="kw">where
     </span>W: BlockWrite,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
                 <span class="comment">// Fill cache with the first write.

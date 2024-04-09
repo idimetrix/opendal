@@ -1167,7 +1167,6 @@
 <a href="#1165" id="1165">1165</a>
 <a href="#1166" id="1166">1166</a>
 <a href="#1167" id="1167">1167</a>
-<a href="#1168" id="1168">1168</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1197,7 +1196,6 @@
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>log::warn;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Buffer;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
@@ -1857,7 +1855,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead, I: RetryInterceptor&gt; oio::BlockingRead <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         { || <span class="self">self</span>.inner.as_ref().unwrap().read_at(offset, limit) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
@@ -1877,13 +1875,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">use </span>backon::RetryableWithContext;
 
         <span class="kw">let </span>inner = <span class="self">self</span>.inner.take().expect(<span class="string">"inner must be valid"</span>);
 
         <span class="kw">let </span>((inner, <span class="kw">_</span>), res) = {
-            |(<span class="kw-2">mut </span>r, bs): (R, oio::Buffer)| <span class="kw">async move </span>{
+            |(<span class="kw-2">mut </span>r, bs): (R, Buffer)| <span class="kw">async move </span>{
                 <span class="kw">let </span>res = r.write(bs.clone()).<span class="kw">await</span>;
 
                 ((r, bs), res)
@@ -1975,7 +1973,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
@@ -2204,7 +2202,7 @@
     }
 
     <span class="kw">impl </span>oio::Read <span class="kw">for </span>MockReader {
-        <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+        <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>attempt = <span class="self">self</span>.attempt.lock().unwrap();
             <span class="kw-2">*</span>attempt += <span class="number">1</span>;
 

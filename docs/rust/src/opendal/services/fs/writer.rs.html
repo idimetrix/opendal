@@ -153,7 +153,7 @@
 </span><span class="kw">unsafe impl</span>&lt;F&gt; Sync <span class="kw">for </span>FsWriter&lt;F&gt; {}
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>FsWriter&lt;tokio::fs::File&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"FsWriter must be initialized"</span>);
 
         <span class="comment">// TODO: use write_vectored instead.
@@ -188,7 +188,7 @@
 }
 
 <span class="kw">impl </span>oio::BlockingWrite <span class="kw">for </span>FsWriter&lt;std::fs::File&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"FsWriter must be initialized"</span>);
 
         f.write(bs.chunk()).map_err(new_std_io_error)

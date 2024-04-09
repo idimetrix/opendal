@@ -212,9 +212,6 @@
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -248,10 +245,7 @@
 <span class="kw">use </span><span class="kw">super</span>::parse_content_encoding;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_length;
 <span class="kw">use </span><span class="kw">super</span>::AsyncBody;
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Error;
-<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
-<span class="kw">use </span><span class="kw">crate</span>::Result;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// HttpClient that used across opendal.
 </span><span class="attr">#[derive(Clone)]
@@ -303,7 +297,7 @@
     }
 
     <span class="doccomment">/// Send a request in async way.
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="comment">// Uri stores all string alike data in `Bytes` which means
         // the clone here is cheap.
         </span><span class="kw">let </span>uri = req.uri().clone();
@@ -335,7 +329,7 @@
                 }
                 <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
                 </span>{
-                    <span class="kw">let </span>bs = oio::StreamExt::collect(s).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>bs = <span class="kw">crate</span>::raw::oio::StreamExt::collect(s).<span class="kw">await</span><span class="question-mark">?</span>;
                     req_builder.body(reqwest::Body::from(bs))
                 }
             }
@@ -402,7 +396,7 @@
                     .set_source(err)
             })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>buffer = oio::Buffer::from(bs);
+        <span class="kw">let </span>buffer = Buffer::from(bs);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(expect) = content_length {
             check(expect, buffer.remaining() <span class="kw">as </span>u64)<span class="question-mark">?</span>;

@@ -97,7 +97,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>SftpWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.file.write(bs.chunk()).<span class="kw">await</span>.map_err(new_std_io_error)
     }
 

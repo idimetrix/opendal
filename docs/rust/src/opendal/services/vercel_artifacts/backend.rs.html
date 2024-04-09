@@ -286,7 +286,7 @@
         hash: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         <span class="kw">_</span>: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
             <span class="string">"https://api.vercel.com/v8/artifacts/{}"</span>,
             percent_encode_path(hash)
@@ -313,7 +313,7 @@
         hash: <span class="kw-2">&amp;</span>str,
         size: u64,
         body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://api.vercel.com/v8/artifacts/{}"</span>,
             percent_encode_path(hash)
@@ -331,7 +331,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>vercel_artifacts_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;oio::Buffer&gt;&gt; {
+    <span class="kw">pub async fn </span>vercel_artifacts_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://api.vercel.com/v8/artifacts/{}"</span>,
             percent_encode_path(hash)

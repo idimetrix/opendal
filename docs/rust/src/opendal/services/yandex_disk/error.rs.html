@@ -106,8 +106,6 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -131,9 +129,7 @@
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Error;
-<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
-<span class="kw">use </span><span class="kw">crate</span>::Result;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// YandexDiskError is the error returned by YandexDisk service.
 </span><span class="attr">#[derive(Default, Debug, Deserialize)]
@@ -145,7 +141,7 @@
 }
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;oio::Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -206,7 +202,7 @@
 
         <span class="kw">for </span>res <span class="kw">in </span>err_res {
             <span class="kw">let </span>bs = bytes::Bytes::from(res.<span class="number">0</span>);
-            <span class="kw">let </span>body = oio::Buffer::from(bs);
+            <span class="kw">let </span>body = Buffer::from(bs);
             <span class="kw">let </span>resp = Response::builder().status(res.<span class="number">2</span>).body(body).unwrap();
 
             <span class="kw">let </span>err = parse_error(resp).<span class="kw">await</span>;

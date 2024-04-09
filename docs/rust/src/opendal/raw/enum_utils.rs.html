@@ -237,7 +237,6 @@
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
 <a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -278,8 +277,7 @@
 //! This module is used to provide some enums for the above code. We should remove this module once
 //! type_alias_impl_trait has been stabilized.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::oio::Buffer;
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// TwoWays is used to implement traits that based on two ways.
@@ -302,7 +300,7 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::BlockingRead, TWO: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, limit),
             <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, limit),
@@ -311,7 +309,7 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write&gt; oio::Write <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
             <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,
@@ -346,7 +344,7 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Read, TWO: oio::Read, THREE: oio::Read&gt; oio::Read <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             ThreeWays::One(v) =&gt; v.read_at(offset, limit).<span class="kw">await</span>,
             ThreeWays::Two(v) =&gt; v.read_at(offset, limit).<span class="kw">await</span>,
@@ -358,7 +356,7 @@
 <span class="kw">impl</span>&lt;ONE: oio::BlockingRead, TWO: oio::BlockingRead, THREE: oio::BlockingRead&gt; oio::BlockingRead
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, limit),
             <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, limit),
@@ -370,7 +368,7 @@
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write, THREE: oio::Write&gt; oio::Write
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
             <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,
@@ -433,7 +431,7 @@
     THREE: oio::BlockingRead,
     FOUR: oio::BlockingRead,
 {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, limit),
             <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, limit),

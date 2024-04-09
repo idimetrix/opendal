@@ -87,7 +87,6 @@
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -111,8 +110,7 @@
 <span class="kw">use </span>tokio::io::ReadBuf;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Error;
-<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>HdfsReader {
     f: Arc&lt;File&gt;,
@@ -125,7 +123,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>HdfsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>r = <span class="self">Self </span>{ f: <span class="self">self</span>.f.clone() };
         <span class="kw">match </span>tokio::runtime::Handle::try_current() {
             <span class="prelude-val">Ok</span>(runtime) =&gt; runtime
@@ -143,7 +141,7 @@
 }
 
 <span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>HdfsReader {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(limit);
 
         <span class="kw">let </span>buf = bs.spare_capacity_mut();
@@ -173,7 +171,7 @@
         <span class="comment">// Safety: We make sure that bs contains `n` more bytes.
         </span><span class="kw">let </span>filled = read_buf.filled().len();
         <span class="kw">unsafe </span>{ bs.set_len(filled) }
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(bs))
+        <span class="prelude-val">Ok</span>(Buffer::from(bs))
     }
 }
 </code></pre></div></section></main></body></html>

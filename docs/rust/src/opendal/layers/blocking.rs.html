@@ -634,13 +634,13 @@
 }
 
 <span class="kw">impl</span>&lt;I: oio::Read + <span class="lifetime">'static</span>&gt; oio::BlockingRead <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.read_at(offset, limit))
     }
 }
 
 <span class="kw">impl</span>&lt;I: oio::Write + <span class="lifetime">'static</span>&gt; oio::BlockingWrite <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.write(bs))
     }
 

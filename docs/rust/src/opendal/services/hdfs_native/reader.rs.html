@@ -36,6 +36,7 @@
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -55,7 +56,8 @@
 
 </span><span class="kw">use </span>hdfs_native::file::FileReader;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>HdfsNativeReader {
     _f: FileReader,
@@ -68,7 +70,7 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>HdfsNativeReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, _offset: u64, _limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, _offset: u64, _limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="macro">todo!</span>()
     }
 }

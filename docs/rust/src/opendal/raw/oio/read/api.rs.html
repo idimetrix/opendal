@@ -175,10 +175,6 @@
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -265,17 +261,13 @@
     /// Storage services should try to read as much as possible, only return bytes less than the
     /// limit while reaching the end of the file.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">fn </span>read_at(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        offset: u64,
-        limit: usize,
-    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt; + Send;
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt;;
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>() {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (offset, limit);
 
         <span class="prelude-val">Err</span>(Error::new(
@@ -287,22 +279,22 @@
 
 <span class="kw">impl </span>Read <span class="kw">for </span>Bytes {
     <span class="doccomment">/// TODO: we can check if the offset is out of range.
-    </span><span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    </span><span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() <span class="kw">as </span>u64 {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
         <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
         <span class="kw">let </span>limit = limit.min(<span class="self">self</span>.len() - offset);
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
+        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
     }
 }
 
 <span class="kw">pub trait </span>ReadDyn: Unpin + Send + Sync {
-    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt;;
+    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;
 }
 
 <span class="kw">impl</span>&lt;T: Read + <span class="question-mark">?</span>Sized&gt; ReadDyn <span class="kw">for </span>T {
-    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;&gt; {
+    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; {
         Box::pin(<span class="self">self</span>.read_at(offset, limit))
     }
 }
@@ -312,7 +304,7 @@
 /// Take care about the `deref_mut()` here. This makes sure that we are calling functions
 /// upon `&amp;mut T` instead of `&amp;mut Box&lt;T&gt;`. The later could result in infinite recursion.
 </span><span class="kw">impl</span>&lt;T: ReadDyn + <span class="question-mark">?</span>Sized&gt; Read <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.deref().read_at_dyn(offset, limit).<span class="kw">await
     </span>}
 }
@@ -328,11 +320,11 @@
     ///
     /// Storage services should try to read as much as possible, only return bytes less than the
     /// limit while reaching the end of the file.
-    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt;;
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt;;
 }
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>() {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let _ </span>= (offset, limit);
 
         <span class="macro">unimplemented!</span>(<span class="string">"read is required to be implemented for oio::BlockingRead"</span>)
@@ -341,20 +333,20 @@
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>Bytes {
     <span class="doccomment">/// TODO: we can check if the offset is out of range.
-    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() <span class="kw">as </span>u64 {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(oio::Buffer::new());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
         <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
         <span class="kw">let </span>limit = limit.min(<span class="self">self</span>.len() - offset);
-        <span class="prelude-val">Ok</span>(oio::Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
+        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.slice(offset..offset + limit)))
     }
 }
 
 <span class="doccomment">/// `Box&lt;dyn BlockingRead&gt;` won't implement `BlockingRead` automatically.
 /// To make BlockingReader work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;oio::Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).read_at(offset, limit)
     }
 }

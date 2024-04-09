@@ -707,12 +707,12 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>MadsimReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;oio::Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="kw">crate</span>::Result&lt;Buffer&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>data) = <span class="self">self</span>.data {
             <span class="kw">let </span>size = min(limit, data.len());
             <span class="prelude-val">Ok</span>(data.clone().split_to(size).into())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(oio::Buffer::new())
+            <span class="prelude-val">Ok</span>(Buffer::new())
         }
     }
 }
@@ -727,7 +727,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>MadsimWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="kw">crate</span>::Result&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">crate</span>::Result&lt;usize&gt; {
         <span class="attr">#[cfg(madsim)]
         </span>{
             <span class="kw">let </span>req = Request::Write(<span class="self">self</span>.path.to_string(), bs);
