@@ -210,6 +210,11 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -265,6 +270,11 @@
     <span class="doccomment">/// Create a new http client in async context.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::build(reqwest::ClientBuilder::new())
+    }
+
+    <span class="doccomment">/// Construct `Self` with given [`reqwest::Client`]
+    </span><span class="kw">pub fn </span>with(client: reqwest::Client) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ client }
     }
 
     <span class="doccomment">/// Build a new http client in async context.
