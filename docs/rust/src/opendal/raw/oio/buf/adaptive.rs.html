@@ -186,8 +186,8 @@
 </span><span class="kw">pub struct </span>AdaptiveBuf {
     <span class="doccomment">/// The underlying buffer.
     </span>buffer: BytesMut,
-
-    next: usize,
+    <span class="doccomment">/// The next buffer size.
+    </span>next: usize,
     decrease_now: bool,
 }
 

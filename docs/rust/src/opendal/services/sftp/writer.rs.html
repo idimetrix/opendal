@@ -56,8 +56,6 @@
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -75,7 +73,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::pin::Pin;
+</span><span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>std::pin::Pin;
 
 <span class="kw">use </span>openssh_sftp_client::file::File;
 <span class="kw">use </span>openssh_sftp_client::file::TokioCompatFile;
@@ -98,11 +97,8 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>SftpWriter {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.file
-            .write(bs.as_slice())
-            .<span class="kw">await
-            </span>.map_err(new_std_io_error)
+    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="self">self</span>.file.write(bs.chunk()).<span class="kw">await</span>.map_err(new_std_io_error)
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

@@ -1551,7 +1551,7 @@
 <span class="kw">where
     </span>W: oio::Write,
 {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
@@ -1586,7 +1586,7 @@
 <span class="kw">where
     </span>W: oio::BlockingWrite,
 {
-    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;

@@ -358,7 +358,7 @@
 <span class="kw">use </span>std::vec::IntoIter;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>bytes::{Buf, Bytes};
 
 <span class="kw">use </span><span class="kw">super</span>::Adapter;
 <span class="kw">use </span><span class="kw">super</span>::Value;
@@ -618,11 +618,11 @@
 }
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::Write <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>size = bs.len();
+    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">let </span>size = bs.chunk().len();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="self">self</span>.buf.take().unwrap_or_else(|| Vec::with_capacity(size));
-        buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
+        buf.extend_from_slice(bs.chunk());
 
         <span class="self">self</span>.buf = <span class="prelude-val">Some</span>(buf);
         <span class="prelude-val">Ok</span>(size)
@@ -648,11 +648,11 @@
 }
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::BlockingWrite <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::ReadableBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>size = bs.len();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="self">self</span>.buf.take().unwrap_or_else(|| Vec::with_capacity(size));
-        buf.extend_from_slice(<span class="kw-2">&amp;</span>bs);
+        buf.extend_from_slice(bs.chunk());
 
         <span class="self">self</span>.buf = <span class="prelude-val">Some</span>(buf);
 
