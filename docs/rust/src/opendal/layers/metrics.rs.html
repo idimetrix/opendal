@@ -1634,7 +1634,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
@@ -1668,7 +1668,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="self">self</span>.inner
             .write(bs)
             .map(|n| {

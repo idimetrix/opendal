@@ -772,7 +772,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.write(bs);
         <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, WriteOperation::Write.into_static(), fut).<span class="kw">await
     </span>}

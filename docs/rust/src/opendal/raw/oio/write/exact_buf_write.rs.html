@@ -231,7 +231,7 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>ExactBufWriter&lt;W&gt; {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">if </span><span class="self">self</span>.buffer.len() &gt;= <span class="self">self</span>.buffer_size {
             <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.to_buffer()).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(written);
@@ -250,7 +250,7 @@
                 <span class="kw">break</span>;
             }
 
-            <span class="kw">let </span>written = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.to_buffer()).<span class="kw">await</span><span class="question-mark">? </span>};
+            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.to_buffer()).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(written);
         }
 
@@ -282,7 +282,7 @@
     }
 
     <span class="kw">impl </span>Write <span class="kw">for </span>MockWriter {
-        <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
             <span class="macro">debug!</span>(<span class="string">"test_fuzz_exact_buf_writer: flush size: {}"</span>, <span class="kw-2">&amp;</span>bs.len());
 
             <span class="kw">let </span>chunk = bs.chunk();
@@ -315,7 +315,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>bs = Bytes::from(expected.clone());
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="kw">let </span>n = <span class="kw">unsafe </span>{ w.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">? </span>};
+            <span class="kw">let </span>n = w.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -354,7 +354,7 @@
 
             <span class="kw">let </span><span class="kw-2">mut </span>bs = Bytes::from(content.clone());
             <span class="kw">while </span>!bs.is_empty() {
-                <span class="kw">let </span>n = <span class="kw">unsafe </span>{ writer.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">? </span>};
+                <span class="kw">let </span>n = writer.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
                 bs.advance(n);
             }
         }

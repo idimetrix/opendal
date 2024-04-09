@@ -1877,7 +1877,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">use </span>backon::RetryableWithContext;
 
         <span class="kw">let </span>inner = <span class="self">self</span>.inner.take().expect(<span class="string">"inner must be valid"</span>);
@@ -1975,7 +1975,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())

@@ -123,7 +123,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>GhacWriter {
-    <span class="kw">async unsafe fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: oio::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>size = bs.len();
         <span class="kw">let </span>offset = <span class="self">self</span>.size;
 

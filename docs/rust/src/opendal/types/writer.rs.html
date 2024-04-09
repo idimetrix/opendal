@@ -387,12 +387,6 @@
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -489,8 +483,7 @@
     </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="comment">// Safety: buf is valid before write return.
-            </span><span class="kw">let </span>n = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">? </span>};
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -534,8 +527,7 @@
         <span class="kw">while let </span><span class="prelude-val">Some</span>(bs) = sink_from.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
             <span class="kw">while </span>!bs.is_empty() {
-                <span class="comment">// Safety: bs must be valid before write return.
-                </span><span class="kw">let </span>n = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">? </span>};
+                <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into()).<span class="kw">await</span><span class="question-mark">?</span>;
                 bs.advance(n);
                 written += n <span class="kw">as </span>u64;
             }
@@ -636,7 +628,7 @@
                         <span class="kw">let </span>bs = this.buf.get().expect(<span class="string">"frozen buffer must be valid"</span>);
                         <span class="kw">let </span><span class="kw-2">mut </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                            <span class="kw">let </span>res = <span class="kw">unsafe </span>{ w.write(oio::Buffer::from(bs)).<span class="kw">await </span>};
+                            <span class="kw">let </span>res = w.write(oio::Buffer::from(bs)).<span class="kw">await</span>;
                             (w, res)
                         };
                         this.state = State::Writing(Box::pin(fut));
@@ -674,7 +666,7 @@
 
                         <span class="kw">let </span><span class="kw-2">mut </span>w = w.take().expect(<span class="string">"writer must be valid"</span>);
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                            <span class="kw">let </span>res = <span class="kw">unsafe </span>{ w.write(oio::Buffer::from(bs)).<span class="kw">await </span>};
+                            <span class="kw">let </span>res = w.write(oio::Buffer::from(bs)).<span class="kw">await</span>;
                             (w, res)
                         };
                         this.state = State::Writing(Box::pin(fut));
@@ -757,8 +749,7 @@
     </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = bs.into();
         <span class="kw">while </span>!bs.is_empty() {
-            <span class="comment">// Safety: bs must be valid before write return.
-            </span><span class="kw">let </span>n = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.write(bs.clone().into())<span class="question-mark">? </span>};
+            <span class="kw">let </span>n = <span class="self">self</span>.inner.write(bs.clone().into())<span class="question-mark">?</span>;
             bs.advance(n);
         }
 
@@ -774,12 +765,9 @@
 <span class="doccomment">/// TODO: implement buffer for std:io.
 </span><span class="kw">impl </span>io::Write <span class="kw">for </span>BlockingWriter {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
-        <span class="comment">// Safety: buf is valid before write return.
-        </span><span class="kw">unsafe </span>{
-            <span class="self">self</span>.inner
-                .write(Bytes::copy_from_slice(buf).into())
-                .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
-        }
+        <span class="self">self</span>.inner
+            .write(Bytes::copy_from_slice(buf).into())
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
     }
 
     <span class="kw">fn </span>flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; io::Result&lt;()&gt; {
