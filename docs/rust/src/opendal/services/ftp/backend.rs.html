@@ -516,6 +516,18 @@
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
 <a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -555,12 +567,12 @@
 <span class="kw">use </span>suppaftp::ImplAsyncFtpStream;
 <span class="kw">use </span>suppaftp::Status;
 <span class="kw">use </span>tokio::sync::OnceCell;
+<span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">super</span>::err::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::FtpLister;
 <span class="kw">use </span><span class="kw">super</span>::reader::FtpReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::FtpWriter;
-<span class="kw">use </span><span class="kw">super</span>::writer::FtpWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -803,7 +815,7 @@
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>FtpBackend {
     <span class="kw">type </span>Reader = FtpReader;
-    <span class="kw">type </span>Writer = FtpWriters;
+    <span class="kw">type </span>Writer = FtpWriter;
     <span class="kw">type </span>Lister = FtpLister;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>BlockingWriter = ();
@@ -819,6 +831,8 @@
                 read: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
+                write_can_multi: <span class="bool-val">true</span>,
+                write_can_append: <span class="bool-val">true</span>,
 
                 delete: <span class="bool-val">true</span>,
                 create_dir: <span class="bool-val">true</span>,
@@ -878,7 +892,7 @@
         <span class="prelude-val">Ok</span>((RpRead::new(), FtpReader::new(<span class="self">self</span>.clone(), path, args)))
     }
 
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="comment">// Ensure the parent dir exists.
         </span><span class="kw">let </span>parent = get_parent(path);
         <span class="kw">let </span>paths: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = parent.split(<span class="string">'/'</span>).collect();
@@ -888,7 +902,11 @@
         <span class="kw">let </span><span class="kw-2">mut </span>curr_path = String::new();
 
         <span class="kw">for </span>path <span class="kw">in </span>paths {
+            <span class="kw">if </span>path.is_empty() {
+                <span class="kw">continue</span>;
+            }
             curr_path.push_str(path);
+            curr_path.push(<span class="string">'/'</span>);
             <span class="kw">match </span>ftp_stream.mkdir(<span class="kw-2">&amp;</span>curr_path).<span class="kw">await </span>{
                 <span class="comment">// Do nothing if status is FileUnavailable or OK(()) is return.
                 </span><span class="prelude-val">Err</span>(FtpError::UnexpectedResponse(Response {
@@ -902,8 +920,14 @@
             }
         }
 
-        <span class="kw">let </span>w = FtpWriter::new(<span class="self">self</span>.clone(), path.to_string());
-        <span class="kw">let </span>w = oio::OneShotWriter::new(w);
+        <span class="kw">let </span>tmp_path = <span class="kw">if </span>op.append() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="kw">let </span>uuid = Uuid::new_v4().to_string();
+            <span class="prelude-val">Some</span>(<span class="macro">format!</span>(<span class="string">"{}.{}"</span>, path, uuid))
+        };
+
+        <span class="kw">let </span>w = FtpWriter::new(ftp_stream, path.to_string(), tmp_path);
 
         <span class="prelude-val">Ok</span>((RpWrite::new(), w))
     }
