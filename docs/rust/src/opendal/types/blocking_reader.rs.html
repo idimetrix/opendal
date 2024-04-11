@@ -314,6 +314,35 @@
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
 <a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -362,21 +391,62 @@
         <span class="prelude-val">Ok</span>(BlockingReader { inner: r })
     }
 
-    <span class="doccomment">/// Read from underlying storage and write data into the specified buffer, starting at
-    /// the given offset and up to the limit.
+    <span class="doccomment">/// Read give range from reader into [`Buffer`].
     ///
-    /// A return value of `n` signifies that `n` bytes of data have been read into `buf`.
-    /// If `n &lt; limit`, it indicates that the reader has reached EOF (End of File).
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, limit)<span class="question-mark">?</span>;
-        <span class="kw">let </span>n = bs.remaining();
-        buf.put(bs);
-        <span class="prelude-val">Ok</span>(n)
+    /// This operation is zero-copy, which means it keeps the [`Bytes`] returned by underlying
+    /// storage services without any extra copy or intensive memory allocations.
+    ///
+    /// # Notes
+    ///
+    /// - Buffer length smaller than range means we have reached the end of file.
+    </span><span class="kw">pub fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
+            Bound::Included(start) =&gt; start,
+            Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
+            Bound::Unbounded =&gt; <span class="number">0</span>,
+        };
+
+        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound().cloned() {
+            Bound::Included(end) =&gt; <span class="prelude-val">Some</span>(end + <span class="number">1</span>),
+            Bound::Excluded(end) =&gt; <span class="prelude-val">Some</span>(end),
+            Bound::Unbounded =&gt; <span class="prelude-val">None</span>,
+        };
+
+        <span class="comment">// If range is empty, return Ok(0) directly.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(end) = end {
+            <span class="kw">if </span>end &lt;= start {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
+            }
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>bufs = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
+
+        <span class="kw">loop </span>{
+            <span class="comment">// TODO: use service preferred io size instead.
+            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
+            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, limit)<span class="question-mark">?</span>;
+            <span class="kw">let </span>n = bs.remaining();
+            bufs.push(bs);
+            <span class="kw">if </span>n &lt; limit {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
+            }
+
+            offset += n <span class="kw">as </span>u64;
+            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
+            }
+        }
     }
 
-    <span class="doccomment">/// Read given range bytes of data from reader.
-    </span><span class="kw">pub fn </span>read_range(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="doccomment">///
+    /// This operation will copy and write bytes into given [`BufMut`]. Allocation happens while
+    /// [`BufMut`] doesn't have enough space.
+    ///
+    /// # Notes
+    ///
+    /// - Returning length smaller than range means we have reached the end of file.
+    </span><span class="kw">pub fn </span>read_into(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
             Bound::Included(start) =&gt; start,
             Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
@@ -397,36 +467,24 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
-        <span class="kw">let </span><span class="kw-2">mut </span>size = end.map(|end| end - start);
-
         <span class="kw">let </span><span class="kw-2">mut </span>read = <span class="number">0</span>;
+
         <span class="kw">loop </span>{
-            <span class="kw">let </span>bs = <span class="self">self
-                </span>.inner
-                <span class="comment">// TODO: use service preferred io size instead.
-                </span>.read_at(offset, size.unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize)<span class="question-mark">?</span>;
+            <span class="comment">// TODO: use service preferred io size instead.
+            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
+            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, limit)<span class="question-mark">?</span>;
             <span class="kw">let </span>n = bs.remaining();
-            read += n;
             buf.put(bs);
-            <span class="kw">if </span>n == <span class="number">0 </span>{
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(read);
+            read += n <span class="kw">as </span>u64;
+            <span class="kw">if </span>n &lt; limit {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
             }
 
             offset += n <span class="kw">as </span>u64;
-
-            size = size.map(|v| v - n <span class="kw">as </span>u64);
-            <span class="kw">if </span>size == <span class="prelude-val">Some</span>(<span class="number">0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(read);
+            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
             }
         }
-    }
-
-    <span class="doccomment">/// Read all data from reader.
-    ///
-    /// This API is exactly the same with `BlockingReader::read_range(buf, ..)`.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>read_to_end(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.read_range(buf, ..)
     }
 
     <span class="doccomment">/// Convert reader into [`FuturesIoAsyncReader`] which implements [`futures::AsyncRead`],

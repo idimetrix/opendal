@@ -132,8 +132,6 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -240,12 +238,11 @@
         <span class="kw">for </span>action <span class="kw">in </span>actions {
             <span class="kw">match </span><span class="kw-2">*</span>action {
                 ReadAction::Read(offset, size) =&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(size);
-                    <span class="kw">let </span>n = r
-                        .read(<span class="kw-2">&amp;mut </span>bs, offset <span class="kw">as </span>u64, size)
+                    <span class="kw">let </span>bs = r
+                        .read(offset <span class="kw">as </span>u64..(offset + size) <span class="kw">as </span>u64)
                         .<span class="kw">await
                         </span>.expect(<span class="string">"read must success"</span>);
-                    <span class="self">self</span>.check_read(offset, size, <span class="kw-2">&amp;</span>bs[..n]);
+                    <span class="self">self</span>.check_read(offset, size, bs.to_bytes().as_ref());
                 }
             }
         }
@@ -258,11 +255,10 @@
         <span class="kw">for </span>action <span class="kw">in </span>actions {
             <span class="kw">match </span><span class="kw-2">*</span>action {
                 ReadAction::Read(offset, size) =&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(size);
-                    <span class="kw">let </span>n = r
-                        .read(<span class="kw-2">&amp;mut </span>bs, offset <span class="kw">as </span>u64, size)
+                    <span class="kw">let </span>bs = r
+                        .read(offset <span class="kw">as </span>u64..(offset + size) <span class="kw">as </span>u64)
                         .expect(<span class="string">"read must success"</span>);
-                    <span class="self">self</span>.check_read(offset, size, <span class="kw-2">&amp;</span>bs[..n]);
+                    <span class="self">self</span>.check_read(offset, size, bs.to_bytes().as_ref());
                 }
             }
         }

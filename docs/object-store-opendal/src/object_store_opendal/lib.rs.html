@@ -619,7 +619,7 @@
             .<span class="kw">await
             </span>.map_err(|err| format_object_store_error(err, location.as_ref()))<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(Bytes::from(bs))
+        <span class="prelude-val">Ok</span>(bs.to_bytes())
     }
 
     <span class="kw">async fn </span>head(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;ObjectMeta&gt; {

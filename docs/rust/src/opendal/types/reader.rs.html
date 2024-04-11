@@ -452,6 +452,35 @@
 <a href="#450" id="450">450</a>
 <a href="#451" id="451">451</a>
 <a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -508,21 +537,63 @@
         <span class="prelude-val">Ok</span>(Reader { inner: r })
     }
 
-    <span class="doccomment">/// Read from underlying storage and write data into the specified buffer, starting at
-    /// the given offset and up to the limit.
+    <span class="doccomment">/// Read give range from reader into [`Buffer`].
     ///
-    /// A return value of `n` signifies that `n` bytes of data have been read into `buf`.
-    /// If `n &lt; limit`, it indicates that the reader has reached EOF (End of File).
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at_dyn(offset, limit).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>n = bs.remaining();
-        buf.put(bs);
-        <span class="prelude-val">Ok</span>(n)
+    /// This operation is zero-copy, which means it keeps the [`Bytes`] returned by underlying
+    /// storage services without any extra copy or intensive memory allocations.
+    ///
+    /// # Notes
+    ///
+    /// - Buffer length smaller than range means we have reached the end of file.
+    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
+            Bound::Included(start) =&gt; start,
+            Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
+            Bound::Unbounded =&gt; <span class="number">0</span>,
+        };
+
+        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound().cloned() {
+            Bound::Included(end) =&gt; <span class="prelude-val">Some</span>(end + <span class="number">1</span>),
+            Bound::Excluded(end) =&gt; <span class="prelude-val">Some</span>(end),
+            Bound::Unbounded =&gt; <span class="prelude-val">None</span>,
+        };
+
+        <span class="comment">// If range is empty, return Ok(0) directly.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(end) = end {
+            <span class="kw">if </span>end &lt;= start {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
+            }
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>bufs = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
+
+        <span class="kw">loop </span>{
+            <span class="comment">// TODO: use service preferred io size instead.
+            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
+            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at_dyn(offset, limit).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>n = bs.remaining();
+            bufs.push(bs);
+            <span class="kw">if </span>n &lt; limit {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
+            }
+
+            offset += n <span class="kw">as </span>u64;
+            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
+            }
+        }
     }
 
-    <span class="doccomment">/// Read given range bytes of data from reader.
-    </span><span class="kw">pub async fn </span>read_range(
+    <span class="doccomment">/// Read all data from reader into given [`BufMut`].
+    ///
+    /// This operation will copy and write bytes into given [`BufMut`]. Allocation happens while
+    /// [`BufMut`] doesn't have enough space.
+    ///
+    /// # Notes
+    ///
+    /// - Returning length smaller than range means we have reached the end of file.
+    </span><span class="kw">pub async fn </span>read_into(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut,
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
@@ -547,35 +618,25 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
-        <span class="kw">let </span><span class="kw-2">mut </span>size = end.map(|end| end - start);
-
         <span class="kw">let </span><span class="kw-2">mut </span>read = <span class="number">0</span>;
+
         <span class="kw">loop </span>{
             <span class="comment">// TODO: use service preferred io size instead.
-            </span><span class="kw">let </span>limit = size.unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
+            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
             <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at_dyn(offset, limit).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>n = bs.remaining();
-            read += n;
             buf.put(bs);
+            read += n <span class="kw">as </span>u64;
             <span class="kw">if </span>n &lt; limit {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(read);
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
             }
 
             offset += n <span class="kw">as </span>u64;
-            size = size.map(|v| v - n <span class="kw">as </span>u64);
-            <span class="kw">if </span>size == <span class="prelude-val">Some</span>(<span class="number">0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(read);
+            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
             }
         }
     }
-
-    <span class="doccomment">/// Read all data from reader.
-    ///
-    /// This API is exactly the same with `Reader::read_range(buf, ..)`.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>read_to_end(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.read_range(buf, ..).<span class="kw">await
-    </span>}
 
     <span class="doccomment">/// Convert reader into [`FuturesIoAsyncReader`] which implements [`futures::AsyncRead`],
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
@@ -866,7 +927,7 @@
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_async_read() {
+    </span><span class="kw">async fn </span>test_reader_read() {
         <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
@@ -876,17 +937,13 @@
             </span>.expect(<span class="string">"write must succeed"</span>);
 
         <span class="kw">let </span>reader = op.reader(path).<span class="kw">await</span>.unwrap();
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
-        reader
-            .read_to_end(<span class="kw-2">&amp;mut </span>buf)
-            .<span class="kw">await
-            </span>.expect(<span class="string">"read to end must succeed"</span>);
+        <span class="kw">let </span>buf = reader.read(..).<span class="kw">await</span>.expect(<span class="string">"read to end must succeed"</span>);
 
-        <span class="macro">assert_eq!</span>(buf, content);
+        <span class="macro">assert_eq!</span>(buf.to_bytes(), content);
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_async_seek() {
+    </span><span class="kw">async fn </span>test_reader_read_into() {
         <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
@@ -898,9 +955,10 @@
         <span class="kw">let </span>reader = op.reader(path).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         reader
-            .read_to_end(<span class="kw-2">&amp;mut </span>buf)
+            .read_into(<span class="kw-2">&amp;mut </span>buf, ..)
             .<span class="kw">await
             </span>.expect(<span class="string">"read to end must succeed"</span>);
+
         <span class="macro">assert_eq!</span>(buf, content);
     }
 }
