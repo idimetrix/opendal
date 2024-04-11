@@ -554,7 +554,7 @@
             },
         };
 
-        <span class="kw">let </span>req: Request&lt;AsyncBody&gt; = pr.into();
+        <span class="kw">let </span>req: Request&lt;Buffer&gt; = pr.into();
         <span class="macro">assert_eq!</span>(Method::PATCH, req.method());
         <span class="macro">assert_eq!</span>(
             <span class="string">"https://opendal.apache.org/path/to/file"</span>,

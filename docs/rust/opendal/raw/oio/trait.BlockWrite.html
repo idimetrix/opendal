@@ -4,13 +4,13 @@
     fn <a href="#tymethod.write_once" class="fn">write_once</a>(
         &amp;self,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.write_block" class="fn">write_block</a>(
         &amp;self,
         block_id: <a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.complete_block" class="fn">complete_block</a>(
         &amp;self,
@@ -47,7 +47,7 @@ w.close().await?;
 </div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.write_once" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/block_write.rs.html#70">source</a><h4 class="code-header">fn <a href="#tymethod.write_once" class="fn">write_once</a>(
     &amp;self,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><span class="item-info"><div class="stab portability">Available on <strong>non-WebAssembly</strong> only.</div></span><div class="docblock"><p>write_once is used to write the data to underlying storage at once.</p>
 <p>BlockWriter will call this API when:</p>
 <ul>
@@ -57,7 +57,7 @@ w.close().await?;
     &amp;self,
     block_id: <a class="struct" href="https://docs.rs/uuid/1.7.0/uuid/struct.Uuid.html" title="struct uuid::Uuid">Uuid</a>,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><span class="item-info"><div class="stab portability">Available on <strong>non-WebAssembly</strong> only.</div></span><div class="docblock"><p>write_block will write a block of the data and returns the result
 [<code>Block</code>].</p>
 <p>BlockWriter will call this API and stores the result in

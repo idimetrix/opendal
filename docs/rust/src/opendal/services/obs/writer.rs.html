@@ -243,7 +243,7 @@
 }
 
 <span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>ObsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
             </span>.core
             .obs_put_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(size), <span class="kw-2">&amp;</span><span class="self">self</span>.op, body)<span class="question-mark">?</span>;
@@ -287,7 +287,7 @@
         upload_id: <span class="kw-2">&amp;</span>str,
         part_number: usize,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MultipartPart&gt; {
         <span class="comment">// Obs service requires part number must between [1..=10000]
         </span><span class="kw">let </span>part_number = part_number + <span class="number">1</span>;
@@ -375,7 +375,7 @@
         }
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
             </span>.core
             .obs_append_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, offset, size, <span class="kw-2">&amp;</span><span class="self">self</span>.op, body)<span class="question-mark">?</span>;

@@ -769,7 +769,7 @@
             path,
             <span class="string">"directory"</span>,
             <span class="kw-2">&amp;</span>OpWrite::default(),
-            AsyncBody::Empty,
+            Buffer::new(),
         )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;

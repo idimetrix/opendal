@@ -373,7 +373,7 @@
 
 <span class="kw">impl </span>GithubCore {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -442,7 +442,7 @@
 
         <span class="kw">let </span>req = req
             .header(<span class="string">"Accept"</span>, <span class="string">"application/vnd.github.raw+json"</span>)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -465,7 +465,7 @@
         <span class="kw">let </span>req = req
             .header(header::ACCEPT, <span class="string">"application/vnd.github.raw+json"</span>)
             .header(header::RANGE, range.to_header())
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -501,7 +501,7 @@
 
         <span class="kw">let </span>req = req
             .header(<span class="string">"Accept"</span>, <span class="string">"application/vnd.github+json"</span>)
-            .body(AsyncBody::Bytes(Bytes::from(req_body)))
+            .body(Buffer::from(Bytes::from(req_body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -534,7 +534,7 @@
 
         <span class="kw">let </span>req = req
             .header(<span class="string">"Accept"</span>, <span class="string">"application/vnd.github.object+json"</span>)
-            .body(AsyncBody::Bytes(Bytes::from(req_body)))
+            .body(Buffer::from(Bytes::from(req_body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -561,7 +561,7 @@
 
         <span class="kw">let </span>req = req
             .header(<span class="string">"Accept"</span>, <span class="string">"application/vnd.github.object+json"</span>)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

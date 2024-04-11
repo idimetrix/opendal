@@ -232,12 +232,6 @@
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -302,7 +296,7 @@
         <span class="kw">let </span>req_body = <span class="kw-2">&amp;</span><span class="macro">json!</span>({
             <span class="string">"path"</span>: percent_encode_path(<span class="kw-2">&amp;</span>p),
         });
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
@@ -326,7 +320,7 @@
             </span><span class="string">"recursive"</span>: <span class="bool-val">true</span>,
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(request_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(request_body.to_string()));
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
@@ -348,7 +342,7 @@
             <span class="string">"destination_path"</span>: percent_encode_path(<span class="kw-2">&amp;</span>target),
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
@@ -370,14 +364,12 @@
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.token);
         req = req.header(header::AUTHORIZATION, auth_header_content);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub fn </span>dbfs_create_file_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, body: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>dbfs_create_file_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, body: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/api/2.0/dbfs/put"</span>, <span class="self">self</span>.endpoint);
 
         <span class="kw">let </span>contents = BASE64_STANDARD.encode(body);
@@ -392,7 +384,7 @@
             <span class="string">"overwrite"</span>: <span class="bool-val">true</span>,
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         req.body(body).map_err(new_request_build_error)
     }
@@ -426,9 +418,7 @@
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.token);
         req = req.header(header::AUTHORIZATION, auth_header_content);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -456,9 +446,7 @@
         <span class="kw">let </span>auth_header_content = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.token);
         req = req.header(header::AUTHORIZATION, auth_header_content);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}

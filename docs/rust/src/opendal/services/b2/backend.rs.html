@@ -520,12 +520,6 @@
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -985,9 +979,7 @@
 
                 <span class="kw">let </span>req = Request::get(url);
 
-                <span class="kw">let </span>req = req
-                    .body(AsyncBody::Empty)
-                    .map_err(new_request_build_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
                 <span class="comment">// We don't need this request anymore, consume
                 </span><span class="kw">let </span>(parts, <span class="kw">_</span>) = req.into_parts();
@@ -1014,9 +1006,7 @@
 
                 <span class="kw">let </span>req = Request::get(url);
 
-                <span class="kw">let </span>req = req
-                    .body(AsyncBody::Empty)
-                    .map_err(new_request_build_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
                 <span class="comment">// We don't need this request anymore, consume
                 </span><span class="kw">let </span>(parts, <span class="kw">_</span>) = req.into_parts();
@@ -1037,9 +1027,7 @@
                 req = req.header(http::header::CONTENT_TYPE, <span class="string">"b2/x-auto"</span>);
                 req = req.header(constants::X_BZ_CONTENT_SHA1, <span class="string">"do_not_verify"</span>);
 
-                <span class="kw">let </span>req = req
-                    .body(AsyncBody::Empty)
-                    .map_err(new_request_build_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
                 <span class="comment">// We don't need this request anymore, consume it directly.
                 </span><span class="kw">let </span>(parts, <span class="kw">_</span>) = req.into_parts();
 

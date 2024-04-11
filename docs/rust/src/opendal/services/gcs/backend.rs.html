@@ -1088,7 +1088,7 @@
             PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.gcs_get_object_xml_request(path, v)<span class="question-mark">?</span>,
             PresignOperation::Write(v) =&gt; {
                 <span class="self">self</span>.core
-                    .gcs_insert_object_xml_request(path, v, AsyncBody::Empty)<span class="question-mark">?
+                    .gcs_insert_object_xml_request(path, v, Buffer::new())<span class="question-mark">?
             </span>}
         };
 

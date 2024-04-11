@@ -1315,8 +1315,6 @@
 <a href="#1313" id="1313">1313</a>
 <a href="#1314" id="1314">1314</a>
 <a href="#1315" id="1315">1315</a>
-<a href="#1316" id="1316">1316</a>
-<a href="#1317" id="1317">1317</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2066,7 +2064,7 @@
         }
 
         <span class="comment">// Try to detect region by HeadBucket.
-        </span><span class="kw">let </span>req = http::Request::head(<span class="kw-2">&amp;</span>url).body(AsyncBody::Empty).ok()<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = http::Request::head(<span class="kw-2">&amp;</span>url).body(Buffer::new()).ok()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>client = HttpClient::new().ok()<span class="question-mark">?</span>;
         <span class="kw">let </span>res = client
@@ -2459,12 +2457,10 @@
                 <span class="self">self</span>.core
                     .s3_get_object_request(path, BytesRange::default(), <span class="kw-2">&amp;</span>v)<span class="question-mark">?
             </span>}
-            PresignOperation::Write(<span class="kw">_</span>) =&gt; <span class="self">self</span>.core.s3_put_object_request(
-                path,
-                <span class="prelude-val">None</span>,
-                <span class="kw-2">&amp;</span>OpWrite::default(),
-                AsyncBody::Empty,
-            )<span class="question-mark">?</span>,
+            PresignOperation::Write(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.core
+                    .s3_put_object_request(path, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>OpWrite::default(), Buffer::new())<span class="question-mark">?
+            </span>}
         };
 
         <span class="self">self</span>.core.sign_query(<span class="kw-2">&amp;mut </span>req, expire).<span class="kw">await</span><span class="question-mark">?</span>;

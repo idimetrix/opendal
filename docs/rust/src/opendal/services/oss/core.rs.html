@@ -928,16 +928,6 @@
 <a href="#926" id="926">926</a>
 <a href="#927" id="927">927</a>
 <a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1066,7 +1056,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -1103,9 +1093,9 @@
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
-        body: AsyncBody,
+        body: Buffer,
         is_presign: bool,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
@@ -1139,8 +1129,8 @@
         position: u64,
         size: u64,
         args: <span class="kw-2">&amp;</span>OpWrite,
-        body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(<span class="bool-val">false</span>);
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -1179,7 +1169,7 @@
         range: BytesRange,
         is_presign: bool,
         args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
@@ -1215,22 +1205,18 @@
             req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">fn </span>oss_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">fn </span>oss_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(<span class="bool-val">false</span>);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
         <span class="kw">let </span>req = Request::delete(<span class="kw-2">&amp;</span>url);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -1241,7 +1227,7 @@
         is_presign: bool,
         if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
@@ -1253,9 +1239,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
             req = req.header(IF_NONE_MATCH, if_none_match);
         }
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -1267,7 +1251,7 @@
         delimiter: <span class="kw-2">&amp;</span>str,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         start_after: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(<span class="bool-val">false</span>);
@@ -1299,7 +1283,7 @@
         }
 
         <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(req)
     }
@@ -1332,7 +1316,7 @@
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_put_object_request(path, size, args, body, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
 
@@ -1357,9 +1341,7 @@
 
         req = req.header(<span class="string">"x-oss-copy-source"</span>, source);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -1408,7 +1390,7 @@
         </span><span class="kw">let </span>req = req.header(<span class="string">"CONTENT-MD5"</span>, format_content_md5(content.as_bytes()));
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req
-            .body(AsyncBody::Bytes(Bytes::from(content)))
+            .body(Buffer::from(Bytes::from(content)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1446,9 +1428,7 @@
             req = req.header(CACHE_CONTROL, cache_control);
         }
         req = <span class="self">self</span>.insert_sse_headers(req);
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -1461,7 +1441,7 @@
         part_number: usize,
         is_presign: bool,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
@@ -1509,7 +1489,7 @@
         </span><span class="kw">let </span>req = req.header(CONTENT_TYPE, <span class="string">"application/xml"</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req
-            .body(AsyncBody::Bytes(Bytes::from(content)))
+            .body(Buffer::from(Bytes::from(content)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1533,7 +1513,7 @@
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::delete(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await

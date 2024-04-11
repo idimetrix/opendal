@@ -923,8 +923,6 @@
 <a href="#921" id="921">921</a>
 <a href="#922" id="922">922</a>
 <a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1592,12 +1590,10 @@
                 <span class="self">self</span>.core
                     .azblob_get_blob_request(path, BytesRange::default(), v)<span class="question-mark">?
             </span>}
-            PresignOperation::Write(<span class="kw">_</span>) =&gt; <span class="self">self</span>.core.azblob_put_blob_request(
-                path,
-                <span class="prelude-val">None</span>,
-                <span class="kw-2">&amp;</span>OpWrite::default(),
-                AsyncBody::Empty,
-            )<span class="question-mark">?</span>,
+            PresignOperation::Write(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.core
+                    .azblob_put_blob_request(path, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>OpWrite::default(), Buffer::new())<span class="question-mark">?
+            </span>}
         };
 
         <span class="self">self</span>.core.sign_query(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;

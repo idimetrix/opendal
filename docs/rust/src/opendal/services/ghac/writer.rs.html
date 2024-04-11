@@ -133,7 +133,7 @@
                 <span class="self">self</span>.cache_id,
                 offset,
                 size <span class="kw">as </span>u64,
-                AsyncBody::Bytes(bs.to_bytes()),
+                Buffer::from(bs.to_bytes()),
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
 

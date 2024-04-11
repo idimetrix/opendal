@@ -234,7 +234,7 @@
 }
 
 <span class="kw">impl </span>oio::BlockWrite <span class="kw">for </span>WebhdfsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>req = <span class="self">self
             </span>.backend
             .webhdfs_create_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(size), <span class="kw-2">&amp;</span><span class="self">self</span>.op, body)
@@ -249,7 +249,7 @@
         }
     }
 
-    <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>atomic_write_dir) = <span class="self">self</span>.backend.atomic_write_dir <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
@@ -339,7 +339,7 @@
         <span class="prelude-val">Ok</span>(<span class="number">0</span>)
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, _offset: u64, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, _offset: u64, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.webhdfs_get_file_status(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
@@ -353,7 +353,7 @@
             StatusCode::NOT_FOUND =&gt; {
                 <span class="kw">let </span>req = <span class="self">self
                     </span>.backend
-                    .webhdfs_create_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, AsyncBody::Empty)
+                    .webhdfs_create_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, Buffer::new())
                     .<span class="kw">await</span><span class="question-mark">?</span>;
 
                 <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

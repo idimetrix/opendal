@@ -182,7 +182,7 @@
 }
 
 <span class="kw">impl </span>oio::RangeWrite <span class="kw">for </span>GcsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.gcs_insert_object_request(
             <span class="kw-2">&amp;</span>percent_encode_path(<span class="kw-2">&amp;</span><span class="self">self</span>.path),
             <span class="prelude-val">Some</span>(size),
@@ -227,7 +227,7 @@
         location: <span class="kw-2">&amp;</span>str,
         written: u64,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
             </span>.core
@@ -249,7 +249,7 @@
         location: <span class="kw-2">&amp;</span>str,
         written: u64,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core

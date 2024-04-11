@@ -378,18 +378,6 @@
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
 <a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -459,9 +447,9 @@
     ///
     /// - All the data has been written to the buffer and we can perform the upload at once.
     </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
+    </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 
     <span class="doccomment">/// write_block will write a block of the data and returns the result
     /// [`Block`].
@@ -475,14 +463,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         block_id: Uuid,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
     </span><span class="kw">fn </span>write_block(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         block_id: Uuid,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 
     <span class="doccomment">/// complete_block will complete the block upload to build the final
@@ -526,16 +514,12 @@
 <span class="kw">impl </span>WriteBlockFuture {
     <span class="kw">pub fn </span>new&lt;W: BlockWrite&gt;(w: Arc&lt;W&gt;, block_id: Uuid, bytes: Bytes) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>fut = <span class="kw">async move </span>{
-            w.write_block(
-                block_id,
-                bytes.len() <span class="kw">as </span>u64,
-                AsyncBody::Bytes(bytes.clone()),
-            )
-            .<span class="kw">await
-            </span><span class="comment">// Return bytes while we got an error to allow retry.
-            </span>.map_err(|err| (block_id, bytes, err))
-            <span class="comment">// Return the successful block id.
-            </span>.map(|<span class="kw">_</span>| block_id)
+            w.write_block(block_id, bytes.len() <span class="kw">as </span>u64, Buffer::from(bytes.clone()))
+                .<span class="kw">await
+                </span><span class="comment">// Return bytes while we got an error to allow retry.
+                </span>.map_err(|err| (block_id, bytes, err))
+                <span class="comment">// Return the successful block id.
+                </span>.map(|<span class="kw">_</span>| block_id)
         };
 
         WriteBlockFuture(Box::pin(fut))
@@ -616,8 +600,8 @@
         <span class="comment">// No write block has been sent.
         </span><span class="kw">if </span><span class="self">self</span>.futures.is_empty() &amp;&amp; <span class="self">self</span>.block_ids.is_empty() {
             <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
-                <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), AsyncBody::Bytes(cache)),
-                <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, AsyncBody::Empty),
+                <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), Buffer::from(cache)),
+                <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, Buffer::new()),
             };
             <span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Cleanup cache after write succeed.
@@ -669,20 +653,18 @@
     <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::sync::Mutex;
 
-    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::StreamExt;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
 
     <span class="kw">struct </span>TestWrite {
         length: u64,
-        bytes: HashMap&lt;Uuid, Bytes&gt;,
-        content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
+        bytes: HashMap&lt;Uuid, Buffer&gt;,
+        content: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
     }
 
     <span class="kw">impl </span>TestWrite {
@@ -698,25 +680,19 @@
     }
 
     <span class="kw">impl </span>BlockWrite <span class="kw">for </span>Arc&lt;Mutex&lt;TestWrite&gt;&gt; {
-        <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
             <span class="prelude-val">Ok</span>(())
         }
 
-        <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
             <span class="comment">// We will have 50% percent rate for write part to fail.
             </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">5.0 </span>/ <span class="number">10.0</span>) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
             }
 
-            <span class="kw">let </span>bs = <span class="kw">match </span>body {
-                AsyncBody::Empty =&gt; Bytes::new(),
-                AsyncBody::Bytes(bs) =&gt; bs,
-                AsyncBody::Stream(s) =&gt; s.collect().<span class="kw">await</span>.unwrap(),
-            };
-
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.lock().unwrap();
             this.length += size;
-            this.bytes.insert(block_id, bs);
+            this.bytes.insert(block_id, body);
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -725,9 +701,9 @@
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.lock().unwrap();
             <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::new();
             <span class="kw">for </span>id <span class="kw">in </span>block_ids {
-                bs.extend_from_slice(<span class="kw-2">&amp;</span>this.bytes[<span class="kw-2">&amp;</span>id]);
+                bs.push(this.bytes[<span class="kw-2">&amp;</span>id].clone());
             }
-            this.content = <span class="prelude-val">Some</span>(bs.into());
+            this.content = <span class="prelude-val">Some</span>(bs.into_iter().flatten().collect());
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -775,7 +751,7 @@
         <span class="macro">assert!</span>(inner.content.is_some());
         <span class="macro">assert_eq!</span>(
             expected_content,
-            inner.content.clone().unwrap(),
+            inner.content.clone().unwrap().to_bytes(),
             <span class="string">"content must be the same"
         </span>);
     }

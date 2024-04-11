@@ -4,7 +4,7 @@
     fn <a href="#tymethod.write_once" class="fn">write_once</a>(
         &amp;self,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.initiate_range" class="fn">initiate_range</a>(&amp;self) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.write_range" class="fn">write_range</a>(
@@ -12,14 +12,14 @@
         location: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
         offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.complete_range" class="fn">complete_range</a>(
         &amp;self,
         location: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
         offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 <span class="item-spacer"></span>    fn <a href="#tymethod.abort_range" class="fn">abort_range</a>(
         &amp;self,
@@ -52,7 +52,7 @@ to align with 256KiB.</li>
 </div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.write_once" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/range_write.rs.html#66">source</a><h4 class="code-header">fn <a href="#tymethod.write_once" class="fn">write_once</a>(
     &amp;self,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><div class="docblock"><p>write_once is used to write the data to underlying storage at once.</p>
 <p>RangeWriter will call this API when:</p>
 <ul>
@@ -64,14 +64,14 @@ to align with 256KiB.</li>
     location: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><div class="docblock"><p>write_range will write a range of data.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.complete_range" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/range_write.rs.html#81-87">source</a><h4 class="code-header">fn <a href="#tymethod.complete_range" class="fn">complete_range</a>(
     &amp;self,
     location: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><div class="docblock"><p>complete_range will complete the range write by uploading the last chunk.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.abort_range" class="method"><a class="src rightside" href="../../../src/opendal/raw/oio/write/range_write.rs.html#90">source</a><h4 class="code-header">fn <a href="#tymethod.abort_range" class="fn">abort_range</a>(&amp;self, location: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><div class="docblock"><p>abort_range will abort the range write by abort all already uploaded data.</p>
 </div></details></div><h2 id="object-safety" class="section-header">Object Safety<a href="#object-safety" class="anchor">§</a></h2><div class="object-safety-info">This trait is <b>not</b> <a href="https://doc.rust-lang.org/nightly/reference/items/traits.html#object-safety">object safe</a>.</div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../../trait.impl/opendal/raw/oio/write/range_write/trait.RangeWrite.js" async></script></section></div></main></body></html>

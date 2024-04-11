@@ -168,10 +168,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         offset: u64,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send;
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: AsyncBody) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="kw">fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
 }
 
 <span class="doccomment">/// AppendWriter will implements [`Write`] based on append object.
@@ -215,7 +215,7 @@
 
         <span class="kw">let </span>size = bs.len();
         <span class="self">self</span>.inner
-            .append(offset, size <span class="kw">as </span>u64, AsyncBody::Bytes(bs.to_bytes()))
+            .append(offset, size <span class="kw">as </span>u64, Buffer::from(bs.to_bytes()))
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Update offset after succeed.
         </span><span class="self">self</span>.offset = <span class="prelude-val">Some</span>(offset + size <span class="kw">as </span>u64);

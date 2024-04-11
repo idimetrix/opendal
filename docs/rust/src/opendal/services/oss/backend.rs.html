@@ -1110,7 +1110,7 @@
             </span>}
             PresignOperation::Write(v) =&gt; {
                 <span class="self">self</span>.core
-                    .oss_put_object_request(path, <span class="prelude-val">None</span>, v, AsyncBody::Empty, <span class="bool-val">true</span>)<span class="question-mark">?
+                    .oss_put_object_request(path, <span class="prelude-val">None</span>, v, Buffer::new(), <span class="bool-val">true</span>)<span class="question-mark">?
             </span>}
         };
 

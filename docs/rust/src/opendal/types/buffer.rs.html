@@ -520,6 +520,58 @@
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -539,6 +591,7 @@
 
 </span><span class="kw">use </span>std::collections::VecDeque;
 <span class="kw">use </span>std::convert::Infallible;
+<span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::Arc;
@@ -564,6 +617,38 @@
         idx: usize,
         offset: usize,
     },
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>Buffer {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>b = f.debug_struct(<span class="string">"Buffer"</span>);
+
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0 </span>{
+            Inner::Contiguous(bs) =&gt; {
+                b.field(<span class="string">"type"</span>, <span class="kw-2">&amp;</span><span class="string">"contiguous"</span>);
+                b.field(<span class="string">"size"</span>, <span class="kw-2">&amp;</span>bs.len());
+            }
+            Inner::NonContiguous {
+                parts,
+                size,
+                idx,
+                offset,
+            } =&gt; {
+                b.field(<span class="string">"type"</span>, <span class="kw-2">&amp;</span><span class="string">"non_contiguous"</span>);
+                b.field(<span class="string">"parts"</span>, <span class="kw-2">&amp;</span>parts);
+                b.field(<span class="string">"size"</span>, <span class="kw-2">&amp;</span>size);
+                b.field(<span class="string">"idx"</span>, <span class="kw-2">&amp;</span>idx);
+                b.field(<span class="string">"offset"</span>, <span class="kw-2">&amp;</span>offset);
+            }
+        }
+        b.finish_non_exhaustive()
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Buffer {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
 }
 
 <span class="kw">impl </span>Buffer {
@@ -628,6 +713,24 @@
     }
 }
 
+<span class="kw">impl </span>From&lt;String&gt; <span class="kw">for </span>Buffer {
+    <span class="kw">fn </span>from(s: String) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Inner::Contiguous(Bytes::from(s)))
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]&gt; <span class="kw">for </span>Buffer {
+    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Inner::Contiguous(Bytes::from_static(s)))
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; <span class="kw">for </span>Buffer {
+    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Inner::Contiguous(Bytes::from_static(s.as_bytes())))
+    }
+}
+
 <span class="kw">impl </span>FromIterator&lt;u8&gt; <span class="kw">for </span>Buffer {
     <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = u8&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(Bytes::from_iter(iter)))
@@ -674,7 +777,8 @@
     <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = Bytes&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="number">0</span>;
         <span class="kw">let </span>bs = iter.into_iter().inspect(|v| size += v.len());
-        <span class="comment">// Use `Arc::from_iter` here to make sure we can benefit from `TrustedLen` if provided.
+        <span class="comment">// This operation only needs one allocation from iterator to `Arc&lt;[Bytes]&gt;` instead
+        // of iterator -&gt; `Vec&lt;Bytes&gt;` -&gt; `Arc&lt;[Bytes]&gt;`.
         </span><span class="kw">let </span>parts = Arc::from_iter(bs);
         <span class="self">Self</span>(Inner::NonContiguous {
             parts,

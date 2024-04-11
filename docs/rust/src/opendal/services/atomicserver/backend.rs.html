@@ -469,22 +469,6 @@
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -519,19 +503,7 @@
 <span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::new_json_deserialize_error;
-<span class="kw">use </span><span class="kw">crate</span>::raw::new_json_serialize_error;
-<span class="kw">use </span><span class="kw">crate</span>::raw::new_request_build_error;
-<span class="kw">use </span><span class="kw">crate</span>::raw::normalize_path;
-<span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
-<span class="kw">use </span><span class="kw">crate</span>::raw::percent_encode_path;
-<span class="kw">use </span><span class="kw">crate</span>::raw::AsyncBody;
-<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
-<span class="kw">use </span><span class="kw">crate</span>::raw::FormDataPart;
-<span class="kw">use </span><span class="kw">crate</span>::raw::HttpClient;
-<span class="kw">use </span><span class="kw">crate</span>::raw::Multipart;
-<span class="kw">use </span><span class="kw">crate</span>::Builder;
-<span class="kw">use </span><span class="kw">crate</span>::Scheme;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Atomicserver service support.
@@ -756,7 +728,7 @@
 }
 
 <span class="kw">impl </span>Adapter {
-    <span class="kw">pub fn </span>atomic_get_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>atomic_get_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
         <span class="kw">let </span>path = path.as_str();
 
@@ -772,9 +744,7 @@
         req = <span class="self">self</span>.sign(<span class="kw-2">&amp;</span>url, req);
         req = req.header(http::header::ACCEPT, <span class="string">"application/ad+json"</span>);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -783,7 +753,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         value: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
         <span class="kw">let </span>path = path.as_str();
 
@@ -812,7 +782,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub fn </span>atomic_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, subject: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>atomic_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, subject: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/commit"</span>, <span class="self">self</span>.endpoint);
 
         <span class="kw">let </span>timestamp = std::time::SystemTime::now()
@@ -851,7 +821,7 @@
 
         <span class="kw">let </span>body_bytes = body_string.as_bytes().to_owned();
         <span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body_bytes.into()))
+            .body(Buffer::from(body_bytes))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
@@ -859,9 +829,7 @@
 
     <span class="kw">pub async fn </span>download_from_url(<span class="kw-2">&amp;</span><span class="self">self</span>, download_url: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
         <span class="kw">let </span>req = Request::get(download_url);
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>bytes_file = resp.into_body();
 

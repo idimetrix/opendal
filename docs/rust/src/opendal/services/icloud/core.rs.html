@@ -884,8 +884,6 @@
 <a href="#882" id="882">882</a>
 <a href="#883" id="883">883</a>
 <a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1047,7 +1045,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(uri)
             .header(header::CONTENT_TYPE, <span class="string">"application/json"</span>)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
@@ -1074,7 +1072,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(uri)
             .header(header::CONTENT_TYPE, <span class="string">"application/json"</span>)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
@@ -1200,7 +1198,7 @@
     /// - Init the signer if it's not initiated.
     /// - Sign the request.
     /// - Update the session data if needed.
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1242,7 +1240,7 @@
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::post(uri)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1273,7 +1271,7 @@
         );
 
         <span class="kw">let </span>req = Request::get(uri)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1300,9 +1298,7 @@
             req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = signer.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1404,7 +1400,7 @@
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::post(uri)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1445,7 +1441,7 @@
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::post(uri)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

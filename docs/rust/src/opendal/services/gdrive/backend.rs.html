@@ -442,7 +442,7 @@
             <span class="string">"name"</span>: to_name,
             <span class="string">"parents"</span>: [to_parent_id],
         });
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(request_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(request_body.to_string()));
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(<span class="kw-2">&amp;</span>url)
             .body(body)

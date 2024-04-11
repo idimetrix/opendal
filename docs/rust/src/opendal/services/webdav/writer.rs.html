@@ -108,7 +108,7 @@
                 <span class="kw-2">&amp;</span><span class="self">self</span>.path,
                 <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.op,
-                AsyncBody::Bytes(bs),
+                Buffer::from(bs),
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
 

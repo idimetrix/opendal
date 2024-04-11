@@ -180,7 +180,7 @@
 
         <span class="kw">let </span>req = req
             .header(header::AUTHORIZATION, <span class="macro">format!</span>(<span class="string">"Token {}"</span>, auth_info.token))
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

@@ -104,11 +104,6 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -127,9 +122,8 @@
 // under the License.
 
 </span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>bytes::{Buf, Bytes};
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>std::collections::VecDeque;
-<span class="kw">use </span>std::sync::Arc;
 
 <span class="doccomment">/// QueueBuf is a queue of [`Buffer`].
 ///
@@ -186,11 +180,7 @@
         } <span class="kw">else if </span><span class="self">self</span>.<span class="number">0</span>.len() == <span class="number">1 </span>{
             <span class="self">self</span>.<span class="number">0</span>.clone().pop_front().unwrap()
         } <span class="kw">else </span>{
-            <span class="kw">let </span>iter = <span class="self">self</span>.<span class="number">0</span>.clone().into_iter().flatten();
-            <span class="comment">// This operation only needs one allocation from iterator to `Arc&lt;[Bytes]&gt;` instead
-            // of iterator -&gt; `Vec&lt;Bytes&gt;` -&gt; `Arc&lt;[Bytes]&gt;`.
-            </span><span class="kw">let </span>bs: Arc&lt;[Bytes]&gt; = Arc::from_iter(iter);
-            Buffer::from(bs)
+            <span class="self">self</span>.<span class="number">0</span>.clone().into_iter().flatten().collect()
         }
     }
 

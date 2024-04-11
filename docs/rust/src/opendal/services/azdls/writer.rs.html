@@ -181,7 +181,7 @@
     <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req =
             <span class="self">self</span>.core
-                .azdls_create_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, AsyncBody::Empty)<span class="question-mark">?</span>;
+                .azdls_create_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, Buffer::new())<span class="question-mark">?</span>;
 
         <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -201,7 +201,7 @@
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
             <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
             <span class="number">0</span>,
-            AsyncBody::Bytes(bs),
+            Buffer::from(bs),
         )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -232,11 +232,11 @@
         }
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>offset == <span class="number">0 </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>req =
                 <span class="self">self</span>.core
-                    .azdls_create_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, AsyncBody::Empty)<span class="question-mark">?</span>;
+                    .azdls_create_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, Buffer::new())<span class="question-mark">?</span>;
 
             <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 

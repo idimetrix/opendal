@@ -198,7 +198,7 @@
 }
 
 <span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>B2Writer {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
             .upload_file(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(size), <span class="kw-2">&amp;</span><span class="self">self</span>.op, body)
@@ -235,7 +235,7 @@
         upload_id: <span class="kw-2">&amp;</span>str,
         part_number: usize,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;oio::MultipartPart&gt; {
         <span class="comment">// B2 requires part number must between [1..=10000]
         </span><span class="kw">let </span>part_number = part_number + <span class="number">1</span>;

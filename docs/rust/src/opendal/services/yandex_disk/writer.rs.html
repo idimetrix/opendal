@@ -109,7 +109,7 @@
         <span class="kw">let </span>upload_url = <span class="self">self</span>.core.get_upload_url(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::put(upload_url)
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

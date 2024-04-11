@@ -6,7 +6,7 @@
         &amp;self,
         offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
         size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-        body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+        body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
     ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>AppendWrite is used to implement [<code>Write</code>] based on append
 object. By implementing AppendWrite, services don’t need to
@@ -29,6 +29,6 @@ care about the details of buffering and uploading parts.</p>
     &amp;self,
     offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
     size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>,
-    body: <a class="enum" href="../enum.AsyncBody.html" title="enum opendal::raw::AsyncBody">AsyncBody</a>
+    body: <a class="struct" href="../../struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>
 ) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../../type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></summary><span class="item-info"><div class="stab portability">Available on <strong>non-WebAssembly</strong> only.</div></span><div class="docblock"><p>Append the data to the end of this object.</p>
 </div></details></div><h2 id="object-safety" class="section-header">Object Safety<a href="#object-safety" class="anchor">§</a></h2><div class="object-safety-info">This trait is <b>not</b> <a href="https://doc.rust-lang.org/nightly/reference/items/traits.html#object-safety">object safe</a>.</div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../../trait.impl/opendal/raw/oio/write/append_write/trait.AppendWrite.js" async></script></section></div></main></body></html>

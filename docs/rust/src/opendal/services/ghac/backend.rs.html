@@ -507,10 +507,6 @@
 <a href="#505" id="505">505</a>
 <a href="#506" id="506">506</a>
 <a href="#507" id="507">507</a>
-<a href="#508" id="508">508</a>
-<a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -789,7 +785,7 @@
 
         <span class="kw">let </span>req = Request::get(location)
             .header(header::RANGE, <span class="string">"bytes=0-0"</span>)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -870,7 +866,7 @@
 }
 
 <span class="kw">impl </span>GhacBackend {
-    <span class="kw">async fn </span>ghac_query(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>ghac_query(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -884,9 +880,7 @@
         req = req.header(AUTHORIZATION, <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, <span class="self">self</span>.catch_token));
         req = req.header(ACCEPT, CACHE_HEADER_ACCEPT);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -895,17 +889,17 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         location: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(location);
 
         <span class="kw">if </span>!range.is_full() {
             req = req.header(header::RANGE, range.to_header());
         }
 
-        req.body(AsyncBody::Empty).map_err(new_request_build_error)
+        req.body(Buffer::new()).map_err(new_request_build_error)
     }
 
-    <span class="kw">async fn </span>ghac_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>ghac_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{CACHE_URL_BASE}/caches"</span>, <span class="self">self</span>.cache_url);
@@ -923,7 +917,7 @@
         req = req.header(CONTENT_TYPE, <span class="string">"application/json"</span>);
 
         <span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(Bytes::from(bs)))
+            .body(Buffer::from(Bytes::from(bs)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
@@ -934,8 +928,8 @@
         cache_id: i64,
         offset: u64,
         size: u64,
-        body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{CACHE_URL_BASE}/caches/{cache_id}"</span>, <span class="self">self</span>.cache_url);
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::patch(<span class="kw-2">&amp;</span>url);
@@ -955,7 +949,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>ghac_commit(<span class="kw-2">&amp;</span><span class="self">self</span>, cache_id: i64, size: u64) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>ghac_commit(<span class="kw-2">&amp;</span><span class="self">self</span>, cache_id: i64, size: u64) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{CACHE_URL_BASE}/caches/{cache_id}"</span>, <span class="self">self</span>.cache_url);
 
         <span class="kw">let </span>bs =
@@ -968,7 +962,7 @@
         req = req.header(CONTENT_LENGTH, bs.len());
 
         <span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(Bytes::from(bs)))
+            .body(Buffer::from(Bytes::from(bs)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
@@ -989,9 +983,7 @@
         req = req.header(USER_AGENT, <span class="macro">format!</span>(<span class="string">"opendal/{VERSION} (service ghac)"</span>));
         req = req.header(<span class="string">"X-GitHub-Api-Version"</span>, GITHUB_API_VERSION);
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}

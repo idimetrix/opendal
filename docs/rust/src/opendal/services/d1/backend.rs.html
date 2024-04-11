@@ -619,7 +619,7 @@
 }
 
 <span class="kw">impl </span>Adapter {
-    <span class="kw">fn </span>create_d1_query_request(<span class="kw-2">&amp;</span><span class="self">self</span>, sql: <span class="kw-2">&amp;</span>str, params: Vec&lt;Value&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">fn </span>create_d1_query_request(<span class="kw-2">&amp;</span><span class="self">self</span>, sql: <span class="kw-2">&amp;</span>str, params: Vec&lt;Value&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = <span class="macro">format!</span>(
             <span class="string">"/accounts/{}/d1/database/{}/query"</span>,
             <span class="self">self</span>.account_id, <span class="self">self</span>.database_id
@@ -642,7 +642,7 @@
         });
 
         <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span>json).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
-        req.body(AsyncBody::Bytes(body.into()))
+        req.body(Buffer::from(body))
             .map_err(new_request_build_error)
     }
 }

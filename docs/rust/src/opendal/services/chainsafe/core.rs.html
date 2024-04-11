@@ -325,7 +325,7 @@
 
 <span class="kw">impl </span>ChainsafeCore {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 }
@@ -342,7 +342,7 @@
         <span class="kw">let </span>req_body = <span class="kw-2">&amp;</span><span class="macro">json!</span>({
             <span class="string">"path"</span>: path,
         });
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(
@@ -369,7 +369,7 @@
             <span class="string">"path"</span>: path,
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(
@@ -396,7 +396,7 @@
             <span class="string">"path"</span>: from,
             <span class="string">"new_path"</span>: to,
         });
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(
@@ -422,7 +422,7 @@
             <span class="string">"paths"</span>: <span class="macro">vec!</span>[path],
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(
@@ -472,7 +472,7 @@
             <span class="string">"path"</span>: path,
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(
@@ -498,7 +498,7 @@
             <span class="string">"path"</span>: path,
         });
 
-        <span class="kw">let </span>body = AsyncBody::Bytes(Bytes::from(req_body.to_string()));
+        <span class="kw">let </span>body = Buffer::from(Bytes::from(req_body.to_string()));
 
         <span class="kw">let </span>req = Request::post(url)
             .header(

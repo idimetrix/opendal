@@ -548,8 +548,6 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -650,7 +648,7 @@
         <span class="kw">let </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/x-www-form-urlencoded"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(request).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -697,9 +695,7 @@
             req = req.header(header::RANGE, range.to_header());
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>request = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>request = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.client.send(request).<span class="kw">await
@@ -710,7 +706,7 @@
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="string">"https://content.dropboxapi.com/2/files/upload"</span>.to_string();
         <span class="kw">let </span>dropbox_update_args = DropboxUploadArgs {
@@ -749,7 +745,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/json"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -772,7 +768,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/json"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -788,7 +784,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/json"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -834,7 +830,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/json"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -864,7 +860,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::post(<span class="kw-2">&amp;</span>url)
             .header(CONTENT_TYPE, <span class="string">"application/json"</span>)
             .header(CONTENT_LENGTH, bs.len())
-            .body(AsyncBody::Bytes(bs))
+            .body(Buffer::from(bs))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>request).<span class="kw">await</span><span class="question-mark">?</span>;
