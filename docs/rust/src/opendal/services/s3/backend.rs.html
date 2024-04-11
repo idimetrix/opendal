@@ -1312,6 +1312,11 @@
 <a href="#1310" id="1310">1310</a>
 <a href="#1311" id="1311">1311</a>
 <a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2403,6 +2408,11 @@
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
+        <span class="comment">// This would delete the bucket, do not perform
+        </span><span class="kw">if </span><span class="self">self</span>.core.root == <span class="string">"/" </span>&amp;&amp; path == <span class="string">"/" </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(RpDelete::default());
+        }
+
         <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_delete_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
