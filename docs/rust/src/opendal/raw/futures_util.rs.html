@@ -289,6 +289,23 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -331,6 +348,23 @@
 </span><span class="kw">pub type </span>BoxedStaticFuture&lt;T&gt; = futures::future::BoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
 <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
 </span><span class="kw">pub type </span>BoxedStaticFuture&lt;T&gt; = futures::future::LocalBoxFuture&lt;<span class="lifetime">'static</span>, T&gt;;
+
+<span class="doccomment">/// MaybeSend is a marker to determine whether a type is `Send` or not.
+/// We use this trait to wrap the `Send` requirement for wasm32 target.
+///
+/// # Safety
+///
+/// MaybeSend equivalent to `Send` on non-wasm32 target. And it's empty
+/// on wasm32 target.
+</span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+</span><span class="kw">pub unsafe trait </span>MaybeSend: Send {}
+<span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+</span><span class="kw">pub unsafe trait </span>MaybeSend {}
+
+<span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+</span><span class="kw">unsafe impl</span>&lt;T: Send&gt; MaybeSend <span class="kw">for </span>T {}
+<span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+</span><span class="kw">unsafe impl</span>&lt;T&gt; MaybeSend <span class="kw">for </span>T {}
 
 <span class="doccomment">/// CONCURRENT_LARGE_THRESHOLD is the threshold to determine whether to use
 /// [`FuturesOrdered`] or not.

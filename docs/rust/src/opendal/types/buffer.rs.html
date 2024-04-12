@@ -701,6 +701,17 @@
 <a href="#699" id="699">699</a>
 <a href="#700" id="700">700</a>
 <a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -929,43 +940,50 @@
 }
 
 <span class="kw">impl </span>From&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(bs: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(bs: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(bs.into()))
     }
 }
 
 <span class="kw">impl </span>From&lt;Bytes&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(bs: Bytes) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(bs: Bytes) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(bs))
     }
 }
 
 <span class="kw">impl </span>From&lt;String&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(s: String) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(s: String) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(Bytes::from(s)))
     }
 }
 
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(Bytes::from_static(s)))
     }
 }
 
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(Bytes::from_static(s.as_bytes())))
     }
 }
 
 <span class="kw">impl </span>FromIterator&lt;u8&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = u8&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = u8&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Inner::Contiguous(Bytes::from_iter(iter)))
     }
 }
 
 <span class="kw">impl </span>From&lt;VecDeque&lt;Bytes&gt;&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(bs: VecDeque&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(bs: VecDeque&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>size = bs.iter().map(Bytes::len).sum();
         <span class="self">Self</span>(Inner::NonContiguous {
             parts: Vec::from(bs).into(),
@@ -977,7 +995,8 @@
 }
 
 <span class="kw">impl </span>From&lt;Vec&lt;Bytes&gt;&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(bs: Vec&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(bs: Vec&lt;Bytes&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>size = bs.iter().map(Bytes::len).sum();
         <span class="self">Self</span>(Inner::NonContiguous {
             parts: bs.into(),
@@ -989,7 +1008,8 @@
 }
 
 <span class="kw">impl </span>From&lt;Arc&lt;[Bytes]&gt;&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from(bs: Arc&lt;[Bytes]&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from(bs: Arc&lt;[Bytes]&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>size = bs.iter().map(Bytes::len).sum();
         <span class="self">Self</span>(Inner::NonContiguous {
             parts: bs,
@@ -1001,7 +1021,8 @@
 }
 
 <span class="kw">impl </span>FromIterator&lt;Bytes&gt; <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = Bytes&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = Bytes&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="number">0</span>;
         <span class="kw">let </span>bs = iter.into_iter().inspect(|v| size += v.len());
         <span class="comment">// This operation only needs one allocation from iterator to `Arc&lt;[Bytes]&gt;` instead
@@ -1043,7 +1064,8 @@
         }
     }
 
-    <span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'a</span>&gt;]) -&gt; usize {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'a</span>&gt;]) -&gt; usize {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0 </span>{
             Inner::Contiguous(b) =&gt; {
                 <span class="kw">if </span>dst.is_empty() {

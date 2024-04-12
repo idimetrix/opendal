@@ -419,7 +419,7 @@
 /// use opendal::services;
 /// use opendal::Operator;
 ///
-/// fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync + 'static&gt;&gt; {
+/// fn main() -&gt; Result&lt;(), Box&lt;dyn Error + MaybeSend + Sync + 'static&gt;&gt; {
 ///     let reporter =
 ///         minitrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse().unwrap(), "opendal")
 ///             .unwrap();
@@ -669,19 +669,19 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + Send {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;usize&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Write.into_static());
         <span class="self">self</span>.inner.write(bs)
     }
 
-    <span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send {
+    <span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Abort.into_static());
         <span class="self">self</span>.inner.abort()
     }
 
-    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + Send {
+    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Close.into_static());
         <span class="self">self</span>.inner.close()

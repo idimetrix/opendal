@@ -393,7 +393,7 @@
 //! pub trait Accessor {
 //!     fn create_dir&lt;'async&gt;(
 //!         &amp;'async self,
-//!     ) -&gt; Pin&lt;Box&lt;dyn core::future::Future&lt;Output = Result()&gt; + Send + 'async&gt;&gt;
+//!     ) -&gt; Pin&lt;Box&lt;dyn core::future::Future&lt;Output = Result()&gt; + MaybeSend + 'async&gt;&gt;
 //!     where Self: Sync + 'async;
 //! }
 //! ```

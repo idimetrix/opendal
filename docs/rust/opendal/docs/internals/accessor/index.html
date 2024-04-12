@@ -33,7 +33,7 @@ underlying storage services via APIs provided by <a href="../../../raw/trait.Acc
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor {
     <span class="kw">fn </span>create_dir&lt;<span class="lifetime">'async</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">'async </span><span class="self">self</span>,
-    ) -&gt; Pin&lt;Box&lt;<span class="kw">dyn </span>core::future::Future&lt;Output = <span class="prelude-ty">Result</span>()&gt; + Send + <span class="lifetime">'async</span>&gt;&gt;
+    ) -&gt; Pin&lt;Box&lt;<span class="kw">dyn </span>core::future::Future&lt;Output = <span class="prelude-ty">Result</span>()&gt; + MaybeSend + <span class="lifetime">'async</span>&gt;&gt;
     <span class="kw">where </span><span class="self">Self</span>: Sync + <span class="lifetime">'async</span>;
 }</code></pre></div>
 <p>It’s not zero cost, and we will improve this part once the related features are stabilised.</p>
