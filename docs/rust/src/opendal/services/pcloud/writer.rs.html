@@ -66,7 +66,6 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -87,7 +86,6 @@
 </span><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::PcloudCore;
@@ -110,7 +108,7 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>PcloudWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.core.ensure_dir_exists(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.upload_file(<span class="kw-2">&amp;</span><span class="self">self</span>.path, bs).<span class="kw">await</span><span class="question-mark">?</span>;

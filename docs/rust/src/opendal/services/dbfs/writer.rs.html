@@ -63,6 +63,7 @@
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
 <a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -82,7 +83,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -104,7 +104,7 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>DbfsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
 
         <span class="comment">// MAX_BLOCK_SIZE_EXCEEDED will be thrown if this limit(1MB) is exceeded.
@@ -115,7 +115,9 @@
             ));
         }
 
-        <span class="kw">let </span>req = <span class="self">self</span>.core.dbfs_create_file_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, bs)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self
+            </span>.core
+            .dbfs_create_file_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, bs.to_bytes())<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 

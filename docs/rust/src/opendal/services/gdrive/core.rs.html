@@ -644,7 +644,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         size: u64,
-        body: Bytes,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>parent = <span class="self">self</span>.path_cache.ensure_dir(get_parent(path)).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -694,7 +694,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file_id: <span class="kw-2">&amp;</span>str,
         size: u64,
-        body: Bytes,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://www.googleapis.com/upload/drive/v3/files/{}?uploadType=media"</span>,
@@ -705,7 +705,7 @@
             .header(header::CONTENT_TYPE, <span class="string">"application/octet-stream"</span>)
             .header(header::CONTENT_LENGTH, size)
             .header(<span class="string">"X-Upload-Content-Length"</span>, size)
-            .body(Buffer::from(body))
+            .body(body)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;

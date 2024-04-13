@@ -565,7 +565,7 @@
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>empty_bytes = bytes::Bytes::new();
+        <span class="kw">let </span>empty_bytes = Buffer::new();
 
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core

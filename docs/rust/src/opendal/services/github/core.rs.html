@@ -471,7 +471,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>upload(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    <span class="kw">pub async fn </span>upload(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>sha = <span class="self">self</span>.get_file_sha(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -489,7 +489,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req_body = CreateOrUpdateContentsRequest {
             message: <span class="macro">format!</span>(<span class="string">"Write {} at {} via opendal"</span>, path, chrono::Local::now()),
-            content: base64::engine::general_purpose::STANDARD.encode(<span class="kw-2">&amp;</span>bs),
+            content: base64::engine::general_purpose::STANDARD.encode(<span class="kw-2">&amp;</span>bs.to_bytes()),
             sha: <span class="prelude-val">None</span>,
         };
 
@@ -501,7 +501,7 @@
 
         <span class="kw">let </span>req = req
             .header(<span class="string">"Accept"</span>, <span class="string">"application/vnd.github+json"</span>)
-            .body(Buffer::from(Bytes::from(req_body)))
+            .body(Buffer::from(req_body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await

@@ -202,13 +202,13 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>OneDriveWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
 
         <span class="kw">if </span>size &lt;= <span class="self">Self</span>::MAX_SIMPLE_SIZE {
             <span class="self">self</span>.write_simple(bs).<span class="kw">await</span><span class="question-mark">?</span>;
         } <span class="kw">else </span>{
-            <span class="self">self</span>.write_chunked(bs).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.write_chunked(bs.to_bytes()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -216,10 +216,10 @@
 }
 
 <span class="kw">impl </span>OneDriveWriter {
-    <span class="kw">async fn </span>write_simple(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_simple(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.backend
-            .onedrive_upload_simple(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len()), <span class="kw-2">&amp;</span><span class="self">self</span>.op, Buffer::from(bs))
+            .onedrive_upload_simple(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len()), <span class="kw-2">&amp;</span><span class="self">self</span>.op, bs)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();

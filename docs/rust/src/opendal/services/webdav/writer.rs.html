@@ -54,12 +54,6 @@
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
-<a href="#55" id="55">55</a>
-<a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -79,7 +73,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
@@ -101,15 +94,10 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>WebdavWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
-            .webdav_put(
-                <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-                <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
-                <span class="kw-2">&amp;</span><span class="self">self</span>.op,
-                Buffer::from(bs),
-            )
+            .webdav_put(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64), <span class="kw-2">&amp;</span><span class="self">self</span>.op, bs)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();

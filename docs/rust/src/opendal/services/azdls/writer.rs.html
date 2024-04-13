@@ -131,10 +131,6 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -154,7 +150,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AzdlsCore;
@@ -178,7 +173,7 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>AzdlsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req =
             <span class="self">self</span>.core
                 .azdls_create_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.op, Buffer::new())<span class="question-mark">?</span>;
@@ -197,12 +192,9 @@
             }
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.azdls_update_request(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-            <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
-            <span class="number">0</span>,
-            Buffer::from(bs),
-        )<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
+            </span>.core
+            .azdls_update_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64), <span class="number">0</span>, bs)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 

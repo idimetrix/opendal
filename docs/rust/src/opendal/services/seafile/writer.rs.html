@@ -86,7 +86,6 @@
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -106,7 +105,6 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::StatusCode;
@@ -135,7 +133,7 @@
 }
 
 <span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>SeafileWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>upload_url = <span class="self">self</span>.core.get_upload_url().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>req = Request::post(upload_url);
