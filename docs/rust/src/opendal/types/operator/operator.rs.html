@@ -2120,6 +2120,7 @@
 <a href="#2118" id="2118">2118</a>
 <a href="#2119" id="2119">2119</a>
 <a href="#2120" id="2120">2120</a>
+<a href="#2121" id="2121">2121</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2621,8 +2622,8 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpRead::default(), BytesRange::default()),
-            |inner, path, (args, range)| <span class="kw">async move </span>{
+            (OpRead::default(), OpReader::default()),
+            |inner, path, (args, options)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
@@ -2632,7 +2633,8 @@
                     );
                 }
 
-                <span class="kw">let </span>r = Reader::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>range = options.range();
+                <span class="kw">let </span>r = Reader::create(inner, <span class="kw-2">&amp;</span>path, args, options).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>buf = r.read(range.to_range()).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
@@ -2692,8 +2694,8 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpRead::default(),
-            |inner, path, args| <span class="kw">async move </span>{
+            (OpRead::default(), OpReader::default()),
+            |inner, path, (args, options)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
@@ -2703,7 +2705,7 @@
                     );
                 }
 
-                Reader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args).<span class="kw">await
+                Reader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args, options).<span class="kw">await
             </span>},
         )
     }
