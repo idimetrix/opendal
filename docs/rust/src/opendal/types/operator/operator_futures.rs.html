@@ -483,6 +483,11 @@
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -738,9 +743,14 @@
         <span class="self">self</span>.map(|(op_read, op_reader)| (op_read, op_reader.with_concurrent(concurrent)))
     }
 
-    <span class="doccomment">/// Set the chunk size for this operation.
+    <span class="doccomment">/// Set the chunk size for this reader.
     </span><span class="kw">pub fn </span>chunk(<span class="self">self</span>, chunk_size: usize) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|(op_read, op_reader)| (op_read, op_reader.with_chunk(chunk_size)))
+    }
+
+    <span class="doccomment">/// Set the gap size for this reader.
+    </span><span class="kw">pub fn </span>gap(<span class="self">self</span>, gap_size: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|(op_read, op_reader)| (op_read, op_reader.with_gap(gap_size)))
     }
 }
 
