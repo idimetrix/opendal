@@ -1051,7 +1051,7 @@
     <span class="doccomment">/// The concurrent requests that reader can send.
     </span>concurrent: usize,
     <span class="doccomment">/// The chunk size of each request.
-    </span>chunk: usize,
+    </span>chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>OpReader {
@@ -1059,7 +1059,7 @@
         <span class="self">Self </span>{
             range: BytesRange::default(),
             concurrent: <span class="number">1</span>,
-            chunk: <span class="number">0</span>,
+            chunk: <span class="prelude-val">None</span>,
         }
     }
 }
@@ -1094,12 +1094,12 @@
 
     <span class="doccomment">/// Set the chunk of the option
     </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.chunk = chunk;
+        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk.max(<span class="number">1</span>));
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Get chunk from option
-    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
         <span class="self">self</span>.chunk
     }
 }
