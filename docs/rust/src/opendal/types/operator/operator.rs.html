@@ -2120,7 +2120,6 @@
 <a href="#2118" id="2118">2118</a>
 <a href="#2119" id="2119">2119</a>
 <a href="#2120" id="2120">2120</a>
-<a href="#2121" id="2121">2121</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2141,7 +2140,6 @@
 </span><span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::stream;
 <span class="kw">use </span>futures::Stream;
 <span class="kw">use </span>futures::StreamExt;
@@ -2745,7 +2743,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bs = bs.into();
         <span class="self">self</span>.write_with(path, bs).<span class="kw">await
     </span>}
@@ -3234,7 +3232,7 @@
     </span><span class="kw">pub fn </span>write_with(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        bs: <span class="kw">impl </span>Into&lt;Bytes&gt;,
+        bs: <span class="kw">impl </span>Into&lt;Buffer&gt;,
     ) -&gt; FutureWrite&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
         <span class="kw">let </span>bs = bs.into();

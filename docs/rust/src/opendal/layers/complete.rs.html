@@ -911,6 +911,7 @@
 <a href="#909" id="909">909</a>
 <a href="#910" id="910">910</a>
 <a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1719,7 +1720,8 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_writer() {
         <span class="kw">let </span>op = new_test_operator(Capability::default());
-        <span class="kw">let </span>res = op.write(<span class="string">"path"</span>, <span class="macro">vec!</span>[]).<span class="kw">await</span>;
+        <span class="kw">let </span>bs: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>res = op.write(<span class="string">"path"</span>, bs).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.is_err());
         <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
 
