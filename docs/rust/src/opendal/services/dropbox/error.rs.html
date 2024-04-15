@@ -83,6 +83,9 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -156,7 +159,10 @@
 ///
 /// See &lt;https://www.dropbox.com/developers/documentation/http/documentation#error-handling&gt;
 </span><span class="kw">pub fn </span>parse_dropbox_error_summary(summary: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;(ErrorKind, bool)&gt; {
-    <span class="kw">if </span>summary.starts_with(<span class="string">"path/not_found"</span>) || summary.starts_with(<span class="string">"path_lookup/not_found"</span>) {
+    <span class="kw">if </span>summary.starts_with(<span class="string">"path/not_found"</span>)
+        || summary.starts_with(<span class="string">"path_lookup/not_found"</span>)
+        || summary.starts_with(<span class="string">"from_lookup/not_found"</span>)
+    {
         <span class="prelude-val">Some</span>((ErrorKind::NotFound, <span class="bool-val">false</span>))
     } <span class="kw">else if </span>summary.starts_with(<span class="string">"path/conflict"</span>) {
         <span class="prelude-val">Some</span>((ErrorKind::AlreadyExists, <span class="bool-val">false</span>))
