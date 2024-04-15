@@ -664,20 +664,6 @@
 <a href="#662" id="662">662</a>
 <a href="#663" id="663">663</a>
 <a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -855,14 +841,14 @@
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>into_futures_io_async_read(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; FuturesIoAsyncReader {
-        FuturesIoAsyncReader::new(<span class="self">self</span>.inner, range)
+        FuturesIoAsyncReader::new(<span class="self">self</span>.inner, <span class="self">self</span>.options.chunk(), range)
     }
 
     <span class="doccomment">/// Convert reader into [`FuturesBytesStream`] which implements [`futures::Stream`],
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>into_futures_bytes_stream(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; FuturesBytesStream {
-        FuturesBytesStream::new(<span class="self">self</span>.inner, range)
+        FuturesBytesStream::new(<span class="self">self</span>.inner, <span class="self">self</span>.options.chunk(), range)
     }
 }
 
@@ -972,7 +958,7 @@
         state: State,
         offset: u64,
         size: u64,
-        cap: usize,
+        chunk: usize,
 
         cur: u64,
         buf: Buffer,
@@ -991,24 +977,17 @@
     <span class="kw">impl </span>FuturesIoAsyncReader {
         <span class="doccomment">/// NOTE: don't allow users to create FuturesAsyncReader directly.
         </span><span class="attr">#[inline]
-        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(r: oio::Reader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(r: oio::Reader, chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
             FuturesIoAsyncReader {
                 state: State::Idle(<span class="prelude-val">Some</span>(r)),
                 offset: range.start,
                 size: range.end - range.start,
-                <span class="comment">// TODO: should use services preferred io size.
-                </span>cap: <span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
+                chunk: chunk.unwrap_or(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
 
                 cur: <span class="number">0</span>,
                 buf: Buffer::new(),
             }
         }
-
-        <span class="doccomment">/// Set the capacity of this reader to control the IO size.
-        </span><span class="kw">pub fn </span>with_capacity(<span class="kw-2">mut </span><span class="self">self</span>, cap: usize) -&gt; <span class="self">Self </span>{
-            <span class="self">self</span>.cap = cap;
-            <span class="self">self
-        </span>}
     }
 
     <span class="kw">impl </span>AsyncBufRead <span class="kw">for </span>FuturesIoAsyncReader {
@@ -1028,7 +1007,7 @@
 
                         <span class="kw">let </span>r = r.take().expect(<span class="string">"reader must be present"</span>);
                         <span class="kw">let </span>next_offset = this.offset + this.cur;
-                        <span class="kw">let </span>next_size = (this.size - this.cur).min(this.cap <span class="kw">as </span>u64) <span class="kw">as </span>usize;
+                        <span class="kw">let </span>next_size = (this.size - this.cur).min(this.chunk <span class="kw">as </span>u64) <span class="kw">as </span>usize;
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{
                             <span class="kw">let </span>res = r.read_at_dyn(next_offset, next_size).<span class="kw">await</span>;
                             (r, res)
@@ -1128,7 +1107,7 @@
         state: State,
         offset: u64,
         size: u64,
-        cap: usize,
+        chunk: usize,
 
         cur: u64,
     }
@@ -1146,24 +1125,17 @@
     <span class="kw">impl </span>FuturesBytesStream {
         <span class="doccomment">/// NOTE: don't allow users to create FuturesStream directly.
         </span><span class="attr">#[inline]
-        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::Reader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::Reader, chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
             FuturesBytesStream {
                 r,
                 state: State::Idle(Buffer::new()),
                 offset: range.start,
                 size: range.end - range.start,
-                <span class="comment">// TODO: should use services preferred io size.
-                </span>cap: <span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
+                chunk: chunk.unwrap_or(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
 
                 cur: <span class="number">0</span>,
             }
         }
-
-        <span class="doccomment">/// Set the capacity of this reader to control the IO size.
-        </span><span class="kw">pub fn </span>with_capacity(<span class="kw-2">mut </span><span class="self">self</span>, cap: usize) -&gt; <span class="self">Self </span>{
-            <span class="self">self</span>.cap = cap;
-            <span class="self">self
-        </span>}
     }
 
     <span class="kw">impl </span>Stream <span class="kw">for </span>FuturesBytesStream {
@@ -1187,7 +1159,7 @@
 
                         <span class="kw">let </span>r = this.r.clone();
                         <span class="kw">let </span>next_offset = this.offset + this.cur;
-                        <span class="kw">let </span>next_size = (this.size - this.cur).min(this.cap <span class="kw">as </span>u64) <span class="kw">as </span>usize;
+                        <span class="kw">let </span>next_size = (this.size - this.cur).min(this.chunk <span class="kw">as </span>u64) <span class="kw">as </span>usize;
                         <span class="kw">let </span>fut = <span class="kw">async move </span>{ r.read_at_dyn(next_offset, next_size).<span class="kw">await </span>};
                         this.state = State::Next(Box::pin(fut));
                     }
