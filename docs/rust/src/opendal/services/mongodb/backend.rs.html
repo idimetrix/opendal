@@ -597,7 +597,7 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>collection = <span class="self">self</span>.get_collection().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc! </span>{ <span class="self">self</span>.key_field.as_str(): path };
         <span class="kw">let </span>update = <span class="macro">doc! </span>{ <span class="string">"$set"</span>: { <span class="self">self</span>.value_field.as_str(): Binary { subtype: mongodb::bson::spec::BinarySubtype::Generic, bytes: value.to_vec() } } };

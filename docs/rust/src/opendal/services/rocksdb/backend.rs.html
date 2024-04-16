@@ -204,6 +204,7 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -346,18 +347,19 @@
         <span class="prelude-val">Ok</span>(result.map(Buffer::from))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
-        <span class="kw">let </span>cloned_value = value.to_vec();
 
-        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), <span class="kw-2">&amp;</span>cloned_value))
+        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), value))
             .<span class="kw">await
             </span>.map_err(new_task_join_error)<span class="question-mark">?
     </span>}
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.db.put(path, value).map_err(parse_rocksdb_error)
+    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.db
+            .put(path, value.to_vec())
+            .map_err(parse_rocksdb_error)
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

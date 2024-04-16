@@ -264,6 +264,7 @@
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -464,20 +465,21 @@
         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>cloned_path = path.to_string();
-        <span class="kw">let </span>cloned_value = value.to_vec();
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
 
-        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), <span class="kw-2">&amp;</span>cloned_value))
+        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), value))
             .<span class="kw">await
             </span>.map_err(new_task_join_error)
             .and_then(|inner_result| inner_result)
     }
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>tx = <span class="self">self</span>.persy.begin().map_err(parse_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>id = tx.insert(<span class="kw-2">&amp;</span><span class="self">self</span>.segment, value).map_err(parse_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>id = tx
+            .insert(<span class="kw-2">&amp;</span><span class="self">self</span>.segment, <span class="kw-2">&amp;</span>value.to_vec())
+            .map_err(parse_error)<span class="question-mark">?</span>;
 
         tx.put::&lt;String, persy::PersyId&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>.index, path.to_string(), id)
             .map_err(parse_error)<span class="question-mark">?</span>;

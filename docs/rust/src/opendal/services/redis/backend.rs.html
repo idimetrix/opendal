@@ -457,6 +457,7 @@
 <a href="#455" id="455">455</a>
 <a href="#456" id="456">456</a>
 <a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -857,8 +858,9 @@
         <span class="prelude-val">Ok</span>(result.map(Buffer::from))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>value = value.to_vec();
         <span class="kw">match </span><span class="self">self</span>.default_ttl {
             <span class="prelude-val">Some</span>(ttl) =&gt; <span class="kw">match </span>conn {
                 RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; conn

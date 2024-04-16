@@ -550,7 +550,7 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// delete old file if exists
         </span><span class="kw">let </span>filter = <span class="macro">doc! </span>{ <span class="string">"filename"</span>: path };
@@ -566,7 +566,7 @@
         <span class="comment">// set new file
         </span><span class="kw">let </span><span class="kw-2">mut </span>upload_stream = bucket.open_upload_stream(path, <span class="prelude-val">None</span>);
         upload_stream
-            .write_all(value)
+            .write_all(<span class="kw-2">&amp;</span>value.to_vec())
             .<span class="kw">await
             </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
         upload_stream.close().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;

@@ -245,6 +245,7 @@
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -408,18 +409,17 @@
         <span class="prelude-val">Ok</span>(result.map(Buffer::from))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
-        <span class="kw">let </span>cloned_value = value.to_vec();
 
-        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), <span class="kw-2">&amp;</span>cloned_value))
+        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), value))
             .<span class="kw">await
             </span>.map_err(new_task_join_error)
             .and_then(|inner_result| inner_result)
     }
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>write_txn = <span class="self">self</span>.db.begin_write().map_err(parse_transaction_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>table_define: redb::TableDefinition&lt;<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>[u8]&gt; =
@@ -430,7 +430,9 @@
                 .open_table(table_define)
                 .map_err(parse_table_error)<span class="question-mark">?</span>;
 
-            table.insert(path, value).map_err(parse_storage_error)<span class="question-mark">?</span>;
+            table
+                .insert(path, <span class="kw-2">&amp;*</span>value.to_vec())
+                .map_err(parse_storage_error)<span class="question-mark">?</span>;
         }
 
         write_txn.commit().map_err(parse_commit_error)<span class="question-mark">?</span>;

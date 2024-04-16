@@ -811,7 +811,7 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>query = <span class="macro">format!</span>(
             <span class="string">"INSERT OR REPLACE INTO `{}` (`{}`, `{}`) VALUES (?, ?)"</span>,
             <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.value_field

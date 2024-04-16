@@ -541,12 +541,12 @@
         <span class="prelude-val">Ok</span>(result.map(Buffer::from))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
 
         conn.set(
             <span class="kw-2">&amp;</span>percent_encode_path(key),
-            value,
+            <span class="kw-2">&amp;</span>value.to_vec(),
             <span class="comment">// Set expiration to 0 if ttl not set.
             </span><span class="self">self</span>.default_ttl
                 .map(|v| v.as_secs() <span class="kw">as </span>u32)

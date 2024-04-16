@@ -755,7 +755,7 @@
         <span class="prelude-val">Ok</span>(value.map(Buffer::from))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">crate</span>::Result&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="kw">crate</span>::Result&lt;()&gt; {
         <span class="kw">let </span>query = <span class="macro">format!</span>(
             <span class="string">"INSERT INTO {} ({}, {}) \
             VALUES ($path, $value) \
@@ -766,7 +766,7 @@
             .<span class="kw">await</span><span class="question-mark">?
             </span>.query(query)
             .bind((<span class="string">"path"</span>, path))
-            .bind((<span class="string">"value"</span>, value))
+            .bind((<span class="string">"value"</span>, value.to_vec()))
             .<span class="kw">await
             </span>.map_err(parse_surrealdb_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())

@@ -577,7 +577,7 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>query = <span class="macro">format!</span>(
             <span class="string">"INSERT INTO `{}` (`{}`, `{}`)
             VALUES (:path, :value)
@@ -595,7 +595,7 @@
             statement,
             <span class="macro">params! </span>{
                 <span class="string">"path" </span>=&gt; path,
-                <span class="string">"value" </span>=&gt; value,
+                <span class="string">"value" </span>=&gt; value.to_vec(),
             },
         )
         .<span class="kw">await

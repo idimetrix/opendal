@@ -364,10 +364,10 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>transaction = <span class="self">self</span>.db.create_trx().expect(<span class="string">"Unable to create transaction"</span>);
 
-        transaction.set(path.as_bytes(), value);
+        transaction.set(path.as_bytes(), <span class="kw-2">&amp;</span>value.to_vec());
 
         <span class="kw">match </span>transaction.commit().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),

@@ -158,8 +158,6 @@
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -283,17 +281,15 @@
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(result)))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        cacache::write(<span class="kw-2">&amp;</span><span class="self">self</span>.datadir, path, value)
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        cacache::write(<span class="kw-2">&amp;</span><span class="self">self</span>.datadir, path, value.to_vec())
             .<span class="kw">await
             </span>.map_err(parse_error)<span class="question-mark">?</span>;
-
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        cacache::write_sync(<span class="kw-2">&amp;</span><span class="self">self</span>.datadir, path, value).map_err(parse_error)<span class="question-mark">?</span>;
-
+    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        cacache::write_sync(<span class="kw-2">&amp;</span><span class="self">self</span>.datadir, path, value.to_vec()).map_err(parse_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 

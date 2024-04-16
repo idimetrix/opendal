@@ -684,7 +684,7 @@
         }
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>table = <span class="kw-2">&amp;</span><span class="self">self</span>.table;
         <span class="kw">let </span>key_field = <span class="kw-2">&amp;</span><span class="self">self</span>.key_field;
         <span class="kw">let </span>value_field = <span class="kw-2">&amp;</span><span class="self">self</span>.value_field;
@@ -695,7 +695,7 @@
                     DO UPDATE SET {value_field} = EXCLUDED.{value_field}"</span>,
         );
 
-        <span class="kw">let </span>params = <span class="macro">vec!</span>[path.into(), value.into()];
+        <span class="kw">let </span>params = <span class="macro">vec!</span>[path.into(), value.to_vec().into()];
         <span class="kw">let </span>req = <span class="self">self</span>.create_d1_query_request(<span class="kw-2">&amp;</span>query, params)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;

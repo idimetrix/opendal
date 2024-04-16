@@ -748,7 +748,7 @@
     <span class="kw">async fn </span>atomic_post_object_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        value: <span class="kw-2">&amp;</span>[u8],
+        value: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = normalize_path(path);
         <span class="kw">let </span>path = path.as_str();
@@ -892,7 +892,7 @@
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(bytes_file))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.atomic_get_object_request(path)<span class="question-mark">?</span>;
         <span class="kw">let </span>res = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>bytes = res.into_body();
