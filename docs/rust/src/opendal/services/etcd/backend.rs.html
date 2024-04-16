@@ -755,11 +755,11 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>resp = client.get(key, <span class="prelude-val">None</span>).<span class="kw">await</span>.map_err(format_etcd_error)<span class="question-mark">?</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(kv) = resp.kvs().first() {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(kv.value().to_vec()))
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(kv.value().to_vec())))
         } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
         }

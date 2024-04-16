@@ -773,7 +773,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>query = <span class="macro">format!</span>(
             <span class="string">"SELECT {} FROM {} WHERE `{}` = ? LIMIT 1"</span>,
             <span class="self">self</span>.value_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
@@ -793,7 +793,7 @@
                     <span class="kw">let </span>val = <span class="kw-2">&amp;</span>rows[<span class="number">0</span>][<span class="number">0</span>];
                     <span class="kw">match </span>val {
                         Value::Null =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-                        Value::Blob { value } =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(value.to_owned())),
+                        Value::Blob { value } =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(value.to_vec()))),
                         <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"invalid value type"</span>)),
                     }
                 }

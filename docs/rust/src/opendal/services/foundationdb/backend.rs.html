@@ -346,12 +346,12 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>transaction = <span class="self">self</span>.db.create_trx().expect(<span class="string">"Unable to create transaction"</span>);
 
         <span class="kw">match </span>transaction.get(path.as_bytes(), <span class="bool-val">false</span>).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(slice) =&gt; <span class="kw">match </span>slice {
-                <span class="prelude-val">Some</span>(data) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(data.to_vec())),
+                <span class="prelude-val">Some</span>(data) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(data.to_vec()))),
                 <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::NotFound,
                     <span class="string">"foundationdb: key not found"</span>,

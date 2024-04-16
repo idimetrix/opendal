@@ -430,11 +430,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
 <span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
-<span class="kw">use </span><span class="kw">crate</span>::Builder;
 <span class="kw">use </span><span class="kw">crate</span>::Capability;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
+<span class="kw">use crate</span>::{Buffer, Builder};
 
 <span class="doccomment">/// Config for Surrealdb services support.
 </span><span class="attr">#[derive(Default, Deserialize)]
@@ -730,7 +730,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">crate</span>::Result&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">crate</span>::Result&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>query: String = <span class="kw">if </span><span class="self">self</span>.key_field == <span class="string">"id" </span>{
             <span class="string">"SELECT type::field($value_field) FROM type::thing($table, $path)"</span>.to_string()
         } <span class="kw">else </span>{
@@ -752,7 +752,7 @@
             .take((<span class="number">0</span>, <span class="self">self</span>.value_field.as_str()))
             .map_err(parse_surrealdb_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(value)
+        <span class="prelude-val">Ok</span>(value.map(Buffer::from))
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">crate</span>::Result&lt;()&gt; {

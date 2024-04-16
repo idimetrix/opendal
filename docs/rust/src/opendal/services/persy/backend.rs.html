@@ -442,7 +442,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
         task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_get(cloned_path.as_str()))
@@ -451,14 +451,14 @@
             .and_then(|inner_result| inner_result)
     }
 
-    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>read_id = <span class="self">self
             </span>.persy
             .get::&lt;String, persy::PersyId&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>.index, <span class="kw-2">&amp;</span>path.to_string())
             .map_err(parse_error)<span class="question-mark">?</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = read_id.next() {
             <span class="kw">let </span>value = <span class="self">self</span>.persy.read(<span class="kw-2">&amp;</span><span class="self">self</span>.segment, <span class="kw-2">&amp;</span>id).map_err(parse_error)<span class="question-mark">?</span>;
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(value);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(value.map(Buffer::from));
         }
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)

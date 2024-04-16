@@ -551,7 +551,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>query = <span class="macro">format!</span>(
             <span class="string">"SELECT `{}` FROM `{}` WHERE `{}` = :path LIMIT 1"</span>,
             <span class="self">self</span>.value_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
@@ -572,7 +572,7 @@
             .<span class="kw">await
             </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
         <span class="kw">match </span>result {
-            <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
+            <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(v))),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }
     }

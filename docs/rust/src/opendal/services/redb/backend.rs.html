@@ -380,7 +380,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
 
@@ -390,7 +390,7 @@
             .and_then(|inner_result| inner_result)
     }
 
-    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>read_txn = <span class="self">self</span>.db.begin_read().map_err(parse_transaction_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>table_define: redb::TableDefinition&lt;<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>[u8]&gt; =
@@ -404,8 +404,8 @@
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v.value().to_vec())),
             <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(parse_storage_error(e)),
-        };
-        result
+        }<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(result.map(Buffer::from))
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
