@@ -135,7 +135,7 @@
 /// - `push`: Push a new buffer in the queue.
 /// - `collect`: Collect all buffer in the queue as a new [`Buffer`]
 /// - `advance`: Advance the queue by `cnt` bytes.
-</span><span class="attr">#[derive(Default)]
+</span><span class="attr">#[derive(Clone, Default)]
 </span><span class="kw">pub struct </span>QueueBuf(VecDeque&lt;Buffer&gt;);
 
 <span class="kw">impl </span>QueueBuf {
@@ -174,13 +174,13 @@
     /// most of them should be acceptable since we can expect the item length of buffers are slower
     /// than 4k.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>collect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Buffer {
+    </span><span class="kw">pub fn </span>collect(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; Buffer {
         <span class="kw">if </span><span class="self">self</span>.<span class="number">0</span>.is_empty() {
             Buffer::new()
         } <span class="kw">else if </span><span class="self">self</span>.<span class="number">0</span>.len() == <span class="number">1 </span>{
-            <span class="self">self</span>.<span class="number">0</span>.clone().pop_front().unwrap()
+            <span class="self">self</span>.<span class="number">0</span>.pop_front().unwrap()
         } <span class="kw">else </span>{
-            <span class="self">self</span>.<span class="number">0</span>.clone().into_iter().flatten().collect()
+            <span class="self">self</span>.<span class="number">0</span>.into_iter().flatten().collect()
         }
     }
 

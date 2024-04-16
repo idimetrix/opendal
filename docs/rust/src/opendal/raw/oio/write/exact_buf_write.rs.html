@@ -233,7 +233,7 @@
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>ExactBufWriter&lt;W&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">if </span><span class="self">self</span>.buffer.len() &gt;= <span class="self">self</span>.buffer_size {
-            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.collect()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.clone().collect()).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(written);
         }
 
@@ -250,7 +250,7 @@
                 <span class="kw">break</span>;
             }
 
-            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.collect()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>written = <span class="self">self</span>.inner.write(<span class="self">self</span>.buffer.clone().collect()).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.buffer.advance(written);
         }
 
