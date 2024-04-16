@@ -342,7 +342,6 @@
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -487,18 +486,17 @@
         }
     }
 
-    <span class="doccomment">/// Convert reader into [`FuturesIoAsyncReader`] which implements [`futures::AsyncRead`],
+    <span class="doccomment">/// Convert reader into [`StdReader`] which implements [`futures::AsyncRead`],
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_std_io_read(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdIoReader {
+    </span><span class="kw">pub fn </span>into_std_read(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdReader {
         <span class="comment">// TODO: the capacity should be decided by services.
-        </span>StdIoReader::new(<span class="self">self</span>.inner, range)
+        </span>StdReader::new(<span class="self">self</span>.inner, range)
     }
 
-    <span class="doccomment">/// Convert reader into [`FuturesBytesStream`] which implements [`futures::Stream`],
-    /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
+    <span class="doccomment">/// Convert reader into [`StdBytesIterator`] which implements [`Iterator`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_std_bytes_iterator(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdBytesIterator {
+    </span><span class="kw">pub fn </span>into_bytes_iterator(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdBytesIterator {
         StdBytesIterator::new(<span class="self">self</span>.inner, range)
     }
 }
@@ -521,7 +519,7 @@
     /// Users can use this adapter in cases where they need to use [`Read`] or [`BufRead`] trait.
     ///
     /// StdReader also implements [`Send`] and [`Sync`].
-    </span><span class="kw">pub struct </span>StdIoReader {
+    </span><span class="kw">pub struct </span>StdReader {
         inner: oio::BlockingReader,
         offset: u64,
         size: u64,
@@ -531,11 +529,11 @@
         buf: Buffer,
     }
 
-    <span class="kw">impl </span>StdIoReader {
+    <span class="kw">impl </span>StdReader {
         <span class="doccomment">/// NOTE: don't allow users to create StdReader directly.
         </span><span class="attr">#[inline]
         </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(r: oio::BlockingReader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-            StdIoReader {
+            StdReader {
                 inner: r,
                 offset: range.start,
                 size: range.end - range.start,
@@ -554,7 +552,7 @@
         </span>}
     }
 
-    <span class="kw">impl </span>BufRead <span class="kw">for </span>StdIoReader {
+    <span class="kw">impl </span>BufRead <span class="kw">for </span>StdReader {
         <span class="kw">fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
             <span class="kw">if </span><span class="self">self</span>.buf.has_remaining() {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.chunk());
@@ -580,7 +578,7 @@
         }
     }
 
-    <span class="kw">impl </span>Read <span class="kw">for </span>StdIoReader {
+    <span class="kw">impl </span>Read <span class="kw">for </span>StdReader {
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
             <span class="kw">let </span>bs = <span class="self">self</span>.fill_buf()<span class="question-mark">?</span>;
@@ -591,7 +589,7 @@
         }
     }
 
-    <span class="kw">impl </span>Seek <span class="kw">for </span>StdIoReader {
+    <span class="kw">impl </span>Seek <span class="kw">for </span>StdReader {
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; io::Result&lt;u64&gt; {
             <span class="kw">let </span>new_pos = <span class="kw">match </span>pos {

@@ -597,12 +597,12 @@
             .<span class="kw">await
             </span>.map_err(|err| format_object_store_error(err, location.as_ref()))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>stream = r
-            .into_futures_bytes_stream(<span class="number">0</span>..meta.size <span class="kw">as </span>u64)
-            .map_err(|err| object_store::Error::Generic {
-                store: <span class="string">"IoError"</span>,
-                source: Box::new(err),
-            });
+        <span class="kw">let </span>stream =
+            r.into_bytes_stream(<span class="number">0</span>..meta.size <span class="kw">as </span>u64)
+                .map_err(|err| object_store::Error::Generic {
+                    store: <span class="string">"IoError"</span>,
+                    source: Box::new(err),
+                });
 
         <span class="prelude-val">Ok</span>(GetResult {
             payload: GetResultPayload::Stream(Box::pin(stream)),

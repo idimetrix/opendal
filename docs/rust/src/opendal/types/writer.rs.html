@@ -631,9 +631,9 @@
         <span class="self">self</span>.inner.close().<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Convert writer into [`FuturesIoAsyncWriter`] which implements [`futures::AsyncWrite`],
-    </span><span class="kw">pub fn </span>into_futures_io_async_write(<span class="self">self</span>) -&gt; FuturesIoAsyncWriter {
-        FuturesIoAsyncWriter::new(<span class="self">self</span>.inner)
+    <span class="doccomment">/// Convert writer into [`FuturesAsyncWriter`] which implements [`futures::AsyncWrite`],
+    </span><span class="kw">pub fn </span>into_futures_async_write(<span class="self">self</span>) -&gt; FuturesAsyncWriter {
+        FuturesAsyncWriter::new(<span class="self">self</span>.inner)
     }
 }
 
@@ -659,7 +659,7 @@
     /// # TODO
     ///
     /// We should insert checks if the input slice changed after future created.
-    </span><span class="kw">pub struct </span>FuturesIoAsyncWriter {
+    </span><span class="kw">pub struct </span>FuturesAsyncWriter {
         state: State,
         buf: oio::FlexBuf,
     }
@@ -675,18 +675,18 @@
     /// FuturesReader only exposes `&amp;mut self` to the outside world, so it's safe to be `Sync`.
     </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>State {}
 
-    <span class="kw">impl </span>FuturesIoAsyncWriter {
+    <span class="kw">impl </span>FuturesAsyncWriter {
         <span class="doccomment">/// NOTE: don't allow users to create FuturesIoAsyncWriter directly.
         </span><span class="attr">#[inline]
         </span><span class="kw">pub fn </span>new(r: oio::Writer) -&gt; <span class="self">Self </span>{
-            FuturesIoAsyncWriter {
+            FuturesAsyncWriter {
                 state: State::Idle(<span class="prelude-val">Some</span>(r)),
                 buf: oio::FlexBuf::new(<span class="number">256 </span>* <span class="number">1024</span>),
             }
         }
     }
 
-    <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>FuturesIoAsyncWriter {
+    <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>FuturesAsyncWriter {
         <span class="kw">fn </span>poll_write(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
             cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,

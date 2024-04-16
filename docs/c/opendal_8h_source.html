@@ -123,7 +123,7 @@ $(function() {
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>OperatorInfo OperatorInfo;</div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160; </div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>StdIoReader StdIoReader;</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>StdReader StdReader;</div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160; </div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>opendal_bytes {</div>
 <div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keyword">const</span> uint8_t *data;</div>
@@ -171,7 +171,7 @@ $(function() {
 <div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;} opendal_result_read;</div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160; </div>
 <div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>opendal_reader {</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;  <span class="keyword">struct </span>StdIoReader *inner;</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;  <span class="keyword">struct </span>StdReader *inner;</div>
 <div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;} opendal_reader;</div>
 <div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160; </div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>opendal_result_operator_reader {</div>

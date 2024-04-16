@@ -101,17 +101,17 @@
 <span class="kw">pub use </span>metadata::Metakey;
 
 <span class="kw">mod </span>reader;
-<span class="kw">pub use </span>reader::into_futures_async_read::FuturesIoAsyncReader;
+<span class="kw">pub use </span>reader::into_futures_async_read::FuturesAsyncReader;
 <span class="kw">pub use </span>reader::into_futures_stream::FuturesBytesStream;
 <span class="kw">pub use </span>reader::Reader;
 
 <span class="kw">mod </span>blocking_reader;
 <span class="kw">pub use </span>blocking_reader::into_std_iterator::StdBytesIterator;
-<span class="kw">pub use </span>blocking_reader::into_std_read::StdIoReader;
+<span class="kw">pub use </span>blocking_reader::into_std_read::StdReader;
 <span class="kw">pub use </span>blocking_reader::BlockingReader;
 
 <span class="kw">mod </span>writer;
-<span class="kw">pub use </span>writer::into_futures_async_write::FuturesIoAsyncWriter;
+<span class="kw">pub use </span>writer::into_futures_async_write::FuturesAsyncWriter;
 <span class="kw">pub use </span>writer::BlockingWriter;
 <span class="kw">pub use </span>writer::Writer;
 
