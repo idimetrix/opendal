@@ -663,6 +663,12 @@
 <a href="#661" id="661">661</a>
 <a href="#662" id="662">662</a>
 <a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -685,7 +691,6 @@
 
 <span class="kw">use </span>bytes::BufMut;
 <span class="kw">use </span>futures::stream;
-<span class="kw">use </span>futures::Stream;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>futures::TryStreamExt;
 
@@ -737,7 +742,7 @@
     ///
     /// - Buffer length smaller than range means we have reached the end of file.
     </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>bufs: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.into_stream(range).try_collect().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bufs: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.clone().into_stream(range).try_collect().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect())
     }
 
@@ -754,7 +759,7 @@
         buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut,
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>stream = <span class="self">self</span>.into_stream(range);
+        <span class="kw">let </span><span class="kw-2">mut </span>stream = <span class="self">self</span>.clone().into_stream(range);
 
         <span class="kw">let </span><span class="kw-2">mut </span>read = <span class="number">0</span>;
         <span class="kw">loop </span>{
@@ -823,17 +828,14 @@
     }
 
     <span class="doccomment">/// Create a buffer stream to read specific range from given reader.
-    </span><span class="kw">pub fn </span>into_stream(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
-    ) -&gt; <span class="kw">impl </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Unpin + MaybeSend + <span class="lifetime">'static </span>{
-        <span class="kw">let </span>futs = into_future_iterator::ReadFutureIterator::new(
-            <span class="self">self</span>.inner.clone(),
-            <span class="self">self</span>.options.chunk(),
-            range,
-        );
-
-        stream::iter(futs).buffered(<span class="self">self</span>.options.concurrent())
+    ///
+    /// # Notes
+    ///
+    /// This API can be public but we are not sure if it's useful for users.
+    /// And the name `BufferStream` is not good enough to expose to users.
+    /// Let's keep it inside for now.
+    </span><span class="kw">fn </span>into_stream(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; into_stream::BufferStream {
+        into_stream::BufferStream::new(<span class="self">self</span>.inner, <span class="self">self</span>.options, range)
     }
 
     <span class="doccomment">/// Convert reader into [`FuturesAsyncReader`] which implements [`futures::AsyncRead`],
@@ -845,22 +847,29 @@
 
     <span class="doccomment">/// Convert reader into [`FuturesBytesStream`] which implements [`futures::Stream`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_bytes_stream(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; FuturesBytesStream {
-        FuturesBytesStream::new(<span class="self">self</span>.inner, <span class="self">self</span>.options.chunk(), range)
+    </span><span class="kw">pub fn </span>into_bytes_stream(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; FuturesBytesStream {
+        <span class="kw">let </span>stream = <span class="self">self</span>.into_stream(range);
+        FuturesBytesStream::new(stream)
     }
 }
 
-<span class="kw">pub mod </span>into_future_iterator {
+<span class="kw">pub mod </span>into_stream {
+    <span class="kw">use </span>std::pin::Pin;
     <span class="kw">use </span>std::sync::atomic::Ordering;
+    <span class="kw">use </span>std::task::{Context, Poll};
     <span class="kw">use </span>std::{
         ops::{Bound, RangeBounds},
         sync::{atomic::AtomicBool, Arc},
     };
 
+    <span class="kw">use </span>futures::stream::{<span class="self">self</span>, Buffered, Iter};
+    <span class="kw">use </span>futures::{Stream, StreamExt};
+
     <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">pub struct </span>ReadFutureIterator {
+    <span class="doccomment">/// ReadFutureIterator is an iterator that returns future of [`Buffer`] from [`Reader`].
+    </span><span class="kw">struct </span>ReadFutureIterator {
         r: oio::Reader,
         chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 
@@ -870,7 +879,8 @@
     }
 
     <span class="kw">impl </span>ReadFutureIterator {
-        <span class="kw">pub fn </span>new(r: oio::Reader, chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>new(r: oio::Reader, chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
             <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
                 Bound::Included(start) =&gt; start,
                 Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
@@ -926,6 +936,45 @@
 
             <span class="prelude-val">Some</span>(Box::pin(fut))
         }
+    }
+
+    <span class="doccomment">/// BufferStream is a stream that returns [`Buffer`] from [`Reader`].
+    ///
+    /// This stream will use concurrent read to fetch data from underlying storage.
+    ///
+    /// # Notes
+    ///
+    /// BufferStream uses `Buffered&lt;Iter&lt;ReadFutureIterator&gt;&gt;` internally,
+    /// but we want to hide those details from users.
+    </span><span class="kw">pub struct </span>BufferStream(Buffered&lt;Iter&lt;ReadFutureIterator&gt;&gt;);
+
+    <span class="kw">impl </span>BufferStream {
+        <span class="doccomment">/// Create a new buffer stream from given reader.
+        </span><span class="attr">#[inline]
+        </span><span class="kw">pub fn </span>new(r: oio::Reader, options: OpReader, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+            <span class="kw">let </span>iter = ReadFutureIterator::new(r, options.chunk(), range);
+            <span class="kw">let </span>stream = stream::iter(iter).buffered(options.concurrent());
+
+            BufferStream(stream)
+        }
+    }
+
+    <span class="kw">impl </span>Stream <span class="kw">for </span>BufferStream {
+        <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;;
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
+            <span class="self">self</span>.<span class="number">0</span>.poll_next_unpin(cx)
+        }
+    }
+
+    <span class="attr">#[cfg(test)]
+    </span><span class="kw">mod </span>tests {
+        <span class="kw">use super</span>::<span class="kw-2">*</span>;
+        <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
+
+        <span class="kw">trait </span>AssertTrait: Unpin + MaybeSend + <span class="lifetime">'static </span>{}
+        <span class="kw">impl </span>AssertTrait <span class="kw">for </span>BufferStream {}
     }
 }
 
@@ -1083,7 +1132,6 @@
 
 <span class="kw">pub mod </span>into_futures_stream {
     <span class="kw">use </span>std::io;
-    <span class="kw">use </span>std::ops::Range;
     <span class="kw">use </span>std::pin::Pin;
     <span class="kw">use </span>std::task::ready;
     <span class="kw">use </span>std::task::Context;
@@ -1091,7 +1139,9 @@
 
     <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>futures::Stream;
+    <span class="kw">use </span>futures::StreamExt;
 
+    <span class="kw">use </span><span class="kw">super</span>::into_stream::BufferStream;
     <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1101,37 +1151,17 @@
     ///
     /// FuturesStream also implements [`Unpin`], [`Send`] and [`Sync`].
     </span><span class="kw">pub struct </span>FuturesBytesStream {
-        r: oio::Reader,
-        state: State,
-        offset: u64,
-        size: u64,
-        chunk: usize,
-
-        cur: u64,
+        stream: BufferStream,
+        buf: Buffer,
     }
-
-    <span class="kw">enum </span>State {
-        Idle(Buffer),
-        Next(BoxedStaticFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;),
-    }
-
-    <span class="doccomment">/// # Safety
-    ///
-    /// FuturesReader only exposes `&amp;mut self` to the outside world, so it's safe to be `Sync`.
-    </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>State {}
 
     <span class="kw">impl </span>FuturesBytesStream {
         <span class="doccomment">/// NOTE: don't allow users to create FuturesStream directly.
         </span><span class="attr">#[inline]
-        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::Reader, chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(stream: BufferStream) -&gt; <span class="self">Self </span>{
             FuturesBytesStream {
-                r,
-                state: State::Idle(Buffer::new()),
-                offset: range.start,
-                size: range.end - range.start,
-                chunk: chunk.unwrap_or(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
-
-                cur: <span class="number">0</span>,
+                stream,
+                buf: Buffer::new(),
             }
         }
     }
@@ -1143,34 +1173,16 @@
             <span class="kw">let </span>this = <span class="self">self</span>.get_mut();
 
             <span class="kw">loop </span>{
-                <span class="kw">match </span><span class="kw-2">&amp;mut </span>this.state {
-                    State::Idle(buf) =&gt; {
-                        <span class="comment">// Consume current buffer
-                        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = buf.next() {
-                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)));
-                        }
-
-                        <span class="comment">// Make sure cur didn't exceed size.
-                        </span><span class="kw">if </span>this.cur &gt;= this.size {
-                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">None</span>);
-                        }
-
-                        <span class="kw">let </span>r = this.r.clone();
-                        <span class="kw">let </span>next_offset = this.offset + this.cur;
-                        <span class="kw">let </span>next_size = (this.size - this.cur).min(this.chunk <span class="kw">as </span>u64) <span class="kw">as </span>usize;
-                        <span class="kw">let </span>fut = <span class="kw">async move </span>{ r.read_at_dyn(next_offset, next_size).<span class="kw">await </span>};
-                        this.state = State::Next(Box::pin(fut));
-                    }
-                    State::Next(fut) =&gt; {
-                        <span class="kw">let </span>res = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
-                        <span class="kw">match </span>res {
-                            <span class="prelude-val">Ok</span>(buf) =&gt; {
-                                this.state = State::Idle(buf);
-                            }
-                            <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(format_std_io_error(err)))),
-                        };
-                    }
+                <span class="comment">// Consume current buffer
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = Iterator::next(<span class="kw-2">&amp;mut </span>this.buf) {
+                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)));
                 }
+
+                this.buf = <span class="kw">match </span><span class="macro">ready!</span>(this.stream.poll_next_unpin(cx)) {
+                    <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(buf)) =&gt; buf,
+                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(format_std_io_error(err)))),
+                    <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">None</span>),
+                };
             }
         }
     }
