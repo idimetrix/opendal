@@ -757,6 +757,10 @@
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
 <a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -776,16 +780,21 @@
 
 </span><span class="kw">use </span>std::collections::VecDeque;
 <span class="kw">use </span>std::convert::Infallible;
-<span class="kw">use </span>std::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::io::IoSlice;
 <span class="kw">use </span>std::mem;
-<span class="kw">use </span>std::ops::{Bound, RangeBounds};
+<span class="kw">use </span>std::ops::Bound;
+<span class="kw">use </span>std::ops::RangeBounds;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::{Context, Poll};
+<span class="kw">use </span>std::task::Context;
+<span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>bytes::{Buf, BytesMut};
-<span class="kw">use </span>bytes::{BufMut, Bytes};
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>bytes::BufMut;
+<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>bytes::BytesMut;
 <span class="kw">use </span>futures::Stream;
 
 <span class="doccomment">/// Buffer is a wrapper of contiguous `Bytes` and non contiguous `[Bytes]`.
@@ -807,8 +816,8 @@
 ///
 /// ```rust
 /// use bytes::Buf;
-/// use serde_json;
 /// use opendal::Buffer;
+/// use serde_json;
 ///
 /// fn test(mut buf: Buffer) -&gt; Vec&lt;String&gt; {
 ///     serde_json::from_reader(buf.reader()).unwrap()
@@ -834,8 +843,8 @@
 ///
 /// ```rust
 /// use bytes::Bytes;
-/// use opendal::Buffer;
 /// use futures::TryStreamExt;
+/// use opendal::Buffer;
 ///
 /// async fn test(mut buf: Buffer) -&gt; Vec&lt;Bytes&gt; {
 ///     buf.into_iter().try_collect().await.unwrap()
@@ -860,7 +869,6 @@
 ///     buf.to_bytes()
 /// }
 /// ```
-///
 ///
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Buffer(Inner);

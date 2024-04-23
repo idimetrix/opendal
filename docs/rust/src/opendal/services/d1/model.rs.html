@@ -145,6 +145,7 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -170,7 +171,8 @@
 <span class="kw">use </span>serde_json::Map;
 <span class="kw">use </span>serde_json::Value;
 
-<span class="kw">use crate</span>::{Buffer, Error};
+<span class="kw">use </span><span class="kw">crate</span>::Buffer;
+<span class="kw">use </span><span class="kw">crate</span>::Error;
 
 <span class="doccomment">/// response data from d1
 </span><span class="attr">#[derive(Deserialize, Debug)]

@@ -185,6 +185,7 @@
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
 <a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -208,12 +209,13 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::Utc;
 
+<span class="kw">use </span><span class="kw">crate</span>::Buffer;
+<span class="kw">use </span><span class="kw">crate</span>::EntryMode;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Metadata;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
-<span class="kw">use crate</span>::{Buffer, EntryMode};
 
 <span class="doccomment">/// Adapter is the typed adapter to underlying kv services.
 ///

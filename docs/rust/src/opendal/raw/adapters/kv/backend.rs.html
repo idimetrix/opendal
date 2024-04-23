@@ -277,6 +277,7 @@
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -300,7 +301,8 @@
 <span class="kw">use </span>async_trait::async_trait;
 
 <span class="kw">use </span><span class="kw">super</span>::Adapter;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::{HierarchyLister, QueueBuf};
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::HierarchyLister;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::QueueBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 

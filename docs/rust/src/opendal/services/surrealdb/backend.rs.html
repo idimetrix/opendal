@@ -398,6 +398,7 @@
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -430,11 +431,12 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::normalize_root;
 <span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
+<span class="kw">use </span><span class="kw">crate</span>::Buffer;
+<span class="kw">use </span><span class="kw">crate</span>::Builder;
 <span class="kw">use </span><span class="kw">crate</span>::Capability;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
-<span class="kw">use crate</span>::{Buffer, Builder};
 
 <span class="doccomment">/// Config for Surrealdb services support.
 </span><span class="attr">#[derive(Default, Deserialize)]

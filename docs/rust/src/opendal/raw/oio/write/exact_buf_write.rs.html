@@ -184,6 +184,7 @@
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -265,7 +266,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>bytes::{Buf, Bytes};
+    <span class="kw">use </span>bytes::Buf;
+    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>log::debug;
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;

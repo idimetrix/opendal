@@ -104,6 +104,8 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -121,9 +123,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
+</span><span class="kw">use </span>std::collections::VecDeque;
+
 <span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>std::collections::VecDeque;
+
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// QueueBuf is a queue of [`Buffer`].
 ///
