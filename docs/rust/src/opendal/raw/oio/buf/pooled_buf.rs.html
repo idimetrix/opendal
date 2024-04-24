@@ -114,6 +114,17 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -132,6 +143,8 @@
 // under the License.
 
 </span><span class="kw">use </span>std::collections::VecDeque;
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::{<span class="self">self</span>, Formatter};
 <span class="kw">use </span>std::sync::Mutex;
 
 <span class="kw">use </span>bytes::BytesMut;
@@ -145,6 +158,15 @@
     pool: Mutex&lt;VecDeque&lt;BytesMut&gt;&gt;,
     size: usize,
     initial_capacity: usize,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>PooledBuf {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"PooledBuf"</span>)
+            .field(<span class="string">"size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.size)
+            .field(<span class="string">"initial_capacity"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.initial_capacity)
+            .finish_non_exhaustive()
+    }
 }
 
 <span class="kw">impl </span>PooledBuf {

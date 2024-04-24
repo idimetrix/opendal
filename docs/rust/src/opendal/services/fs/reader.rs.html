@@ -106,6 +106,18 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -123,18 +135,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>tokio::io::ReadBuf;
+</span><span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>tokio::io::ReadBuf;
 
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>FsReader {
+    core: Arc&lt;FsCore&gt;,
     f: std::fs::File,
 }
 
 <span class="kw">impl </span>FsReader {
-    <span class="kw">pub fn </span>new(f: std::fs::File) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ f }
+    <span class="kw">pub fn </span>new(core: Arc&lt;FsCore&gt;, f: std::fs::File) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ core, f }
     }
 
     <span class="kw">fn </span>try_clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
@@ -146,7 +161,10 @@
             .set_source(err)
         })<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ f })
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            core: <span class="self">self</span>.core.clone(),
+            f,
+        })
     }
 
     <span class="attr">#[cfg(target_family = <span class="string">"unix"</span>)]
@@ -183,12 +201,13 @@
 
 <span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>FsReader {
     <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(limit);
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
+        bs.reserve(limit);
 
-        <span class="kw">let </span>buf = bs.spare_capacity_mut();
+        <span class="kw">let </span>buf = <span class="kw-2">&amp;mut </span>bs.spare_capacity_mut()[..limit];
         <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
 
-        <span class="comment">// SAFETY: Read at most `size` bytes into `read_buf`.
+        <span class="comment">// SAFETY: Read at most `limit` bytes into `read_buf`.
         </span><span class="kw">unsafe </span>{
             read_buf.assume_init(limit);
         }
@@ -209,7 +228,12 @@
         <span class="comment">// Safety: We make sure that bs contains `n` more bytes.
         </span><span class="kw">let </span>filled = read_buf.filled().len();
         <span class="kw">unsafe </span>{ bs.set_len(filled) }
-        <span class="prelude-val">Ok</span>(Buffer::from(bs))
+
+        <span class="kw">let </span>frozen = bs.split().freeze();
+        <span class="comment">// Return the buffer to the pool.
+        </span><span class="self">self</span>.core.buf_pool.put(bs);
+
+        <span class="prelude-val">Ok</span>(Buffer::from(frozen))
     }
 }
 </code></pre></div></section></main></body></html>
