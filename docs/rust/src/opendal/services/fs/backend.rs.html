@@ -554,56 +554,6 @@
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
-<a href="#556" id="556">556</a>
-<a href="#557" id="557">557</a>
-<a href="#558" id="558">558</a>
-<a href="#559" id="559">559</a>
-<a href="#560" id="560">560</a>
-<a href="#561" id="561">561</a>
-<a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
-<a href="#574" id="574">574</a>
-<a href="#575" id="575">575</a>
-<a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -624,16 +574,17 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>uuid::Uuid;
 
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::lister::FsLister;
+<span class="kw">use </span><span class="kw">super</span>::reader::FsReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::fs::reader::FsReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// POSIX file system support.
@@ -669,17 +620,6 @@
             <span class="prelude-val">Some</span>(PathBuf::from(dir))
         };
 
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// OpenDAL requires all input path are normalized to make sure the
-    /// behavior is consistent. By enable path check, we can make sure
-    /// fs will behave the same as other services.
-    ///
-    /// Enabling this feature will lead to extra metadata call in all
-    /// operations.
-    </span><span class="attr">#[deprecated(note = <span class="string">"path always checked since RFC-3243 List Prefix"</span>)]
-    </span><span class="kw">pub fn </span>enable_path_check(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self
     </span>}
 }
@@ -768,8 +708,10 @@
 
         <span class="macro">debug!</span>(<span class="string">"backend build finished: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
         <span class="prelude-val">Ok</span>(FsBackend {
-            root,
-            atomic_write_dir,
+            core: Arc::new(FsCore {
+                root,
+                atomic_write_dir,
+            }),
         })
     }
 }
@@ -777,72 +719,7 @@
 <span class="doccomment">/// Backend is used to serve `Accessor` support for posix alike fs.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>FsBackend {
-    root: PathBuf,
-    atomic_write_dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-}
-
-<span class="attr">#[inline]
-</span><span class="kw">fn </span>tmp_file_of(path: <span class="kw-2">&amp;</span>str) -&gt; String {
-    <span class="kw">let </span>name = get_basename(path);
-    <span class="kw">let </span>uuid = Uuid::new_v4().to_string();
-
-    <span class="macro">format!</span>(<span class="string">"{name}.{uuid}"</span>)
-}
-
-<span class="kw">impl </span>FsBackend {
-    <span class="comment">// Synchronously build write path and ensure the parent dirs created
-    </span><span class="kw">fn </span>blocking_ensure_write_abs_path(parent: <span class="kw-2">&amp;</span>Path, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
-        <span class="kw">let </span>p = parent.join(path);
-
-        <span class="comment">// Create dir before write path.
-        //
-        // TODO(xuanwo): There are many works to do here:
-        //   - Is it safe to create dir concurrently?
-        //   - Do we need to extract this logic as new util functions?
-        //   - Is it better to check the parent dir exists before call mkdir?
-        </span><span class="kw">let </span>parent = PathBuf::from(<span class="kw-2">&amp;</span>p)
-            .parent()
-            .ok_or_else(|| {
-                Error::new(
-                    ErrorKind::Unexpected,
-                    <span class="string">"path should have parent but not, it must be malformed"</span>,
-                )
-                .with_context(<span class="string">"input"</span>, p.to_string_lossy())
-            })<span class="question-mark">?
-            </span>.to_path_buf();
-
-        std::fs::create_dir_all(parent).map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(p)
-    }
-
-    <span class="comment">// Build write path and ensure the parent dirs created
-    </span><span class="kw">async fn </span>ensure_write_abs_path(parent: <span class="kw-2">&amp;</span>Path, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
-        <span class="kw">let </span>p = parent.join(path);
-
-        <span class="comment">// Create dir before write path.
-        //
-        // TODO(xuanwo): There are many works to do here:
-        //   - Is it safe to create dir concurrently?
-        //   - Do we need to extract this logic as new util functions?
-        //   - Is it better to check the parent dir exists before call mkdir?
-        </span><span class="kw">let </span>parent = PathBuf::from(<span class="kw-2">&amp;</span>p)
-            .parent()
-            .ok_or_else(|| {
-                Error::new(
-                    ErrorKind::Unexpected,
-                    <span class="string">"path should have parent but not, it must be malformed"</span>,
-                )
-                .with_context(<span class="string">"input"</span>, p.to_string_lossy())
-            })<span class="question-mark">?
-            </span>.to_path_buf();
-
-        tokio::fs::create_dir_all(<span class="kw-2">&amp;</span>parent)
-            .<span class="kw">await
-            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(p)
-    }
+    core: Arc&lt;FsCore&gt;,
 }
 
 <span class="attr">#[async_trait]
@@ -857,7 +734,7 @@
     <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_scheme(Scheme::Fs)
-            .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root.to_string_lossy())
+            .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root.to_string_lossy())
             .set_native_capability(Capability {
                 stat: <span class="bool-val">true</span>,
 
@@ -883,7 +760,7 @@
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         tokio::fs::create_dir_all(<span class="kw-2">&amp;</span>p)
             .<span class="kw">await
@@ -893,7 +770,7 @@
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = tokio::fs::metadata(<span class="kw-2">&amp;</span>p).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -925,7 +802,7 @@
     ///
     /// Benchmark could be found [here](https://gist.github.com/Xuanwo/48f9cfbc3022ea5f865388bb62e1a70f)
     </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = tokio::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
@@ -938,10 +815,15 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>tmp_path =
-                <span class="self">Self</span>::ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.core.atomic_write_dir {
+            <span class="kw">let </span>target_path = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>tmp_path = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))
+                .<span class="kw">await</span><span class="question-mark">?</span>;
 
             <span class="comment">// If the target file exists, we should append to the end of it directly.
             </span><span class="kw">if </span>op.append()
@@ -954,7 +836,10 @@
                 (target_path, <span class="prelude-val">Some</span>(tmp_path))
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>p = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>p = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
 
             (p, <span class="prelude-val">None</span>)
         };
@@ -976,7 +861,7 @@
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = tokio::fs::metadata(<span class="kw-2">&amp;</span>p).<span class="kw">await</span>;
 
@@ -996,7 +881,7 @@
     }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = <span class="kw">match </span>tokio::fs::read_dir(<span class="kw-2">&amp;</span>p).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(rd) =&gt; rd,
@@ -1009,18 +894,21 @@
             }
         };
 
-        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
+        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, f);
 
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         tokio::fs::copy(from, to).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1028,12 +916,15 @@
     }
 
     <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         tokio::fs::rename(from, to)
             .<span class="kw">await
@@ -1043,7 +934,7 @@
     }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         std::fs::create_dir_all(p).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1051,7 +942,7 @@
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = std::fs::metadata(p).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1074,7 +965,7 @@
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = std::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
@@ -1086,10 +977,13 @@
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)<span class="question-mark">?</span>;
-            <span class="kw">let </span>tmp_path =
-                <span class="self">Self</span>::blocking_ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))<span class="question-mark">?</span>;
+        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.core.atomic_write_dir {
+            <span class="kw">let </span>target_path = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)<span class="question-mark">?</span>;
+            <span class="kw">let </span>tmp_path = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))<span class="question-mark">?</span>;
 
             <span class="comment">// If the target file exists, we should append to the end of it directly.
             </span><span class="kw">if </span>op.append()
@@ -1102,7 +996,9 @@
                 (target_path, <span class="prelude-val">Some</span>(tmp_path))
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>p = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)<span class="question-mark">?</span>;
+            <span class="kw">let </span>p = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)<span class="question-mark">?</span>;
 
             (p, <span class="prelude-val">None</span>)
         };
@@ -1124,7 +1020,7 @@
     }
 
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = std::fs::metadata(<span class="kw-2">&amp;</span>p);
 
@@ -1144,7 +1040,7 @@
     }
 
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = <span class="kw">match </span>std::fs::read_dir(p) {
             <span class="prelude-val">Ok</span>(rd) =&gt; rd,
@@ -1157,18 +1053,20 @@
             }
         };
 
-        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
+        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, f);
 
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
 
     <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
 
         std::fs::copy(from, to).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1176,12 +1074,14 @@
     }
 
     <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
 
         std::fs::rename(from, to).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
