@@ -245,7 +245,7 @@ writing data continuously, please use <a href="struct.Operator.html#method.write
 <h6 id="multipart-uploads-write"><a href="#multipart-uploads-write">Multipart Uploads Write</a></h6>
 <p>OpenDAL abstracts the multipart uploads into <a href="struct.Writer.html" title="struct opendal::Writer"><code>Writer</code></a>. It will automatically
 handle the multipart uploads for you. You can control the behavior of multipart uploads
-by setting <code>buffer</code>, <code>concurrent</code> via <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a></p>
+by setting <code>chunk</code>, <code>concurrent</code> via <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a></p>
 <h5 id="examples-9"><a href="#examples-9">Examples</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bytes::Bytes;
 
@@ -276,13 +276,13 @@ op.rename(<span class="string">"path/to/file"</span>, <span class="string">"path
 <p><a href="struct.Operator.html#method.write" title="method opendal::Operator::write"><code>Operator::write</code></a> is a wrapper of <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a> without any options. To use
 extra options like <code>content_type</code> and <code>cache_control</code>, please use <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a>
 instead.</p>
-<h6 id="buffer"><a href="#buffer">Buffer</a></h6>
-<p>OpenDAL is designed to write files directly without buffering by default, giving users
+<h6 id="chunk-2"><a href="#chunk-2">Chunk</a></h6>
+<p>OpenDAL is designed to write files directly without chunking by default, giving users
 control over the exact size of their writes and helping avoid unnecessary costs.</p>
 <p>This is not efficient for cases when users write small chunks of data. Some storage services
 like <code>s3</code> could even return hard errors like <code>EntityTooSmall</code>. Besides, cloud storage services
 will cost more money if we write data in small chunks.</p>
-<p>Users can use <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a> to set a good buffer size might improve the performance,</p>
+<p>Users can use <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a> to set a good chunk size might improve the performance,</p>
 <h5 id="examples-12"><a href="#examples-12">Examples</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bytes::Bytes;
 
@@ -306,22 +306,22 @@ please set <code>append</code> to true.</p>
 w.write(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
 w.write(<span class="macro">vec!</span>[<span class="number">1</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
 w.close().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-<h6 id="buffer-1"><a href="#buffer-1"><code>buffer</code></a></h6>
-<p>Set <code>buffer</code> for the writer.</p>
-<p>OpenDAL is designed to write files directly without buffering by default, giving users
+<h6 id="chunk-3"><a href="#chunk-3"><code>chunk</code></a></h6>
+<p>Set <code>chunk</code> for the writer.</p>
+<p>OpenDAL is designed to write files directly without chunking by default, giving users
 control over the exact size of their writes and helping avoid unnecessary costs.</p>
 <p>This is not efficient for cases when users write small chunks of data. Some storage services
 like <code>s3</code> could even return hard errors like <code>EntityTooSmall</code>. Besides, cloud storage services
 will cost more money if we write data in small chunks.</p>
-<p>Set a good buffer size might improve the performance, reduce the API calls and save money.</p>
-<p>The following example will set the writer buffer to 8MiB. Only one API call will be sent at
+<p>Set a good chunk size might improve the performance, reduce the API calls and save money.</p>
+<p>The following example will set the writer chunk to 8MiB. Only one API call will be sent at
 <code>close</code> instead.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">let </span><span class="kw-2">mut </span>w = op
     .writer_with(<span class="string">"path/to/file"</span>)
-    .buffer(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)
+    .chunk(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)
     .<span class="kw">await</span><span class="question-mark">?</span>;
 w.write(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
 w.write(<span class="macro">vec!</span>[<span class="number">1</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -404,7 +404,7 @@ writing data lazily, please use <a href="struct.Operator.html#method.writer_with
 <h6 id="multipart-uploads-write-1"><a href="#multipart-uploads-write-1">Multipart Uploads Write</a></h6>
 <p>OpenDAL abstracts the multipart uploads into <a href="struct.Writer.html" title="struct opendal::Writer"><code>Writer</code></a>. It will automatically
 handle the multipart uploads for you. You can control the behavior of multipart uploads
-by setting <code>buffer</code>, <code>concurrent</code> via <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a></p>
+by setting <code>chunk</code>, <code>concurrent</code> via <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a></p>
 <h5 id="options-4"><a href="#options-4">Options</a></h5><h6 id="append-1"><a href="#append-1"><code>append</code></a></h6>
 <p>Set <code>append</code> for this <code>write</code> request.</p>
 <p><code>write</code> by default to overwrite existing files. To append to the end of file instead,

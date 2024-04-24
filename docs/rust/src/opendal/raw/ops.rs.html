@@ -671,6 +671,7 @@
 <a href="#669" id="669">669</a>
 <a href="#670" id="670">670</a>
 <a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1221,7 +1222,7 @@
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpWrite {
     append: bool,
-    buffer: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     concurrent: usize,
 
     content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -1256,23 +1257,24 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Get the buffer from op.
+    <span class="doccomment">/// Get the chunk from op.
     ///
-    /// The buffer is used by service to decide the buffer size of the underlying writer.
-    </span><span class="kw">pub fn </span>buffer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="self">self</span>.buffer
+    /// The chunk is used by service to decide the chunk size of the underlying writer.
+    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.chunk
     }
 
-    <span class="doccomment">/// Set the buffer of op.
+    <span class="doccomment">/// Set the chunk of op.
     ///
-    /// If buffer is set, the data will be buffered by the underlying writer.
+    /// If chunk is set, the data will be chunked by the underlying writer.
     ///
     /// ## NOTE
     ///
-    /// Service could have their own minimum buffer size while perform write operations like
-    /// multipart uploads. So the buffer size may be larger than the given buffer size.
-    </span><span class="kw">pub fn </span>with_buffer(<span class="kw-2">mut </span><span class="self">self</span>, buffer: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(buffer);
+    /// Service could have their own minimum chunk size while perform write
+    /// operations like multipart uploads. So the chunk size may be larger than
+    /// the given buffer size.
+    </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk);
         <span class="self">self
     </span>}
 
