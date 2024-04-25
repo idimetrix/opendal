@@ -761,6 +761,51 @@
 <a href="#759" id="759">759</a>
 <a href="#760" id="760">760</a>
 <a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -938,6 +983,51 @@
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.len() == <span class="number">0
     </span>}
+
+    <span class="doccomment">/// Number of [`Bytes`] in [`Buffer`].
+    ///
+    /// For contiguous buffer, it's always 1. For non-contiguous buffer, it's number of bytes
+    /// available for use.
+    </span><span class="kw">pub fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0 </span>{
+            Inner::Contiguous(<span class="kw">_</span>) =&gt; <span class="number">1</span>,
+            Inner::NonContiguous {
+                parts,
+                idx,
+                size,
+                offset,
+            } =&gt; {
+                parts
+                    .iter()
+                    .skip(<span class="kw-2">*</span>idx)
+                    .fold((<span class="number">0</span>, size + offset), |(count, size), bytes| {
+                        <span class="kw">if </span>size == <span class="number">0 </span>{
+                            (count, <span class="number">0</span>)
+                        } <span class="kw">else </span>{
+                            (count + <span class="number">1</span>, size.saturating_sub(bytes.len()))
+                        }
+                    })
+                    .<span class="number">0
+            </span>}
+        }
+    }
+
+    <span class="doccomment">/// Get current [`Bytes`].
+    </span><span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Bytes {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0 </span>{
+            Inner::Contiguous(inner) =&gt; inner.clone(),
+            Inner::NonContiguous {
+                parts,
+                idx,
+                offset,
+                size,
+            } =&gt; {
+                <span class="kw">let </span>chunk = <span class="kw-2">&amp;</span>parts[<span class="kw-2">*</span>idx];
+                <span class="kw">let </span>n = (chunk.len() - <span class="kw-2">*</span>offset).min(<span class="kw-2">*</span>size);
+                chunk.slice(<span class="kw-2">*</span>offset..<span class="kw-2">*</span>offset + n)
+            }
+        }
+    }
 
     <span class="doccomment">/// Shortens the buffer, keeping the first `len` bytes and dropping the rest.
     ///
