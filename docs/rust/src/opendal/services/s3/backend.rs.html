@@ -1313,6 +1313,35 @@
 <a href="#1313" id="1313">1313</a>
 <a href="#1314" id="1314">1314</a>
 <a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1519,6 +1548,12 @@
     ///
     /// For example, R2 doesn't support stat with `response_content_type` query.
     </span><span class="kw">pub </span>disable_stat_with_override: bool,
+    <span class="doccomment">/// Checksum Algorithm to use when sending checksums in HTTP headers.
+    /// This is necessary when writing to AWS S3 Buckets with Object Lock enabled for example.
+    ///
+    /// Available options:
+    /// - "crc32c"
+    </span><span class="kw">pub </span>checksum_algorithm: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>S3Config {
@@ -1978,6 +2013,17 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Set checksum algorithm of this backend.
+    /// This is necessary when writing to AWS S3 Buckets with Object Lock enabled for example.
+    ///
+    /// Available options:
+    /// - "crc32c"
+    </span><span class="kw">pub fn </span>checksum_algorithm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, checksum_algorithm: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.config.checksum_algorithm = <span class="prelude-val">Some</span>(checksum_algorithm.to_string());
+
+        <span class="self">self
+    </span>}
+
     <span class="doccomment">/// Detect region of S3 bucket.
     ///
     /// # Args
@@ -2173,6 +2219,17 @@
                 })<span class="question-mark">?</span>),
             };
 
+        <span class="kw">let </span>checksum_algorithm = <span class="kw">match </span><span class="self">self</span>.config.checksum_algorithm.as_deref() {
+            <span class="prelude-val">Some</span>(<span class="string">"crc32c"</span>) =&gt; <span class="prelude-val">Some</span>(ChecksumAlgorithm::Crc32c),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ConfigInvalid,
+                    <span class="string">"{v} is not a supported checksum_algorithm."</span>,
+                ))
+            }
+        };
+
         <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
             client
         } <span class="kw">else </span>{
@@ -2294,6 +2351,7 @@
                 credential_loaded: AtomicBool::new(<span class="bool-val">false</span>),
                 client,
                 batch_max_operations,
+                checksum_algorithm,
             }),
         })
     }
