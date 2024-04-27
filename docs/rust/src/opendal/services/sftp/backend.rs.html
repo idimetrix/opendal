@@ -776,7 +776,7 @@
     <span class="kw">type </span>Connection = Sftp;
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::result::Result&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>session = SessionBuilder::default();
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(user) = <span class="kw-2">&amp;</span><span class="self">self</span>.user {
@@ -822,7 +822,7 @@
     }
 
     <span class="comment">// Check if connect valid by checking the root path.
-    </span><span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; std::result::Result&lt;(), <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         <span class="kw">let _ </span>= conn.fs().metadata(<span class="string">"./"</span>).<span class="kw">await</span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())

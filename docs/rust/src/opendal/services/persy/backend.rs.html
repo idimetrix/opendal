@@ -379,7 +379,7 @@
             persy: <span class="kw-2">&amp;</span>persy::Persy,
             segment_name: <span class="kw-2">&amp;</span>str,
             index_name: <span class="kw-2">&amp;</span>str,
-        ) -&gt; std::result::Result&lt;(), Box&lt;<span class="kw">dyn </span>std::error::Error&gt;&gt; {
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>std::error::Error&gt;&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>tx = persy.begin()<span class="question-mark">?</span>;
 
             <span class="kw">if </span>!tx.exists_segment(segment_name)<span class="question-mark">? </span>{

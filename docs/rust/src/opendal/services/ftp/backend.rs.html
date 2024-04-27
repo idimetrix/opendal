@@ -744,7 +744,7 @@
     <span class="kw">type </span>Connection = AsyncRustlsFtpStream;
     <span class="kw">type </span>Error = FtpError;
 
-    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::result::Result&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>stream = ImplAsyncFtpStream::connect(<span class="kw-2">&amp;</span><span class="self">self</span>.endpoint).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// switch to secure mode if ssl/tls is on.
         </span><span class="kw">let </span><span class="kw-2">mut </span>ftp_stream = <span class="kw">if </span><span class="self">self</span>.enable_secure {
@@ -781,7 +781,7 @@
         <span class="prelude-val">Ok</span>(ftp_stream)
     }
 
-    <span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; std::result::Result&lt;(), <span class="self">Self</span>::Error&gt; {
+    <span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         conn.noop().<span class="kw">await
     </span>}
 

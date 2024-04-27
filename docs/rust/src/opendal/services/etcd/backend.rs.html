@@ -676,7 +676,7 @@
     <span class="kw">type </span>Connection = Client;
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::result::Result&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">async fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Connection, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>conn = Client::connect(<span class="self">self</span>.endpoints.clone(), <span class="prelude-val">Some</span>(<span class="self">self</span>.options.clone()))
             .<span class="kw">await
             </span>.map_err(format_etcd_error)<span class="question-mark">?</span>;
@@ -684,7 +684,7 @@
         <span class="prelude-val">Ok</span>(conn)
     }
 
-    <span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; std::result::Result&lt;(), <span class="self">Self</span>::Error&gt; {
+    <span class="kw">async fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Connection) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         <span class="kw">let _ </span>= conn.status().<span class="kw">await</span>.map_err(format_etcd_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }

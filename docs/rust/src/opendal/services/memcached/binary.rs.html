@@ -363,7 +363,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub async fn </span>read(reader: <span class="kw-2">&amp;mut </span>TcpStream) -&gt; std::result::Result&lt;PacketHeader, io::Error&gt; {
+    <span class="kw">pub async fn </span>read(reader: <span class="kw-2">&amp;mut </span>TcpStream) -&gt; <span class="prelude-ty">Result</span>&lt;PacketHeader, io::Error&gt; {
         <span class="kw">let </span>header = PacketHeader {
             magic: reader.read_u8().<span class="kw">await</span><span class="question-mark">?</span>,
             opcode: reader.read_u8().<span class="kw">await</span><span class="question-mark">?</span>,

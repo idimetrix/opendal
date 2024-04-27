@@ -452,7 +452,7 @@
 <span class="doccomment">/// WriteBlockResult is the result returned by [`WriteBlockFuture`].
 ///
 /// The error part will carries input `(block_id, bytes, err)` so caller can retry them.
-</span><span class="kw">type </span>WriteBlockResult = std::result::Result&lt;Uuid, (Uuid, Buffer, Error)&gt;;
+</span><span class="kw">type </span>WriteBlockResult = <span class="prelude-ty">Result</span>&lt;Uuid, (Uuid, Buffer, Error)&gt;;
 
 <span class="kw">struct </span>WriteBlockFuture(BoxedStaticFuture&lt;WriteBlockResult&gt;);
 
