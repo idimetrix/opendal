@@ -110,6 +110,12 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -215,11 +221,17 @@
         bs.advance(cnt);
 
         <span class="kw">if </span>bs.is_empty() {
-            <span class="self">self</span>.frozen = <span class="prelude-val">None</span>;
-            <span class="comment">// This reserve cloud be cheap since we can reuse already allocated memory.
-            // (if all references to the frozen buffer are dropped)
-            </span><span class="self">self</span>.buf.reserve(<span class="self">self</span>.cap);
+            <span class="self">self</span>.clean()
         }
+    }
+
+    <span class="doccomment">/// Cleanup the buffer, reset to the initial state.
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>clean(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.frozen = <span class="prelude-val">None</span>;
+        <span class="comment">// This reserve cloud be cheap since we can reuse already allocated memory.
+        // (if all references to the frozen buffer are dropped)
+        </span><span class="self">self</span>.buf.reserve(<span class="self">self</span>.cap);
     }
 }
 </code></pre></div></section></main></body></html>
