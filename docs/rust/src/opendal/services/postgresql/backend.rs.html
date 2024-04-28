@@ -391,16 +391,16 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for PostGresQL services support.
+<span class="doccomment">/// Config for PostgreSQL services support.
 </span><span class="attr">#[derive(Default, Deserialize)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>PostgresqlConfig {
-    <span class="doccomment">/// root of this backend.
+    <span class="doccomment">/// Root of this backend.
     ///
     /// All operations will happen under this root.
     ///
-    /// default to `/` if not set.
+    /// Default to `/` if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// the connection string of postgres server
     </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -428,7 +428,7 @@
     }
 }
 
-<span class="doccomment">/// [Postgresql](https://www.postgresql.org/) services support.
+<span class="doccomment">/// [PostgreSQL](https://www.postgresql.org/) services support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>PostgresqlBuilder {
