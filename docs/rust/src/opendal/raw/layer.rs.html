@@ -366,6 +366,33 @@
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -385,7 +412,7 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::Future;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -412,7 +439,7 @@
 /// ```
 /// use std::sync::Arc;
 ///
-/// use async_trait::async_trait;
+///
 /// use opendal::raw::*;
 /// use opendal::*;
 ///
@@ -422,8 +449,6 @@
 ///     inner: A,
 /// }
 ///
-/// #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-/// #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 /// impl&lt;A: Accessor&gt; LayeredAccessor for TraceAccessor&lt;A&gt; {
 ///     type Inner = A;
 ///     type Reader = A::Reader;
@@ -498,8 +523,7 @@
 <span class="doccomment">/// LayeredAccessor is layered accessor that forward all not implemented
 /// method to inner.
 </span><span class="attr">#[allow(missing_docs)]
-#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
+
 </span><span class="kw">pub trait </span>LayeredAccessor: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
     <span class="kw">type </span>Inner: Accessor;
     <span class="kw">type </span>Reader: oio::Read;
@@ -515,39 +539,73 @@
         <span class="self">self</span>.inner().info()
     }
 
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="self">self</span>.inner().create_dir(path, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>create_dir(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpCreateDir,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().create_dir(path, args)
+    }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt;;
+    <span class="kw">fn </span>read(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpRead,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt;&gt; + MaybeSend;
 
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt;;
+    <span class="kw">fn </span>write(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpWrite,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt;&gt; + MaybeSend;
 
-    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="self">self</span>.inner().copy(from, to, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>copy(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        from: <span class="kw-2">&amp;</span>str,
+        to: <span class="kw-2">&amp;</span>str,
+        args: OpCopy,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpCopy&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().copy(from, to, args)
+    }
 
-    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="self">self</span>.inner().rename(from, to, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>rename(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        from: <span class="kw-2">&amp;</span>str,
+        to: <span class="kw-2">&amp;</span>str,
+        args: OpRename,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpRename&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().rename(from, to, args)
+    }
 
-    <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="self">self</span>.inner().stat(path, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpStat&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().stat(path, args)
+    }
 
-    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="self">self</span>.inner().delete(path, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>delete(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpDelete,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpDelete&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().delete(path, args)
+    }
 
-    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt;;
+    <span class="kw">fn </span>list(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpList,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt;&gt; + MaybeSend;
 
-    <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
-        <span class="self">self</span>.inner().batch(args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpBatch&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().batch(args)
+    }
 
-    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="self">self</span>.inner().presign(path, args).<span class="kw">await
-    </span>}
+    <span class="kw">fn </span>presign(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        args: OpPresign,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;RpPresign&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner().presign(path, args)
+    }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="self">self</span>.inner().blocking_create_dir(path, args)
@@ -576,9 +634,7 @@
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt;;
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;L: LayeredAccessor&gt; Accessor <span class="kw">for </span>L {
+<span class="kw">impl</span>&lt;L: LayeredAccessor&gt; Accessor <span class="kw">for </span>L {
     <span class="kw">type </span>Reader = L::Reader;
     <span class="kw">type </span>BlockingReader = L::BlockingReader;
     <span class="kw">type </span>Writer = L::Writer;
@@ -690,9 +746,7 @@
         }
     }
 
-    <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-    #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-    </span><span class="kw">impl</span>&lt;A: Accessor&gt; Accessor <span class="kw">for </span>Test&lt;A&gt; {
+    <span class="kw">impl</span>&lt;A: Accessor&gt; Accessor <span class="kw">for </span>Test&lt;A&gt; {
         <span class="kw">type </span>Reader = ();
         <span class="kw">type </span>BlockingReader = ();
         <span class="kw">type </span>Writer = ();

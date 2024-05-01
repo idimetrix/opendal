@@ -310,8 +310,6 @@
 <a href="#310" id="310">310</a>
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -332,7 +330,6 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>mongodb::bson::doc;
 <span class="kw">use </span>mongodb::bson::Binary;
 <span class="kw">use </span>mongodb::bson::Document;
@@ -563,8 +560,7 @@
     </span>}
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; kv::Metadata {
         kv::Metadata::new(
             Scheme::Mongodb,

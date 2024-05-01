@@ -427,9 +427,6 @@
 <a href="#427" id="427">427</a>
 <a href="#428" id="428">428</a>
 <a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -450,7 +447,6 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::TryFutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
@@ -491,9 +487,7 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = ErrorContextWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = ErrorContextWrapper&lt;A::BlockingReader&gt;;

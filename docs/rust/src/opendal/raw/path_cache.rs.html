@@ -238,6 +238,10 @@
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -257,7 +261,7 @@
 
 </span><span class="kw">use </span>std::collections::VecDeque;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::Future;
 <span class="kw">use </span>moka::sync::Cache;
 <span class="kw">use </span>tokio::sync::Mutex;
 <span class="kw">use </span>tokio::sync::MutexGuard;
@@ -266,15 +270,21 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// The trait required for path cacher.
-</span><span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
 </span><span class="kw">pub trait </span>PathQuery {
     <span class="doccomment">/// Fetch the id for the root of the service.
-    </span><span class="kw">async fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt;;
+    </span><span class="kw">fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;String&gt;&gt; + MaybeSend;
     <span class="doccomment">/// Query the id by parent_id and name.
-    </span><span class="kw">async fn </span>query(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt;;
+    </span><span class="kw">fn </span>query(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        parent_id: <span class="kw-2">&amp;</span>str,
+        name: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt;&gt; + MaybeSend;
     <span class="doccomment">/// Create a dir by parent_id and name.
-    </span><span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, parent_id: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt;;
+    </span><span class="kw">fn </span>create_dir(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        parent_id: <span class="kw-2">&amp;</span>str,
+        name: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;String&gt;&gt; + MaybeSend;
 }
 
 <span class="doccomment">/// PathCacher is a cache for path query.
@@ -434,7 +444,6 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>async_trait::async_trait;
 
     <span class="kw">use </span><span class="kw">crate</span>::raw::PathCacher;
     <span class="kw">use </span><span class="kw">crate</span>::raw::PathQuery;
@@ -442,8 +451,7 @@
 
     <span class="kw">struct </span>TestQuery {}
 
-    <span class="attr">#[async_trait]
-    </span><span class="kw">impl </span>PathQuery <span class="kw">for </span>TestQuery {
+    <span class="kw">impl </span>PathQuery <span class="kw">for </span>TestQuery {
         <span class="kw">async fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
             <span class="prelude-val">Ok</span>(<span class="string">"root/"</span>.to_string())
         }

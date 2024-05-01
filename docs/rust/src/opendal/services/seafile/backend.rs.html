@@ -324,8 +324,6 @@
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -348,7 +346,6 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>tokio::sync::RwLock;
@@ -581,8 +578,7 @@
     core: Arc&lt;SeafileCore&gt;,
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>SeafileBackend {
+<span class="kw">impl </span>Accessor <span class="kw">for </span>SeafileBackend {
     <span class="kw">type </span>Reader = SeafileReader;
     <span class="kw">type </span>Writer = SeafileWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;SeafileLister&gt;;
@@ -644,7 +640,7 @@
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, _args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let _ </span>= <span class="self">self</span>.core.delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.core.delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(RpDelete::default())
     }

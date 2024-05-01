@@ -333,9 +333,6 @@
 <a href="#333" id="333">333</a>
 <a href="#334" id="334">334</a>
 <a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -357,7 +354,6 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>http::header;
 <span class="kw">use </span>http::header::IF_MATCH;
 <span class="kw">use </span>http::header::IF_NONE_MATCH;
@@ -560,9 +556,7 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>HttpBackend {
+<span class="kw">impl </span>Accessor <span class="kw">for </span>HttpBackend {
     <span class="kw">type </span>Reader = HttpReader;
     <span class="kw">type </span>Writer = ();
     <span class="kw">type </span>Lister = ();

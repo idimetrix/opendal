@@ -436,9 +436,6 @@
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -475,7 +472,6 @@
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="attr">#[cfg(madsim)]
 </span><span class="kw">use </span>madsim::net::Endpoint;
@@ -583,9 +579,7 @@
     </span>addr: SocketAddr,
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>LayeredAccessor <span class="kw">for </span>MadsimAccessor {
+<span class="kw">impl </span>LayeredAccessor <span class="kw">for </span>MadsimAccessor {
     <span class="kw">type </span>Inner = ();
     <span class="kw">type </span>Reader = MadsimReader;
     <span class="kw">type </span>BlockingReader = ();

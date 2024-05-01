@@ -183,7 +183,6 @@
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
 <a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -201,19 +200,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::mem::size_of;
+<span class="kw">use </span>std::{fmt::Debug, future::ready};
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::Utc;
 
-<span class="kw">use </span><span class="kw">crate</span>::Buffer;
 <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 <span class="kw">use </span><span class="kw">crate</span>::Metadata;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
+<span class="kw">use crate</span>::{raw::MaybeSend, Buffer};
 
 <span class="doccomment">/// Adapter is the typed adapter to underlying kv services.
 ///
@@ -228,38 +227,37 @@
 ///
 /// Ideally, we should use `typed_kv::Adapter` instead of `kv::Adapter` for
 /// in-memory rust libs like moka and dashmap.
-</span><span class="attr">#[async_trait]
 </span><span class="kw">pub trait </span>Adapter: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Get the scheme and name of current adapter.
     </span><span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Info;
 
     <span class="doccomment">/// Get a value from adapter.
-    </span><span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Value&gt;&gt;;
+    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Value&gt;&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Get a value from adapter.
     </span><span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Value&gt;&gt;;
 
     <span class="doccomment">/// Set a value into adapter.
-    </span><span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Value) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Value) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Set a value into adapter.
     </span><span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Value) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
     <span class="doccomment">/// Delete a value from adapter.
-    </span><span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Delete a value from adapter.
     </span><span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
     <span class="doccomment">/// Scan a key prefix to get all keys that start with this key.
-    </span><span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
+    </span><span class="kw">fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt;&gt; + MaybeSend {
         <span class="kw">let _ </span>= path;
 
-        <span class="prelude-val">Err</span>(Error::new(
+        ready(<span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"typed_kv adapter doesn't support this operation"</span>,
         )
-        .with_operation(<span class="string">"typed_kv::Adapter::scan"</span>))
+        .with_operation(<span class="string">"typed_kv::Adapter::scan"</span>)))
     }
 
     <span class="doccomment">/// Scan a key prefix to get all keys that start with this key

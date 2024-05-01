@@ -171,7 +171,6 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -189,9 +188,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::{fmt::Debug, future::ready};
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::Future;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::Capability;
@@ -201,7 +200,6 @@
 <span class="doccomment">/// KvAdapter is the adapter to underlying kv services.
 ///
 /// By implement this trait, any kv service can work as an OpenDAL Service.
-</span><span class="attr">#[async_trait]
 </span><span class="kw">pub trait </span>Adapter: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Return the metadata of this key value accessor.
     </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Metadata;
@@ -209,7 +207,7 @@
     <span class="doccomment">/// Get a key from service.
     ///
     /// - return `Ok(None)` if this key is not exist.
-    </span><span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt;;
+    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// The blocking version of get.
     </span><span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
@@ -223,7 +221,7 @@
     }
 
     <span class="doccomment">/// Set a key into service.
-    </span><span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// The blocking version of set.
     </span><span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -239,7 +237,7 @@
     <span class="doccomment">/// Delete a key from service.
     ///
     /// - return `Ok(())` even if this key is not exist.
-    </span><span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Delete a key from service in blocking way.
     ///
@@ -255,14 +253,14 @@
     }
 
     <span class="doccomment">/// Scan a key prefix to get all keys that start with this key.
-    </span><span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
+    </span><span class="kw">fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt;&gt; + MaybeSend {
         <span class="kw">let _ </span>= path;
 
-        <span class="prelude-val">Err</span>(Error::new(
+        ready(<span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"kv adapter doesn't support this operation"</span>,
         )
-        .with_operation(<span class="string">"kv::Adapter::scan"</span>))
+        .with_operation(<span class="string">"kv::Adapter::scan"</span>)))
     }
 
     <span class="doccomment">/// Scan a key prefix to get all keys that start with this key
@@ -278,15 +276,15 @@
     }
 
     <span class="doccomment">/// Append a key into service
-    </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let _ </span>= path;
         <span class="kw">let _ </span>= value;
 
-        <span class="prelude-val">Err</span>(Error::new(
+        ready(<span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"kv adapter doesn't support this operation"</span>,
         )
-        .with_operation(<span class="string">"kv::Adapter::append"</span>))
+        .with_operation(<span class="string">"kv::Adapter::append"</span>)))
     }
 
     <span class="doccomment">/// Append a key into service

@@ -155,8 +155,6 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -178,7 +176,6 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>dashmap::DashMap;
 <span class="kw">use </span>serde::Deserialize;
 
@@ -242,8 +239,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>typed_kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>typed_kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; typed_kv::Info {
         typed_kv::Info::new(
             Scheme::Dashmap,
