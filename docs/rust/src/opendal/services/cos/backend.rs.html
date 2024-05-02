@@ -649,7 +649,7 @@
     core: Arc&lt;CosCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>CosBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>CosBackend {
     <span class="kw">type </span>Reader = CosReader;
     <span class="kw">type </span>Writer = CosWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;CosLister&gt;;

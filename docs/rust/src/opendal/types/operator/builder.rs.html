@@ -491,7 +491,7 @@
     /// }
     /// ```
     </span><span class="attr">#[allow(clippy::new_ret_no_self)]
-    </span><span class="kw">pub fn </span>new&lt;B: Builder&gt;(<span class="kw-2">mut </span>ab: B) -&gt; <span class="prelude-ty">Result</span>&lt;OperatorBuilder&lt;<span class="kw">impl </span>Accessor&gt;&gt; {
+    </span><span class="kw">pub fn </span>new&lt;B: Builder&gt;(<span class="kw-2">mut </span>ab: B) -&gt; <span class="prelude-ty">Result</span>&lt;OperatorBuilder&lt;<span class="kw">impl </span>Access&gt;&gt; {
         <span class="kw">let </span>acc = ab.build()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(OperatorBuilder::new(acc))
     }
@@ -529,7 +529,7 @@
     /// ```
     </span><span class="kw">pub fn </span>from_map&lt;B: Builder&gt;(
         map: HashMap&lt;String, String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;OperatorBuilder&lt;<span class="kw">impl </span>Accessor&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;OperatorBuilder&lt;<span class="kw">impl </span>Access&gt;&gt; {
         <span class="kw">let </span>acc = B::from_map(map).build()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(OperatorBuilder::new(acc))
     }
@@ -727,7 +727,7 @@
     /// # }
     /// ```
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>layer&lt;L: Layer&lt;FusedAccessor&gt;&gt;(<span class="self">self</span>, layer: L) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>layer&lt;L: Layer&lt;Accessor&gt;&gt;(<span class="self">self</span>, layer: L) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from_inner(Arc::new(
             TypeEraseLayer.layer(layer.layer(<span class="self">self</span>.into_inner())),
         ))
@@ -778,14 +778,14 @@
 ///     Ok(())
 /// }
 /// ```
-</span><span class="kw">pub struct </span>OperatorBuilder&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>OperatorBuilder&lt;A: Access&gt; {
     accessor: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; OperatorBuilder&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; OperatorBuilder&lt;A&gt; {
     <span class="doccomment">/// Create a new operator builder.
     </span><span class="attr">#[allow(clippy::new_ret_no_self)]
-    </span><span class="kw">pub fn </span>new(accessor: A) -&gt; OperatorBuilder&lt;<span class="kw">impl </span>Accessor&gt; {
+    </span><span class="kw">pub fn </span>new(accessor: A) -&gt; OperatorBuilder&lt;<span class="kw">impl </span>Access&gt; {
         <span class="comment">// Make sure error context layer has been attached.
         </span>OperatorBuilder { accessor }
             .layer(ErrorContextLayer)
@@ -822,7 +822,7 @@
     /// # }
     /// ```
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>layer&lt;L: Layer&lt;A&gt;&gt;(<span class="self">self</span>, layer: L) -&gt; OperatorBuilder&lt;L::LayeredAccessor&gt; {
+    </span><span class="kw">pub fn </span>layer&lt;L: Layer&lt;A&gt;&gt;(<span class="self">self</span>, layer: L) -&gt; OperatorBuilder&lt;L::LayeredAccess&gt; {
         OperatorBuilder {
             accessor: layer.layer(<span class="self">self</span>.accessor),
         }
@@ -831,7 +831,7 @@
     <span class="doccomment">/// Finish the building to construct an Operator.
     </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) -&gt; Operator {
         <span class="kw">let </span>ob = <span class="self">self</span>.layer(TypeEraseLayer);
-        Operator::from_inner(Arc::new(ob.accessor) <span class="kw">as </span>FusedAccessor)
+        Operator::from_inner(Arc::new(ob.accessor) <span class="kw">as </span>Accessor)
     }
 }
 </code></pre></div></section></main></body></html>

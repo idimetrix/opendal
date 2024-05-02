@@ -365,7 +365,7 @@
 /// - Lister implements `Stream&lt;Item = Result&lt;Entry&gt;&gt;`.
 /// - Lister will return `None` if there is no more entries or error has been returned.
 </span><span class="kw">pub struct </span>Lister {
-    acc: FusedAccessor,
+    acc: Accessor,
     lister: <span class="prelude-ty">Option</span>&lt;oio::Lister&gt;,
     <span class="doccomment">/// required_metakey is the metakey required by users.
     </span>required_metakey: FlagSet&lt;Metakey&gt;,
@@ -452,7 +452,7 @@
 
 <span class="kw">impl </span>Lister {
     <span class="doccomment">/// Create a new lister.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create(acc: Accessor, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>required_metakey = args.metakey();
         <span class="kw">let </span>concurrent = cmp::max(<span class="number">1</span>, args.concurrent());
 
@@ -544,7 +544,7 @@
 /// - Lister implements `Iterator&lt;Item = Result&lt;Entry&gt;&gt;`.
 /// - Lister will return `None` if there is no more entries or error has been returned.
 </span><span class="kw">pub struct </span>BlockingLister {
-    acc: FusedAccessor,
+    acc: Accessor,
     <span class="doccomment">/// required_metakey is the metakey required by users.
     </span>required_metakey: FlagSet&lt;Metakey&gt;,
 
@@ -559,7 +559,7 @@
 
 <span class="kw">impl </span>BlockingLister {
     <span class="doccomment">/// Create a new lister.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: Accessor, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>required_metakey = args.metakey();
         <span class="kw">let </span>(<span class="kw">_</span>, lister) = acc.blocking_list(path, args)<span class="question-mark">?</span>;
 

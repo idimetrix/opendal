@@ -308,7 +308,7 @@
     <span class="kw">pub </span>core: Arc&lt;DropboxCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>DropboxBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>DropboxBackend {
     <span class="kw">type </span>Reader = DropboxReader;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;DropboxWriter&gt;;
     <span class="kw">type </span>Lister = oio::PageLister&lt;DropboxLister&gt;;

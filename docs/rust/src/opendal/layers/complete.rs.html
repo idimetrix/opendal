@@ -1007,10 +1007,10 @@
 /// operation is not supported, an error will be returned directly.
 </span><span class="kw">pub struct </span>CompleteLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>CompleteLayer {
-    <span class="kw">type </span>LayeredAccessor = CompleteAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>CompleteLayer {
+    <span class="kw">type </span>LayeredAccess = CompleteAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         CompleteAccessor {
             meta: inner.info(),
             inner: Arc::new(inner),
@@ -1019,18 +1019,18 @@
 }
 
 <span class="doccomment">/// Provide complete wrapper for backend.
-</span><span class="kw">pub struct </span>CompleteAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>CompleteAccessor&lt;A: Access&gt; {
     meta: AccessorInfo,
     inner: Arc&lt;A&gt;,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; CompleteAccessor&lt;A&gt; {
     <span class="kw">fn </span>new_unsupported_error(<span class="kw-2">&amp;</span><span class="self">self</span>, op: <span class="kw">impl </span>Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;) -&gt; Error {
         <span class="kw">let </span>scheme = <span class="self">self</span>.meta.scheme();
         <span class="kw">let </span>op = op.into();
@@ -1269,7 +1269,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = CompleteReader&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = CompleteReader&lt;A::BlockingReader&gt;;
@@ -1602,7 +1602,7 @@
         capability: Capability,
     }
 
-    <span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
+    <span class="kw">impl </span>Access <span class="kw">for </span>MockService {
         <span class="kw">type </span>Reader = oio::Reader;
         <span class="kw">type </span>Writer = oio::Writer;
         <span class="kw">type </span>Lister = oio::Lister;

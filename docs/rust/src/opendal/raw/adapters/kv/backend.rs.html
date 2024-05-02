@@ -330,7 +330,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;S: Adapter&gt; Accessor <span class="kw">for </span>Backend&lt;S&gt; {
+<span class="kw">impl</span>&lt;S: Adapter&gt; Access <span class="kw">for </span>Backend&lt;S&gt; {
     <span class="kw">type </span>Reader = Buffer;
     <span class="kw">type </span>BlockingReader = Buffer;
     <span class="kw">type </span>Writer = KvWriter&lt;S&gt;;

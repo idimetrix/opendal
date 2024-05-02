@@ -699,7 +699,7 @@
     core: Arc&lt;AzfileCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>AzfileBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>AzfileBackend {
     <span class="kw">type </span>Reader = AzfileReader;
     <span class="kw">type </span>Writer = AzfileWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;AzfileLister&gt;;

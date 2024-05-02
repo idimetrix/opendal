@@ -1265,13 +1265,13 @@
 /// ```
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>BlockingOperator {
-    accessor: FusedAccessor,
+    accessor: Accessor,
 
     limit: usize,
 }
 
 <span class="kw">impl </span>BlockingOperator {
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FusedAccessor {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
         <span class="kw-2">&amp;</span><span class="self">self</span>.accessor
     }
 
@@ -1279,7 +1279,7 @@
     ///
     /// # Note
     /// default batch limit is 1000.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_inner(accessor: FusedAccessor) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_inner(accessor: Accessor) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>limit = accessor
             .info()
             .full_capability()

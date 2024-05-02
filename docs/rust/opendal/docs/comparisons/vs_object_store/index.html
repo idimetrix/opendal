@@ -48,7 +48,7 @@ object_store’s maintainers. So it could not be very objective.</p>
     .get(<span class="kw-2">&amp;</span>path)
     .<span class="kw">await</span><span class="question-mark">?
     </span>.into_stream();</code></pre></div>
-<p><code>opendal</code> has a similar trait called <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a></p>
+<p><code>opendal</code> has a similar trait called <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a></p>
 <p>But <code>opendal</code> don’t expose this trait to end users directly. Instead, <code>opendal</code> expose a new struct called <a href="../../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> and builds public API on it.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>op: Operator = Operator::from_env(Scheme::S3)<span class="question-mark">?</span>;

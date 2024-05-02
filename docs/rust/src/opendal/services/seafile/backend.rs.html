@@ -578,7 +578,7 @@
     core: Arc&lt;SeafileCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>SeafileBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>SeafileBackend {
     <span class="kw">type </span>Reader = SeafileReader;
     <span class="kw">type </span>Writer = SeafileWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;SeafileLister&gt;;

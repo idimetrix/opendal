@@ -460,7 +460,7 @@
     core: Arc&lt;DbfsCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>DbfsBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>DbfsBackend {
     <span class="kw">type </span>Reader = DbfsReader;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;DbfsWriter&gt;;
     <span class="kw">type </span>Lister = oio::PageLister&lt;DbfsLister&gt;;

@@ -322,7 +322,7 @@
 /// Especially, for storage services that can't return dirs first, ToFlatLister
 /// may output parent dirs' files before nested dirs, this is expected because files
 /// always output directly while listing.
-</span><span class="kw">pub struct </span>FlatLister&lt;A: Accessor, L&gt; {
+</span><span class="kw">pub struct </span>FlatLister&lt;A: Access, L&gt; {
     acc: A,
     root: String,
 
@@ -333,15 +333,15 @@
 <span class="doccomment">/// # Safety
 ///
 /// wasm32 is a special target that we only have one event-loop for this FlatLister.
-</span><span class="kw">unsafe impl</span>&lt;A: Accessor, L&gt; Send <span class="kw">for </span>FlatLister&lt;A, L&gt; {}
+</span><span class="kw">unsafe impl</span>&lt;A: Access, L&gt; Send <span class="kw">for </span>FlatLister&lt;A, L&gt; {}
 <span class="doccomment">/// # Safety
 ///
 /// We will only take `&amp;mut Self` reference for FsLister.
-</span><span class="kw">unsafe impl</span>&lt;A: Accessor, L&gt; Sync <span class="kw">for </span>FlatLister&lt;A, L&gt; {}
+</span><span class="kw">unsafe impl</span>&lt;A: Access, L&gt; Sync <span class="kw">for </span>FlatLister&lt;A, L&gt; {}
 
 <span class="kw">impl</span>&lt;A, L&gt; FlatLister&lt;A, L&gt;
 <span class="kw">where
-    </span>A: Accessor,
+    </span>A: Access,
 {
     <span class="doccomment">/// Create a new flat lister
     </span><span class="kw">pub fn </span>new(acc: A, path: <span class="kw-2">&amp;</span>str) -&gt; FlatLister&lt;A, L&gt; {
@@ -356,7 +356,7 @@
 
 <span class="kw">impl</span>&lt;A, L&gt; oio::List <span class="kw">for </span>FlatLister&lt;A, L&gt;
 <span class="kw">where
-    </span>A: Accessor&lt;Lister = L&gt;,
+    </span>A: Access&lt;Lister = L&gt;,
     L: oio::List,
 {
     <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
@@ -399,7 +399,7 @@
 
 <span class="kw">impl</span>&lt;A, P&gt; oio::BlockingList <span class="kw">for </span>FlatLister&lt;A, P&gt;
 <span class="kw">where
-    </span>A: Accessor&lt;BlockingLister = P&gt;,
+    </span>A: Access&lt;BlockingLister = P&gt;,
     P: oio::BlockingList,
 {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
@@ -476,7 +476,7 @@
         }
     }
 
-    <span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
+    <span class="kw">impl </span>Access <span class="kw">for </span>MockService {
         <span class="kw">type </span>Reader = ();
         <span class="kw">type </span>BlockingReader = ();
         <span class="kw">type </span>Writer = ();

@@ -1515,10 +1515,10 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>LoggingLayer {
-    <span class="kw">type </span>LayeredAccessor = LoggingAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>LoggingLayer {
+    <span class="kw">type </span>LayeredAccess = LoggingAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
         LoggingAccessor {
             inner,
@@ -1568,7 +1568,7 @@
 }
 
 <span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>LoggingAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>LoggingAccessor&lt;A: Access&gt; {
     inner: A,
 
     ctx: LoggingContext,
@@ -1576,7 +1576,7 @@
 
 <span class="kw">static </span>LOGGING_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">"opendal::services"</span>;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>LoggingAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>LoggingAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = LoggingReader&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = LoggingReader&lt;A::BlockingReader&gt;;

@@ -600,10 +600,10 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>TimeoutLayer {
-    <span class="kw">type </span>LayeredAccessor = TimeoutAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>TimeoutLayer {
+    <span class="kw">type </span>LayeredAccess = TimeoutAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         TimeoutAccessor {
             inner,
 
@@ -614,14 +614,14 @@
 }
 
 <span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>TimeoutAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>TimeoutAccessor&lt;A: Access&gt; {
     inner: A,
 
     timeout: Duration,
     io_timeout: Duration,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; TimeoutAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; TimeoutAccessor&lt;A&gt; {
     <span class="kw">async fn </span>timeout&lt;F: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;T&gt;&gt;, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, fut: F) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
         tokio::time::timeout(<span class="self">self</span>.timeout, fut).<span class="kw">await</span>.map_err(|<span class="kw">_</span>| {
             Error::new(ErrorKind::Unexpected, <span class="string">"operation timeout reached"</span>)
@@ -647,7 +647,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>TimeoutAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>TimeoutAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = TimeoutWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = A::BlockingReader;
@@ -801,7 +801,7 @@
     <span class="attr">#[derive(Debug, Clone, Default)]
     </span><span class="kw">struct </span>MockService;
 
-    <span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
+    <span class="kw">impl </span>Access <span class="kw">for </span>MockService {
         <span class="kw">type </span>Reader = MockReader;
         <span class="kw">type </span>Writer = ();
         <span class="kw">type </span>Lister = MockLister;
@@ -857,7 +857,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_operation_timeout() {
-        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>FusedAccessor;
+        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>Accessor;
         <span class="kw">let </span>op = Operator::from_inner(acc)
             .layer(TimeoutLayer::new().with_timeout(Duration::from_secs(<span class="number">1</span>)));
 
@@ -876,7 +876,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_io_timeout() {
-        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>FusedAccessor;
+        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>Accessor;
         <span class="kw">let </span>op = Operator::from_inner(acc)
             .layer(TimeoutLayer::new().with_io_timeout(Duration::from_secs(<span class="number">1</span>)));
 
@@ -891,7 +891,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_list_timeout() {
-        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>FusedAccessor;
+        <span class="kw">let </span>acc = Arc::new(TypeEraseLayer.layer(MockService)) <span class="kw">as </span>Accessor;
         <span class="kw">let </span>op = Operator::from_inner(acc).layer(
             TimeoutLayer::new()
                 .with_timeout(Duration::from_secs(<span class="number">1</span>))
@@ -917,7 +917,7 @@
             .with_io_timeout(Duration::from_secs(<span class="number">1</span>));
         <span class="kw">let </span>timeout_acc = timeout_layer.layer(acc);
 
-        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>lister) = Accessor::list(<span class="kw-2">&amp;</span>timeout_acc, <span class="string">"test"</span>, OpList::default())
+        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>lister) = Access::list(<span class="kw-2">&amp;</span>timeout_acc, <span class="string">"test"</span>, OpList::default())
             .<span class="kw">await
             </span>.unwrap();
 

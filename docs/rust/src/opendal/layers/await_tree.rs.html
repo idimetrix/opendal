@@ -207,20 +207,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>AwaitTreeLayer {
-    <span class="kw">type </span>LayeredAccessor = AwaitTreeAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>AwaitTreeLayer {
+    <span class="kw">type </span>LayeredAccess = AwaitTreeAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, accessor: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, accessor: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         AwaitTreeAccessor { inner: accessor }
     }
 }
 
 <span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>AwaitTreeAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>AwaitTreeAccessor&lt;A: Access&gt; {
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>AwaitTreeAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>AwaitTreeAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = A::Reader;
     <span class="kw">type </span>BlockingReader = A::BlockingReader;

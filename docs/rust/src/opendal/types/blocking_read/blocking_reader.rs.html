@@ -198,7 +198,7 @@
     ///
     /// We don't want to expose those details to users so keep this function
     /// in crate only.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="kw">crate</span>::Result&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: Accessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="kw">crate</span>::Result&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, r) = acc.blocking_read(path, op)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(BlockingReader { inner: r })

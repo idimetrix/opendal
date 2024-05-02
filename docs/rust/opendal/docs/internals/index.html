@@ -2,19 +2,19 @@
 <p>OpenDAL has provides unified abstraction via two-level API sets:</p>
 <ul>
 <li>Public API like <a href="../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> provides user level API.</li>
-<li>Raw API like <a href="../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>, <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a> provides developer level API.</li>
+<li>Raw API like <a href="../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>, <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a> provides developer level API.</li>
 </ul>
 <p>OpenDAL tries it’s best to keep the public API stable. But raw APIs
 may change between minor releases from time to time. So most users
 should only use the public API. And only developers need to implement
-with raw API to implement a new service <a href="../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> or their own
+with raw API to implement a new service <a href="../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> or their own
 <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a>.</p>
 <p>In this section, we will talk about the following components:</p>
 <ul>
-<li><a href="accessor/index.html" title="mod opendal::docs::internals::accessor"><code>Accessor</code></a>: to connect underlying storage services.</li>
+<li><a href="accessor/index.html" title="mod opendal::docs::internals::accessor"><code>Access</code></a>: to connect underlying storage services.</li>
 <li><a href="layer/index.html" title="mod opendal::docs::internals::layer"><code>Layer</code></a>: middleware/interceptor between storage services.</li>
 </ul>
-<p>The relation between <a href="../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>, <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a> and <a href="../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> looks like the following:</p>
+<p>The relation between <a href="../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>, <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a> and <a href="../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> looks like the following:</p>
 <div class="example-wrap"><pre class="language-text"><code>┌─────────────────────────────────────────────────┬──────────┐
 │                                                 │          │
 │              ┌──────────┐  ┌────────┐           │          │
@@ -30,4 +30,4 @@ with raw API to implement a new service <a href="../../raw/trait.Accessor.html" 
 │              └──────────┘           └──────┘    │          │
 │                                                 │          │
 └─────────────────────────────────────────────────┴──────────┘
-</code></pre></div></div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="mod" href="accessor/index.html" title="mod opendal::docs::internals::accessor">accessor</a></div><div class="desc docblock-short">The internal implementation details of <a href="../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>.</div></li><li><div class="item-name"><a class="mod" href="layer/index.html" title="mod opendal::docs::internals::layer">layer</a></div><div class="desc docblock-short">The internal implementation details of <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a>.</div></li></ul></section></div></main></body></html>
+</code></pre></div></div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="mod" href="accessor/index.html" title="mod opendal::docs::internals::accessor">accessor</a></div><div class="desc docblock-short">The internal implementation details of <a href="../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>.</div></li><li><div class="item-name"><a class="mod" href="layer/index.html" title="mod opendal::docs::internals::layer">layer</a></div><div class="desc docblock-short">The internal implementation details of <a href="../../raw/trait.Layer.html" title="trait opendal::raw::Layer"><code>Layer</code></a>.</div></li></ul></section></div></main></body></html>

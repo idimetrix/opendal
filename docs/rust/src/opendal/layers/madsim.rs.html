@@ -558,10 +558,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>MadsimLayer {
-    <span class="kw">type </span>LayeredAccessor = MadsimAccessor;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>MadsimLayer {
+    <span class="kw">type </span>LayeredAccess = MadsimAccessor;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="attr">#[cfg(madsim)]
         </span>{
             MadsimAccessor { addr: <span class="self">self</span>.addr }
@@ -579,7 +579,7 @@
     </span>addr: SocketAddr,
 }
 
-<span class="kw">impl </span>LayeredAccessor <span class="kw">for </span>MadsimAccessor {
+<span class="kw">impl </span>LayeredAccess <span class="kw">for </span>MadsimAccessor {
     <span class="kw">type </span>Inner = ();
     <span class="kw">type </span>Reader = MadsimReader;
     <span class="kw">type </span>BlockingReader = ();

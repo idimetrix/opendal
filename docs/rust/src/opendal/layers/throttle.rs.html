@@ -339,10 +339,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>ThrottleLayer {
-    <span class="kw">type </span>LayeredAccessor = ThrottleAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>ThrottleLayer {
+    <span class="kw">type </span>LayeredAccess = ThrottleAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, accessor: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, accessor: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>rate_limiter = Arc::new(RateLimiter::direct(
             Quota::per_second(<span class="self">self</span>.bandwidth).allow_burst(<span class="self">self</span>.burst),
         ));
@@ -359,12 +359,12 @@
 </span><span class="kw">type </span>SharedRateLimiter = Arc&lt;RateLimiter&lt;NotKeyed, InMemoryState, DefaultClock, NoOpMiddleware&gt;&gt;;
 
 <span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>ThrottleAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>ThrottleAccessor&lt;A: Access&gt; {
     inner: A,
     rate_limiter: SharedRateLimiter,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ThrottleAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>ThrottleAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = ThrottleWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = ThrottleWrapper&lt;A::BlockingReader&gt;;

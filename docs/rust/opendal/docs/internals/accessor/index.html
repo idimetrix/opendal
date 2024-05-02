@@ -1,8 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The internal implementation details of `Accessor`."><title>opendal::docs::internals::accessor - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (0bf471f33 2024-04-13)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.45.1</span></h2></div><h2 class="location"><a href="#">Module accessor</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::internals</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../../index.html">opendal</a>::<wbr><a href="../../index.html">docs</a>::<wbr><a href="../index.html">internals</a>::<wbr><a class="mod" href="#">accessor</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../../../../src/opendal/docs/internals/accessor.rs.html#18-327">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The internal implementation details of <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>.</p>
-<p><a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> is the core trait of OpenDAL’s raw API. We operate
-underlying storage services via APIs provided by <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The internal implementation details of `Access`."><title>opendal::docs::internals::accessor - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (0bf471f33 2024-04-13)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../../opendal/index.html">opendal</a><span class="version">0.45.1</span></h2></div><h2 class="location"><a href="#">Module accessor</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs::internals</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../../index.html">opendal</a>::<wbr><a href="../../index.html">docs</a>::<wbr><a href="../index.html">internals</a>::<wbr><a class="mod" href="#">accessor</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../../../../src/opendal/docs/internals/accessor.rs.html#18-327">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The internal implementation details of <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>.</p>
+<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> is the core trait of OpenDAL’s raw API. We operate
+underlying storage services via APIs provided by <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>.</p>
 <h2 id="introduction"><a class="doc-anchor" href="#introduction">§</a>Introduction</h2>
-<p><a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> can be split in the following parts:</p>
+<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> can be split in the following parts:</p>
 
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Attributes
 </span><span class="attr">#[async_trait]
@@ -17,9 +17,9 @@ underlying storage services via APIs provided by <a href="../../../raw/trait.Acc
     </span><span class="kw">async fn </span>hello(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt;;
     <span class="kw">async fn </span>world(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt;;
 }</code></pre></div>
-<p>Let’s go deep into <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> line by line.</p>
+<p>Let’s go deep into <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> line by line.</p>
 <h3 id="async-trait"><a class="doc-anchor" href="#async-trait">§</a>Async Trait</h3>
-<p>At the first line of <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>, we will read:</p>
+<p>At the first line of <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>, we will read:</p>
 
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="attr">#[async_trait]</span></code></pre></div>
 <p>This is an attribute from <a href="https://docs.rs/async-trait/latest/async_trait/"><code>async_trait</code></a>. By using this attribute, we can write the following code without use nightly feature.</p>
@@ -37,10 +37,10 @@ underlying storage services via APIs provided by <a href="../../../raw/trait.Acc
 }</code></pre></div>
 <p>It’s not zero cost, and we will improve this part once the related features are stabilised.</p>
 <h3 id="trait-bound"><a class="doc-anchor" href="#trait-bound">§</a>Trait Bound</h3>
-<p>Then we will read the declare of <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> trait:</p>
+<p>Then we will read the declare of <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> trait:</p>
 
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{}</code></pre></div>
-<p>There are many trait boundings here. For now, <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> requires the following bound:</p>
+<p>There are many trait boundings here. For now, <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> requires the following bound:</p>
 <ul>
 <li><a href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send"><code>Send</code></a>: Allow user to send between threads without extra wrapper.</li>
 <li><a href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync"><code>Sync</code></a>: Allow user to sync between threads without extra lock.</li>
@@ -54,10 +54,10 @@ underlying storage services via APIs provided by <a href="../../../raw/trait.Acc
 <li>Make sure the backend is <code>Send</code> and <code>Sync</code>, wrap the internal struct with <code>Arc&lt;Mutex&lt;T&gt;&gt;</code> if necessary.</li>
 </ul>
 <h3 id="associated-type"><a class="doc-anchor" href="#associated-type">§</a>Associated Type</h3>
-<p>The first block of <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> trait is our associated types. We
+<p>The first block of <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> trait is our associated types. We
 require implementers to specify the type to be returned, thus avoiding
 the additional overhead of dynamic dispatch.</p>
-<p><a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> has four associated type so far:</p>
+<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> has four associated type so far:</p>
 <ul>
 <li><code>Reader</code>: reader returned by <code>read</code> operation.</li>
 <li><code>BlockingReader</code>: reader returned by <code>blocking_read</code> operation.</li>
@@ -70,16 +70,16 @@ the additional overhead of dynamic dispatch.</p>
 <li>Use <code>()</code> as type if the operation is not supported.</li>
 </ul>
 <h3 id="api-style"><a class="doc-anchor" href="#api-style">§</a>API Style</h3>
-<p>Every API of <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> follows the same style:</p>
+<p>Every API of <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> follows the same style:</p>
 <ul>
 <li>All APIs have a unique <a href="../../../raw/enum.Operation.html" title="enum opendal::raw::Operation"><code>Operation</code></a> and <a href="../../../struct.Capability.html" title="struct opendal::Capability"><code>Capability</code></a></li>
 <li>All APIs are orthogonal and do not overlap with each other</li>
 <li>Most APIs accept <code>path</code> and <code>OpXxx</code>, and returns <code>RpXxx</code>.</li>
 <li>Most APIs have <code>async</code> and <code>blocking</code> variants, they share the same semantics but may have different underlying implementations.</li>
 </ul>
-<p><a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> can declare their capabilities via <a href="../../../raw/struct.AccessorInfo.html" title="struct opendal::raw::AccessorInfo"><code>AccessorInfo</code></a>’s <code>set_capability</code>:</p>
+<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> can declare their capabilities via <a href="crate::raw::AccessInfo"><code>AccessorInfo</code></a>’s <code>set_capability</code>:</p>
 
-<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Accessor <span class="kw">for </span>MyBackend {
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Access <span class="kw">for </span>MyBackend {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_capability(
@@ -92,7 +92,7 @@ the additional overhead of dynamic dispatch.</p>
         am
     }
 }</code></pre></div>
-<p>Now that you have mastered <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>, let’s go and implement our own backend!</p>
+<p>Now that you have mastered <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>, let’s go and implement our own backend!</p>
 <h2 id="tutorial"><a class="doc-anchor" href="#tutorial">§</a>Tutorial</h2>
 <p>This tutorial implements a <code>duck</code> storage service that sends API
 requests to a super-powered duck. Gagaga!</p>
@@ -207,7 +207,7 @@ angry ducks.</p>
 <p><code>DuckBuilder</code> is ready now, let’s try to play with real ducks!</p>
 <h3 id="backend"><a class="doc-anchor" href="#backend">§</a>Backend</h3>
 <p>I’m sure you can see it already: <code>DuckBuilder</code> will build a
-<code>DuckBackend</code> that implements <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>. The backend is what we used
+<code>DuckBackend</code> that implements <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>. The backend is what we used
 to communicate with the super-powered ducks!</p>
 <p>Let’s keep adding more code under <code>backend.rs</code>:</p>
 
@@ -218,7 +218,7 @@ to communicate with the super-powered ducks!</p>
 }
 
 <span class="attr">#[async_trait]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>DuckBackend {
+</span><span class="kw">impl </span>Access <span class="kw">for </span>DuckBackend {
     <span class="kw">type </span>Reader = DuckReader;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>Writer = ();
@@ -243,7 +243,7 @@ to communicate with the super-powered ducks!</p>
         <span class="macro">gagaga!</span>()
     }
 }</code></pre></div>
-<p>Congratulations, we have implemented an <a href="../../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a> that can talk to
+<p>Congratulations, we have implemented an <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> that can talk to
 Super Power Ducks!</p>
 <p>What!? There are no Super Power Ducks? So sad, but never mind, we have
 really powerful storage services <a href="https://github.com/apache/opendal/issues/5">here</a>. Welcome to pick one to implement. I promise you won’t

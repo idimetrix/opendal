@@ -527,13 +527,13 @@
 /// users to use this struct directly.
 </span><span class="kw">pub struct </span>OperatorFuture&lt;I, O, F: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;O&gt;&gt;&gt; {
     <span class="doccomment">/// The accessor to the underlying object storage
-    </span>acc: FusedAccessor,
+    </span>acc: Accessor,
     <span class="doccomment">/// The path of string
     </span>path: String,
     <span class="doccomment">/// The input args
     </span>args: I,
     <span class="doccomment">/// The function which will move all the args and return a static future
-    </span>f: <span class="kw">fn</span>(FusedAccessor, String, I) -&gt; F,
+    </span>f: <span class="kw">fn</span>(Accessor, String, I) -&gt; F,
 }
 
 <span class="kw">impl</span>&lt;I, O, F: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;O&gt;&gt;&gt; OperatorFuture&lt;I, O, F&gt; {
@@ -542,10 +542,10 @@
     /// This struct is by design to keep in crate. We don't want
     /// users to use this struct directly.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
-        inner: FusedAccessor,
+        inner: Accessor,
         path: String,
         args: I,
-        f: <span class="kw">fn</span>(FusedAccessor, String, I) -&gt; F,
+        f: <span class="kw">fn</span>(Accessor, String, I) -&gt; F,
     ) -&gt; <span class="self">Self </span>{
         OperatorFuture {
             acc: inner,

@@ -480,7 +480,7 @@
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>probe::probe_lazy;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::Accessor;
+<span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -626,19 +626,19 @@
 </span><span class="attr">#[derive(Default, Debug, Clone)]
 </span><span class="kw">pub struct </span>DtraceLayer {}
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>DtraceLayer {
-    <span class="kw">type </span>LayeredAccessor = DTraceAccessor&lt;A&gt;;
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>DtraceLayer {
+    <span class="kw">type </span>LayeredAccess = DTraceAccessor&lt;A&gt;;
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         DTraceAccessor { inner }
     }
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>DTraceAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>DTraceAccessor&lt;A: Access&gt; {
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>DTraceAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>DTraceAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         f.debug_struct(<span class="string">"DTraceAccessor"</span>)
             .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
@@ -646,7 +646,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>DTraceAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>DTraceAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = DtraceLayerWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = DtraceLayerWrapper&lt;A::BlockingReader&gt;;

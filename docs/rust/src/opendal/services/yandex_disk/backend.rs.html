@@ -478,7 +478,7 @@
     core: Arc&lt;YandexDiskCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>YandexDiskBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>YandexDiskBackend {
     <span class="kw">type </span>Reader = YandexDiskReader;
     <span class="kw">type </span>Writer = YandexDiskWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;YandexDiskLister&gt;;

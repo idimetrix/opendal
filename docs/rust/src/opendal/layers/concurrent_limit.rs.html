@@ -355,10 +355,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>ConcurrentLimitLayer {
-    <span class="kw">type </span>LayeredAccessor = ConcurrentLimitAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>ConcurrentLimitLayer {
+    <span class="kw">type </span>LayeredAccess = ConcurrentLimitAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         ConcurrentLimitAccessor {
             inner,
             semaphore: Arc::new(Semaphore::new(<span class="self">self</span>.permits)),
@@ -367,12 +367,12 @@
 }
 
 <span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>ConcurrentLimitAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>ConcurrentLimitAccessor&lt;A: Access&gt; {
     inner: A,
     semaphore: Arc&lt;Semaphore&gt;,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ConcurrentLimitAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>ConcurrentLimitAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = ConcurrentLimitWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = ConcurrentLimitWrapper&lt;A::BlockingReader&gt;;

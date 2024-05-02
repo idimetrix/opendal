@@ -940,7 +940,7 @@
     core: Arc&lt;GcsCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>GcsBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>GcsBackend {
     <span class="kw">type </span>Reader = GcsReader;
     <span class="kw">type </span>Writer = GcsWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;GcsLister&gt;;

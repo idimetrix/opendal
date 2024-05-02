@@ -131,44 +131,44 @@
 </span><span class="attr">#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Default)]
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>Operation {
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::info`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::info`]
     </span><span class="attr">#[default]
     </span>Info,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::create_dir`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::create_dir`]
     </span>CreateDir,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::read`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::read`]
     </span>Read,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::write`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::write`]
     </span>Write,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::copy`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::copy`]
     </span>Copy,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::rename`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::rename`]
     </span>Rename,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::stat`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::stat`]
     </span>Stat,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::delete`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::delete`]
     </span>Delete,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::list`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::list`]
     </span>List,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::batch`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::batch`]
     </span>Batch,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::presign`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::presign`]
     </span>Presign,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_create_dir`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_create_dir`]
     </span>BlockingCreateDir,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_read`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_read`]
     </span>BlockingRead,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_write`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_write`]
     </span>BlockingWrite,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_copy`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_copy`]
     </span>BlockingCopy,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_rename`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_rename`]
     </span>BlockingRename,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_stat`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_stat`]
     </span>BlockingStat,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_delete`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_delete`]
     </span>BlockingDelete,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_list`]
+    <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_list`]
     </span>BlockingList,
 }
 

@@ -453,10 +453,10 @@
 /// For real-world usage, please take a look at [`tracing-opentelemetry`](https://crates.io/crates/tracing-opentelemetry).
 </span><span class="kw">pub struct </span>TracingLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>TracingLayer {
-    <span class="kw">type </span>LayeredAccessor = TracingAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>TracingLayer {
+    <span class="kw">type </span>LayeredAccess = TracingAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         TracingAccessor { inner }
     }
 }
@@ -466,7 +466,7 @@
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>TracingAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>TracingAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = TracingWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = TracingWrapper&lt;A::BlockingReader&gt;;

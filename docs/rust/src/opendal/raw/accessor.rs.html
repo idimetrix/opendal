@@ -939,14 +939,14 @@
 <span class="doccomment">/// Underlying trait of all backends for implementers.
 ///
 /// The actual data access of storage service happens in Accessor layer.
-/// Every storage supported by OpenDAL must implement [`Accessor`] but not all
-/// methods of [`Accessor`] will be implemented according to how the storage service is.
+/// Every storage supported by OpenDAL must implement [`Access`] but not all
+/// methods of [`Access`] will be implemented according to how the storage service is.
 ///
 /// For example, user can not modify the content from one HTTP file server directly.
 /// So [`Http`][crate::services::Http] implements and provides only read related actions.
 ///
-/// [`Accessor`] gives default implementation for all methods which will raise [`ErrorKind::Unsupported`] error.
-/// And what action this [`Accessor`] supports will be pointed out in [`AccessorInfo`].
+/// [`Access`] gives default implementation for all methods which will raise [`ErrorKind::Unsupported`] error.
+/// And what action this [`Access`] supports will be pointed out in [`AccessorInfo`].
 ///
 /// # Note
 ///
@@ -966,7 +966,7 @@
 /// - Operations with capability requirement like `presign` are optional operations.
 ///   - Services can implement them based on services capabilities.
 ///   - The default implementation should return [`ErrorKind::Unsupported`].
-</span><span class="kw">pub trait </span>Accessor: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
+</span><span class="kw">pub trait </span>Access: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Reader is the associated reader returned in `read` operation.
     </span><span class="kw">type </span>Reader: oio::Read;
     <span class="doccomment">/// Writer is the associated writer returned in `write` operation.
@@ -1307,7 +1307,7 @@
     }
 }
 
-<span class="doccomment">/// `AccessorDyn` is the dyn version of [`Accessor`] make it possible to use as
+<span class="doccomment">/// `AccessorDyn` is the dyn version of [`Access`] make it possible to use as
 /// `Box&lt;dyn AccessorDyn&gt;`.
 </span><span class="kw">pub trait </span>AccessorDyn: Send + Sync + Debug + Unpin {
     <span class="doccomment">/// Dyn version of [`Accessor::info`]
@@ -1387,7 +1387,7 @@
 
 <span class="kw">impl</span>&lt;A: <span class="question-mark">?</span>Sized&gt; AccessorDyn <span class="kw">for </span>A
 <span class="kw">where
-    </span>A: Accessor&lt;
+    </span>A: Access&lt;
         Reader = oio::Reader,
         BlockingReader = oio::BlockingReader,
         Writer = oio::Writer,
@@ -1511,7 +1511,7 @@
     }
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for dyn </span>AccessorDyn {
+<span class="kw">impl </span>Access <span class="kw">for dyn </span>AccessorDyn {
     <span class="kw">type </span>Reader = oio::Reader;
     <span class="kw">type </span>BlockingReader = oio::BlockingReader;
     <span class="kw">type </span>Writer = oio::Writer;
@@ -1597,7 +1597,7 @@
 }
 
 <span class="doccomment">/// Dummy implementation of accessor.
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>() {
+</span><span class="kw">impl </span>Access <span class="kw">for </span>() {
     <span class="kw">type </span>Reader = ();
     <span class="kw">type </span>Writer = ();
     <span class="kw">type </span>Lister = ();
@@ -1617,11 +1617,11 @@
 }
 
 <span class="doccomment">/// All functions in `Accessor` only requires `&amp;self`, so it's safe to implement
-/// `Accessor` for `Arc&lt;impl Accessor&gt;`.
+/// `Accessor` for `Arc&lt;impl Access&gt;`.
 </span><span class="comment">// If we use async fn directly, some weird higher rank trait bound error (`Send`/`Accessor` impl not general enough) will happen.
 // Probably related to https://github.com/rust-lang/rust/issues/96865
 </span><span class="attr">#[allow(clippy::manual_async_fn)]
-</span><span class="kw">impl</span>&lt;T: Accessor + <span class="question-mark">?</span>Sized&gt; Accessor <span class="kw">for </span>Arc&lt;T&gt; {
+</span><span class="kw">impl</span>&lt;T: Access + <span class="question-mark">?</span>Sized&gt; Access <span class="kw">for </span>Arc&lt;T&gt; {
     <span class="kw">type </span>Reader = T::Reader;
     <span class="kw">type </span>Writer = T::Writer;
     <span class="kw">type </span>Lister = T::Lister;
@@ -1740,8 +1740,8 @@
     }
 }
 
-<span class="doccomment">/// FusedAccessor is the type erased accessor with `Arc&lt;dyn Accessor&gt;`.
-</span><span class="kw">pub type </span>FusedAccessor = Arc&lt;<span class="kw">dyn </span>AccessorDyn&gt;;
+<span class="doccomment">/// Accessor is the type erased accessor with `Arc&lt;dyn Accessor&gt;`.
+</span><span class="kw">pub type </span>Accessor = Arc&lt;<span class="kw">dyn </span>AccessorDyn&gt;;
 
 <span class="doccomment">/// Metadata for accessor, users can use this metadata to get information of underlying backend.
 </span><span class="attr">#[derive(Clone, Debug, Default)]

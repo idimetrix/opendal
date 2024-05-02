@@ -31,7 +31,7 @@ general name. For example, we will rename <code>S3Builder</code> to <code>S3</co
 builder.bucket(<span class="string">"example"</span>);
 builder.root(<span class="string">"/path/to/file"</span>);</code></pre></div>
 <h2 id="operator"><a class="doc-anchor" href="#operator">§</a>Operator</h2>
-<p>The <a href="../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> is a delegate for Service, the underlying implementation detail that implements <a href="../../raw/trait.Accessor.html" title="trait opendal::raw::Accessor"><code>Accessor</code></a>,
+<p>The <a href="../../struct.Operator.html" title="struct opendal::Operator"><code>Operator</code></a> is a delegate for Service, the underlying implementation detail that implements <a href="../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>,
 and it also provides one unified access interface.
 It will hold one reference of Service with its all generic types erased by OpenDAL,
 which is the reason why we say the Operator is the delegate of one Service.</p>

@@ -784,7 +784,7 @@
     core: Arc&lt;B2Core&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>B2Backend {
+<span class="kw">impl </span>Access <span class="kw">for </span>B2Backend {
     <span class="kw">type </span>Reader = B2Reader;
     <span class="kw">type </span>Writer = B2Writers;
     <span class="kw">type </span>Lister = oio::PageLister&lt;B2Lister&gt;;

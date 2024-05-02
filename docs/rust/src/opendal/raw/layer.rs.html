@@ -445,11 +445,11 @@
 ///
 /// /// Implement the real accessor logic here.
 /// #[derive(Debug)]
-/// struct TraceAccessor&lt;A: Accessor&gt; {
+/// struct TraceAccessor&lt;A: Access&gt; {
 ///     inner: A,
 /// }
 ///
-/// impl&lt;A: Accessor&gt; LayeredAccessor for TraceAccessor&lt;A&gt; {
+/// impl&lt;A: Access&gt; LayeredAccess for TraceAccessor&lt;A&gt; {
 ///     type Inner = A;
 ///     type Reader = A::Reader;
 ///     type BlockingReader = A::BlockingReader;
@@ -504,28 +504,28 @@
 /// /// Will be used like `op.layer(TraceLayer)`
 /// struct TraceLayer;
 ///
-/// impl&lt;A: Accessor&gt; Layer&lt;A&gt; for TraceLayer {
-///     type LayeredAccessor = TraceAccessor&lt;A&gt;;
+/// impl&lt;A: Access&gt; Layer&lt;A&gt; for TraceLayer {
+///     type LayeredAccess = TraceAccessor&lt;A&gt;;
 ///
-///     fn layer(&amp;self, inner: A) -&gt; Self::LayeredAccessor {
+///     fn layer(&amp;self, inner: A) -&gt; Self::LayeredAccess {
 ///         TraceAccessor { inner }
 ///     }
 /// }
 /// ```
-</span><span class="kw">pub trait </span>Layer&lt;A: Accessor&gt; {
+</span><span class="kw">pub trait </span>Layer&lt;A: Access&gt; {
     <span class="doccomment">/// The layered accessor that returned by this layer.
-    </span><span class="kw">type </span>LayeredAccessor: Accessor;
+    </span><span class="kw">type </span>LayeredAccess: Access;
 
     <span class="doccomment">/// Intercept the operations on the underlying storage.
-    </span><span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor;
+    </span><span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess;
 }
 
-<span class="doccomment">/// LayeredAccessor is layered accessor that forward all not implemented
+<span class="doccomment">/// LayeredAccess is layered accessor that forward all not implemented
 /// method to inner.
 </span><span class="attr">#[allow(missing_docs)]
 
-</span><span class="kw">pub trait </span>LayeredAccessor: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
-    <span class="kw">type </span>Inner: Accessor;
+</span><span class="kw">pub trait </span>LayeredAccess: Send + Sync + Debug + Unpin + <span class="lifetime">'static </span>{
+    <span class="kw">type </span>Inner: Access;
     <span class="kw">type </span>Reader: oio::Read;
     <span class="kw">type </span>BlockingReader: oio::BlockingRead;
     <span class="kw">type </span>Writer: oio::Write;
@@ -634,7 +634,7 @@
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt;;
 }
 
-<span class="kw">impl</span>&lt;L: LayeredAccessor&gt; Accessor <span class="kw">for </span>L {
+<span class="kw">impl</span>&lt;L: LayeredAccess&gt; Access <span class="kw">for </span>L {
     <span class="kw">type </span>Reader = L::Reader;
     <span class="kw">type </span>BlockingReader = L::BlockingReader;
     <span class="kw">type </span>Writer = L::Writer;
@@ -729,16 +729,16 @@
     <span class="kw">use </span><span class="kw">crate</span>::services::Memory;
 
     <span class="attr">#[derive(Debug)]
-    </span><span class="kw">struct </span>Test&lt;A: Accessor&gt; {
+    </span><span class="kw">struct </span>Test&lt;A: Access&gt; {
         <span class="attr">#[allow(dead_code)]
         </span>inner: <span class="prelude-ty">Option</span>&lt;A&gt;,
         deleted: Arc&lt;Mutex&lt;bool&gt;&gt;,
     }
 
-    <span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Test&lt;A&gt; {
-        <span class="kw">type </span>LayeredAccessor = Test&lt;A&gt;;
+    <span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Test&lt;A&gt; {
+        <span class="kw">type </span>LayeredAccess = Test&lt;A&gt;;
 
-        <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+        <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
             Test {
                 inner: <span class="prelude-val">Some</span>(inner),
                 deleted: <span class="self">self</span>.deleted.clone(),
@@ -746,7 +746,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;A: Accessor&gt; Accessor <span class="kw">for </span>Test&lt;A&gt; {
+    <span class="kw">impl</span>&lt;A: Access&gt; Access <span class="kw">for </span>Test&lt;A&gt; {
         <span class="kw">type </span>Reader = ();
         <span class="kw">type </span>BlockingReader = ();
         <span class="kw">type </span>Writer = ();

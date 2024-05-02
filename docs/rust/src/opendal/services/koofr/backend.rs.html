@@ -628,7 +628,7 @@
     core: Arc&lt;KoofrCore&gt;,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>KoofrBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>KoofrBackend {
     <span class="kw">type </span>Reader = KoofrReader;
     <span class="kw">type </span>Writer = KoofrWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;KoofrLister&gt;;

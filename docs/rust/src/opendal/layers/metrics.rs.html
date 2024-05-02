@@ -953,10 +953,10 @@
 </span><span class="attr">#[derive(Debug, Copy, Clone)]
 </span><span class="kw">pub struct </span>MetricsLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>MetricsLayer {
-    <span class="kw">type </span>LayeredAccessor = MetricsAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>MetricsLayer {
+    <span class="kw">type </span>LayeredAccess = MetricsAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
 
         MetricsAccessor {
@@ -1229,12 +1229,12 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>MetricsAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>MetricsAccessor&lt;A: Access&gt; {
     inner: A,
     handle: Arc&lt;MetricsHandler&gt;,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>MetricsAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>MetricsAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         f.debug_struct(<span class="string">"MetricsAccessor"</span>)
             .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
@@ -1242,7 +1242,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>MetricsAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>MetricsAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = MetricWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = MetricWrapper&lt;A::BlockingReader&gt;;

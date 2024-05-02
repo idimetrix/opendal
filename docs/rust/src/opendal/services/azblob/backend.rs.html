@@ -1461,7 +1461,7 @@
     has_sas_token: bool,
 }
 
-<span class="kw">impl </span>Accessor <span class="kw">for </span>AzblobBackend {
+<span class="kw">impl </span>Access <span class="kw">for </span>AzblobBackend {
     <span class="kw">type </span>Reader = AzblobReader;
     <span class="kw">type </span>Writer = AzblobWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;AzblobLister&gt;;

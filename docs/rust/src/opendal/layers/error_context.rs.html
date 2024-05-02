@@ -466,28 +466,28 @@
 /// - `path`: The path of this operation
 </span><span class="kw">pub struct </span>ErrorContextLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>ErrorContextLayer {
-    <span class="kw">type </span>LayeredAccessor = ErrorContextAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>ErrorContextLayer {
+    <span class="kw">type </span>LayeredAccess = ErrorContextAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
         ErrorContextAccessor { meta, inner }
     }
 }
 
 <span class="doccomment">/// Provide error context wrapper for backend.
-</span><span class="kw">pub struct </span>ErrorContextAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>ErrorContextAccessor&lt;A: Access&gt; {
     meta: AccessorInfo,
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = ErrorContextWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = ErrorContextWrapper&lt;A::BlockingReader&gt;;

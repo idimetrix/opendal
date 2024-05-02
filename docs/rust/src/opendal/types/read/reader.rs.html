@@ -488,7 +488,7 @@
     /// We don't want to expose those details to users so keep this function
     /// in crate only.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create(
-        acc: FusedAccessor,
+        acc: Accessor,
         path: <span class="kw-2">&amp;</span>str,
         args: OpRead,
         options: OpReader,
