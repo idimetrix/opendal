@@ -81,6 +81,10 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -161,7 +165,11 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
 
-    <span class="kw">trait </span>AssertTrait: Unpin + MaybeSend + Sync + <span class="lifetime">'static </span>{}
-    <span class="kw">impl </span>AssertTrait <span class="kw">for </span>FuturesBytesStream {}
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_trait() {
+        <span class="kw">let </span>v = FuturesBytesSink::new(Box::new(()));
+
+        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>Unpin + MaybeSend + Sync + <span class="lifetime">'static</span>&gt; = Box::new(v);
+    }
 }
 </code></pre></div></section></main></body></html>

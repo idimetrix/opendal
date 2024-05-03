@@ -769,7 +769,7 @@
                     <span class="kw">let </span>resp_body = resp.into_body();
                     <span class="kw">let </span>token: GdriveTokenResponse = serde_json::from_reader(resp_body.reader())
                         .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-                    <span class="self">self</span>.access_token = token.access_token.clone();
+                    <span class="self">self</span>.access_token.clone_from(<span class="kw-2">&amp;</span>token.access_token);
                     <span class="self">self</span>.expires_in = Utc::now()
                         + chrono::TimeDelta::try_seconds(token.expires_in)
                             .expect(<span class="string">"expires_in must be valid seconds"</span>)

@@ -116,6 +116,7 @@
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -192,7 +193,8 @@
                     <span class="kw">if </span>directory_listing.remaining_entries == <span class="number">0 </span>{
                         ctx.done = <span class="bool-val">true</span>;
                     } <span class="kw">else if </span>!file_statuses.is_empty() {
-                        ctx.token = file_statuses.last().unwrap().path_suffix.clone();
+                        ctx.token
+                            .clone_from(<span class="kw-2">&amp;</span>file_statuses.last().unwrap().path_suffix);
                     }
 
                     file_statuses

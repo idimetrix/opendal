@@ -118,6 +118,10 @@
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -207,8 +211,12 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">trait </span>AssertTrait: Unpin + MaybeSend + Sync + <span class="lifetime">'static </span>{}
-    <span class="kw">impl </span>AssertTrait <span class="kw">for </span>FuturesBytesStream {}
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_trait() {
+        <span class="kw">let </span>v = FuturesBytesStream::new(Arc::new(Buffer::new()), OpReader::new(), <span class="number">4</span>..<span class="number">8</span>);
+
+        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>Unpin + MaybeSend + Sync + <span class="lifetime">'static</span>&gt; = Box::new(v);
+    }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_futures_bytes_stream() {

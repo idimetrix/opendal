@@ -183,7 +183,7 @@
                 ListOpResponse::Subdir { subdir } =&gt; subdir,
                 ListOpResponse::FileInfo { name, .. } =&gt; name,
             };
-            ctx.token = path.clone();
+            ctx.token.clone_from(path);
         } <span class="kw">else </span>{
             ctx.done = <span class="bool-val">true</span>;
         }

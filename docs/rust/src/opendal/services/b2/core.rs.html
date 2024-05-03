@@ -970,7 +970,7 @@
         };
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(mime) = args.content_type() {
-            start_large_file_request.content_type = mime.to_owned();
+            mime.clone_into(<span class="kw-2">&amp;mut </span>start_large_file_request.content_type)
         }
 
         <span class="kw">let </span>body =
