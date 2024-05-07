@@ -363,8 +363,8 @@
     </span>}
 }
 
-<span class="doccomment">/// BlockingReader is a boxed dyn `BlockingRead`.
-</span><span class="kw">pub type </span>BlockingReader = Box&lt;<span class="kw">dyn </span>BlockingRead&gt;;
+<span class="doccomment">/// BlockingReader is a arc dyn `BlockingRead`.
+</span><span class="kw">pub type </span>BlockingReader = Arc&lt;<span class="kw">dyn </span>BlockingRead&gt;;
 
 <span class="doccomment">/// Read is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>BlockingRead: Send + Sync {
@@ -407,9 +407,9 @@
     }
 }
 
-<span class="doccomment">/// `Box&lt;dyn BlockingRead&gt;` won't implement `BlockingRead` automatically.
+<span class="doccomment">/// `Arc&lt;dyn BlockingRead&gt;` won't implement `BlockingRead` automatically.
 /// To make BlockingReader work as expected, we must add this impl.
-</span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Box&lt;T&gt; {
+</span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Arc&lt;T&gt; {
     <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).read_at(offset, limit)
     }

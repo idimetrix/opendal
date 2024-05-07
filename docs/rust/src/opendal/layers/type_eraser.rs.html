@@ -193,7 +193,7 @@
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="self">self</span>.inner
             .blocking_read(path, args)
-            .map(|(rp, r)| (rp, Box::new(r) <span class="kw">as </span>oio::BlockingReader))
+            .map(|(rp, r)| (rp, Arc::new(r) <span class="kw">as </span>oio::BlockingReader))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
