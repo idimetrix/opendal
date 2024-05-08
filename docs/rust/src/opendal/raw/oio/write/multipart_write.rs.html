@@ -437,6 +437,10 @@
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -547,12 +551,15 @@
 ///
 /// - `part_number` is the index of the part, starting from 0.
 /// - `etag` is the `ETag` of the part.
+/// - `checksum` is the optional checksum of the part.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>MultipartPart {
     <span class="doccomment">/// The number of the part, starting from 0.
     </span><span class="kw">pub </span>part_number: usize,
     <span class="doccomment">/// The etag of the part.
     </span><span class="kw">pub </span>etag: String,
+    <span class="doccomment">/// The checksum of the part.
+    </span><span class="kw">pub </span>checksum: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="doccomment">/// WritePartResult is the result returned by [`WritePartFuture`].
@@ -820,6 +827,7 @@
             <span class="prelude-val">Ok</span>(MultipartPart {
                 part_number,
                 etag: <span class="string">"etag"</span>.to_string(),
+                checksum: <span class="prelude-val">None</span>,
             })
         }
 

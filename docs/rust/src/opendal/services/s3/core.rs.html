@@ -1092,6 +1092,19 @@
 <a href="#1092" id="1092">1092</a>
 <a href="#1093" id="1093">1093</a>
 <a href="#1094" id="1094">1094</a>
+<a href="#1095" id="1095">1095</a>
+<a href="#1096" id="1096">1096</a>
+<a href="#1097" id="1097">1097</a>
+<a href="#1098" id="1098">1098</a>
+<a href="#1099" id="1099">1099</a>
+<a href="#1100" id="1100">1100</a>
+<a href="#1101" id="1101">1101</a>
+<a href="#1102" id="1102">1102</a>
+<a href="#1103" id="1103">1103</a>
+<a href="#1104" id="1104">1104</a>
+<a href="#1105" id="1105">1105</a>
+<a href="#1106" id="1106">1106</a>
+<a href="#1107" id="1107">1107</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1344,21 +1357,23 @@
 
         req
     }
-
+    <span class="kw">pub fn </span>calculate_checksum(<span class="kw-2">&amp;</span><span class="self">self</span>, body: <span class="kw-2">&amp;</span>Buffer) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+        <span class="kw">match </span><span class="self">self</span>.checksum_algorithm {
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(ChecksumAlgorithm::Crc32c) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>crc = <span class="number">0u32</span>;
+                body.clone()
+                    .for_each(|b| crc = crc32c::crc32c_append(crc, <span class="kw-2">&amp;</span>b));
+                <span class="prelude-val">Some</span>(BASE64_STANDARD.encode(crc.to_be_bytes()))
+            }
+        }
+    }
     <span class="kw">pub fn </span>insert_checksum_header(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut </span>req: http::request::Builder,
-        body: <span class="kw-2">&amp;</span>Buffer,
+        checksum: <span class="kw-2">&amp;</span>str,
     ) -&gt; http::request::Builder {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(checksum_algorithm) = <span class="self">self</span>.checksum_algorithm.as_ref() {
-            <span class="kw">let </span>checksum = <span class="kw">match </span>checksum_algorithm {
-                ChecksumAlgorithm::Crc32c =&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>crc = <span class="number">0u32</span>;
-                    body.clone()
-                        .for_each(|b| crc = crc32c::crc32c_append(crc, <span class="kw-2">&amp;</span>b));
-                    BASE64_STANDARD.encode(crc.to_be_bytes())
-                }
-            };
             req = req.header(checksum_algorithm.to_header_name(), checksum);
         }
         req
@@ -1535,8 +1550,11 @@
         <span class="comment">// Set SSE headers.
         </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">true</span>);
 
-        <span class="comment">// Set Checksum header.
-        </span>req = <span class="self">self</span>.insert_checksum_header(req, <span class="kw-2">&amp;</span>body);
+        <span class="comment">// Calculate Checksum.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(checksum) = <span class="self">self</span>.calculate_checksum(<span class="kw-2">&amp;</span>body) {
+            <span class="comment">// Set Checksum header.
+            </span>req = <span class="self">self</span>.insert_checksum_header(req, <span class="kw-2">&amp;</span>checksum);
+        }
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
@@ -1720,6 +1738,7 @@
         part_number: usize,
         size: u64,
         body: Buffer,
+        checksum: <span class="prelude-ty">Option</span>&lt;String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -1738,8 +1757,10 @@
         <span class="comment">// Set SSE headers.
         </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">true</span>);
 
-        <span class="comment">// Set Checksum header.
-        </span>req = <span class="self">self</span>.insert_checksum_header(req, <span class="kw-2">&amp;</span>body);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(checksum) = checksum {
+            <span class="comment">// Set Checksum header.
+            </span>req = <span class="self">self</span>.insert_checksum_header(req, <span class="kw-2">&amp;</span>checksum);
+        }
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
@@ -1886,6 +1907,8 @@
     /// ref: &lt;https://github.com/tafia/quick-xml/issues/362&gt;
     </span><span class="attr">#[serde(rename = <span class="string">"ETag"</span>)]
     </span><span class="kw">pub </span>etag: String,
+    <span class="attr">#[serde(rename = <span class="string">"ChecksumCRC32C"</span>, skip_serializing_if = <span class="string">"Option::is_none"</span>)]
+    </span><span class="kw">pub </span>checksum_crc32c: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="doccomment">/// Request of DeleteObjects.
@@ -2015,14 +2038,17 @@
                 CompleteMultipartUploadRequestPart {
                     part_number: <span class="number">1</span>,
                     etag: <span class="string">"\"a54357aff0632cce46d942af68356b38\""</span>.to_string(),
+                    ..Default::default()
                 },
                 CompleteMultipartUploadRequestPart {
                     part_number: <span class="number">2</span>,
                     etag: <span class="string">"\"0c78aef83f66abc1fa1e8477f296d394\""</span>.to_string(),
+                    ..Default::default()
                 },
                 CompleteMultipartUploadRequestPart {
                     part_number: <span class="number">3</span>,
                     etag: <span class="string">"\"acbd18db4cc2f85cedef654fccc4a4d8\""</span>.to_string(),
+                    ..Default::default()
                 },
             ],
         };
