@@ -391,7 +391,7 @@
 <span class="kw">impl </span>Access <span class="kw">for </span>SupabaseBackend {
     <span class="kw">type </span>Reader = SupabaseReader;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;SupabaseWriter&gt;;
-    <span class="comment">// todo: implement Lister to support list and scan
+    <span class="comment">// todo: implement Lister to support list
     </span><span class="kw">type </span>Lister = ();
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>BlockingWriter = ();
