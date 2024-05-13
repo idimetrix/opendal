@@ -272,8 +272,8 @@ op.copy(<span class="string">"path/to/file"</span>, <span class="string">"path/t
 op.rename(<span class="string">"path/to/file"</span>, <span class="string">"path/to/file2"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.writer" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#855-857">source</a><h4 class="code-header">pub async fn <a href="#method.writer" class="fn">writer</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.Writer.html" title="struct opendal::Writer">Writer</a>&gt;</h4></section></summary><div class="docblock"><p>Write multiple bytes into path.</p>
 <h5 id="notes-10"><a class="doc-anchor" href="#notes-10">§</a>Notes</h5><h6 id="extra-options-5"><a class="doc-anchor" href="#extra-options-5">§</a>Extra Options</h6>
-<p><a href="struct.Operator.html#method.write" title="method opendal::Operator::write"><code>Operator::write</code></a> is a wrapper of <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a> without any options. To use
-extra options like <code>content_type</code> and <code>cache_control</code>, please use <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a>
+<p><a href="struct.Operator.html#method.writer" title="method opendal::Operator::writer"><code>Operator::writer</code></a> is a wrapper of <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a> without any options. To use
+extra options like <code>content_type</code> and <code>cache_control</code>, please use <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a>
 instead.</p>
 <h6 id="chunk-2"><a class="doc-anchor" href="#chunk-2">§</a>Chunk</h6>
 <p>OpenDAL is designed to write files directly without chunking by default, giving users
@@ -281,7 +281,7 @@ control over the exact size of their writes and helping avoid unnecessary costs.
 <p>This is not efficient for cases when users write small chunks of data. Some storage services
 like <code>s3</code> could even return hard errors like <code>EntityTooSmall</code>. Besides, cloud storage services
 will cost more money if we write data in small chunks.</p>
-<p>Users can use <a href="struct.Operator.html#method.write_with" title="method opendal::Operator::write_with"><code>Operator::write_with</code></a> to set a good chunk size might improve the performance,</p>
+<p>Users can use <a href="struct.Operator.html#method.writer_with" title="method opendal::Operator::writer_with"><code>Operator::writer_with</code></a> to set a good chunk size might improve the performance,</p>
 <h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bytes::Bytes;
 
