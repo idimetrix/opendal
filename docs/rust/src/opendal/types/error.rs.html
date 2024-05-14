@@ -473,6 +473,16 @@
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -865,6 +875,16 @@
     /// By set temporary, we indicate this error is retryable.
     </span><span class="kw">pub fn </span>set_temporary(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.status = ErrorStatus::Temporary;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set temporary status for error by given temporary.
+    ///
+    /// By set temporary, we indicate this error is retryable.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_temporary(<span class="kw-2">mut </span><span class="self">self</span>, temporary: bool) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>temporary {
+            <span class="self">self</span>.status = ErrorStatus::Temporary;
+        }
         <span class="self">self
     </span>}
 

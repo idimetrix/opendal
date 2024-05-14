@@ -189,11 +189,6 @@
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -302,28 +297,11 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>resp = req_builder.send().<span class="kw">await</span>.map_err(|err| {
-            <span class="kw">let </span>is_temporary = !(
-                <span class="comment">// Builder related error should not be retried.
-                </span>err.is_builder() ||
-                <span class="comment">// Error returned by RedirectPolicy.
-                //
-                // Don't retry error if we redirect too many.
-                </span>err.is_redirect() ||
-                <span class="comment">// We never use `Response::error_for_status`, just don't allow retry.
-                //
-                // Status should be checked by our services.
-                </span>err.is_status()
-            );
-
-            <span class="kw">let </span><span class="kw-2">mut </span>oerr = Error::new(ErrorKind::Unexpected, <span class="string">"send http request"</span>)
+            Error::new(ErrorKind::Unexpected, <span class="string">"send http request"</span>)
                 .with_operation(<span class="string">"http_util::Client::send"</span>)
                 .with_context(<span class="string">"url"</span>, uri.to_string())
-                .set_source(err);
-            <span class="kw">if </span>is_temporary {
-                oerr = oerr.set_temporary();
-            }
-
-            oerr
+                .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
+                .set_source(err)
         })<span class="question-mark">?</span>;
 
         <span class="comment">// Get content length from header so that we can check it.
@@ -358,7 +336,9 @@
             .<span class="kw">await
             </span>.map_err(|err| {
                 Error::new(ErrorKind::Unexpected, <span class="string">"read data from http response"</span>)
+                    .with_operation(<span class="string">"http_util::Client::send"</span>)
                     .with_context(<span class="string">"url"</span>, uri.to_string())
+                    .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
                     .set_source(err)
             })<span class="question-mark">?</span>;
 
@@ -389,5 +369,15 @@
         )
         .set_temporary()),
     }
+}
+
+<span class="attr">#[inline]
+</span><span class="kw">fn </span>is_temporary_error(err: <span class="kw-2">&amp;</span>reqwest::Error) -&gt; bool {
+    <span class="comment">// error sending request
+    </span>err.is_request()||
+    <span class="comment">// request or response body error
+    </span>err.is_body() ||
+    <span class="comment">// error decoding response body, for example, connection reset.
+    </span>err.is_decode()
 }
 </code></pre></div></section></main></body></html>
