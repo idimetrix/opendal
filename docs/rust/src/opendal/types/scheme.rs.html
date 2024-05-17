@@ -472,6 +472,12 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -506,6 +512,8 @@
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>Scheme {
+    <span class="doccomment">/// [aliyun_drive][crate::services::AliyunDrive]: Aliyun Drive services.
+    </span>AliyunDrive,
     <span class="doccomment">/// [atomicserver][crate::services::Atomicserver]: Atomicserver services.
     </span>Atomicserver,
     <span class="doccomment">/// [azblob][crate::services::Azblob]: Azure Storage Blob services.
@@ -665,6 +673,8 @@
     /// ```
     </span><span class="kw">pub fn </span>enabled() -&gt; HashSet&lt;Scheme&gt; {
         HashSet::from([
+            <span class="attr">#[cfg(feature = <span class="string">"services-aliyun-drive"</span>)]
+            </span>Scheme::AliyunDrive,
             <span class="attr">#[cfg(feature = <span class="string">"services-atomicserver"</span>)]
             </span>Scheme::Atomicserver,
             <span class="attr">#[cfg(feature = <span class="string">"services-alluxio"</span>)]
@@ -799,6 +809,7 @@
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">let </span>s = s.to_lowercase();
         <span class="kw">match </span>s.as_str() {
+            <span class="string">"aliyun_drive" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::AliyunDrive),
             <span class="string">"atomicserver" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Atomicserver),
             <span class="string">"azblob" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Azblob),
             <span class="string">"alluxio" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Alluxio),
@@ -873,6 +884,7 @@
 <span class="kw">impl </span>From&lt;Scheme&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
     <span class="kw">fn </span>from(v: Scheme) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>v {
+            Scheme::AliyunDrive =&gt; <span class="string">"aliyun_drive"</span>,
             Scheme::Atomicserver =&gt; <span class="string">"atomicserver"</span>,
             Scheme::Azblob =&gt; <span class="string">"azblob"</span>,
             Scheme::Azdls =&gt; <span class="string">"azdls"</span>,

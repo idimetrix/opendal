@@ -416,6 +416,8 @@
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -568,6 +570,8 @@
     </span><span class="attr">#[allow(unused_variables, unreachable_code)]
     </span><span class="kw">pub fn </span>via_map(scheme: Scheme, map: HashMap&lt;String, String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Operator&gt; {
         <span class="kw">let </span>op = <span class="kw">match </span>scheme {
+            <span class="attr">#[cfg(feature = <span class="string">"services-aliyun-drive"</span>)]
+            </span>Scheme::AliyunDrive =&gt; <span class="self">Self</span>::from_map::&lt;services::AliyunDrive&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-atomicserver"</span>)]
             </span>Scheme::Atomicserver =&gt; <span class="self">Self</span>::from_map::&lt;services::Atomicserver&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-alluxio"</span>)]
