@@ -102,6 +102,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/NativeObject.html#close()" class="member-name-link">close()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/NativeObject.html" title="class in org.apache.opendal">NativeObject</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorInputStream.html#close()" class="member-name-link">close()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorInputStream.html" title="class in org.apache.opendal">OperatorInputStream</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorOutputStream.html#close()" class="member-name-link">close()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorOutputStream.html" title="class in org.apache.opendal">OperatorOutputStream</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OpenDALException.Code.html#ConditionNotMatch" class="member-name-link">ConditionNotMatch</a> - Enum constant in enum org.apache.opendal.<a href="org/apache/opendal/OpenDALException.Code.html" title="enum in org.apache.opendal">OpenDALException.Code</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OpenDALException.Code.html#ConfigInvalid" class="member-name-link">ConfigInvalid</a> - Enum constant in enum org.apache.opendal.<a href="org/apache/opendal/OpenDALException.Code.html" title="enum in org.apache.opendal">OpenDALException.Code</a></dt>
@@ -141,6 +145,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="org/apache/opendal/BlockingOperator.html#createDir(java.lang.String)" class="member-name-link">createDir(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Operator.html#createDir(java.lang.String)" class="member-name-link">createDir(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/BlockingOperator.html#createInputStream(java.lang.String)" class="member-name-link">createInputStream(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/BlockingOperator.html#createOutputStream(java.lang.String)" class="member-name-link">createOutputStream(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/AsyncExecutor.html#createTokioExecutor(int)" class="member-name-link">createTokioExecutor(int)</a> - Static method in class org.apache.opendal.<a href="org/apache/opendal/AsyncExecutor.html" title="class in org.apache.opendal">AsyncExecutor</a></dt>
 <dd>&nbsp;</dd>
@@ -199,6 +207,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">FILE means the path has data to read.</div>
 </dd>
+<dt><a href="org/apache/opendal/OperatorOutputStream.html#flush()" class="member-name-link">flush()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorOutputStream.html" title="class in org.apache.opendal">OperatorOutputStream</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OperatorInfo.html#fullCapability" class="member-name-link">fullCapability</a> - Variable in class org.apache.opendal.<a href="org/apache/opendal/OperatorInfo.html" title="class in org.apache.opendal">OperatorInfo</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -370,6 +380,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OperatorInfo.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,org.apache.opendal.Capability,org.apache.opendal.Capability)" class="member-name-link">OperatorInfo(String, String, String, Capability, Capability)</a> - Constructor for class org.apache.opendal.<a href="org/apache/opendal/OperatorInfo.html" title="class in org.apache.opendal">OperatorInfo</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorInputStream.html" class="type-name-link" title="class in org.apache.opendal">OperatorInputStream</a> - Class in <a href="org/apache/opendal/package-summary.html">org.apache.opendal</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorInputStream.html#%3Cinit%3E(org.apache.opendal.BlockingOperator,java.lang.String)" class="member-name-link">OperatorInputStream(BlockingOperator, String)</a> - Constructor for class org.apache.opendal.<a href="org/apache/opendal/OperatorInputStream.html" title="class in org.apache.opendal">OperatorInputStream</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorOutputStream.html" class="type-name-link" title="class in org.apache.opendal">OperatorOutputStream</a> - Class in <a href="org/apache/opendal/package-summary.html">org.apache.opendal</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/OperatorOutputStream.html#%3Cinit%3E(org.apache.opendal.BlockingOperator,java.lang.String)" class="member-name-link">OperatorOutputStream(BlockingOperator, String)</a> - Constructor for class org.apache.opendal.<a href="org/apache/opendal/OperatorOutputStream.html" title="class in org.apache.opendal">OperatorOutputStream</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/package-summary.html">org.apache.opendal</a> - package org.apache.opendal</dt>
 <dd>
 <div class="block">JNI-based Java binding for <a href="https://opendal.apache.org/">Apache OpenDAL™</a>.</div>
@@ -420,6 +438,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">If operator supports read.</div>
 </dd>
+<dt><a href="org/apache/opendal/OperatorInputStream.html#read()" class="member-name-link">read()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorInputStream.html" title="class in org.apache.opendal">OperatorInputStream</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/BlockingOperator.html#read(java.lang.String)" class="member-name-link">read(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Operator.html#read(java.lang.String)" class="member-name-link">read(String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
@@ -537,6 +557,8 @@ the order they are declared.</div>
 <dd>
 <div class="block">If operator supports write.</div>
 </dd>
+<dt><a href="org/apache/opendal/OperatorOutputStream.html#write(int)" class="member-name-link">write(int)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorOutputStream.html" title="class in org.apache.opendal">OperatorOutputStream</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/BlockingOperator.html#write(java.lang.String,byte%5B%5D)" class="member-name-link">write(String, byte[])</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/BlockingOperator.html" title="class in org.apache.opendal">BlockingOperator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Operator.html#write(java.lang.String,byte%5B%5D)" class="member-name-link">write(String, byte[])</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>

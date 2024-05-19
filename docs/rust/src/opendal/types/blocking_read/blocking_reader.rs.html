@@ -308,7 +308,7 @@
 
     <span class="doccomment">/// Convert reader into [`StdBytesIterator`] which implements [`Iterator`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_bytes_iterator(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdBytesIterator {
+    </span><span class="kw">pub fn </span>into_bytes_iterator(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; StdBytesIterator {
         StdBytesIterator::new(<span class="self">self</span>.inner, range)
     }
 }
