@@ -521,6 +521,11 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -662,7 +667,12 @@
 
         <span class="kw">let </span>stream = r
             .into_bytes_stream(<span class="number">0</span>..meta.size <span class="kw">as </span>u64)
-            .into_send()
+            .<span class="kw">await
+            </span>.map_err(|err| object_store::Error::Generic {
+                store: <span class="string">"IoError"</span>,
+                source: Box::new(err),
+            })<span class="question-mark">?
+            </span>.into_send()
             .map_err(|err| object_store::Error::Generic {
                 store: <span class="string">"IoError"</span>,
                 source: Box::new(err),

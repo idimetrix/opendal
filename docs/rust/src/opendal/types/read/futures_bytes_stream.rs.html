@@ -140,7 +140,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::io;
-<span class="kw">use </span>std::ops::RangeBounds;
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::task::ready;
 <span class="kw">use </span>std::task::Context;
@@ -170,7 +170,7 @@
 <span class="kw">impl </span>FuturesBytesStream {
     <span class="doccomment">/// NOTE: don't allow users to create FuturesStream directly.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::Reader, options: OpReader, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::Reader, options: OpReader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>stream = BufferStream::new(r, options, range);
 
         FuturesBytesStream {

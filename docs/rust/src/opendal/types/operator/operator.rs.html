@@ -2193,6 +2193,9 @@
 <a href="#2193" id="2193">2193</a>
 <a href="#2194" id="2194">2194</a>
 <a href="#2195" id="2195">2195</a>
+<a href="#2196" id="2196">2196</a>
+<a href="#2197" id="2197">2197</a>
+<a href="#2198" id="2198">2198</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2211,6 +2214,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>futures::stream;
@@ -2742,8 +2746,9 @@
                     );
                 }
 
+                <span class="kw">let </span>path = Arc::new(path);
                 <span class="kw">let </span>range = options.range();
-                <span class="kw">let </span>r = Reader::create(inner, <span class="kw-2">&amp;</span>path, args, options).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>r = Reader::create(inner, path, args, options).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>buf = r.read(range.to_range()).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
@@ -2851,7 +2856,8 @@
                     );
                 }
 
-                Reader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args, options).<span class="kw">await
+                <span class="kw">let </span>path = Arc::new(path);
+                Reader::create(inner.clone(), path, args, options).<span class="kw">await
             </span>},
         )
     }
