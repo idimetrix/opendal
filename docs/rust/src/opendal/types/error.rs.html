@@ -457,26 +457,6 @@
 <a href="#457" id="457">457</a>
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -561,24 +541,6 @@
     /// As OpenDAL cannot handle the `condition not match` error, it will always return this error to users.
     /// So users could to handle this error by themselves.
     </span>ConditionNotMatch,
-    <span class="doccomment">/// The content is truncated.
-    ///
-    /// This error kind means there are more content to come but been truncated.
-    ///
-    /// For examples:
-    ///
-    /// - Users expected to read 1024 bytes, but service returned more bytes.
-    /// - Service expected to write 1024 bytes, but users write more bytes.
-    </span>ContentTruncated,
-    <span class="doccomment">/// The content is incomplete.
-    ///
-    /// This error kind means expect content length is not reached.
-    ///
-    /// For examples:
-    ///
-    /// - Users expected to read 1024 bytes, but service returned less bytes.
-    /// - Service expected to write 1024 bytes, but users write less bytes.
-    </span>ContentIncomplete,
 }
 
 <span class="kw">impl </span>ErrorKind {
@@ -608,8 +570,6 @@
             ErrorKind::RateLimited =&gt; <span class="string">"RateLimited"</span>,
             ErrorKind::IsSameFile =&gt; <span class="string">"IsSameFile"</span>,
             ErrorKind::ConditionNotMatch =&gt; <span class="string">"ConditionNotMatch"</span>,
-            ErrorKind::ContentTruncated =&gt; <span class="string">"ContentTruncated"</span>,
-            ErrorKind::ContentIncomplete =&gt; <span class="string">"ContentIncomplete"</span>,
         }
     }
 }
