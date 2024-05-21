@@ -477,12 +477,6 @@
 <a href="#477" id="477">477</a>
 <a href="#478" id="478">478</a>
 <a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -585,10 +579,6 @@
     /// - Users expected to read 1024 bytes, but service returned less bytes.
     /// - Service expected to write 1024 bytes, but users write less bytes.
     </span>ContentIncomplete,
-    <span class="doccomment">/// The input is invalid.
-    ///
-    /// For example, user try to seek to a negative position
-    </span>InvalidInput,
 }
 
 <span class="kw">impl </span>ErrorKind {
@@ -620,7 +610,6 @@
             ErrorKind::ConditionNotMatch =&gt; <span class="string">"ConditionNotMatch"</span>,
             ErrorKind::ContentTruncated =&gt; <span class="string">"ContentTruncated"</span>,
             ErrorKind::ContentIncomplete =&gt; <span class="string">"ContentIncomplete"</span>,
-            ErrorKind::InvalidInput =&gt; <span class="string">"InvalidInput"</span>,
         }
     }
 }
@@ -912,7 +901,6 @@
         <span class="kw">let </span>kind = <span class="kw">match </span>err.kind() {
             ErrorKind::NotFound =&gt; io::ErrorKind::NotFound,
             ErrorKind::PermissionDenied =&gt; io::ErrorKind::PermissionDenied,
-            ErrorKind::InvalidInput =&gt; io::ErrorKind::InvalidInput,
             <span class="kw">_ </span>=&gt; io::ErrorKind::Other,
         };
 

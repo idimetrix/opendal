@@ -85,7 +85,6 @@
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -123,7 +122,6 @@
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
     <span class="kw">let </span>(kind, _retryable) = <span class="kw">match </span>parts.status.as_u16() {
-        <span class="number">400 </span>=&gt; (ErrorKind::InvalidInput, <span class="bool-val">false</span>),
         <span class="number">403 </span>=&gt; (ErrorKind::PermissionDenied, <span class="bool-val">false</span>),
         <span class="number">404 </span>=&gt; (ErrorKind::NotFound, <span class="bool-val">false</span>),
         <span class="number">520 </span>=&gt; (ErrorKind::Unexpected, <span class="bool-val">false</span>),
