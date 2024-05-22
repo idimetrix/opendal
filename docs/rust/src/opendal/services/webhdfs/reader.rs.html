@@ -53,20 +53,6 @@
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
-<a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
-<a href="#65" id="65">65</a>
-<a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -84,11 +70,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>http::StatusCode;
+</span><span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
-<span class="kw">use </span><span class="kw">super</span>::error::parse_error_msg;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::webhdfs::backend::WebhdfsBackend;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -111,8 +95,8 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>WebhdfsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>range = BytesRange::new(offset, <span class="prelude-val">Some</span>(limit <span class="kw">as </span>u64));
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>range = BytesRange::new(offset, <span class="prelude-val">Some</span>(size <span class="kw">as </span>u64));
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.webhdfs_read_file(<span class="kw-2">&amp;</span><span class="self">self</span>.path, range).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -120,18 +104,6 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; <span class="prelude-val">Ok</span>(resp.into_body()),
-            <span class="comment">// WebHDFS will returns 403 when range is outside of the end.
-            </span>StatusCode::FORBIDDEN =&gt; {
-                <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
-                <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
-                <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
-                <span class="kw">if </span>s.contains(<span class="string">"out of the range"</span>) {
-                    <span class="prelude-val">Ok</span>(Buffer::new())
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">Err</span>(parse_error_msg(parts, <span class="kw-2">&amp;</span>s)<span class="question-mark">?</span>)
-                }
-            }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; <span class="prelude-val">Ok</span>(Buffer::new()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }

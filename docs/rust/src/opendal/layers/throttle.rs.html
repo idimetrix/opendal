@@ -252,8 +252,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -435,16 +433,14 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="comment">// TODO: How can we handle buffer reads with a limiter?
-        </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read_at(offset, size).<span class="kw">await
     </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ThrottleWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="comment">// TODO: How can we handle buffer reads with a limiter?
-        </span><span class="self">self</span>.inner.read_at(offset, limit)
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read_at(offset, size)
     }
 }
 

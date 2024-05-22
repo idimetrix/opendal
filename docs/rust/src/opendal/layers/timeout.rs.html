@@ -752,8 +752,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>fut = <span class="self">self</span>.inner.read_at(offset, limit);
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>fut = <span class="self">self</span>.inner.read_at(offset, size);
         <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ReadOperation::Read.into_static(), fut).<span class="kw">await
     </span>}
 }

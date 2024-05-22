@@ -1824,13 +1824,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read, I: RetryInterceptor&gt; oio::Read <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         {
             || {
                 <span class="self">self</span>.inner
                     .as_ref()
                     .expect(<span class="string">"inner must be valid"</span>)
-                    .read_at(offset, limit)
+                    .read_at(offset, size)
             }
         }
         .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
@@ -1851,8 +1851,8 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead, I: RetryInterceptor&gt; oio::BlockingRead <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        { || <span class="self">self</span>.inner.as_ref().unwrap().read_at(offset, limit) }
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        { || <span class="self">self</span>.inner.as_ref().unwrap().read_at(offset, size) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {

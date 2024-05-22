@@ -900,6 +900,24 @@
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1489,22 +1507,40 @@
 <span class="kw">pub struct </span>CompleteReader&lt;R&gt;(R);
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>CompleteReader&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">if </span>limit == <span class="number">0 </span>{
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">if </span>size == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
 
-        <span class="self">self</span>.<span class="number">0</span>.read_at(offset, limit).<span class="kw">await
-    </span>}
+        <span class="kw">let </span>buf = <span class="self">self</span>.<span class="number">0</span>.read_at(offset, size).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>buf.len() != size {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::RangeNotSatisfied,
+                <span class="string">"service didn't return the expected size"</span>,
+            )
+            .with_context(<span class="string">"expect"</span>, size.to_string())
+            .with_context(<span class="string">"actual"</span>, buf.len().to_string()));
+        }
+        <span class="prelude-val">Ok</span>(buf)
+    }
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>CompleteReader&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">if </span>limit == <span class="number">0 </span>{
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">if </span>size == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
 
-        <span class="self">self</span>.<span class="number">0</span>.read_at(offset, limit)
+        <span class="kw">let </span>buf = <span class="self">self</span>.<span class="number">0</span>.read_at(offset, size)<span class="question-mark">?</span>;
+        <span class="kw">if </span>buf.len() != size {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::RangeNotSatisfied,
+                <span class="string">"service didn't return the expected size"</span>,
+            )
+            .with_context(<span class="string">"expect"</span>, size.to_string())
+            .with_context(<span class="string">"actual"</span>, buf.len().to_string()));
+        }
+        <span class="prelude-val">Ok</span>(buf)
     }
 }
 

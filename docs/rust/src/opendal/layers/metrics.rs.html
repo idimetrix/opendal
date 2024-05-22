@@ -1588,10 +1588,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>start = Instant::now();
 
-        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, limit).<span class="kw">await </span>{
+        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, size).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bs) =&gt; {
                 <span class="self">self</span>.bytes_counter.increment(bs.remaining() <span class="kw">as </span>u64);
                 <span class="self">self</span>.requests_duration_seconds
@@ -1607,11 +1607,11 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
-            .read_at(offset, limit)
+            .read_at(offset, size)
             .map(|bs| {
                 <span class="self">self</span>.bytes_counter.increment(bs.remaining() <span class="kw">as </span>u64);
                 <span class="self">self</span>.requests_duration_seconds

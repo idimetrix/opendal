@@ -1181,6 +1181,9 @@
 <a href="#1181" id="1181">1181</a>
 <a href="#1182" id="1182">1182</a>
 <a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1200,6 +1203,7 @@
 
 </span><span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -1579,7 +1583,8 @@
                     );
                 }
 
-                <span class="kw">let </span>r = BlockingReader::create(inner, <span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
+                <span class="kw">let </span>path = Arc::new(path);
+                <span class="kw">let </span>r = BlockingReader::create(inner, path, args)<span class="question-mark">?</span>;
                 <span class="kw">let </span>buf = r.read(range.to_range())<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
@@ -1637,7 +1642,8 @@
                     );
                 }
 
-                BlockingReader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args)
+                <span class="kw">let </span>path = Arc::new(path);
+                BlockingReader::create(inner.clone(), path, args)
             },
         ))
     }

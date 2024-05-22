@@ -121,11 +121,11 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>HdfsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>r = <span class="self">Self </span>{ f: <span class="self">self</span>.f.clone() };
         <span class="kw">match </span>tokio::runtime::Handle::try_current() {
             <span class="prelude-val">Ok</span>(runtime) =&gt; runtime
-                .spawn_blocking(<span class="kw">move </span>|| oio::BlockingRead::read_at(<span class="kw-2">&amp;</span>r, offset, limit))
+                .spawn_blocking(<span class="kw">move </span>|| oio::BlockingRead::read_at(<span class="kw-2">&amp;</span>r, offset, size))
                 .<span class="kw">await
                 </span>.map_err(|err| {
                     Error::new(ErrorKind::Unexpected, <span class="string">"tokio spawn io task failed"</span>).set_source(err)
@@ -139,15 +139,15 @@
 }
 
 <span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>HdfsReader {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(limit);
+    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(size);
 
         <span class="kw">let </span>buf = bs.spare_capacity_mut();
         <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
 
         <span class="comment">// SAFETY: Read at most `size` bytes into `read_buf`.
         </span><span class="kw">unsafe </span>{
-            read_buf.assume_init(limit);
+            read_buf.assume_init(size);
         }
 
         <span class="kw">loop </span>{

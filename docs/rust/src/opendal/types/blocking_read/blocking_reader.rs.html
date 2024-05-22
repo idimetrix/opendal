@@ -155,6 +155,15 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -175,6 +184,7 @@
 </span><span class="kw">use </span>std::collections::Bound;
 <span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::ops::RangeBounds;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::BufMut;
@@ -185,7 +195,13 @@
 <span class="doccomment">/// BlockingReader is designed to read data from given path in an blocking
 /// manner.
 </span><span class="kw">pub struct </span>BlockingReader {
+    acc: Accessor,
+    path: Arc&lt;String&gt;,
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) inner: oio::BlockingReader,
+
+    <span class="doccomment">/// Total size of the reader.
+    </span>size: Arc&lt;AtomicContentLength&gt;,
 }
 
 <span class="kw">impl </span>BlockingReader {
@@ -196,10 +212,45 @@
     ///
     /// We don't want to expose those details to users so keep this function
     /// in crate only.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: Accessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="kw">crate</span>::Result&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, r) = acc.blocking_read(path, op)<span class="question-mark">?</span>;
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: Accessor, path: Arc&lt;String&gt;, op: OpRead) -&gt; <span class="kw">crate</span>::Result&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>(<span class="kw">_</span>, r) = acc.blocking_read(<span class="kw-2">&amp;</span>path, op)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(BlockingReader { inner: r })
+        <span class="prelude-val">Ok</span>(BlockingReader {
+            acc,
+            path,
+            inner: r,
+            size: Arc::new(AtomicContentLength::new()),
+        })
+    }
+
+    <span class="doccomment">/// Parse users input range bounds into valid `Range&lt;u64&gt;`.
+    ///
+    /// To avoid duplicated stat call, we will cache the size of the reader.
+    </span><span class="kw">fn </span>parse_range(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Range&lt;u64&gt;&gt; {
+        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound() {
+            Bound::Included(v) =&gt; <span class="kw-2">*</span>v,
+            Bound::Excluded(v) =&gt; v + <span class="number">1</span>,
+            Bound::Unbounded =&gt; <span class="number">0</span>,
+        };
+
+        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound() {
+            Bound::Included(v) =&gt; v + <span class="number">1</span>,
+            Bound::Excluded(v) =&gt; <span class="kw-2">*</span>v,
+            Bound::Unbounded =&gt; <span class="kw">match </span><span class="self">self</span>.size.load() {
+                <span class="prelude-val">Some</span>(v) =&gt; v,
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="kw">let </span>size = <span class="self">self
+                        </span>.acc
+                        .blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>.path, OpStat::new())<span class="question-mark">?
+                        </span>.into_metadata()
+                        .content_length();
+                    <span class="self">self</span>.size.store(size);
+                    size
+                }
+            },
+        };
+
+        <span class="prelude-val">Ok</span>(start..end)
     }
 
     <span class="doccomment">/// Read give range from reader into [`Buffer`].
@@ -211,40 +262,25 @@
     ///
     /// - Buffer length smaller than range means we have reached the end of file.
     </span><span class="kw">pub fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
-            Bound::Included(start) =&gt; start,
-            Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
-            Bound::Unbounded =&gt; <span class="number">0</span>,
-        };
-
-        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound().cloned() {
-            Bound::Included(end) =&gt; <span class="prelude-val">Some</span>(end + <span class="number">1</span>),
-            Bound::Excluded(end) =&gt; <span class="prelude-val">Some</span>(end),
-            Bound::Unbounded =&gt; <span class="prelude-val">None</span>,
-        };
-
-        <span class="comment">// If range is empty, return Ok(0) directly.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(end) = end {
-            <span class="kw">if </span>end &lt;= start {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
-            }
-        }
+        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range)<span class="question-mark">?</span>;
+        <span class="kw">let </span>start = range.start;
+        <span class="kw">let </span>end = range.end;
 
         <span class="kw">let </span><span class="kw-2">mut </span>bufs = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
 
         <span class="kw">loop </span>{
             <span class="comment">// TODO: use service preferred io size instead.
-            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
-            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, limit)<span class="question-mark">?</span>;
+            </span><span class="kw">let </span>size = (end - offset) <span class="kw">as </span>usize;
+            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, size)<span class="question-mark">?</span>;
             <span class="kw">let </span>n = bs.remaining();
             bufs.push(bs);
-            <span class="kw">if </span>n &lt; limit {
+            <span class="kw">if </span>n &lt; size {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
             }
 
             offset += n <span class="kw">as </span>u64;
-            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+            <span class="kw">if </span>offset == end {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect());
             }
         }
@@ -258,41 +294,22 @@
     ///
     /// - Returning length smaller than range means we have reached the end of file.
     </span><span class="kw">pub fn </span>read_into(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufMut, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound().cloned() {
-            Bound::Included(start) =&gt; start,
-            Bound::Excluded(start) =&gt; start + <span class="number">1</span>,
-            Bound::Unbounded =&gt; <span class="number">0</span>,
-        };
-
-        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound().cloned() {
-            Bound::Included(end) =&gt; <span class="prelude-val">Some</span>(end + <span class="number">1</span>),
-            Bound::Excluded(end) =&gt; <span class="prelude-val">Some</span>(end),
-            Bound::Unbounded =&gt; <span class="prelude-val">None</span>,
-        };
-
-        <span class="comment">// If range is empty, return Ok(0) directly.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(end) = end {
-            <span class="kw">if </span>end &lt;= start {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>);
-            }
-        }
+        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range)<span class="question-mark">?</span>;
+        <span class="kw">let </span>start = range.start;
+        <span class="kw">let </span>end = range.end;
 
         <span class="kw">let </span><span class="kw-2">mut </span>offset = start;
         <span class="kw">let </span><span class="kw-2">mut </span>read = <span class="number">0</span>;
 
         <span class="kw">loop </span>{
             <span class="comment">// TODO: use service preferred io size instead.
-            </span><span class="kw">let </span>limit = end.map(|end| end - offset).unwrap_or(<span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>usize;
-            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, limit)<span class="question-mark">?</span>;
+            </span><span class="kw">let </span>size = (end - offset) <span class="kw">as </span>usize;
+            <span class="kw">let </span>bs = <span class="self">self</span>.inner.read_at(offset, size)<span class="question-mark">?</span>;
             <span class="kw">let </span>n = bs.remaining();
             buf.put(bs);
             read += n <span class="kw">as </span>u64;
-            <span class="kw">if </span>n &lt; limit {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
-            }
-
             offset += n <span class="kw">as </span>u64;
-            <span class="kw">if </span><span class="prelude-val">Some</span>(offset) == end {
+            <span class="kw">if </span>offset == end {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(read <span class="kw">as _</span>);
             }
         }
@@ -301,15 +318,16 @@
     <span class="doccomment">/// Convert reader into [`StdReader`] which implements [`futures::AsyncRead`],
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_std_read(<span class="self">self</span>, range: Range&lt;u64&gt;) -&gt; StdReader {
-        <span class="comment">// TODO: the capacity should be decided by services.
-        </span>StdReader::new(<span class="self">self</span>.inner, range)
+    </span><span class="kw">pub fn </span>into_std_read(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;StdReader&gt; {
+        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(StdReader::new(<span class="self">self</span>.inner, range))
     }
 
     <span class="doccomment">/// Convert reader into [`StdBytesIterator`] which implements [`Iterator`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>into_bytes_iterator(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; StdBytesIterator {
-        StdBytesIterator::new(<span class="self">self</span>.inner, range)
+    </span><span class="kw">pub fn </span>into_bytes_iterator(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;StdBytesIterator&gt; {
+        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(StdBytesIterator::new(<span class="self">self</span>.inner, range))
     }
 }
 </code></pre></div></section></main></body></html>

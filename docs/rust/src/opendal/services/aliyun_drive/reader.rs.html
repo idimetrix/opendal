@@ -116,15 +116,15 @@
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>AliyunDriveReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="comment">// AliyunDrive responds with status OK even if the range is not statisfiable.
         // and then the whole file will be read.
         </span><span class="kw">let </span>limit = <span class="kw">if </span>offset &gt;= <span class="self">self</span>.size {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
-        } <span class="kw">else if </span>offset + (limit <span class="kw">as </span>u64) - <span class="number">1 </span>&gt; <span class="self">self</span>.size {
+        } <span class="kw">else if </span>offset + (size <span class="kw">as </span>u64) - <span class="number">1 </span>&gt; <span class="self">self</span>.size {
             <span class="self">self</span>.size - offset
         } <span class="kw">else </span>{
-            limit <span class="kw">as </span>u64
+            size <span class="kw">as </span>u64
         };
         <span class="kw">let </span>range = BytesRange::new(offset, <span class="prelude-val">Some</span>(limit));
         <span class="kw">let </span>req = Request::get(<span class="self">self</span>.download_url.as_str())
