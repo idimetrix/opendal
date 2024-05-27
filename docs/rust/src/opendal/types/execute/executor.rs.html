@@ -68,6 +68,20 @@
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -89,6 +103,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 <span class="kw">use </span>futures::FutureExt;
+<span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -99,12 +114,18 @@
 ///
 /// Executor will run futures in background and return a [`Task`] as handle to the future. Users
 /// can call `task.await` to wait for the future to complete or drop the `Task` to cancel it.
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Executor {
     executor: Arc&lt;<span class="kw">dyn </span>Execute&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">"executors-tokio"</span>)]
-</span><span class="kw">impl </span>Default <span class="kw">for </span>Executor {
+<span class="kw">impl </span>Debug <span class="kw">for </span>Executor {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"Executor"</span>)
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Executor {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new()
     }
@@ -113,10 +134,17 @@
 <span class="kw">impl </span>Executor {
     <span class="doccomment">/// Create a default executor.
     ///
-    /// The default executor is enabled by feature flags.
-    </span><span class="attr">#[cfg(feature = <span class="string">"executors-tokio"</span>)]
+    /// The default executor is enabled by feature flags. If no feature flags enabled, the default
+    /// executor will always return error if users try to perform concurrent tasks.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::with(executors::TokioExecutor::default())
+        <span class="attr">#[cfg(feature = <span class="string">"executors-tokio"</span>)]
+        </span>{
+            <span class="self">Self</span>::with(executors::TokioExecutor::default())
+        }
+        <span class="attr">#[cfg(not(feature = <span class="string">"executors-tokio"</span>))]
+        </span>{
+            <span class="self">Self</span>::with(())
+        }
     }
 
     <span class="doccomment">/// Create a new executor with given execute impl.

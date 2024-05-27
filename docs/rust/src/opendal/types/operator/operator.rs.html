@@ -2196,6 +2196,33 @@
 <a href="#2196" id="2196">2196</a>
 <a href="#2197" id="2197">2197</a>
 <a href="#2198" id="2198">2198</a>
+<a href="#2199" id="2199">2199</a>
+<a href="#2200" id="2200">2200</a>
+<a href="#2201" id="2201">2201</a>
+<a href="#2202" id="2202">2202</a>
+<a href="#2203" id="2203">2203</a>
+<a href="#2204" id="2204">2204</a>
+<a href="#2205" id="2205">2205</a>
+<a href="#2206" id="2206">2206</a>
+<a href="#2207" id="2207">2207</a>
+<a href="#2208" id="2208">2208</a>
+<a href="#2209" id="2209">2209</a>
+<a href="#2210" id="2210">2210</a>
+<a href="#2211" id="2211">2211</a>
+<a href="#2212" id="2212">2212</a>
+<a href="#2213" id="2213">2213</a>
+<a href="#2214" id="2214">2214</a>
+<a href="#2215" id="2215">2215</a>
+<a href="#2216" id="2216">2216</a>
+<a href="#2217" id="2217">2217</a>
+<a href="#2218" id="2218">2218</a>
+<a href="#2219" id="2219">2219</a>
+<a href="#2220" id="2220">2220</a>
+<a href="#2221" id="2221">2221</a>
+<a href="#2222" id="2222">2222</a>
+<a href="#2223" id="2223">2223</a>
+<a href="#2224" id="2224">2224</a>
+<a href="#2225" id="2225">2225</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2265,6 +2292,8 @@
 
     <span class="comment">// limit is usually the maximum size of data that operator will handle in one operation
     </span>limit: usize,
+    <span class="doccomment">/// The default executor that used to run futures in background.
+    </span>default_executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;,
 }
 
 <span class="doccomment">/// # Operator basic API.
@@ -2279,7 +2308,11 @@
             .full_capability()
             .batch_max_operations
             .unwrap_or(<span class="number">1000</span>);
-        <span class="self">Self </span>{ accessor, limit }
+        <span class="self">Self </span>{
+            accessor,
+            limit,
+            default_executor: <span class="prelude-val">None</span>,
+        }
     }
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>into_inner(<span class="self">self</span>) -&gt; Accessor {
@@ -2298,6 +2331,18 @@
     </span><span class="kw">pub fn </span>with_limit(<span class="kw-2">&amp;</span><span class="self">self</span>, limit: usize) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>op = <span class="self">self</span>.clone();
         op.limit = limit;
+        op
+    }
+
+    <span class="doccomment">/// Get the default executor.
+    </span><span class="kw">pub fn </span>default_executor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Executor&gt; {
+        <span class="self">self</span>.default_executor.clone()
+    }
+
+    <span class="doccomment">/// Specify the default executor.
+    </span><span class="kw">pub fn </span>with_default_executor(<span class="kw-2">&amp;</span><span class="self">self</span>, executor: Executor) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>op = <span class="self">self</span>.clone();
+        op.default_executor = <span class="prelude-val">Some</span>(executor);
         op
     }
 
@@ -2735,7 +2780,10 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpRead::default(), OpReader::default()),
+            (
+                OpRead::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
+                OpReader::default(),
+            ),
             |inner, path, (args, options)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -2845,7 +2893,10 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpRead::default(), OpReader::default()),
+            (
+                OpRead::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
+                OpReader::default(),
+            ),
             |inner, path, (args, options)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -3250,7 +3301,7 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpWrite::default(),
+            OpWrite::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
             |inner, path, args| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -3394,7 +3445,10 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpWrite::default(), bs),
+            (
+                OpWrite::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
+                bs,
+            ),
             |inner, path, (args, bs)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
