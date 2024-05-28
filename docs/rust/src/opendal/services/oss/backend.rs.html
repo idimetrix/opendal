@@ -587,6 +587,10 @@
 <a href="#587" id="587">587</a>
 <a href="#588" id="588">588</a>
 <a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1055,7 +1059,11 @@
         <span class="kw">let </span>w = <span class="kw">if </span>args.append() {
             OssWriters::Two(oio::AppendWriter::new(writer))
         } <span class="kw">else </span>{
-            OssWriters::One(oio::MultipartWriter::new(writer, args.concurrent()))
+            OssWriters::One(oio::MultipartWriter::new(
+                writer,
+                args.executor().cloned(),
+                args.concurrent(),
+            ))
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))

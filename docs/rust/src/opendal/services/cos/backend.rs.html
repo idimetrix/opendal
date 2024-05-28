@@ -395,6 +395,10 @@
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -733,7 +737,11 @@
         <span class="kw">let </span>w = <span class="kw">if </span>args.append() {
             CosWriters::Two(oio::AppendWriter::new(writer))
         } <span class="kw">else </span>{
-            CosWriters::One(oio::MultipartWriter::new(writer, args.concurrent()))
+            CosWriters::One(oio::MultipartWriter::new(
+                writer,
+                args.executor().cloned(),
+                args.concurrent(),
+            ))
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))

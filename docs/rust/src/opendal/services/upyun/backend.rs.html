@@ -351,6 +351,7 @@
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -657,9 +658,10 @@
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>concurrent = args.concurrent();
+        <span class="kw">let </span>executor = args.executor().cloned();
         <span class="kw">let </span>writer = UpyunWriter::new(<span class="self">self</span>.core.clone(), args, path.to_string());
 
-        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, concurrent);
+        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, executor, concurrent);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }

@@ -55,9 +55,6 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -84,9 +81,8 @@
 
 <span class="kw">impl </span>Execute <span class="kw">for </span>TokioExecutor {
     <span class="doccomment">/// Tokio's JoinHandle has it's own `abort` support, so dropping handle won't cancel the task.
-    </span><span class="kw">fn </span>execute(<span class="kw-2">&amp;</span><span class="self">self</span>, f: BoxedStaticFuture&lt;()&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">fn </span>execute(<span class="kw-2">&amp;</span><span class="self">self</span>, f: BoxedStaticFuture&lt;()&gt;) {
         <span class="kw">let </span>_handle = tokio::task::spawn(f);
-        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -106,12 +102,10 @@
         <span class="kw">let </span>finished = Arc::new(AtomicBool::new(<span class="bool-val">false</span>));
 
         <span class="kw">let </span>finished_clone = finished.clone();
-        <span class="kw">let </span>_task = executor
-            .execute(<span class="kw">async move </span>{
-                sleep(Duration::from_secs(<span class="number">1</span>)).<span class="kw">await</span>;
-                finished_clone.store(<span class="bool-val">true</span>, Ordering::Relaxed);
-            })
-            .unwrap();
+        <span class="kw">let </span>_task = executor.execute(<span class="kw">async move </span>{
+            sleep(Duration::from_secs(<span class="number">1</span>)).<span class="kw">await</span>;
+            finished_clone.store(<span class="bool-val">true</span>, Ordering::Relaxed);
+        });
 
         sleep(Duration::from_secs(<span class="number">2</span>)).<span class="kw">await</span>;
         <span class="comment">// Task must has been finished even without await task.

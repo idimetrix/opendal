@@ -469,6 +469,8 @@
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -932,10 +934,12 @@
         <span class="kw">let </span>parent_path = get_parent(path);
         <span class="kw">let </span>parent_file_id = <span class="self">self</span>.core.ensure_dir_exists(parent_path).<span class="kw">await</span><span class="question-mark">?</span>;
 
+        <span class="kw">let </span>executor = args.executor().cloned();
+
         <span class="kw">let </span>writer =
             AliyunDriveWriter::new(<span class="self">self</span>.core.clone(), <span class="kw-2">&amp;</span>parent_file_id, get_basename(path), args);
 
-        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, <span class="number">1</span>);
+        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, executor, <span class="number">1</span>);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }

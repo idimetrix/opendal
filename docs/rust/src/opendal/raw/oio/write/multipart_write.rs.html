@@ -395,52 +395,6 @@
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -458,14 +412,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>futures::Future;
-<span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::StreamExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -562,45 +511,11 @@
     </span><span class="kw">pub </span>checksum: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="doccomment">/// WritePartResult is the result returned by [`WritePartFuture`].
-///
-/// The error part will carries input `(part_number, buffer, err)` so caller can retry them.
-</span><span class="kw">type </span>WritePartResult = std::result::Result&lt;MultipartPart, (usize, Buffer, Error)&gt;;
-
-<span class="kw">struct </span>WritePartFuture(BoxedStaticFuture&lt;WritePartResult&gt;);
-
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this WritePartFuture.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>WritePartFuture {}
-
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for WritePartFuture.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>WritePartFuture {}
-
-<span class="kw">impl </span>Future <span class="kw">for </span>WritePartFuture {
-    <span class="kw">type </span>Output = WritePartResult;
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="self">self</span>.get_mut().<span class="number">0</span>.poll_unpin(cx)
-    }
-}
-
-<span class="kw">impl </span>WritePartFuture {
-    <span class="kw">pub fn </span>new&lt;W: MultipartWrite&gt;(
-        w: Arc&lt;W&gt;,
-        upload_id: Arc&lt;String&gt;,
-        part_number: usize,
-        bytes: Buffer,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>fut = <span class="kw">async move </span>{
-            w.write_part(<span class="kw-2">&amp;</span>upload_id, part_number, bytes.len() <span class="kw">as </span>u64, bytes.clone())
-                .<span class="kw">await
-                </span>.map_err(|err| (part_number, bytes, err))
-        };
-
-        WritePartFuture(Box::pin(fut))
-    }
+<span class="kw">struct </span>WriteInput&lt;W: MultipartWrite&gt; {
+    w: Arc&lt;W&gt;,
+    upload_id: Arc&lt;String&gt;,
+    part_number: usize,
+    bytes: Buffer,
 }
 
 <span class="doccomment">/// MultipartWriter will implements [`Write`] based on multipart
@@ -611,8 +526,9 @@
     upload_id: <span class="prelude-ty">Option</span>&lt;Arc&lt;String&gt;&gt;,
     parts: Vec&lt;MultipartPart&gt;,
     cache: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
-    futures: ConcurrentFutures&lt;WritePartFuture&gt;,
     next_part_number: usize,
+
+    tasks: ConcurrentTasks&lt;WriteInput&lt;W&gt;, MultipartPart&gt;,
 }
 
 <span class="doccomment">/// # Safety
@@ -621,14 +537,31 @@
 
 </span><span class="kw">impl</span>&lt;W: MultipartWrite&gt; MultipartWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new MultipartWriter.
-    </span><span class="kw">pub fn </span>new(inner: W, concurrent: usize) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(inner: W, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;, concurrent: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>w = Arc::new(inner);
         <span class="self">Self </span>{
-            w: Arc::new(inner),
+            w,
             upload_id: <span class="prelude-val">None</span>,
             parts: Vec::new(),
             cache: <span class="prelude-val">None</span>,
-            futures: ConcurrentFutures::new(<span class="number">1</span>.max(concurrent)),
             next_part_number: <span class="number">0</span>,
+
+            tasks: ConcurrentTasks::new(executor, concurrent, |input| {
+                Box::pin({
+                    <span class="kw">async move </span>{
+                        <span class="kw">let </span>result = input
+                            .w
+                            .write_part(
+                                <span class="kw-2">&amp;</span>input.upload_id,
+                                input.part_number,
+                                input.bytes.len() <span class="kw">as </span>u64,
+                                input.bytes.clone(),
+                            )
+                            .<span class="kw">await</span>;
+                        (input, result)
+                    }
+                })
+            }),
         }
     }
 
@@ -661,40 +594,21 @@
             }
         };
 
-        <span class="kw">loop </span>{
-            <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                <span class="kw">let </span>cache = <span class="self">self</span>.cache.take().expect(<span class="string">"pending write must exist"</span>);
-                <span class="kw">let </span>part_number = <span class="self">self</span>.next_part_number;
-                <span class="self">self</span>.next_part_number += <span class="number">1</span>;
+        <span class="kw">let </span>bytes = <span class="self">self</span>.cache.clone().expect(<span class="string">"pending write must exist"</span>);
+        <span class="kw">let </span>part_number = <span class="self">self</span>.next_part_number;
 
-                <span class="self">self</span>.futures.push_back(WritePartFuture::new(
-                    <span class="self">self</span>.w.clone(),
-                    upload_id.clone(),
-                    part_number,
-                    cache,
-                ));
-                <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
-            }
-
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(part) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
-                <span class="kw">match </span>part {
-                    <span class="prelude-val">Ok</span>(part) =&gt; {
-                        <span class="self">self</span>.parts.push(part);
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="prelude-val">Err</span>((part_number, bytes, err)) =&gt; {
-                        <span class="self">self</span>.futures.push_front(WritePartFuture::new(
-                            <span class="self">self</span>.w.clone(),
-                            upload_id.clone(),
-                            part_number,
-                            bytes,
-                        ));
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                    }
-                }
-            }
-        }
+        <span class="self">self</span>.tasks
+            .execute(WriteInput {
+                w: <span class="self">self</span>.w.clone(),
+                upload_id: upload_id.clone(),
+                part_number,
+                bytes,
+            })
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.next_part_number += <span class="number">1</span>;
+        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(size)
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -712,53 +626,37 @@
             }
         };
 
-        <span class="kw">loop </span>{
-            <span class="comment">// futures queue is empty and cache is consumed, we can complete the upload.
-            </span><span class="kw">if </span><span class="self">self</span>.futures.is_empty() &amp;&amp; <span class="self">self</span>.cache.is_none() {
-                <span class="kw">return </span><span class="self">self</span>.w.complete_part(<span class="kw-2">&amp;</span>upload_id, <span class="kw-2">&amp;</span><span class="self">self</span>.parts).<span class="kw">await</span>;
-            }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.clone() {
+            <span class="kw">let </span>part_number = <span class="self">self</span>.next_part_number;
 
-            <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                <span class="comment">// This must be the final task.
-                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.take() {
-                    <span class="kw">let </span>part_number = <span class="self">self</span>.next_part_number;
-                    <span class="self">self</span>.next_part_number += <span class="number">1</span>;
-
-                    <span class="self">self</span>.futures.push_back(WritePartFuture::new(
-                        <span class="self">self</span>.w.clone(),
-                        upload_id.clone(),
-                        part_number,
-                        cache,
-                    ));
-                }
-            }
-
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(part) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
-                <span class="kw">match </span>part {
-                    <span class="prelude-val">Ok</span>(part) =&gt; {
-                        <span class="self">self</span>.parts.push(part);
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="prelude-val">Err</span>((part_number, bytes, err)) =&gt; {
-                        <span class="self">self</span>.futures.push_front(WritePartFuture::new(
-                            <span class="self">self</span>.w.clone(),
-                            upload_id.clone(),
-                            part_number,
-                            bytes,
-                        ));
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                    }
-                }
-            }
+            <span class="self">self</span>.tasks
+                .execute(WriteInput {
+                    w: <span class="self">self</span>.w.clone(),
+                    upload_id: upload_id.clone(),
+                    part_number,
+                    bytes: cache,
+                })
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+            <span class="self">self</span>.next_part_number += <span class="number">1</span>;
         }
-    }
+
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(result) = <span class="self">self</span>.tasks.next().<span class="kw">await</span>.transpose()<span class="question-mark">? </span><span class="kw">else </span>{
+                <span class="kw">break</span>;
+            };
+            <span class="self">self</span>.parts.push(result)
+        }
+
+        <span class="self">self</span>.w.complete_part(<span class="kw-2">&amp;</span>upload_id, <span class="kw-2">&amp;</span><span class="self">self</span>.parts).<span class="kw">await
+    </span>}
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(upload_id) = <span class="self">self</span>.upload_id.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
-        <span class="self">self</span>.futures.clear();
+        <span class="self">self</span>.tasks.clear();
         <span class="self">self</span>.w.abort_part(<span class="kw-2">&amp;</span>upload_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
         <span class="prelude-val">Ok</span>(())
@@ -767,12 +665,14 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::sync::Mutex;
+    <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
+    <span class="kw">use </span>tokio::sync::Mutex;
+    <span class="kw">use </span>tokio::time::sleep;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
@@ -797,12 +697,12 @@
 
     <span class="kw">impl </span>MultipartWrite <span class="kw">for </span>Arc&lt;Mutex&lt;TestWrite&gt;&gt; {
         <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="self">self</span>.lock().unwrap().length += size;
+            <span class="self">self</span>.lock().<span class="kw">await</span>.length += size;
             <span class="prelude-val">Ok</span>(())
         }
 
         <span class="kw">async fn </span>initiate_part(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-            <span class="kw">let </span>upload_id = <span class="self">self</span>.lock().unwrap().upload_id.clone();
+            <span class="kw">let </span>upload_id = <span class="self">self</span>.lock().<span class="kw">await</span>.upload_id.clone();
             <span class="prelude-val">Ok</span>(upload_id)
         }
 
@@ -813,16 +713,24 @@
             size: u64,
             <span class="kw">_</span>: Buffer,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;MultipartPart&gt; {
-            <span class="kw">let </span><span class="kw-2">mut </span>test = <span class="self">self</span>.lock().unwrap();
-            <span class="macro">assert_eq!</span>(upload_id, test.upload_id);
+            {
+                <span class="kw">let </span>test = <span class="self">self</span>.lock().<span class="kw">await</span>;
+                <span class="macro">assert_eq!</span>(upload_id, test.upload_id);
+            }
 
-            <span class="comment">// We will have 50% percent rate for write part to fail.
-            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">5.0 </span>/ <span class="number">10.0</span>) {
+            <span class="comment">// Add an async sleep here to enforce some pending.
+            </span>sleep(Duration::from_millis(<span class="number">50</span>)).<span class="kw">await</span>;
+
+            <span class="comment">// We will have 10% percent rate for write part to fail.
+            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
             }
 
-            test.part_numbers.push(part_number);
-            test.length += size;
+            {
+                <span class="kw">let </span><span class="kw-2">mut </span>test = <span class="self">self</span>.lock().<span class="kw">await</span>;
+                test.part_numbers.push(part_number);
+                test.length += size;
+            }
 
             <span class="prelude-val">Ok</span>(MultipartPart {
                 part_number,
@@ -832,7 +740,7 @@
         }
 
         <span class="kw">async fn </span>complete_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str, parts: <span class="kw-2">&amp;</span>[MultipartPart]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="kw">let </span>test = <span class="self">self</span>.lock().unwrap();
+            <span class="kw">let </span>test = <span class="self">self</span>.lock().<span class="kw">await</span>;
             <span class="macro">assert_eq!</span>(upload_id, test.upload_id);
             <span class="macro">assert_eq!</span>(parts.len(), test.part_numbers.len());
 
@@ -840,7 +748,7 @@
         }
 
         <span class="kw">async fn </span>abort_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="kw">let </span>test = <span class="self">self</span>.lock().unwrap();
+            <span class="kw">let </span>test = <span class="self">self</span>.lock().<span class="kw">await</span>;
             <span class="macro">assert_eq!</span>(upload_id, test.upload_id);
 
             <span class="prelude-val">Ok</span>(())
@@ -851,7 +759,7 @@
     </span><span class="kw">async fn </span>test_multipart_upload_writer_with_concurrent_errors() {
         <span class="kw">let </span><span class="kw-2">mut </span>rng = thread_rng();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>w = MultipartWriter::new(TestWrite::new(), <span class="number">8</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>w = MultipartWriter::new(TestWrite::new(), <span class="prelude-val">Some</span>(Executor::new()), <span class="number">200</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>total_size = <span class="number">0u64</span>;
 
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">1000 </span>{
@@ -880,7 +788,7 @@
         <span class="kw">let </span>expected_parts: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..<span class="number">1000</span>).collect();
         <span class="macro">assert_eq!</span>(actual_parts, expected_parts);
 
-        <span class="kw">let </span>actual_size = w.w.lock().unwrap().length;
+        <span class="kw">let </span>actual_size = w.w.lock().<span class="kw">await</span>.length;
         <span class="macro">assert_eq!</span>(actual_size, total_size);
     }
 }

@@ -392,6 +392,10 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -727,7 +731,11 @@
         <span class="kw">let </span>w = <span class="kw">if </span>args.append() {
             ObsWriters::Two(oio::AppendWriter::new(writer))
         } <span class="kw">else </span>{
-            ObsWriters::One(oio::MultipartWriter::new(writer, args.concurrent()))
+            ObsWriters::One(oio::MultipartWriter::new(
+                writer,
+                args.executor().cloned(),
+                args.concurrent(),
+            ))
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))

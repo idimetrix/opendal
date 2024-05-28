@@ -81,7 +81,6 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -101,7 +100,6 @@
 
 </span><span class="kw">use super</span>::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::future::Future;
@@ -156,14 +154,14 @@
 
     <span class="doccomment">/// Run given future in background immediately.
     </span><span class="attr">#[allow(unused)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>execute&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;Task&lt;F::Output&gt;&gt;
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>execute&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; Task&lt;F::Output&gt;
     <span class="kw">where
         </span>F: Future + MaybeSend + <span class="lifetime">'static</span>,
         F::Output: MaybeSend + <span class="lifetime">'static</span>,
     {
         <span class="kw">let </span>(fut, handle) = f.remote_handle();
-        <span class="self">self</span>.executor.execute(Box::pin(fut))<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Task::new(handle))
+        <span class="self">self</span>.executor.execute(Box::pin(fut));
+        Task::new(handle)
     }
 }
 </code></pre></div></section></main></body></html>
