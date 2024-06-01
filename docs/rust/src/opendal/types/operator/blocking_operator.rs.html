@@ -1184,6 +1184,9 @@
 <a href="#1184" id="1184">1184</a>
 <a href="#1185" id="1185">1185</a>
 <a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2032,17 +2035,20 @@
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>remove_all(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>meta = <span class="kw">match </span><span class="self">self</span>.stat(path) {
-            <span class="prelude-val">Ok</span>(metadata) =&gt; metadata,
+        <span class="kw">match </span><span class="self">self</span>.stat(path) {
+            <span class="prelude-val">Ok</span>(metadata) =&gt; {
+                <span class="kw">if </span>metadata.mode() != EntryMode::DIR {
+                    <span class="self">self</span>.delete(path)<span class="question-mark">?</span>;
+                    <span class="comment">// There may still be objects prefixed with the path in some backend, so we can't return here.
+                </span>}
+            }
 
-            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
+            <span class="comment">// If dir not found, it may be a prefix in object store like S3,
+            // and we still need to delete objects under the prefix.
+            </span><span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; {}
 
             <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
         };
-
-        <span class="kw">if </span>meta.mode() != EntryMode::DIR {
-            <span class="kw">return </span><span class="self">self</span>.delete(path);
-        }
 
         <span class="kw">let </span>obs = <span class="self">self</span>.lister_with(path).recursive(<span class="bool-val">true</span>).call()<span class="question-mark">?</span>;
 

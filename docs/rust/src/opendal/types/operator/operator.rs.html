@@ -2226,13 +2226,6 @@
 <a href="#2226" id="2226">2226</a>
 <a href="#2227" id="2227">2227</a>
 <a href="#2228" id="2228">2228</a>
-<a href="#2229" id="2229">2229</a>
-<a href="#2230" id="2230">2230</a>
-<a href="#2231" id="2231">2231</a>
-<a href="#2232" id="2232">2232</a>
-<a href="#2233" id="2233">2233</a>
-<a href="#2234" id="2234">2234</a>
-<a href="#2235" id="2235">2235</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3651,14 +3644,7 @@
             </span><span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
         };
 
-        <span class="kw">let </span>obs = <span class="kw">match </span><span class="self">self</span>.lister_with(path).recursive(<span class="bool-val">true</span>).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(obs) =&gt; obs,
-            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; {
-                <span class="comment">// If lister still returns NotFound, we can confirm there are no objects under the prefix in any backend.
-                </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
-        };
+        <span class="kw">let </span>obs = <span class="self">self</span>.lister_with(path).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span><span class="self">self</span>.info().full_capability().batch {
             <span class="kw">let </span><span class="kw-2">mut </span>obs = obs.try_chunks(<span class="self">self</span>.limit());
