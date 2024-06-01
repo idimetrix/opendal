@@ -28,12 +28,37 @@ blocking</li>
 <li><code>root</code>: Set the work directory for backend</li>
 <li><code>bucket</code>: Set the container name for backend</li>
 <li><code>endpoint</code>: Customizable endpoint setting</li>
-<li><code>credential</code>: Credentials string for GCS service OAuth2 authentication</li>
-<li><code>credential_path</code>: Local path to credentials file for GCS service OAuth2 authentication</li>
+<li><code>credential</code>: Service Account or External Account JSON, in base64</li>
+<li><code>credential_path</code>: local path to Service Account or External Account JSON file</li>
+<li><code>service_account</code>: name of Service Account</li>
 <li><code>predefined_acl</code>: Predefined ACL for GCS</li>
 <li><code>default_storage_class</code>: Default storage class for GCS</li>
 </ul>
-<p>Refer to public API docs for more information.</p>
+<p>Refer to public API docs for more information. For authentication related options, read on.</p>
+<h3 id="options-to-authenticate-to-gcs"><a class="doc-anchor" href="#options-to-authenticate-to-gcs">§</a>Options to authenticate to GCS</h3>
+<p>OpenDAL supports the following authentication options:</p>
+<ol>
+<li>Provide a base64-ed JSON key string with <code>credential</code></li>
+<li>Provide a JSON key file at explicit path with <code>credential_path</code></li>
+<li>Provide a JSON key file at implicit path
+<ul>
+<li><code>GcsBackend</code> will attempt to load Service Account key from <a href="https://cloud.google.com/docs/authentication/application-default-credentials">ADC well-known places</a>.</li>
+</ul>
+</li>
+<li>Fetch access token from <a href="https://cloud.google.com/docs/authentication/rest#metadata-server">VM metadata</a>
+<ul>
+<li>Only works when running inside Google Cloud.</li>
+<li>If a non-default Service Account name is required, set with <code>service_account</code>. Otherwise, nothing need to be set.</li>
+</ul>
+</li>
+<li>A custom <code>TokenLoader</code> via <code>GcsBuilder.customed_token_loader()</code></li>
+</ol>
+<p>Notes:</p>
+<ul>
+<li>When a Service Account key is provided, it will be used to create access tokens (VM metadata will not be used).</li>
+<li>Explicit Service Account key, in json or path, always take precedence over ADC-defined key paths.</li>
+<li>Due to <a href="https://cloud.google.com/storage/docs/authentication/signatures#signing-process">limitation in GCS</a>, a private key is required to create Pre-signed URL. Currently, OpenDAL only supports Service Account key.</li>
+</ul>
 <h3 id="example"><a class="doc-anchor" href="#example">§</a>Example</h3><h4 id="via-builder"><a class="doc-anchor" href="#via-builder">§</a>Via Builder</h4>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>opendal::services::Gcs;
@@ -49,8 +74,8 @@ blocking</li>
     <span class="comment">// set the working directory root for GCS
     // all operations will happen within it
     </span>builder.root(<span class="string">"/path/to/dir"</span>);
-    <span class="comment">// set the credentials string of service account
-    </span>builder.credential(<span class="string">"service account credential"</span>);
+    <span class="comment">// set the credentials with service account
+    </span>builder.credential(<span class="string">"service account JSON in base64"</span>);
     <span class="comment">// set the predefined ACL for GCS
     </span>builder.predefined_acl(<span class="string">"publicRead"</span>);
     <span class="comment">// set the default storage class for GCS
