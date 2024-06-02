@@ -727,7 +727,7 @@
 
     <span class="doccomment">/// Set the range header for this operation.
     </span><span class="kw">pub fn </span>range(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|(args, op_reader)| (args, op_reader.with_range(range.into())))
+        <span class="self">self</span>.map(|(args, op_reader)| (args.with_range(range.into()), op_reader))
     }
 
     <span class="doccomment">/// Set the concurrent read task amount.

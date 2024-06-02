@@ -1185,8 +1185,6 @@
 <a href="#1185" id="1185">1185</a>
 <a href="#1186" id="1186">1186</a>
 <a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1205,8 +1203,6 @@
 // under the License.
 
 </span><span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -1586,8 +1582,8 @@
                     );
                 }
 
-                <span class="kw">let </span>path = Arc::new(path);
-                <span class="kw">let </span>r = BlockingReader::create(inner, path, args)<span class="question-mark">?</span>;
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, OpReader::default());
+                <span class="kw">let </span>r = BlockingReader::new(context);
                 <span class="kw">let </span>buf = r.read(range.to_range())<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
@@ -1645,8 +1641,8 @@
                     );
                 }
 
-                <span class="kw">let </span>path = Arc::new(path);
-                BlockingReader::create(inner.clone(), path, args)
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, OpReader::default());
+                <span class="prelude-val">Ok</span>(BlockingReader::new(context))
             },
         ))
     }
@@ -1671,7 +1667,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.write_with(path, bs).call()
     }
 
@@ -1812,7 +1808,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; FunctionWrite {
+    </span><span class="kw">pub fn </span>write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Buffer&gt;) -&gt; FunctionWrite {
         <span class="kw">let </span>path = normalize_path(path);
 
         <span class="kw">let </span>bs = bs.into();
@@ -1833,7 +1829,7 @@
 
                 <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.blocking_write(<span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
                 <span class="kw">while </span>!bs.is_empty() {
-                    <span class="kw">let </span>n = w.write(bs.clone().into())<span class="question-mark">?</span>;
+                    <span class="kw">let </span>n = w.write(bs.clone())<span class="question-mark">?</span>;
                     bs.advance(n);
                 }
                 w.close()<span class="question-mark">?</span>;

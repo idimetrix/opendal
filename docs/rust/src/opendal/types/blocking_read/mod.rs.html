@@ -23,6 +23,9 @@
 <a href="#23" id="23">23</a>
 <a href="#24" id="24">24</a>
 <a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
+<a href="#27" id="27">27</a>
+<a href="#28" id="28">28</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -43,6 +46,9 @@
 </span><span class="attr">#[allow(clippy::module_inception)]
 </span><span class="kw">mod </span>blocking_reader;
 <span class="kw">pub use </span>blocking_reader::BlockingReader;
+
+<span class="kw">mod </span>buffer_iterator;
+<span class="kw">pub use </span>buffer_iterator::BufferIterator;
 
 <span class="kw">mod </span>std_bytes_iterator;
 <span class="kw">pub use </span>std_bytes_iterator::StdBytesIterator;

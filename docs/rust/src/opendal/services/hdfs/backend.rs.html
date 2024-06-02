@@ -665,6 +665,16 @@
 <a href="#665" id="665">665</a>
 <a href="#666" id="666">666</a>
 <a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -686,6 +696,7 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::io;
+<span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -911,10 +922,10 @@
 <span class="kw">unsafe impl </span>Sync <span class="kw">for </span>HdfsBackend {}
 
 <span class="kw">impl </span>Access <span class="kw">for </span>HdfsBackend {
-    <span class="kw">type </span>Reader = HdfsReader;
+    <span class="kw">type </span>Reader = HdfsReader&lt;hdrs::AsyncFile&gt;;
     <span class="kw">type </span>Writer = HdfsWriter&lt;hdrs::AsyncFile&gt;;
     <span class="kw">type </span>Lister = <span class="prelude-ty">Option</span>&lt;HdfsLister&gt;;
-    <span class="kw">type </span>BlockingReader = HdfsReader;
+    <span class="kw">type </span>BlockingReader = HdfsReader&lt;hdrs::File&gt;;
     <span class="kw">type </span>BlockingWriter = HdfsWriter&lt;hdrs::File&gt;;
     <span class="kw">type </span>BlockingLister = <span class="prelude-ty">Option</span>&lt;HdfsLister&gt;;
 
@@ -971,30 +982,29 @@
         <span class="prelude-val">Ok</span>(RpStat::new(m))
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>client = <span class="self">self</span>.client.clone();
-        <span class="kw">let </span>f = <span class="kw">match </span>tokio::runtime::Handle::try_current() {
-            <span class="prelude-val">Ok</span>(runtime) =&gt; runtime
-                .spawn_blocking(<span class="kw">move </span>|| {
-                    client
-                        .open_file()
-                        .read(<span class="bool-val">true</span>)
-                        .open(<span class="kw-2">&amp;</span>p)
-                        .map_err(new_std_io_error)
-                })
-                .<span class="kw">await
-                </span>.map_err(|err| {
-                    Error::new(ErrorKind::Unexpected, <span class="string">"tokio spawn io task failed"</span>).set_source(err)
-                })<span class="question-mark">?</span>,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unexpected,
-                <span class="string">"no tokio runtime found, failed to run io task"</span>,
-            )),
-        }<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>f = client
+            .open_file()
+            .read(<span class="bool-val">true</span>)
+            .async_open(<span class="kw-2">&amp;</span>p)
+            .<span class="kw">await
+            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>((RpRead::new(), HdfsReader::new(f)))
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>futures::AsyncSeekExt;
+
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .<span class="kw">await
+                </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>((
+            RpRead::new(),
+            HdfsReader::new(f, args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>),
+        ))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1173,17 +1183,27 @@
         <span class="prelude-val">Ok</span>(RpStat::new(m))
     }
 
-    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
-        <span class="kw">let </span>f = <span class="self">self
+        <span class="kw">let </span><span class="kw-2">mut </span>f = <span class="self">self
             </span>.client
             .open_file()
             .read(<span class="bool-val">true</span>)
             .open(<span class="kw-2">&amp;</span>p)
             .map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>((RpRead::new(), HdfsReader::new(f)))
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>std::io::Seek;
+
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>((
+            RpRead::new(),
+            HdfsReader::new(f, args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>),
+        ))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {

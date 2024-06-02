@@ -352,6 +352,15 @@
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
 <a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -386,7 +395,6 @@
 <span class="kw">use </span><span class="kw">super</span>::lister::OnedriveLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::OneDriveWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::onedrive::reader::OnedriveReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[derive(Clone)]
@@ -416,7 +424,7 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>OnedriveBackend {
-    <span class="kw">type </span>Reader = OnedriveReader;
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;OneDriveWriter&gt;;
     <span class="kw">type </span>Lister = oio::PageLister&lt;OnedriveLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -504,10 +512,20 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpRead::default(),
-            OnedriveReader::new(<span class="self">self</span>.clone(), path, args),
-        ))
+        <span class="kw">let </span>resp = <span class="self">self</span>.onedrive_get_content(path, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+
+        <span class="kw">match </span>status {
+            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
+                <span class="prelude-val">Ok</span>((RpRead::default(), resp.into_body()))
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+                <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+            }
+        }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -575,7 +593,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
             <span class="string">"https://graph.microsoft.com/v1.0/me/drive/root:{}{}"</span>,
@@ -590,7 +608,7 @@
 
         <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>onedrive_upload_simple(

@@ -116,6 +116,8 @@
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -133,75 +135,46 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::io::Read;
+<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>tokio::io::AsyncReadExt;
 <span class="kw">use </span>tokio::io::ReadBuf;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">pub struct </span>FsReader {
+<span class="kw">pub struct </span>FsReader&lt;F&gt; {
     core: Arc&lt;FsCore&gt;,
-    f: std::fs::File,
+    f: F,
+    read: usize,
+    size: usize,
+    buf_size: usize,
 }
 
-<span class="kw">impl </span>FsReader {
-    <span class="kw">pub fn </span>new(core: Arc&lt;FsCore&gt;, f: std::fs::File) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ core, f }
-    }
-
-    <span class="kw">fn </span>try_clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>f = <span class="self">self</span>.f.try_clone().map_err(|err| {
-            Error::new(
-                ErrorKind::Unexpected,
-                <span class="string">"tokio fs clone file description failed"</span>,
-            )
-            .set_source(err)
-        })<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            core: <span class="self">self</span>.core.clone(),
+<span class="kw">impl</span>&lt;F&gt; FsReader&lt;F&gt; {
+    <span class="kw">pub fn </span>new(core: Arc&lt;FsCore&gt;, f: F, size: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            core,
             f,
-        })
-    }
-
-    <span class="attr">#[cfg(target_family = <span class="string">"unix"</span>)]
-    </span><span class="kw">pub fn </span>read_at_inner(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8], offset: u64) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">use </span>std::os::unix::fs::FileExt;
-        <span class="self">self</span>.f.read_at(buf, offset).map_err(new_std_io_error)
-    }
-
-    <span class="attr">#[cfg(target_family = <span class="string">"windows"</span>)]
-    </span><span class="kw">pub fn </span>read_at_inner(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8], offset: u64) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">use </span>std::os::windows::fs::FileExt;
-        <span class="self">self</span>.f.seek_read(buf, offset).map_err(new_std_io_error)
-    }
-}
-
-<span class="kw">impl </span>oio::Read <span class="kw">for </span>FsReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>handle = <span class="self">self</span>.try_clone()<span class="question-mark">?</span>;
-
-        <span class="kw">match </span>tokio::runtime::Handle::try_current() {
-            <span class="prelude-val">Ok</span>(runtime) =&gt; runtime
-                .spawn_blocking(<span class="kw">move </span>|| oio::BlockingRead::read_at(<span class="kw-2">&amp;</span>handle, offset, size))
-                .<span class="kw">await
-                </span>.map_err(|err| {
-                    Error::new(ErrorKind::Unexpected, <span class="string">"tokio spawn io task failed"</span>).set_source(err)
-                })<span class="question-mark">?</span>,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unexpected,
-                <span class="string">"no tokio runtime found, failed to run io task"</span>,
-            )),
+            read: <span class="number">0</span>,
+            size,
+            <span class="comment">// Use 2 MiB as default value.
+            </span>buf_size: <span class="number">2 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
         }
     }
 }
 
-<span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>FsReader {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
-        bs.reserve(size);
+<span class="kw">impl </span>oio::Read <span class="kw">for </span>FsReader&lt;tokio::fs::File&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">if </span><span class="self">self</span>.read &gt;= <span class="self">self</span>.size {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
+        }
 
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
+        bs.reserve(<span class="self">self</span>.buf_size);
+
+        <span class="kw">let </span>size = (<span class="self">self</span>.size - <span class="self">self</span>.read).min(<span class="self">self</span>.buf_size);
         <span class="kw">let </span>buf = <span class="kw-2">&amp;mut </span>bs.spare_capacity_mut()[..size];
         <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
 
@@ -210,18 +183,49 @@
             read_buf.assume_init(size);
         }
 
-        <span class="kw">loop </span>{
-            <span class="comment">// If the buffer is full, we are done.
-            </span><span class="kw">if </span>read_buf.initialize_unfilled().is_empty() {
-                <span class="kw">break</span>;
-            }
-            <span class="kw">let </span>n = <span class="self">self</span>.read_at_inner(read_buf.initialize_unfilled(), offset)<span class="question-mark">?</span>;
-            <span class="kw">if </span>n == <span class="number">0 </span>{
-                <span class="kw">break</span>;
-            }
-            read_buf.advance(n);
-            offset += n <span class="kw">as </span>u64;
+        <span class="kw">let </span>n = <span class="self">self
+            </span>.f
+            .read_buf(<span class="kw-2">&amp;mut </span>read_buf)
+            .<span class="kw">await
+            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.read += n;
+
+        <span class="comment">// Safety: We make sure that bs contains `n` more bytes.
+        </span><span class="kw">let </span>filled = read_buf.filled().len();
+        <span class="kw">unsafe </span>{ bs.set_len(filled) }
+
+        <span class="kw">let </span>frozen = bs.split().freeze();
+        <span class="comment">// Return the buffer to the pool.
+        </span><span class="self">self</span>.core.buf_pool.put(bs);
+
+        <span class="prelude-val">Ok</span>(Buffer::from(frozen))
+    }
+}
+
+<span class="kw">impl </span>oio::BlockingRead <span class="kw">for </span>FsReader&lt;std::fs::File&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">if </span><span class="self">self</span>.read &gt;= <span class="self">self</span>.size {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
+        bs.reserve(<span class="self">self</span>.buf_size);
+
+        <span class="kw">let </span>size = (<span class="self">self</span>.size - <span class="self">self</span>.read).min(<span class="self">self</span>.buf_size);
+        <span class="kw">let </span>buf = <span class="kw-2">&amp;mut </span>bs.spare_capacity_mut()[..size];
+        <span class="kw">let </span><span class="kw-2">mut </span>read_buf: ReadBuf = ReadBuf::uninit(buf);
+
+        <span class="comment">// SAFETY: Read at most `limit` bytes into `read_buf`.
+        </span><span class="kw">unsafe </span>{
+            read_buf.assume_init(size);
+        }
+
+        <span class="kw">let </span>n = <span class="self">self
+            </span>.f
+            .read(read_buf.initialize_unfilled())
+            .map_err(new_std_io_error)<span class="question-mark">?</span>;
+        read_buf.advance(n);
+        <span class="self">self</span>.read += n;
 
         <span class="comment">// Safety: We make sure that bs contains `n` more bytes.
         </span><span class="kw">let </span>filled = read_buf.filled().len();

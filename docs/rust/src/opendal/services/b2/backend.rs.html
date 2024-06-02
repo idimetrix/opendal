@@ -517,6 +517,18 @@
 <a href="#517" id="517">517</a>
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -541,6 +553,7 @@
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::Request;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
@@ -556,7 +569,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::b2::core::B2Signer;
 <span class="kw">use </span><span class="kw">crate</span>::services::b2::core::ListFileNamesResponse;
-<span class="kw">use </span><span class="kw">crate</span>::services::b2::reader::B2Reader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for backblaze b2 services support.
@@ -786,7 +798,7 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>B2Backend {
-    <span class="kw">type </span>Reader = B2Reader;
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = B2Writers;
     <span class="kw">type </span>Lister = oio::PageLister&lt;B2Lister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -871,10 +883,22 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpRead::default(),
-            B2Reader::new(<span class="self">self</span>.core.clone(), path, args),
-        ))
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .download_file_by_name(path, args.range(), <span class="kw-2">&amp;</span>args)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+        <span class="kw">match </span>status {
+            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
+                <span class="prelude-val">Ok</span>((RpRead::default(), resp.into_body()))
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+                <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+            }
+        }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

@@ -131,6 +131,13 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -154,6 +161,7 @@
 <span class="kw">use </span>std::io::Seek;
 <span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::ops::Range;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
 
@@ -166,72 +174,76 @@
 ///
 /// StdReader also implements [`Send`] and [`Sync`].
 </span><span class="kw">pub struct </span>StdReader {
-    inner: oio::BlockingReader,
-    offset: u64,
-    size: u64,
-    cap: usize,
+    ctx: Arc&lt;ReadContext&gt;,
 
-    cur: u64,
+    iter: BufferIterator,
     buf: Buffer,
+    start: u64,
+    end: u64,
+    pos: u64,
 }
 
 <span class="kw">impl </span>StdReader {
     <span class="doccomment">/// NOTE: don't allow users to create StdReader directly.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(r: oio::BlockingReader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-        StdReader {
-            inner: r,
-            offset: range.start,
-            size: range.end - range.start,
-            <span class="comment">// TODO: should use services preferred io size.
-            </span>cap: <span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(start, end) = (range.start, range.end);
+        <span class="kw">let </span>iter = BufferIterator::new(ctx.clone(), range);
 
-            cur: <span class="number">0</span>,
+        <span class="self">Self </span>{
+            ctx,
+            iter,
             buf: Buffer::new(),
+            start,
+            end,
+            pos: <span class="number">0</span>,
         }
     }
-
-    <span class="doccomment">/// Set the capacity of this reader to control the IO size.
-    </span><span class="kw">pub fn </span>with_capacity(<span class="kw-2">mut </span><span class="self">self</span>, cap: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.cap = cap;
-        <span class="self">self
-    </span>}
 }
 
 <span class="kw">impl </span>BufRead <span class="kw">for </span>StdReader {
     <span class="kw">fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
-        <span class="kw">if </span><span class="self">self</span>.buf.has_remaining() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.chunk());
-        }
+        <span class="kw">loop </span>{
+            <span class="kw">if </span><span class="self">self</span>.buf.has_remaining() {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.chunk());
+            }
 
-        <span class="comment">// Make sure cur didn't exceed size.
-        </span><span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.size {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span>[]);
+            <span class="self">self</span>.buf = <span class="kw">match </span><span class="self">self</span>.iter.next().transpose().map_err(format_std_io_error)<span class="question-mark">? </span>{
+                <span class="prelude-val">Some</span>(buf) =&gt; buf,
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span>[]),
+            };
         }
-
-        <span class="kw">let </span>next_offset = <span class="self">self</span>.offset + <span class="self">self</span>.cur;
-        <span class="kw">let </span>next_size = (<span class="self">self</span>.size - <span class="self">self</span>.cur).min(<span class="self">self</span>.cap <span class="kw">as </span>u64) <span class="kw">as </span>usize;
-        <span class="self">self</span>.buf = <span class="self">self
-            </span>.inner
-            .read_at(next_offset, next_size)
-            .map_err(format_std_io_error)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.chunk())
     }
 
     <span class="kw">fn </span>consume(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amt: usize) {
         <span class="self">self</span>.buf.advance(amt);
-        <span class="self">self</span>.cur += amt <span class="kw">as </span>u64;
+        <span class="comment">// Make sure buf has been dropped before starting new request.
+        // Otherwise, we will hold those bytes in memory until next
+        // buffer reaching.
+        </span><span class="kw">if </span><span class="self">self</span>.buf.is_empty() {
+            <span class="self">self</span>.buf = Buffer::new();
+        }
+        <span class="self">self</span>.pos += amt <span class="kw">as </span>u64;
     }
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>StdReader {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
-        <span class="kw">let </span>bs = <span class="self">self</span>.fill_buf()<span class="question-mark">?</span>;
-        <span class="kw">let </span>n = bs.len().min(buf.len());
-        buf[..n].copy_from_slice(<span class="kw-2">&amp;</span>bs[..n]);
-        <span class="self">self</span>.consume(n);
-        <span class="prelude-val">Ok</span>(n)
+        <span class="kw">loop </span>{
+            <span class="kw">if </span><span class="self">self</span>.buf.remaining() &gt; <span class="number">0 </span>{
+                <span class="kw">let </span>size = <span class="self">self</span>.buf.remaining().min(buf.len());
+                <span class="self">self</span>.buf.copy_to_slice(<span class="kw-2">&amp;mut </span>buf[..size]);
+                <span class="self">self</span>.pos += size <span class="kw">as </span>u64;
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
+            }
+
+            <span class="self">self</span>.buf = <span class="kw">match </span><span class="self">self</span>.iter.next() {
+                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(buf)) =&gt; buf,
+                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(format_std_io_error(err)),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>),
+            };
+        }
     }
 }
 
@@ -240,11 +252,12 @@
     </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; io::Result&lt;u64&gt; {
         <span class="kw">let </span>new_pos = <span class="kw">match </span>pos {
             SeekFrom::Start(pos) =&gt; pos <span class="kw">as </span>i64,
-            SeekFrom::End(pos) =&gt; <span class="self">self</span>.size <span class="kw">as </span>i64 + pos,
-            SeekFrom::Current(pos) =&gt; <span class="self">self</span>.cur <span class="kw">as </span>i64 + pos,
+            SeekFrom::End(pos) =&gt; <span class="self">self</span>.end <span class="kw">as </span>i64 - <span class="self">self</span>.start <span class="kw">as </span>i64 + pos,
+            SeekFrom::Current(pos) =&gt; <span class="self">self</span>.pos <span class="kw">as </span>i64 + pos,
         };
 
-        <span class="kw">if </span>new_pos &lt; <span class="number">0 </span>{
+        <span class="comment">// Check if new_pos is negative.
+        </span><span class="kw">if </span>new_pos &lt; <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 <span class="string">"invalid seek to a negative position"</span>,
@@ -253,15 +266,16 @@
 
         <span class="kw">let </span>new_pos = new_pos <span class="kw">as </span>u64;
 
-        <span class="kw">if </span>(<span class="self">self</span>.cur..<span class="self">self</span>.cur + <span class="self">self</span>.buf.remaining() <span class="kw">as </span>u64).contains(<span class="kw-2">&amp;</span>new_pos) {
-            <span class="kw">let </span>cnt = new_pos - <span class="self">self</span>.cur;
+        <span class="kw">if </span>(<span class="self">self</span>.pos..<span class="self">self</span>.pos + <span class="self">self</span>.buf.remaining() <span class="kw">as </span>u64).contains(<span class="kw-2">&amp;</span>new_pos) {
+            <span class="kw">let </span>cnt = new_pos - <span class="self">self</span>.pos;
             <span class="self">self</span>.buf.advance(cnt <span class="kw">as _</span>);
         } <span class="kw">else </span>{
-            <span class="self">self</span>.buf = Buffer::new()
+            <span class="self">self</span>.buf = Buffer::new();
+            <span class="self">self</span>.iter = BufferIterator::new(<span class="self">self</span>.ctx.clone(), new_pos + <span class="self">self</span>.start..<span class="self">self</span>.end);
         }
 
-        <span class="self">self</span>.cur = new_pos;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.cur)
+        <span class="self">self</span>.pos = new_pos;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.pos)
     }
 }
 </code></pre></div></section></main></body></html>

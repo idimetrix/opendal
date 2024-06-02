@@ -717,10 +717,6 @@
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
 <a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1023,6 +1019,7 @@
 <span class="doccomment">/// Args for `read` operation.
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpRead {
+    range: BytesRange,
     if_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     if_none_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     override_content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -1036,6 +1033,17 @@
     <span class="doccomment">/// Create a default `OpRead` which will read whole content of path.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::default()
+    }
+
+    <span class="doccomment">/// Set the range of the option
+    </span><span class="kw">pub fn </span>with_range(<span class="kw-2">mut </span><span class="self">self</span>, range: BytesRange) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.range = range;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get range from option
+    </span><span class="kw">pub fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BytesRange {
+        <span class="self">self</span>.range
     }
 
     <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
@@ -1134,10 +1142,6 @@
 <span class="doccomment">/// Args for reader operation.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>OpReader {
-    <span class="doccomment">/// The range of the read request.
-    ///
-    /// Not available for `reader`.
-    </span>range: BytesRange,
     <span class="doccomment">/// The concurrent requests that reader can send.
     </span>concurrent: usize,
     <span class="doccomment">/// The chunk size of each request.
@@ -1149,7 +1153,6 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>OpReader {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            range: BytesRange::default(),
             concurrent: <span class="number">1</span>,
             chunk: <span class="prelude-val">None</span>,
             gap: <span class="prelude-val">None</span>,
@@ -1161,17 +1164,6 @@
     <span class="doccomment">/// Create a new `OpReader`.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::default()
-    }
-
-    <span class="doccomment">/// Set the range of the option
-    </span><span class="kw">pub fn </span>with_range(<span class="kw-2">mut </span><span class="self">self</span>, range: BytesRange) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.range = range;
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Get range from option
-    </span><span class="kw">pub fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BytesRange {
-        <span class="self">self</span>.range
     }
 
     <span class="doccomment">/// Set the concurrent of the option

@@ -66,18 +66,6 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -97,11 +85,13 @@
 
 </span><span class="kw">use </span>std::io;
 <span class="kw">use </span>std::ops::Range;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Buf;
+<span class="kw">use crate</span>::{Buffer, BufferIterator};
 <span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// StdIterator is the adapter of [`Iterator`] for [`BlockingReader`][crate::BlockingReader].
 ///
@@ -109,52 +99,38 @@
 ///
 /// StdIterator also implements [`Send`] and [`Sync`].
 </span><span class="kw">pub struct </span>StdBytesIterator {
-    inner: oio::BlockingReader,
-    offset: u64,
-    end: u64,
-    cap: usize,
-
-    cur: u64,
+    iter: BufferIterator,
+    buf: Buffer,
 }
 
 <span class="kw">impl </span>StdBytesIterator {
     <span class="doccomment">/// NOTE: don't allow users to create StdIterator directly.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(r: oio::BlockingReader, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>iter = BufferIterator::new(ctx, range);
+
         StdBytesIterator {
-            inner: r,
-            offset: range.start,
-            end: range.end,
-            <span class="comment">// TODO: should use services preferred io size.
-            </span>cap: <span class="number">4 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
-            cur: <span class="number">0</span>,
+            iter,
+            buf: Buffer::new(),
         }
     }
-
-    <span class="doccomment">/// Set the capacity of this reader to control the IO size.
-    </span><span class="kw">pub fn </span>with_capacity(<span class="kw-2">mut </span><span class="self">self</span>, cap: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.cap = cap;
-        <span class="self">self
-    </span>}
 }
 
 <span class="kw">impl </span>Iterator <span class="kw">for </span>StdBytesIterator {
     <span class="kw">type </span>Item = io::Result&lt;Bytes&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">if </span><span class="self">self</span>.offset + <span class="self">self</span>.cur &gt;= <span class="self">self</span>.end {
-            <span class="kw">return </span><span class="prelude-val">None</span>;
-        }
-
-        <span class="kw">let </span>next_offset = <span class="self">self</span>.offset + <span class="self">self</span>.cur;
-        <span class="kw">let </span>next_size = (<span class="self">self</span>.end - <span class="self">self</span>.offset - <span class="self">self</span>.cur).min(<span class="self">self</span>.cap <span class="kw">as </span>u64) <span class="kw">as </span>usize;
-        <span class="kw">match </span><span class="self">self</span>.inner.read_at(next_offset, next_size) {
-            <span class="prelude-val">Ok</span>(buf) <span class="kw">if </span>!buf.has_remaining() =&gt; <span class="prelude-val">None</span>,
-            <span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>buf) =&gt; {
-                <span class="self">self</span>.cur += buf.remaining() <span class="kw">as </span>u64;
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(buf.copy_to_bytes(buf.remaining())))
+        <span class="kw">loop </span>{
+            <span class="comment">// Consume current buffer
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = Iterator::next(<span class="kw-2">&amp;mut </span><span class="self">self</span>.buf) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs));
             }
-            <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(format_std_io_error(err))),
+
+            <span class="self">self</span>.buf = <span class="kw">match </span><span class="self">self</span>.iter.next() {
+                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(buf)) =&gt; buf,
+                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(format_std_io_error(err))),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
+            };
         }
     }
 }

@@ -289,19 +289,19 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Read, TWO: oio::Read&gt; oio::Read <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            TwoWays::One(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            TwoWays::Two(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
+            TwoWays::One(v) =&gt; v.read().<span class="kw">await</span>,
+            TwoWays::Two(v) =&gt; v.read().<span class="kw">await</span>,
         }
     }
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::BlockingRead, TWO: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, size),
+            <span class="self">Self</span>::One(v) =&gt; v.read(),
+            <span class="self">Self</span>::Two(v) =&gt; v.read(),
         }
     }
 }
@@ -342,11 +342,11 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Read, TWO: oio::Read, THREE: oio::Read&gt; oio::Read <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            ThreeWays::One(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            ThreeWays::Two(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            ThreeWays::Three(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
+            ThreeWays::One(v) =&gt; v.read().<span class="kw">await</span>,
+            ThreeWays::Two(v) =&gt; v.read().<span class="kw">await</span>,
+            ThreeWays::Three(v) =&gt; v.read().<span class="kw">await</span>,
         }
     }
 }
@@ -354,11 +354,11 @@
 <span class="kw">impl</span>&lt;ONE: oio::BlockingRead, TWO: oio::BlockingRead, THREE: oio::BlockingRead&gt; oio::BlockingRead
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Three(v) =&gt; v.read_at(offset, size),
+            <span class="self">Self</span>::One(v) =&gt; v.read(),
+            <span class="self">Self</span>::Two(v) =&gt; v.read(),
+            <span class="self">Self</span>::Three(v) =&gt; v.read(),
         }
     }
 }
@@ -412,12 +412,12 @@
     THREE: oio::Read,
     FOUR: oio::Read,
 {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            FourWays::One(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            FourWays::Two(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            FourWays::Three(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
-            FourWays::Four(v) =&gt; v.read_at(offset, size).<span class="kw">await</span>,
+            FourWays::One(v) =&gt; v.read().<span class="kw">await</span>,
+            FourWays::Two(v) =&gt; v.read().<span class="kw">await</span>,
+            FourWays::Three(v) =&gt; v.read().<span class="kw">await</span>,
+            FourWays::Four(v) =&gt; v.read().<span class="kw">await</span>,
         }
     }
 }
@@ -429,12 +429,12 @@
     THREE: oio::BlockingRead,
     FOUR: oio::BlockingRead,
 {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::One(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Two(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Three(v) =&gt; v.read_at(offset, size),
-            <span class="self">Self</span>::Four(v) =&gt; v.read_at(offset, size),
+            <span class="self">Self</span>::One(v) =&gt; v.read(),
+            <span class="self">Self</span>::Two(v) =&gt; v.read(),
+            <span class="self">Self</span>::Three(v) =&gt; v.read(),
+            <span class="self">Self</span>::Four(v) =&gt; v.read(),
         }
     }
 }

@@ -1177,10 +1177,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>start = Instant::now();
 
-        <span class="kw">match </span><span class="self">self</span>.inner.read_at(offset, size).<span class="kw">await </span>{
+        <span class="kw">match </span><span class="self">self</span>.inner.read().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bs) =&gt; {
                 <span class="self">self</span>.metrics
                     .observe_bytes_total(<span class="self">self</span>.scheme, <span class="self">self</span>.op, bs.remaining());
@@ -1198,10 +1198,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>start = Instant::now();
         <span class="self">self</span>.inner
-            .read_at(offset, size)
+            .read()
             .map(|bs| {
                 <span class="self">self</span>.metrics
                     .observe_bytes_total(<span class="self">self</span>.scheme, <span class="self">self</span>.op, bs.remaining());

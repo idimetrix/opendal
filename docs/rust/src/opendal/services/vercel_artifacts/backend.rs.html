@@ -167,6 +167,13 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -194,7 +201,6 @@
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::writer::VercelArtifactsWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::vercel_artifacts::reader::VercelArtifactsReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
@@ -213,7 +219,7 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>VercelArtifactsBackend {
-    <span class="kw">type </span>Reader = VercelArtifactsReader;
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = oio::OneShotWriter&lt;VercelArtifactsWriter&gt;;
     <span class="kw">type </span>Lister = ();
     <span class="kw">type </span>BlockingReader = ();
@@ -252,10 +258,18 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpRead::default(),
-            VercelArtifactsReader::new(<span class="self">self</span>.clone(), path, args),
-        ))
+        <span class="kw">let </span>resp = <span class="self">self</span>.vercel_artifacts_get(path, args.range(), <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+
+        <span class="kw">match </span>status {
+            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; <span class="prelude-val">Ok</span>((RpRead::new(), resp.into_body())),
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+                <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+            }
+        }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -276,7 +290,7 @@
         hash: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         <span class="kw">_</span>: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
             <span class="string">"https://api.vercel.com/v8/artifacts/{}"</span>,
             percent_encode_path(hash)
@@ -293,7 +307,7 @@
 
         <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>vercel_artifacts_put(

@@ -815,7 +815,7 @@
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         _args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -838,7 +838,7 @@
 
         <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>get_upload_url(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;GetUploadUrlResponse&gt; {

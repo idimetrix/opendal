@@ -285,6 +285,12 @@
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -307,15 +313,16 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AlluxioCore;
+<span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::AlluxioLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::alluxio::reader::AlluxioReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for alluxio services support.
@@ -467,7 +474,7 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>AlluxioBackend {
-    <span class="kw">type </span>Reader = AlluxioReader;
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = AlluxioWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;AlluxioLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -515,8 +522,13 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>stream_id = <span class="self">self</span>.core.open_file(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>r = AlluxioReader::new(<span class="self">self</span>.core.clone(), stream_id, args.clone());
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.read(stream_id, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>!resp.status().is_success() {
+            <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+            <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+        <span class="prelude-val">Ok</span>((RpRead::new(), resp.into_body()))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

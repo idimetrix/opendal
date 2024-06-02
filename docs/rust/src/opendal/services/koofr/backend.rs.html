@@ -392,6 +392,15 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -415,6 +424,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>serde::Deserialize;
@@ -429,7 +439,6 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::KoofrWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::KoofrWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::koofr::reader::KoofrReader;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for backblaze Koofr services support.
@@ -629,7 +638,7 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>KoofrBackend {
-    <span class="kw">type </span>Reader = KoofrReader;
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = KoofrWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;KoofrLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
@@ -704,10 +713,19 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpRead::default(),
-            KoofrReader::new(<span class="self">self</span>.core.clone(), path, args),
-        ))
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.get(path, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+        <span class="kw">match </span>status {
+            StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
+                <span class="prelude-val">Ok</span>((RpRead::default(), resp.into_body()))
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+                <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+            }
+        }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, _args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {

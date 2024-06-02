@@ -2225,7 +2225,6 @@
 <a href="#2225" id="2225">2225</a>
 <a href="#2226" id="2226">2226</a>
 <a href="#2227" id="2227">2227</a>
-<a href="#2228" id="2228">2228</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2244,7 +2243,6 @@
 // under the License.
 
 </span><span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>futures::stream;
@@ -2301,7 +2299,7 @@
 
 <span class="doccomment">/// # Operator basic API.
 </span><span class="kw">impl </span>Operator {
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
         <span class="kw-2">&amp;</span><span class="self">self</span>.accessor
     }
 
@@ -2318,7 +2316,7 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>into_inner(<span class="self">self</span>) -&gt; Accessor {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_inner(<span class="self">self</span>) -&gt; Accessor {
         <span class="self">self</span>.accessor
     }
 
@@ -2797,9 +2795,9 @@
                     );
                 }
 
-                <span class="kw">let </span>path = Arc::new(path);
-                <span class="kw">let </span>range = options.range();
-                <span class="kw">let </span>r = Reader::create(inner, path, args, options).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>range = args.range();
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, options);
+                <span class="kw">let </span>r = Reader::new(context);
                 <span class="kw">let </span>buf = r.read(range.to_range()).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
@@ -2910,9 +2908,9 @@
                     );
                 }
 
-                <span class="kw">let </span>path = Arc::new(path);
-                Reader::create(inner.clone(), path, args, options).<span class="kw">await
-            </span>},
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, options);
+                <span class="prelude-val">Ok</span>(Reader::new(context))
+            },
         )
     }
 

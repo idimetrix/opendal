@@ -60,6 +60,22 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -77,49 +93,65 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>futures::AsyncReadExt;
+</span><span class="kw">use </span>bb8::PooledConnection;
+<span class="kw">use </span>bytes::BytesMut;
+<span class="kw">use </span>futures::{AsyncRead, AsyncReadExt};
 
-<span class="kw">use </span><span class="kw">super</span>::backend::FtpBackend;
+<span class="kw">use </span><span class="kw">super</span>::backend::Manager;
 <span class="kw">use </span><span class="kw">super</span>::err::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>FtpReader {
-    core: FtpBackend,
+    <span class="doccomment">/// Keep the connection alive while data stream is alive.
+    </span>_ftp_stream: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;,
 
-    path: String,
-    _op: OpRead,
+    data_stream: Box&lt;<span class="kw">dyn </span>AsyncRead + Sync + Send + Unpin + <span class="lifetime">'static</span>&gt;,
+    chunk: usize,
+    buf: BytesMut,
 }
 
 <span class="kw">impl </span>FtpReader {
-    <span class="kw">pub fn </span>new(core: FtpBackend, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="self">Self </span>{
-        FtpReader {
-            core,
-            path: path.to_string(),
-            _op: op,
-        }
-    }
-}
-
-<span class="kw">impl </span>oio::Read <span class="kw">for </span>FtpReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>ftp_stream = <span class="self">self</span>.core.ftp_connect(Operation::Read).<span class="kw">await</span><span class="question-mark">?</span>;
-
+    <span class="kw">pub async fn </span>new(
+        <span class="kw-2">mut </span>ftp_stream: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;,
+        path: String,
+        args: OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>(offset, size) = (
+            args.range().offset(),
+            args.range().size().unwrap_or(u64::MAX),
+        );
         <span class="kw">if </span>offset != <span class="number">0 </span>{
             ftp_stream
                 .resume_transfer(offset <span class="kw">as </span>usize)
                 .<span class="kw">await
                 </span>.map_err(parse_error)<span class="question-mark">?</span>;
         }
-
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = ftp_stream
-            .retr_as_stream(<span class="kw-2">&amp;</span><span class="self">self</span>.path)
+        <span class="kw">let </span>ds = ftp_stream
+            .retr_as_stream(path)
             .<span class="kw">await
             </span>.map_err(parse_error)<span class="question-mark">?
             </span>.take(size <span class="kw">as _</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::with_capacity(size);
-        ds.read_to_end(<span class="kw-2">&amp;mut </span>bs).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Buffer::from(bs))
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            _ftp_stream: ftp_stream,
+
+            data_stream: Box::new(ds),
+            chunk: <span class="number">1024 </span>* <span class="number">1024</span>,
+            buf: BytesMut::new(),
+        })
+    }
+}
+
+<span class="kw">impl </span>oio::Read <span class="kw">for </span>FtpReader {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.buf.resize(<span class="self">self</span>.chunk, <span class="number">0</span>);
+        <span class="kw">let </span>n = <span class="self">self
+            </span>.data_stream
+            .read(<span class="kw-2">&amp;mut </span><span class="self">self</span>.buf)
+            .<span class="kw">await
+            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.buf.split_to(n).freeze()))
     }
 }
 </code></pre></div></section></main></body></html>

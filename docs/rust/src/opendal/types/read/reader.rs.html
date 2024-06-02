@@ -490,9 +490,6 @@
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
 <a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -535,11 +532,7 @@
 /// [`Reader`] provides public API including [`Reader::read`], [`Reader:read_range`], and [`Reader::read_to_end`]. You can use those APIs directly without extra copy.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Reader {
-    acc: Accessor,
-    path: Arc&lt;String&gt;,
-
-    inner: oio::Reader,
-    options: OpReader,
+    ctx: Arc&lt;ReadContext&gt;,
 
     <span class="doccomment">/// Total size of the reader.
     </span>size: Arc&lt;AtomicContentLength&gt;,
@@ -553,21 +546,11 @@
     ///
     /// We don't want to expose those details to users so keep this function
     /// in crate only.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create(
-        acc: Accessor,
-        path: Arc&lt;String&gt;,
-        args: OpRead,
-        options: OpReader,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, r) = acc.read(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(Reader {
-            acc,
-            path,
-            inner: r,
-            options,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(ctx: ReadContext) -&gt; <span class="self">Self </span>{
+        Reader {
+            ctx: Arc::new(ctx),
             size: Arc::new(AtomicContentLength::new()),
-        })
+        }
     }
 
     <span class="doccomment">/// Parse users input range bounds into valid `Range&lt;u64&gt;`.
@@ -587,8 +570,9 @@
                 <span class="prelude-val">Some</span>(v) =&gt; v,
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">let </span>size = <span class="self">self
-                        </span>.acc
-                        .stat(<span class="kw-2">&amp;</span><span class="self">self</span>.path, OpStat::new())
+                        </span>.ctx
+                        .accessor()
+                        .stat(<span class="self">self</span>.ctx.path(), OpStat::new())
                         .<span class="kw">await</span><span class="question-mark">?
                         </span>.into_metadata()
                         .content_length();
@@ -644,7 +628,7 @@
 
         <span class="kw">let </span>merged_bufs: Vec&lt;<span class="kw">_</span>&gt; =
             stream::iter(merged_ranges.clone().into_iter().map(|v| <span class="self">self</span>.read(v)))
-                .buffered(<span class="self">self</span>.options.concurrent())
+                .buffered(<span class="self">self</span>.ctx.options().concurrent())
                 .try_collect()
                 .<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -661,7 +645,7 @@
 
     <span class="doccomment">/// Merge given ranges into a list of non-overlapping ranges.
     </span><span class="kw">fn </span>merge_ranges(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>ranges: Vec&lt;Range&lt;u64&gt;&gt;) -&gt; Vec&lt;Range&lt;u64&gt;&gt; {
-        <span class="kw">let </span>gap = <span class="self">self</span>.options.gap().unwrap_or(<span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>u64;
+        <span class="kw">let </span>gap = <span class="self">self</span>.ctx.options().gap().unwrap_or(<span class="number">1024 </span>* <span class="number">1024</span>) <span class="kw">as </span>u64;
         <span class="comment">// We don't care about the order of range with same start, they
         // will be merged in the next step.
         </span>ranges.sort_unstable_by(|a, b| a.start.cmp(<span class="kw-2">&amp;</span>b.start));
@@ -696,7 +680,7 @@
     /// Let's keep it inside for now.
     </span><span class="kw">async fn </span>into_stream(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;BufferStream&gt; {
         <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(BufferStream::new(<span class="self">self</span>.inner, <span class="self">self</span>.options, range))
+        <span class="prelude-val">Ok</span>(BufferStream::new(<span class="self">self</span>.ctx, range))
     }
 
     <span class="doccomment">/// Convert reader into [`FuturesAsyncReader`] which implements [`futures::AsyncRead`],
@@ -762,7 +746,7 @@
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;FuturesAsyncReader&gt; {
         <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(FuturesAsyncReader::new(<span class="self">self</span>.inner, <span class="self">self</span>.options, range))
+        <span class="prelude-val">Ok</span>(FuturesAsyncReader::new(<span class="self">self</span>.ctx, range))
     }
 
     <span class="doccomment">/// Convert reader into [`FuturesBytesStream`] which implements [`futures::Stream`].
@@ -817,34 +801,38 @@
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;FuturesBytesStream&gt; {
         <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(FuturesBytesStream::new(<span class="self">self</span>.inner, <span class="self">self</span>.options, range))
+        <span class="prelude-val">Ok</span>(FuturesBytesStream::new(<span class="self">self</span>.ctx, range))
     }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">crate</span>::layers::TypeEraseLayer;
+    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>rand::rngs::ThreadRng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
-    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
     <span class="kw">use </span><span class="kw">crate</span>::services;
     <span class="kw">use </span><span class="kw">crate</span>::Operator;
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_trait() {
-        <span class="kw">let </span>v = Reader {
-            acc: Arc::new(TypeEraseLayer.layer(())),
-            path: Arc::new(<span class="string">"hello"</span>.to_string()),
-            inner: Arc::new(Buffer::new()),
-            options: OpReader::new(),
-            size: Arc::new(AtomicContentLength::new()),
-        };
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_trait() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        op.write(
+            <span class="string">"test"</span>,
+            Buffer::from(<span class="macro">vec!</span>[Bytes::from(<span class="string">"Hello"</span>), Bytes::from(<span class="string">"World"</span>)]),
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>Unpin + MaybeSend + Sync + <span class="lifetime">'static</span>&gt; = Box::new(v);
+        <span class="kw">let </span>acc = op.into_inner();
+        <span class="kw">let </span>ctx = ReadContext::new(acc, <span class="string">"test"</span>.to_string(), OpRead::new(), OpReader::new());
+
+        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>Unpin + MaybeSend + Sync + <span class="lifetime">'static</span>&gt; = Box::new(Reader::new(ctx));
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>gen_random_bytes() -&gt; Vec&lt;u8&gt; {
@@ -864,8 +852,8 @@
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_read() {
-        <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
+    </span><span class="kw">async fn </span>test_reader_read() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -877,11 +865,12 @@
         <span class="kw">let </span>buf = reader.read(..).<span class="kw">await</span>.expect(<span class="string">"read to end must succeed"</span>);
 
         <span class="macro">assert_eq!</span>(buf.to_bytes(), content);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_read_with_chunk() {
-        <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
+    </span><span class="kw">async fn </span>test_reader_read_with_chunk() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -893,11 +882,12 @@
         <span class="kw">let </span>buf = reader.read(..).<span class="kw">await</span>.expect(<span class="string">"read to end must succeed"</span>);
 
         <span class="macro">assert_eq!</span>(buf.to_bytes(), content);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_read_with_concurrent() {
-        <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
+    </span><span class="kw">async fn </span>test_reader_read_with_concurrent() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -914,11 +904,12 @@
         <span class="kw">let </span>buf = reader.read(..).<span class="kw">await</span>.expect(<span class="string">"read to end must succeed"</span>);
 
         <span class="macro">assert_eq!</span>(buf.to_bytes(), content);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_reader_read_into() {
-        <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
+    </span><span class="kw">async fn </span>test_reader_read_into() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -934,10 +925,11 @@
             </span>.expect(<span class="string">"read to end must succeed"</span>);
 
         <span class="macro">assert_eq!</span>(buf, content);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_merge_ranges() {
+    </span><span class="kw">async fn </span>test_merge_ranges() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
@@ -951,10 +943,11 @@
         <span class="kw">let </span>ranges = <span class="macro">vec!</span>[<span class="number">0</span>..<span class="number">10</span>, <span class="number">10</span>..<span class="number">20</span>, <span class="number">21</span>..<span class="number">30</span>, <span class="number">40</span>..<span class="number">50</span>, <span class="number">40</span>..<span class="number">60</span>, <span class="number">45</span>..<span class="number">59</span>];
         <span class="kw">let </span>merged = reader.merge_ranges(ranges.clone());
         <span class="macro">assert_eq!</span>(merged, <span class="macro">vec!</span>[<span class="number">0</span>..<span class="number">30</span>, <span class="number">40</span>..<span class="number">60</span>]);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_fetch() {
+    </span><span class="kw">async fn </span>test_fetch() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>op = Operator::new(services::Memory::default()).unwrap().finish();
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
@@ -986,6 +979,7 @@
                 content[range.start <span class="kw">as </span>usize..range.end <span class="kw">as </span>usize]
             );
         }
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div></section></main></body></html>

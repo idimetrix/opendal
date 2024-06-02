@@ -551,6 +551,30 @@
 <a href="#551" id="551">551</a>
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -569,6 +593,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::Arc;
@@ -720,10 +745,10 @@
 }
 
 <span class="kw">impl </span>Access <span class="kw">for </span>FsBackend {
-    <span class="kw">type </span>Reader = FsReader;
+    <span class="kw">type </span>Reader = FsReader&lt;tokio::fs::File&gt;;
     <span class="kw">type </span>Writer = FsWriter&lt;tokio::fs::File&gt;;
     <span class="kw">type </span>Lister = <span class="prelude-ty">Option</span>&lt;FsLister&lt;tokio::fs::ReadDir&gt;&gt;;
-    <span class="kw">type </span>BlockingReader = FsReader;
+    <span class="kw">type </span>BlockingReader = FsReader&lt;std::fs::File&gt;;
     <span class="kw">type </span>BlockingWriter = FsWriter&lt;std::fs::File&gt;;
     <span class="kw">type </span>BlockingLister = <span class="prelude-ty">Option</span>&lt;FsLister&lt;std::fs::ReadDir&gt;&gt;;
 
@@ -797,16 +822,28 @@
     /// - open file first, and than use `seek`. (100ns)
     ///
     /// Benchmark could be found [here](https://gist.github.com/Xuanwo/48f9cfbc3022ea5f865388bb62e1a70f)
-    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
-        <span class="kw">let </span>f = tokio::fs::OpenOptions::new()
+        <span class="kw">let </span><span class="kw-2">mut </span>f = tokio::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
             .open(<span class="kw-2">&amp;</span>p)
             .<span class="kw">await
             </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>r = FsReader::new(<span class="self">self</span>.core.clone(), f.into_std().<span class="kw">await</span>);
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>tokio::io::AsyncSeekExt;
+
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .<span class="kw">await
+                </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>r = FsReader::new(
+            <span class="self">self</span>.core.clone(),
+            f,
+            args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>,
+        );
         <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
@@ -960,15 +997,26 @@
         <span class="prelude-val">Ok</span>(RpStat::new(m))
     }
 
-    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
-        <span class="kw">let </span>f = std::fs::OpenOptions::new()
+        <span class="kw">let </span><span class="kw-2">mut </span>f = std::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
             .open(p)
             .map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>r = FsReader::new(<span class="self">self</span>.core.clone(), f);
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>std::io::Seek;
+
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>r = FsReader::new(
+            <span class="self">self</span>.core.clone(),
+            f,
+            args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>,
+        );
         <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 

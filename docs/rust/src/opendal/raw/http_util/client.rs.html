@@ -172,23 +172,6 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -206,21 +189,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::cmp::Ordering;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::str::FromStr;
 
-<span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
+<span class="kw">use </span>raw::oio::Read;
 
 <span class="kw">use </span><span class="kw">super</span>::parse_content_encoding;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_length;
+<span class="kw">use </span><span class="kw">super</span>::HttpBody;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// HttpClient that used across opendal.
@@ -263,6 +245,13 @@
 
     <span class="doccomment">/// Send a request in async way.
     </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = <span class="self">self</span>.fetch(req).<span class="kw">await</span><span class="question-mark">?</span>.into_parts();
+        <span class="kw">let </span>buffer = body.read_all().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Response::from_parts(parts, buffer))
+    }
+
+    <span class="doccomment">/// Fetch a request in async way.
+    </span><span class="kw">pub async fn </span>fetch(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="comment">// Uri stores all string alike data in `Bytes` which means
         // the clone here is cheap.
         </span><span class="kw">let </span>uri = req.uri().clone();
@@ -329,45 +318,22 @@
         <span class="comment">// Swap headers directly instead of copy the entire map.
         </span>mem::swap(hr.headers_mut().unwrap(), resp.headers_mut());
 
-        <span class="kw">let </span>bs: Vec&lt;Bytes&gt; = resp
-            .bytes_stream()
-            .try_filter(|v| future::ready(!v.is_empty()))
-            .try_collect()
-            .<span class="kw">await
-            </span>.map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"read data from http response"</span>)
-                    .with_operation(<span class="string">"http_util::Client::send"</span>)
-                    .with_context(<span class="string">"url"</span>, uri.to_string())
-                    .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
-                    .set_source(err)
-            })<span class="question-mark">?</span>;
+        <span class="kw">let </span>bs = HttpBody::new(
+            resp.bytes_stream()
+                .try_filter(|v| future::ready(!v.is_empty()))
+                .map_ok(Buffer::from)
+                .map_err(<span class="kw">move </span>|err| {
+                    Error::new(ErrorKind::Unexpected, <span class="string">"read data from http response"</span>)
+                        .with_operation(<span class="string">"http_util::Client::send"</span>)
+                        .with_context(<span class="string">"url"</span>, uri.to_string())
+                        .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
+                        .set_source(err)
+                }),
+            content_length,
+        );
 
-        <span class="kw">let </span>buffer = Buffer::from(bs);
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(expect) = content_length {
-            check(expect, buffer.remaining() <span class="kw">as </span>u64)<span class="question-mark">?</span>;
-        }
-
-        <span class="kw">let </span>resp = hr.body(buffer).expect(<span class="string">"response must build succeed"</span>);
-
+        <span class="kw">let </span>resp = hr.body(bs).expect(<span class="string">"response must build succeed"</span>);
         <span class="prelude-val">Ok</span>(resp)
-    }
-}
-
-<span class="attr">#[inline]
-</span><span class="kw">fn </span>check(expect: u64, actual: u64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">match </span>actual.cmp(<span class="kw-2">&amp;</span>expect) {
-        Ordering::Equal =&gt; <span class="prelude-val">Ok</span>(()),
-        Ordering::Less =&gt; <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unexpected,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"http response got too little data, expect: {expect}, actual: {actual}"</span>),
-        )
-        .set_temporary()),
-        Ordering::Greater =&gt; <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unexpected,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"http response got too much data, expect: {expect}, actual: {actual}"</span>),
-        )
-        .set_temporary()),
     }
 }
 

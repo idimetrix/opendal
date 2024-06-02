@@ -80,6 +80,24 @@
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -97,69 +115,87 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::io::SeekFrom;
+</span><span class="kw">use </span>bb8::PooledConnection;
 
 <span class="kw">use </span>bytes::BytesMut;
-<span class="kw">use </span>tokio::io::AsyncSeekExt;
+<span class="kw">use </span>openssh_sftp_client::file::File;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::SftpBackend;
+<span class="kw">use </span><span class="kw">super</span>::backend::Manager;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_sftp_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>SftpReader {
-    inner: SftpBackend,
-    root: String,
-    path: String,
+    <span class="doccomment">/// Keep the connection alive while data stream is alive.
+    </span>_conn: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;,
+
+    file: File,
+    chunk: usize,
+    size: usize,
+    read: usize,
+    buf: BytesMut,
 }
 
 <span class="kw">impl </span>SftpReader {
-    <span class="kw">pub fn </span>new(inner: SftpBackend, root: String, path: String) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ inner, root, path }
+    <span class="kw">pub fn </span>new(conn: PooledConnection&lt;<span class="lifetime">'static</span>, Manager&gt;, file: File, size: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            _conn: conn,
+            file,
+            size,
+            chunk: <span class="number">2 </span>* <span class="number">1024 </span>* <span class="number">1024</span>,
+            read: <span class="number">0</span>,
+            buf: BytesMut::new(),
+        }
     }
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>SftpReader {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>client = <span class="self">self</span>.inner.connect().<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="comment">// let client = self.inner.connect().await?;
+        //
+        // let mut fs = client.fs();
+        // fs.set_cwd(&amp;self.root);
+        //
+        // let path = fs
+        //     .canonicalize(&amp;self.path)
+        //     .await
+        //     .map_err(parse_sftp_error)?;
+        //
+        // let mut f = client
+        //     .open(path.as_path())
+        //     .await
+        //     .map_err(parse_sftp_error)?;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
-        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
+        // f.seek(SeekFrom::Start(offset))
+        //     .await
+        //     .map_err(new_std_io_error)?;
 
-        <span class="kw">let </span>path = fs
-            .canonicalize(<span class="kw-2">&amp;</span><span class="self">self</span>.path)
-            .<span class="kw">await
-            </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
+        // let mut size = size;
+        // if size == 0 {
+        //     return Ok(Buffer::new());
+        // }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>f = client
-            .open(path.as_path())
-            .<span class="kw">await
-            </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
-
-        f.seek(SeekFrom::Start(offset))
-            .<span class="kw">await
-            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span><span class="kw-2">mut </span>size = size;
-        <span class="kw">if </span>size == <span class="number">0 </span>{
+        </span><span class="kw">if </span><span class="self">self</span>.read &gt;= <span class="self">self</span>.size {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = BytesMut::with_capacity(size);
-        <span class="kw">while </span>size &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>len = buf.len();
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(bytes) = f
-                .read(size <span class="kw">as </span>u32, buf.split_off(len))
-                .<span class="kw">await
-                </span>.map_err(parse_sftp_error)<span class="question-mark">?
-            </span>{
-                size -= bytes.len();
-                buf.unsplit(bytes);
-            } <span class="kw">else </span>{
-                <span class="kw">break</span>;
-            }
-        }
-        <span class="prelude-val">Ok</span>(Buffer::from(buf.freeze()))
+        <span class="kw">let </span>size = (<span class="self">self</span>.size - <span class="self">self</span>.read).min(<span class="self">self</span>.chunk);
+        <span class="self">self</span>.buf.reserve(size);
+
+        <span class="kw">let </span><span class="prelude-val">Some</span>(bytes) = <span class="self">self
+            </span>.file
+            .read(size <span class="kw">as </span>u32, <span class="self">self</span>.buf.split_off(size))
+            .<span class="kw">await
+            </span>.map_err(parse_sftp_error)<span class="question-mark">?
+        </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::RangeNotSatisfied,
+                <span class="string">"sftp read file reaching EoF"</span>,
+            ));
+        };
+
+        <span class="self">self</span>.read += bytes.len();
+        <span class="prelude-val">Ok</span>(Buffer::from(bytes.freeze()))
     }
 }
 </code></pre></div></section></main></body></html>

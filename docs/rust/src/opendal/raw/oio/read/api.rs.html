@@ -188,51 +188,6 @@
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -252,8 +207,8 @@
 
 </span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::ops::Deref;
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::ops::DerefMut;
 
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::Future;
@@ -296,7 +251,7 @@
 }
 
 <span class="doccomment">/// Reader is a type erased [`Read`].
-</span><span class="kw">pub type </span>Reader = Arc&lt;<span class="kw">dyn </span>ReadDyn&gt;;
+</span><span class="kw">pub type </span>Reader = Box&lt;<span class="kw">dyn </span>ReadDyn&gt;;
 
 <span class="doccomment">/// Read is the internal trait used by OpenDAL to read data from storage.
 ///
@@ -314,60 +269,42 @@
 /// once, at the outermost level of our API.
 </span><span class="kw">pub trait </span>Read: Unpin + Send + Sync {
     <span class="doccomment">/// Read at the given offset with the given size.
-    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize)
-        -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + MaybeSend;
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + MaybeSend;
+
+    <span class="doccomment">/// Read all data from the reader.
+    </span><span class="kw">fn </span>read_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + MaybeSend {
+        <span class="kw">async </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>bufs = <span class="macro">vec!</span>[];
+            <span class="kw">loop </span>{
+                <span class="kw">match </span><span class="self">self</span>.read().<span class="kw">await </span>{
+                    <span class="prelude-val">Ok</span>(buf) <span class="kw">if </span>buf.is_empty() =&gt; <span class="kw">break</span>,
+                    <span class="prelude-val">Ok</span>(buf) =&gt; bufs.push(buf),
+                    <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
+                }
+            }
+            <span class="prelude-val">Ok</span>(bufs.into_iter().flatten().collect())
+        }
+    }
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>() {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let _ </span>= (offset, size);
-
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support streaming"</span>,
+            <span class="string">"output reader doesn't support read"</span>,
         ))
     }
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>Bytes {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
-
-        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"offset out of range"</span>,
-            ));
-        }
-        <span class="kw">if </span>size &gt; <span class="self">self</span>.len() - offset {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"size out of range"</span>,
-            ));
-        }
-
-        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.slice(offset..offset + size)))
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.split_off(<span class="number">0</span>)))
     }
 }
 
 <span class="kw">impl </span>Read <span class="kw">for </span>Buffer {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
-
-        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"offset out of range"</span>,
-            ));
-        }
-        <span class="kw">if </span>size &gt; <span class="self">self</span>.len() - offset {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"size out of range"</span>,
-            ));
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.slice(offset..offset + size))
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="prelude-val">Ok</span>(mem::take(<span class="self">self</span>))
     }
 }
 
@@ -377,12 +314,19 @@
     <span class="doccomment">/// The dyn version of [`Read::read_at`].
     ///
     /// This function returns a boxed future to make it object safe.
-    </span><span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;
+    </span><span class="kw">fn </span>read_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;
+
+    <span class="doccomment">/// The dyn version of [`Read::read_all`]
+    </span><span class="kw">fn </span>read_all_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;
 }
 
 <span class="kw">impl</span>&lt;T: Read + <span class="question-mark">?</span>Sized&gt; ReadDyn <span class="kw">for </span>T {
-    <span class="kw">fn </span>read_at_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; {
-        Box::pin(<span class="self">self</span>.read_at(offset, size))
+    <span class="kw">fn </span>read_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; {
+        Box::pin(<span class="self">self</span>.read())
+    }
+
+    <span class="kw">fn </span>read_all_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; {
+        Box::pin(<span class="self">self</span>.read_all())
     }
 }
 
@@ -391,81 +335,47 @@
 /// Take care about the `deref_mut()` here. This makes sure that we are calling functions
 /// upon `&amp;mut T` instead of `&amp;mut Box&lt;T&gt;`. The later could result in infinite recursion.
 </span><span class="kw">impl</span>&lt;T: ReadDyn + <span class="question-mark">?</span>Sized&gt; Read <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.deref().read_at_dyn(offset, size).<span class="kw">await
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.deref_mut().read_dyn().<span class="kw">await
     </span>}
-}
 
-<span class="kw">impl</span>&lt;T: ReadDyn + <span class="question-mark">?</span>Sized&gt; Read <span class="kw">for </span>Arc&lt;T&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.deref().read_at_dyn(offset, size).<span class="kw">await
+    <span class="kw">async fn </span>read_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.deref_mut().read_all_dyn().<span class="kw">await
     </span>}
 }
 
 <span class="doccomment">/// BlockingReader is a arc dyn `BlockingRead`.
-</span><span class="kw">pub type </span>BlockingReader = Arc&lt;<span class="kw">dyn </span>BlockingRead&gt;;
+</span><span class="kw">pub type </span>BlockingReader = Box&lt;<span class="kw">dyn </span>BlockingRead&gt;;
 
 <span class="doccomment">/// Read is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>BlockingRead: Send + Sync {
     <span class="doccomment">/// Read data from the reader at the given offset with the given size.
-    </span><span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt;;
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt;;
 }
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>() {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let _ </span>= (offset, size);
-
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">"read is required to be implemented for oio::BlockingRead"</span>)
     }
 }
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>Bytes {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
-
-        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"offset out of range"</span>,
-            ));
-        }
-        <span class="kw">if </span>size &gt; <span class="self">self</span>.len() - offset {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"size out of range"</span>,
-            ));
-        }
-
-        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.slice(offset..offset + size)))
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="prelude-val">Ok</span>(Buffer::from(<span class="self">self</span>.split_off(<span class="number">0</span>)))
     }
 }
 
 <span class="kw">impl </span>BlockingRead <span class="kw">for </span>Buffer {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>offset = offset <span class="kw">as </span>usize;
-
-        <span class="kw">if </span>offset &gt;= <span class="self">self</span>.len() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"offset out of range"</span>,
-            ));
-        }
-        <span class="kw">if </span>size &gt; <span class="self">self</span>.len() - offset {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::RangeNotSatisfied,
-                <span class="string">"size out of range"</span>,
-            ));
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.slice(offset..offset + size))
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="prelude-val">Ok</span>(mem::take(<span class="self">self</span>))
     }
 }
 
 <span class="doccomment">/// `Arc&lt;dyn BlockingRead&gt;` won't implement `BlockingRead` automatically.
 /// To make BlockingReader work as expected, we must add this impl.
-</span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Arc&lt;T&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).read_at(offset, size)
+</span><span class="kw">impl</span>&lt;T: BlockingRead + <span class="question-mark">?</span>Sized&gt; BlockingRead <span class="kw">for </span>Box&lt;T&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).read()
     }
 }
 </code></pre></div></section></main></body></html>

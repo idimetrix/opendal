@@ -423,10 +423,6 @@
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -768,25 +764,21 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::Read&gt; oio::Read <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.inner.read_at(offset, size).<span class="kw">await</span>.map_err(|err| {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read().<span class="kw">await</span>.map_err(|err| {
             err.with_operation(ReadOperation::Read)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"offset"</span>, offset.to_string())
-                .with_context(<span class="string">"size"</span>, size.to_string())
         })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.inner.read_at(offset, size).map_err(|err| {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read().map_err(|err| {
             err.with_operation(ReadOperation::BlockingRead)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"offset"</span>, offset.to_string())
-                .with_context(<span class="string">"size"</span>, size.to_string())
         })
     }
 }

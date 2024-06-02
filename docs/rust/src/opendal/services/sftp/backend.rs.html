@@ -521,6 +521,26 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -541,6 +561,7 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
 
@@ -552,6 +573,7 @@
 <span class="kw">use </span>openssh_sftp_client::Sftp;
 <span class="kw">use </span>openssh_sftp_client::SftpOptions;
 <span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>tokio::io::AsyncSeekExt;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">super</span>::error::is_not_found;
@@ -932,10 +954,28 @@
         <span class="prelude-val">Ok</span>(RpStat::new(meta))
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
+        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
+
+        <span class="kw">let </span>path = fs.canonicalize(path).<span class="kw">await</span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>f = client
+            .open(path.as_path())
+            .<span class="kw">await
+            </span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .<span class="kw">await
+                </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
         <span class="prelude-val">Ok</span>((
             RpRead::default(),
-            SftpReader::new(<span class="self">self</span>.clone(), <span class="self">self</span>.root.clone(), path.to_owned()),
+            SftpReader::new(client, f, args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>),
         ))
     }
 

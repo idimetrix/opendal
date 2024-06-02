@@ -647,16 +647,16 @@
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
     <span class="attr">#[trace(enter_on_poll = <span class="bool-val">true</span>)]
-    </span><span class="kw">async fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.inner.read_at(offset, size).<span class="kw">await
+    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read().<span class="kw">await
     </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read_at(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u64, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ReadOperation::BlockingRead.into_static());
-        <span class="self">self</span>.inner.read_at(offset, size)
+        <span class="self">self</span>.inner.read()
     }
 }
 
