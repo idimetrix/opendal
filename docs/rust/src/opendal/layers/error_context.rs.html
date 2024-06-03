@@ -423,6 +423,67 @@
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -460,6 +521,14 @@
 /// - `service`: The [`Scheme`] of underlying service.
 /// - `operation`: The [`Operation`] of this operation
 /// - `path`: The path of this operation
+///
+/// Some operations may have additional context:
+///
+/// - `range`: The range the read operation is trying to read.
+/// - `read`: The already read size in given reader.
+/// - `size`: The size of the current write operation.
+/// - `written`: The already written size in given writer.
+/// - `listed`: The already listed size in given lister.
 </span><span class="kw">pub struct </span>ErrorContextLayer;
 
 <span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>ErrorContextLayer {
@@ -512,22 +581,21 @@
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="kw">let </span>range = args.range();
         <span class="self">self</span>.inner
             .read(path, args)
             .map_ok(|(rp, r)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: r,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), r)
+                        .with_range(range),
                 )
             })
             .map_err(|err| {
                 err.with_operation(Operation::Read)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
+                    .with_context(<span class="string">"range"</span>, range.to_string())
             })
             .<span class="kw">await
     </span>}
@@ -538,11 +606,7 @@
             .map_ok(|(rp, w)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: w,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), w),
                 )
             })
             .map_err(|err| {
@@ -605,11 +669,7 @@
             .map_ok(|(rp, p)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: p,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), p),
                 )
             })
             .map_err(|err| {
@@ -663,22 +723,21 @@
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+        <span class="kw">let </span>range = args.range();
         <span class="self">self</span>.inner
             .blocking_read(path, args)
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os)
+                        .with_range(range),
                 )
             })
             .map_err(|err| {
                 err.with_operation(Operation::BlockingRead)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
+                    .with_context(<span class="string">"range"</span>, range.to_string())
             })
     }
 
@@ -688,11 +747,7 @@
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os),
                 )
             })
             .map_err(|err| {
@@ -742,11 +797,7 @@
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os),
                 )
             })
             .map_err(|err| {
@@ -761,36 +812,81 @@
     scheme: Scheme,
     path: String,
     inner: T,
+    range: BytesRange,
+    processed: u64,
+}
+
+<span class="kw">impl</span>&lt;T&gt; ErrorContextWrapper&lt;T&gt; {
+    <span class="kw">fn </span>new(scheme: Scheme, path: String, inner: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            scheme,
+            path,
+            inner,
+            range: BytesRange::default(),
+            processed: <span class="number">0</span>,
+        }
+    }
+
+    <span class="kw">fn </span>with_range(<span class="kw-2">mut </span><span class="self">self</span>, range: BytesRange) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.range = range;
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;T: oio::Read&gt; oio::Read <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.inner.read().<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(ReadOperation::Read)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+        <span class="self">self</span>.inner
+            .read()
+            .<span class="kw">await
+            </span>.map(|bs| {
+                <span class="self">self</span>.processed += bs.len() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(ReadOperation::Read)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
+                    .with_context(<span class="string">"read"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="self">self</span>.inner.read().map_err(|err| {
-            err.with_operation(ReadOperation::BlockingRead)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+        <span class="self">self</span>.inner
+            .read()
+            .map(|bs| {
+                <span class="self">self</span>.processed += bs.len() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(ReadOperation::BlockingRead)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
+                    .with_context(<span class="string">"read"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(WriteOperation::Write)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"write_buf"</span>, bs.len().to_string())
-        })
+        <span class="kw">let </span>size = bs.len();
+        <span class="self">self</span>.inner
+            .write(bs)
+            .<span class="kw">await
+            </span>.map(|n| {
+                <span class="self">self</span>.processed += n <span class="kw">as </span>u64;
+                n
+            })
+            .map_err(|err| {
+                err.with_operation(WriteOperation::Write)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"size"</span>, size.to_string())
+                    .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -798,6 +894,7 @@
             err.with_operation(WriteOperation::Close)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 
@@ -806,18 +903,27 @@
             err.with_operation(WriteOperation::Abort)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                .with_context(<span class="string">"processed"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.write(bs.clone()).map_err(|err| {
-            err.with_operation(WriteOperation::BlockingWrite)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"write_buf"</span>, bs.len().to_string())
-        })
+        <span class="kw">let </span>size = bs.len();
+        <span class="self">self</span>.inner
+            .write(bs)
+            .map(|n| {
+                <span class="self">self</span>.processed += n <span class="kw">as </span>u64;
+                n
+            })
+            .map_err(|err| {
+                err.with_operation(WriteOperation::BlockingWrite)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"size"</span>, size.to_string())
+                    .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -825,27 +931,43 @@
             err.with_operation(WriteOperation::BlockingClose)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::List&gt; oio::List <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        <span class="self">self</span>.inner.next().<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(ListOperation::Next)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+        <span class="self">self</span>.inner
+            .next()
+            .<span class="kw">await
+            </span>.map(|bs| {
+                <span class="self">self</span>.processed += bs.is_some() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(ListOperation::Next)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        <span class="self">self</span>.inner.next().map_err(|err| {
-            err.with_operation(ListOperation::BlockingNext)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+        <span class="self">self</span>.inner
+            .next()
+            .map(|bs| {
+                <span class="self">self</span>.processed += bs.is_some() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(ListOperation::BlockingNext)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 </code></pre></div></section></main></body></html>
