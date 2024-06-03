@@ -466,6 +466,15 @@
 <a href="#466" id="466">466</a>
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -628,8 +637,11 @@
                     <span class="kw">match </span>o {
                         <span class="prelude-val">Ok</span>(o) =&gt; <span class="self">self</span>.results.push_back(o),
                         <span class="prelude-val">Err</span>(err) =&gt; {
-                            <span class="self">self</span>.tasks
-                                .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
+                            <span class="comment">// Retry this task if the error is temporary
+                            </span><span class="kw">if </span>err.is_temporary() {
+                                <span class="self">self</span>.tasks
+                                    .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
+                            }
                             <span class="kw">return </span><span class="prelude-val">Err</span>(err);
                         }
                     }
@@ -658,8 +670,11 @@
                     <span class="kw">continue</span>;
                 }
                 <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="self">self</span>.tasks
-                        .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
+                    <span class="comment">// Retry this task if the error is temporary
+                    </span><span class="kw">if </span>err.is_temporary() {
+                        <span class="self">self</span>.tasks
+                            .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
+                    }
                     <span class="kw">return </span><span class="prelude-val">Err</span>(err);
                 }
             }
@@ -674,14 +689,17 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(task) = <span class="self">self</span>.tasks.pop_front() {
             <span class="kw">let </span>(i, o) = task.<span class="kw">await</span>;
-            <span class="kw">match </span>o {
-                <span class="prelude-val">Ok</span>(o) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(o)),
+            <span class="kw">return match </span>o {
+                <span class="prelude-val">Ok</span>(o) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(o)),
                 <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="self">self</span>.tasks
-                        .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err));
+                    <span class="comment">// Retry this task if the error is temporary
+                    </span><span class="kw">if </span>err.is_temporary() {
+                        <span class="self">self</span>.tasks
+                            .push_front(<span class="self">self</span>.executor.execute((<span class="self">self</span>.factory)(i)));
+                    }
+                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err))
                 }
-            }
+            };
         }
 
         <span class="prelude-val">None

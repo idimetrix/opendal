@@ -717,6 +717,11 @@
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
 <a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1044,6 +1049,11 @@
     <span class="doccomment">/// Get range from option
     </span><span class="kw">pub fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BytesRange {
         <span class="self">self</span>.range
+    }
+
+    <span class="doccomment">/// Returns a mutable range to allow updating.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>range_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>BytesRange {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.range
     }
 
     <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
