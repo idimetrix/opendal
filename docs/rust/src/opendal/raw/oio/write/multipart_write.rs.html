@@ -395,6 +395,8 @@
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -723,7 +725,9 @@
 
             <span class="comment">// We will have 10% percent rate for write part to fail.
             </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>).set_temporary()
+                );
             }
 
             {
