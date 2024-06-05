@@ -618,6 +618,7 @@
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
 <a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1054,8 +1055,9 @@
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>concurrent = args.concurrent();
+        <span class="kw">let </span>executor = args.executor().cloned();
         <span class="kw">let </span>w = GcsWriter::new(<span class="self">self</span>.core.clone(), path, args);
-        <span class="kw">let </span>w = oio::RangeWriter::new(w, concurrent);
+        <span class="kw">let </span>w = oio::RangeWriter::new(w, executor, concurrent);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }

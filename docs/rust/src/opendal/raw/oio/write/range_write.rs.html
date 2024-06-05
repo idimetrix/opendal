@@ -368,11 +368,6 @@
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
 <a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -390,14 +385,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>futures::Future;
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>futures::{select, Future};
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -464,74 +455,75 @@
     </span><span class="kw">fn </span>abort_range(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
-<span class="doccomment">/// WritePartResult is the result returned by [`WriteRangeFuture`].
-///
-/// The error part will carries input `(offset, bytes, err)` so caller can retry them.
-</span><span class="kw">type </span>WriteRangeResult = std::result::Result&lt;(), (u64, Buffer, Error)&gt;;
+<span class="kw">struct </span>WriteInput&lt;W: RangeWrite&gt; {
+    w: Arc&lt;W&gt;,
+    executor: Executor,
 
-<span class="kw">struct </span>WriteRangeFuture(BoxedStaticFuture&lt;WriteRangeResult&gt;);
-
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this WriteRangeFuture.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>WriteRangeFuture {}
-
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for WriteRangeFuture.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>WriteRangeFuture {}
-
-<span class="kw">impl </span>Future <span class="kw">for </span>WriteRangeFuture {
-    <span class="kw">type </span>Output = WriteRangeResult;
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="self">self</span>.get_mut().<span class="number">0</span>.poll_unpin(cx)
-    }
-}
-
-<span class="kw">impl </span>WriteRangeFuture {
-    <span class="kw">pub fn </span>new&lt;W: RangeWrite&gt;(
-        w: Arc&lt;W&gt;,
-        location: Arc&lt;String&gt;,
-        offset: u64,
-        bytes: Buffer,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>fut = <span class="kw">async move </span>{
-            w.write_range(<span class="kw-2">&amp;</span>location, offset, bytes.len() <span class="kw">as </span>u64, bytes.clone())
-                .<span class="kw">await
-                </span>.map_err(|err| (offset, bytes, err))
-        };
-
-        WriteRangeFuture(Box::pin(fut))
-    }
+    location: Arc&lt;String&gt;,
+    offset: u64,
+    bytes: Buffer,
 }
 
 <span class="doccomment">/// RangeWriter will implements [`oio::Write`] based on range write.
 </span><span class="kw">pub struct </span>RangeWriter&lt;W: RangeWrite&gt; {
+    w: Arc&lt;W&gt;,
+    executor: Executor,
+
     location: <span class="prelude-ty">Option</span>&lt;Arc&lt;String&gt;&gt;,
     next_offset: u64,
-    buffer: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
-    futures: ConcurrentFutures&lt;WriteRangeFuture&gt;,
-
-    w: Arc&lt;W&gt;,
+    cache: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
+    tasks: ConcurrentTasks&lt;WriteInput&lt;W&gt;, ()&gt;,
 }
 
 <span class="kw">impl</span>&lt;W: RangeWrite&gt; RangeWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new MultipartWriter.
-    </span><span class="kw">pub fn </span>new(inner: W, concurrent: usize) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(inner: W, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;, concurrent: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>executor = executor.unwrap_or_default();
+
         <span class="self">Self </span>{
             w: Arc::new(inner),
-
-            futures: ConcurrentFutures::new(<span class="number">1</span>.max(concurrent)),
-            buffer: <span class="prelude-val">None</span>,
+            executor: executor.clone(),
             location: <span class="prelude-val">None</span>,
             next_offset: <span class="number">0</span>,
+            cache: <span class="prelude-val">None</span>,
+
+            tasks: ConcurrentTasks::new(executor, concurrent, |input| {
+                Box::pin(<span class="kw">async move </span>{
+                    <span class="kw">let </span>fut = input.w.write_range(
+                        <span class="kw-2">&amp;</span>input.location,
+                        input.offset,
+                        input.bytes.len() <span class="kw">as </span>u64,
+                        input.bytes.clone(),
+                    );
+                    <span class="kw">match </span>input.executor.timeout() {
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="kw">let </span>result = fut.<span class="kw">await</span>;
+                            (input, result)
+                        }
+                        <span class="prelude-val">Some</span>(timeout) =&gt; {
+                            <span class="kw">let </span>result = <span class="macro">select!</span> {
+                                result = fut.fuse() =&gt; {
+                                    result
+                                }
+                                <span class="kw">_ </span>= timeout.fuse() =&gt; {
+                                      <span class="prelude-val">Err</span>(Error::new(
+                                            ErrorKind::Unexpected, <span class="string">"write range timeout"</span>)
+                                                .with_context(<span class="string">"offset"</span>, input.offset.to_string())
+                                                .set_temporary())
+                                }
+                            };
+                            (input, result)
+                        }
+                    }
+                })
+            }),
         }
     }
 
     <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; usize {
         <span class="kw">let </span>size = bs.len();
-        <span class="macro">assert!</span>(<span class="self">self</span>.buffer.is_none());
-        <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(bs);
+        <span class="macro">assert!</span>(<span class="self">self</span>.cache.is_none());
+        <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(bs);
         size
     }
 }
@@ -542,7 +534,7 @@
             <span class="prelude-val">Some</span>(location) =&gt; location,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="comment">// Fill cache with the first write.
-                </span><span class="kw">if </span><span class="self">self</span>.buffer.is_none() {
+                </span><span class="kw">if </span><span class="self">self</span>.cache.is_none() {
                     <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
                 }
@@ -554,64 +546,46 @@
             }
         };
 
-        <span class="kw">loop </span>{
-            <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                <span class="kw">let </span>cache = <span class="self">self</span>.buffer.take().expect(<span class="string">"cache must be valid"</span>);
-                <span class="kw">let </span>offset = <span class="self">self</span>.next_offset;
-                <span class="self">self</span>.next_offset += cache.len() <span class="kw">as </span>u64;
-                <span class="self">self</span>.futures.push_back(WriteRangeFuture::new(
-                    <span class="self">self</span>.w.clone(),
-                    location,
-                    offset,
-                    cache,
-                ));
+        <span class="kw">let </span>bytes = <span class="self">self</span>.cache.clone().expect(<span class="string">"pending write must exist"</span>);
+        <span class="kw">let </span>length = bytes.len() <span class="kw">as </span>u64;
+        <span class="kw">let </span>offset = <span class="self">self</span>.next_offset;
 
-                <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
-            }
-
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>((offset, bytes, err))) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
-                <span class="self">self</span>.futures.push_front(WriteRangeFuture::new(
-                    <span class="self">self</span>.w.clone(),
-                    location,
-                    offset,
-                    bytes,
-                ));
-                <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-            }
-        }
+        <span class="self">self</span>.tasks
+            .execute(WriteInput {
+                w: <span class="self">self</span>.w.clone(),
+                executor: <span class="self">self</span>.executor.clone(),
+                location,
+                offset,
+                bytes,
+            })
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.next_offset += length;
+        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(size)
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(location) = <span class="self">self</span>.location.clone() <span class="kw">else </span>{
-            <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.buffer.clone() {
+            <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
                 <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), cache),
                 <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, Buffer::new()),
             };
             <span class="comment">// Call write_once if there is no data in buffer and no location.
-            </span><span class="kw">return </span><span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span>;
+            </span><span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
-        <span class="kw">if </span>!<span class="self">self</span>.futures.is_empty() {
-            <span class="kw">while let </span><span class="prelude-val">Some</span>(result) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
-                <span class="kw">if let </span><span class="prelude-val">Err</span>((offset, bytes, err)) = result {
-                    <span class="self">self</span>.futures.push_front(WriteRangeFuture::new(
-                        <span class="self">self</span>.w.clone(),
-                        location,
-                        offset,
-                        bytes,
-                    ));
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                };
-            }
-        }
+        <span class="comment">// Make sure all tasks are finished.
+        </span><span class="kw">while </span><span class="self">self</span>.tasks.next().<span class="kw">await</span>.transpose()<span class="question-mark">?</span>.is_some() {}
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(buffer) = <span class="self">self</span>.buffer.clone() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(buffer) = <span class="self">self</span>.cache.clone() {
             <span class="kw">let </span>offset = <span class="self">self</span>.next_offset;
             <span class="self">self</span>.w
                 .complete_range(<span class="kw-2">&amp;</span>location, offset, buffer.len() <span class="kw">as </span>u64, buffer)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">self</span>.buffer = <span class="prelude-val">None</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -622,10 +596,9 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
-        <span class="self">self</span>.futures.clear();
+        <span class="self">self</span>.tasks.clear();
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
         <span class="self">self</span>.w.abort_range(<span class="kw-2">&amp;</span>location).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="comment">// Clean cache when abort_range returns success.
-        </span><span class="self">self</span>.buffer = <span class="prelude-val">None</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -634,11 +607,13 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::collections::HashSet;
     <span class="kw">use </span>std::sync::Mutex;
+    <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
+    <span class="kw">use </span>tokio::time::sleep;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
@@ -673,9 +648,14 @@
         }
 
         <span class="kw">async fn </span>write_range(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, offset: u64, size: u64, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="comment">// We will have 50% percent rate for write part to fail.
-            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">5.0 </span>/ <span class="number">10.0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
+            <span class="comment">// Add an async sleep here to enforce some pending.
+            </span>sleep(Duration::from_millis(<span class="number">50</span>)).<span class="kw">await</span>;
+
+            <span class="comment">// We will have 10% percent rate for write part to fail.
+            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>).set_temporary()
+                );
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>test = <span class="self">self</span>.lock().unwrap();
@@ -693,6 +673,16 @@
         }
 
         <span class="kw">async fn </span>complete_range(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, offset: u64, size: u64, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="comment">// Add an async sleep here to enforce some pending.
+            </span>sleep(Duration::from_millis(<span class="number">50</span>)).<span class="kw">await</span>;
+
+            <span class="comment">// We will have 10% percent rate for write part to fail.
+            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>).set_temporary()
+                );
+            }
+
             <span class="kw">let </span><span class="kw-2">mut </span>test = <span class="self">self</span>.lock().unwrap();
             test.length += size;
 
@@ -715,7 +705,7 @@
     </span><span class="kw">async fn </span>test_range_writer_with_concurrent_errors() {
         <span class="kw">let </span><span class="kw-2">mut </span>rng = thread_rng();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>w = RangeWriter::new(TestWrite::new(), <span class="number">8</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>w = RangeWriter::new(TestWrite::new(), <span class="prelude-val">Some</span>(Executor::new()), <span class="number">200</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>total_size = <span class="number">0u64</span>;
 
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">1000 </span>{

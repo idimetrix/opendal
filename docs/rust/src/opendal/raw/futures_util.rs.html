@@ -507,6 +507,50 @@
 <a href="#507" id="507">507</a>
 <a href="#508" id="508">508</a>
 <a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -960,6 +1004,7 @@
     <span class="kw">use </span>futures::future::BoxFuture;
     <span class="kw">use </span>futures::Stream;
     <span class="kw">use </span>rand::Rng;
+    <span class="kw">use </span>tokio::time::sleep;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -1014,6 +1059,49 @@
 
             <span class="macro">assert_eq!</span>(expected, result, <span class="string">"concurrent futures failed: {}"</span>, name);
         }
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_concurrent_tasks() {
+        <span class="kw">let </span>executor = Executor::new();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>tasks = ConcurrentTasks::new(executor, <span class="number">16</span>, |(i, dur)| {
+            Box::pin(<span class="kw">async move </span>{
+                sleep(dur).<span class="kw">await</span>;
+
+                <span class="comment">// 5% rate to fail.
+                </span><span class="kw">if </span>rand::thread_rng().gen_range(<span class="number">0</span>..<span class="number">100</span>) &gt; <span class="number">90 </span>{
+                    <span class="kw">return </span>(
+                        (i, dur),
+                        <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm lucky"</span>).set_temporary()),
+                    );
+                }
+                ((i, dur), <span class="prelude-val">Ok</span>(i))
+            })
+        });
+
+        <span class="kw">let </span><span class="kw-2">mut </span>ans = <span class="macro">vec!</span>[];
+
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">10240 </span>{
+            <span class="comment">// Sleep up to 10ms
+            </span><span class="kw">let </span>dur = Duration::from_millis(rand::thread_rng().gen_range(<span class="number">0</span>..<span class="number">10</span>));
+            <span class="kw">loop </span>{
+                <span class="kw">let </span>res = tasks.execute((i, dur)).<span class="kw">await</span>;
+                <span class="kw">if </span>res.is_ok() {
+                    <span class="kw">break</span>;
+                }
+            }
+        }
+
+        <span class="kw">loop </span>{
+            <span class="kw">match </span>tasks.next().<span class="kw">await</span>.transpose() {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(i)) =&gt; ans.push(i),
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">break</span>,
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
+            }
+        }
+
+        <span class="macro">assert_eq!</span>(ans, (<span class="number">0</span>..<span class="number">10240</span>).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;())
     }
 }
 </code></pre></div></section></main></body></html>
