@@ -348,16 +348,6 @@
 <a href="#348" id="348">348</a>
 <a href="#349" id="349">349</a>
 <a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -375,14 +365,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>futures::Future;
-<span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>futures::{select, Future};
+<span class="kw">use </span>futures::{FutureExt, TryFutureExt};
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -449,63 +435,69 @@
     </span><span class="kw">fn </span>abort_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_ids: Vec&lt;Uuid&gt;) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
-<span class="doccomment">/// WriteBlockResult is the result returned by [`WriteBlockFuture`].
-///
-/// The error part will carries input `(block_id, bytes, err)` so caller can retry them.
-</span><span class="kw">type </span>WriteBlockResult = <span class="prelude-ty">Result</span>&lt;Uuid, (Uuid, Buffer, Error)&gt;;
-
-<span class="kw">struct </span>WriteBlockFuture(BoxedStaticFuture&lt;WriteBlockResult&gt;);
-
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this WriteBlockFuture.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>WriteBlockFuture {}
-
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for WriteBlockFuture.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>WriteBlockFuture {}
-
-<span class="kw">impl </span>Future <span class="kw">for </span>WriteBlockFuture {
-    <span class="kw">type </span>Output = WriteBlockResult;
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="self">self</span>.get_mut().<span class="number">0</span>.poll_unpin(cx)
-    }
-}
-
-<span class="kw">impl </span>WriteBlockFuture {
-    <span class="kw">pub fn </span>new&lt;W: BlockWrite&gt;(w: Arc&lt;W&gt;, block_id: Uuid, bytes: Buffer) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>fut = <span class="kw">async move </span>{
-            w.write_block(block_id, bytes.len() <span class="kw">as </span>u64, bytes.clone())
-                .<span class="kw">await
-                </span><span class="comment">// Return bytes while we got an error to allow retry.
-                </span>.map_err(|err| (block_id, bytes, err))
-                <span class="comment">// Return the successful block id.
-                </span>.map(|<span class="kw">_</span>| block_id)
-        };
-
-        WriteBlockFuture(Box::pin(fut))
-    }
+<span class="kw">struct </span>WriteInput&lt;W: BlockWrite&gt; {
+    w: Arc&lt;W&gt;,
+    executor: Executor,
+    block_id: Uuid,
+    bytes: Buffer,
 }
 
 <span class="doccomment">/// BlockWriter will implements [`Write`] based on block
 /// uploads.
 </span><span class="kw">pub struct </span>BlockWriter&lt;W: BlockWrite&gt; {
     w: Arc&lt;W&gt;,
+    executor: Executor,
 
+    started: bool,
     block_ids: Vec&lt;Uuid&gt;,
     cache: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
-    futures: ConcurrentFutures&lt;WriteBlockFuture&gt;,
+    tasks: ConcurrentTasks&lt;WriteInput&lt;W&gt;, Uuid&gt;,
 }
 
 <span class="kw">impl</span>&lt;W: BlockWrite&gt; BlockWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new BlockWriter.
-    </span><span class="kw">pub fn </span>new(inner: W, concurrent: usize) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(inner: W, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;, concurrent: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>executor = executor.unwrap_or_default();
+
         <span class="self">Self </span>{
             w: Arc::new(inner),
+            executor: executor.clone(),
+            started: <span class="bool-val">false</span>,
             block_ids: Vec::new(),
             cache: <span class="prelude-val">None</span>,
-            futures: ConcurrentFutures::new(<span class="number">1</span>.max(concurrent)),
+
+            tasks: ConcurrentTasks::new(executor, concurrent, |input| {
+                Box::pin(<span class="kw">async move </span>{
+                    <span class="kw">let </span>fut = input
+                        .w
+                        .write_block(
+                            input.block_id,
+                            input.bytes.len() <span class="kw">as </span>u64,
+                            input.bytes.clone(),
+                        )
+                        .map_ok(|<span class="kw">_</span>| input.block_id);
+                    <span class="kw">match </span>input.executor.timeout() {
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="kw">let </span>result = fut.<span class="kw">await</span>;
+                            (input, result)
+                        }
+                        <span class="prelude-val">Some</span>(timeout) =&gt; {
+                            <span class="kw">let </span>result = <span class="macro">select!</span> {
+                                result = fut.fuse() =&gt; {
+                                    result
+                                }
+                                <span class="kw">_ </span>= timeout.fuse() =&gt; {
+                                      <span class="prelude-val">Err</span>(Error::new(
+                                            ErrorKind::Unexpected, <span class="string">"write block timeout"</span>)
+                                                .with_context(<span class="string">"block_id"</span>, input.block_id.to_string())
+                                                .set_temporary())
+                                }
+                            };
+                            (input, result)
+                        }
+                    }
+                })
+            }),
         }
     }
 
@@ -522,83 +514,57 @@
     </span>W: BlockWrite,
 {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                <span class="comment">// Fill cache with the first write.
-                </span><span class="kw">if </span><span class="self">self</span>.cache.is_none() {
-                    <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
-                }
-
-                <span class="kw">let </span>cache = <span class="self">self</span>.cache.take().expect(<span class="string">"pending write must exist"</span>);
-                <span class="self">self</span>.futures.push_back(WriteBlockFuture::new(
-                    <span class="self">self</span>.w.clone(),
-                    Uuid::new_v4(),
-                    cache,
-                ));
-
-                <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
-            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(res) = <span class="self">self</span>.futures.next().<span class="kw">await </span>{
-                <span class="kw">match </span>res {
-                    <span class="prelude-val">Ok</span>(block_id) =&gt; {
-                        <span class="self">self</span>.block_ids.push(block_id);
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="prelude-val">Err</span>((block_id, bytes, err)) =&gt; {
-                        <span class="self">self</span>.futures.push_front(WriteBlockFuture::new(
-                            <span class="self">self</span>.w.clone(),
-                            block_id,
-                            bytes,
-                        ));
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                    }
-                }
-            }
+        <span class="kw">if </span>!<span class="self">self</span>.started &amp;&amp; <span class="self">self</span>.cache.is_none() {
+            <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
         }
+
+        <span class="comment">// The block upload process has been started.
+        </span><span class="self">self</span>.started = <span class="bool-val">true</span>;
+
+        <span class="kw">let </span>bytes = <span class="self">self</span>.cache.clone().expect(<span class="string">"pending write must exist"</span>);
+        <span class="self">self</span>.tasks
+            .execute(WriteInput {
+                w: <span class="self">self</span>.w.clone(),
+                executor: <span class="self">self</span>.executor.clone(),
+                block_id: Uuid::new_v4(),
+                bytes,
+            })
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(size)
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="comment">// No write block has been sent.
-        </span><span class="kw">if </span><span class="self">self</span>.futures.is_empty() &amp;&amp; <span class="self">self</span>.block_ids.is_empty() {
+        <span class="kw">if </span>!<span class="self">self</span>.started {
             <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
                 <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), cache),
                 <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, Buffer::new()),
             };
+
             <span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="comment">// Cleanup cache after write succeed.
-            </span><span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
-        <span class="kw">loop </span>{
-            <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                <span class="comment">// Push into the queue and continue.
-                // It's safe to take the cache here since we will re-push task for it failed.
-                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.take() {
-                    <span class="self">self</span>.futures.push_back(WriteBlockFuture::new(
-                        <span class="self">self</span>.w.clone(),
-                        Uuid::new_v4(),
-                        cache,
-                    ));
-                }
-            }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.clone() {
+            <span class="self">self</span>.tasks
+                .execute(WriteInput {
+                    w: <span class="self">self</span>.w.clone(),
+                    executor: <span class="self">self</span>.executor.clone(),
+                    block_id: Uuid::new_v4(),
+                    bytes: cache,
+                })
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        }
 
-            <span class="kw">let </span><span class="prelude-val">Some</span>(result) = <span class="self">self</span>.futures.next().<span class="kw">await else </span>{
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(result) = <span class="self">self</span>.tasks.next().<span class="kw">await</span>.transpose()<span class="question-mark">? </span><span class="kw">else </span>{
                 <span class="kw">break</span>;
             };
-
-            <span class="kw">match </span>result {
-                <span class="prelude-val">Ok</span>(block_id) =&gt; {
-                    <span class="self">self</span>.block_ids.push(block_id);
-                    <span class="kw">continue</span>;
-                }
-                <span class="prelude-val">Err</span>((block_id, bytes, err)) =&gt; {
-                    <span class="self">self</span>.futures
-                        .push_front(WriteBlockFuture::new(<span class="self">self</span>.w.clone(), block_id, bytes));
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                }
-            }
+            <span class="self">self</span>.block_ids.push(result)
         }
 
         <span class="kw">let </span>block_ids = <span class="self">self</span>.block_ids.clone();
@@ -606,19 +572,28 @@
     </span>}
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.w.abort_block(<span class="self">self</span>.block_ids.clone()).<span class="kw">await
-    </span>}
+        <span class="kw">if </span>!<span class="self">self</span>.started {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        }
+
+        <span class="self">self</span>.tasks.clear();
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.w.abort_block(<span class="self">self</span>.block_ids.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::sync::Mutex;
+    <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
+    <span class="kw">use </span>tokio::time::sleep;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
@@ -647,9 +622,14 @@
         }
 
         <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="comment">// We will have 50% percent rate for write part to fail.
-            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">5.0 </span>/ <span class="number">10.0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
+            <span class="comment">// Add an async sleep here to enforce some pending.
+            </span>sleep(Duration::from_millis(<span class="number">50</span>)).<span class="kw">await</span>;
+
+            <span class="comment">// We will have 10% percent rate for write part to fail.
+            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>).set_temporary()
+                );
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.lock().unwrap();
@@ -679,7 +659,7 @@
     </span><span class="kw">async fn </span>test_block_writer_with_concurrent_errors() {
         <span class="kw">let </span><span class="kw-2">mut </span>rng = thread_rng();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>w = BlockWriter::new(TestWrite::new(), <span class="number">8</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>w = BlockWriter::new(TestWrite::new(), <span class="prelude-val">Some</span>(Executor::new()), <span class="number">8</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>total_size = <span class="number">0u64</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>expected_content = Vec::new();
 

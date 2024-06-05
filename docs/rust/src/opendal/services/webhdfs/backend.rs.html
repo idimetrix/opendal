@@ -680,6 +680,10 @@
 <a href="#680" id="680">680</a>
 <a href="#681" id="681">681</a>
 <a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1328,7 +1332,11 @@
         <span class="kw">let </span>w = <span class="kw">if </span>args.append() {
             WebhdfsWriters::Two(oio::AppendWriter::new(w))
         } <span class="kw">else </span>{
-            WebhdfsWriters::One(oio::BlockWriter::new(w, args.concurrent()))
+            WebhdfsWriters::One(oio::BlockWriter::new(
+                w,
+                args.executor().cloned(),
+                args.concurrent(),
+            ))
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
