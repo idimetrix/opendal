@@ -81,6 +81,15 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -99,7 +108,7 @@
 // under the License.
 
 </span><span class="kw">use super</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
+<span class="kw">use </span><span class="kw">crate</span>::raw::{BoxedStaticFuture, MaybeSend};
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::future::Future;
@@ -152,8 +161,17 @@
         }
     }
 
+    <span class="doccomment">/// Return the inner executor.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_inner(<span class="self">self</span>) -&gt; Arc&lt;<span class="kw">dyn </span>Execute&gt; {
+        <span class="self">self</span>.executor
+    }
+
+    <span class="doccomment">/// Return a future that will be resolved after the given timeout.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>timeout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;BoxedStaticFuture&lt;()&gt;&gt; {
+        <span class="self">self</span>.executor.timeout()
+    }
+
     <span class="doccomment">/// Run given future in background immediately.
-    </span><span class="attr">#[allow(unused)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>execute&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; Task&lt;F::Output&gt;
     <span class="kw">where
         </span>F: Future + MaybeSend + <span class="lifetime">'static</span>,

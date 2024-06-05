@@ -608,12 +608,12 @@
     ///
     /// The factory is a function pointer that shouldn't capture any context.
     </span><span class="kw">pub fn </span>new(
-        executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;,
+        executor: Executor,
         concurrent: usize,
         factory: <span class="kw">fn</span>(I) -&gt; BoxedStaticFuture&lt;(I, <span class="prelude-ty">Result</span>&lt;O&gt;)&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            executor: executor.unwrap_or_default(),
+            executor,
             factory,
 
             tasks: VecDeque::with_capacity(concurrent),
