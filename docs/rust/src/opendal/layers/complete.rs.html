@@ -894,6 +894,59 @@
 <a href="#894" id="894">894</a>
 <a href="#895" id="895">895</a>
 <a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -911,7 +964,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::cmp::Ordering;
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -1294,10 +1348,12 @@
         <span class="kw">if </span>!capability.read {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
         }
+
+        <span class="kw">let </span>size = args.range().size();
         <span class="self">self</span>.inner
             .read(path, args)
             .<span class="kw">await
-            </span>.map(|(rp, r)| (rp, CompleteReader(r)))
+            </span>.map(|(rp, r)| (rp, CompleteReader::new(r, size)))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1410,9 +1466,11 @@
         <span class="kw">if </span>!capability.read || !capability.blocking {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
         }
+
+        <span class="kw">let </span>size = args.range().size();
         <span class="self">self</span>.inner
             .blocking_read(path, args)
-            .map(|(rp, r)| (rp, CompleteReader(r)))
+            .map(|(rp, r)| (rp, CompleteReader::new(r, size)))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
@@ -1480,18 +1538,66 @@
 <span class="kw">pub type </span>CompleteLister&lt;A, P&gt; =
     FourWays&lt;P, FlatLister&lt;Arc&lt;A&gt;, P&gt;, PrefixLister&lt;P&gt;, PrefixLister&lt;FlatLister&lt;Arc&lt;A&gt;, P&gt;&gt;&gt;;
 
-<span class="kw">pub struct </span>CompleteReader&lt;R&gt;(R);
+<span class="kw">pub struct </span>CompleteReader&lt;R&gt; {
+    inner: R,
+    size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    read: u64,
+}
+
+<span class="kw">impl</span>&lt;R&gt; CompleteReader&lt;R&gt; {
+    <span class="kw">pub fn </span>new(inner: R, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner,
+            size,
+            read: <span class="number">0</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>check(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+
+        <span class="kw">match </span><span class="self">self</span>.read.cmp(<span class="kw-2">&amp;</span>size) {
+            Ordering::Equal =&gt; <span class="prelude-val">Ok</span>(()),
+            Ordering::Less =&gt; <span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">"reader got too little data"</span>)
+                    .with_context(<span class="string">"expect"</span>, size)
+                    .with_context(<span class="string">"actual"</span>, <span class="self">self</span>.read),
+            ),
+            Ordering::Greater =&gt; <span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">"reader got too much data"</span>)
+                    .with_context(<span class="string">"expect"</span>, size)
+                    .with_context(<span class="string">"actual"</span>, <span class="self">self</span>.read),
+            ),
+        }
+    }
+}
 
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>CompleteReader&lt;R&gt; {
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>buf = <span class="self">self</span>.<span class="number">0</span>.read().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>buf = <span class="self">self</span>.inner.read().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">if </span>buf.is_empty() {
+            <span class="self">self</span>.check()<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.read += buf.len() <span class="kw">as </span>u64;
+        }
+
         <span class="prelude-val">Ok</span>(buf)
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>CompleteReader&lt;R&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>buf = <span class="self">self</span>.<span class="number">0</span>.read()<span class="question-mark">?</span>;
+        <span class="kw">let </span>buf = <span class="self">self</span>.inner.read()<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>buf.is_empty() {
+            <span class="self">self</span>.check()<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.read += buf.len() <span class="kw">as </span>u64;
+        }
+
         <span class="prelude-val">Ok</span>(buf)
     }
 }

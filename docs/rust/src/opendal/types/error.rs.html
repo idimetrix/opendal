@@ -798,8 +798,8 @@
     </span>}
 
     <span class="doccomment">/// Add more context in error.
-    </span><span class="kw">pub fn </span>with_context(<span class="kw-2">mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, value: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.context.push((key, value.into()));
+    </span><span class="kw">pub fn </span>with_context(<span class="kw-2">mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, value: <span class="kw">impl </span>ToString) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.context.push((key, value.to_string()));
         <span class="self">self
     </span>}
 
