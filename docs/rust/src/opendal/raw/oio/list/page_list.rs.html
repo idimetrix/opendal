@@ -125,7 +125,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// PageList is used to implement [`List`] based on API supporting pagination. By implementing
+<span class="doccomment">/// PageList is used to implement [`oio::List`] based on API supporting pagination. By implementing
 /// PageList, services don't need to care about the details of page list.
 ///
 /// # Architecture
@@ -166,7 +166,7 @@
     </span><span class="kw">pub </span>entries: VecDeque&lt;oio::Entry&gt;,
 }
 
-<span class="doccomment">/// PageLister implements [`List`] based on [`PageList`].
+<span class="doccomment">/// PageLister implements [`oio::List`] based on [`PageList`].
 </span><span class="kw">pub struct </span>PageLister&lt;L: PageList&gt; {
     inner: L,
     ctx: PageContext,

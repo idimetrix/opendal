@@ -90,6 +90,10 @@
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -107,19 +111,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use super</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::{BoxedStaticFuture, MaybeSend};
-<span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>std::fmt::{Debug, Formatter};
+</span><span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>futures::FutureExt;
+
+<span class="kw">use super</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::raw::BoxedStaticFuture;
+<span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
 
 <span class="doccomment">/// Executor that runs futures in background.
 ///
 /// Executor is created by users and used by opendal. So it's by design that Executor only
 /// expose constructor methods.
 ///
-/// Executor will run futures in background and return a [`Task`] as handle to the future. Users
+/// Executor will run futures in background and return a `Task` as handle to the future. Users
 /// can call `task.await` to wait for the future to complete or drop the `Task` to cancel it.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Executor {

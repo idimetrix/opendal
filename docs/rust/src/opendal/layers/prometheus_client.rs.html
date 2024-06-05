@@ -753,6 +753,7 @@
 <a href="#753" id="753">753</a>
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -784,7 +785,8 @@
 <span class="kw">use </span>prometheus_client::metrics::histogram::Histogram;
 <span class="kw">use </span>prometheus_client::registry::Registry;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::{ReadOperation, WriteOperation};
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -841,7 +843,7 @@
 <span class="kw">impl </span>PrometheusClientLayer {
     <span class="doccomment">/// Create PrometheusClientLayer while registering itself to this registry. Please keep in caution
     /// that do NOT call this method multiple times with a same registry. If you want initialize multiple
-    /// [`PrometheusClientLayer`] with a single registry, you should use [`clone`] instead.
+    /// [`PrometheusClientLayer`] with a single registry, you should use [`Arc::clone`] instead.
     </span><span class="kw">pub fn </span>new(registry: <span class="kw-2">&amp;mut </span>Registry) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>metrics = PrometheusClientMetrics::register(registry);
         <span class="self">Self </span>{ metrics }

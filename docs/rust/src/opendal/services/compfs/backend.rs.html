@@ -92,12 +92,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">super</span>::core::CompioThread;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::path::PathBuf;
+
+<span class="kw">use </span><span class="kw">super</span>::core::CompioThread;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::path::PathBuf;
 
 <span class="doccomment">/// [`compio`]-based file system support.
 </span><span class="attr">#[derive(Debug, Clone, Default)]

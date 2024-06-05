@@ -42,11 +42,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="doccomment">//! executors module provides implementations for the [`Execute`] trait for widely used runtimes.
+</span><span class="doccomment">//! executors module provides implementations for the [`Execute`](crate::Execute) trait for widely used runtimes.
 //!
 //! Every executor will be hide behind the feature like `executors-xxx`. Users can switch or enable
 //! the executors they want by enabling the corresponding feature. Also, users can provide their
-//! own executor by implementing the [`Execute`] trait directly.
+//! own executor by implementing the [`Execute`](crate::Execute) trait directly.
 
 </span><span class="attr">#[cfg(feature = <span class="string">"executors-tokio"</span>)]
 </span><span class="kw">mod </span>tokio_executor;

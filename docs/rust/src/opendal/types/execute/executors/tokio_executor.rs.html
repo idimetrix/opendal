@@ -55,6 +55,9 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -88,12 +91,15 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::Executor;
-    <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
+    <span class="kw">use </span>std::sync::atomic::AtomicBool;
+    <span class="kw">use </span>std::sync::atomic::Ordering;
     <span class="kw">use </span>std::sync::Arc;
     <span class="kw">use </span>std::time::Duration;
+
     <span class="kw">use </span>tokio::time::sleep;
+
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::Executor;
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_tokio_executor() {

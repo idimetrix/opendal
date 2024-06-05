@@ -129,7 +129,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// AppendWrite is used to implement [`Write`] based on append
+<span class="doccomment">/// AppendWrite is used to implement [`oio::Write`] based on append
 /// object. By implementing AppendWrite, services don't need to
 /// care about the details of buffering and uploading parts.
 ///
@@ -160,7 +160,7 @@
     ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
-<span class="doccomment">/// AppendWriter will implements [`Write`] based on append object.
+<span class="doccomment">/// AppendWriter will implements [`oio::Write`] based on append object.
 ///
 /// ## TODO
 ///

@@ -2225,6 +2225,10 @@
 <a href="#2225" id="2225">2225</a>
 <a href="#2226" id="2226">2226</a>
 <a href="#2227" id="2227">2227</a>
+<a href="#2228" id="2228">2228</a>
+<a href="#2229" id="2229">2229</a>
+<a href="#2230" id="2230">2230</a>
+<a href="#2231" id="2231">2231</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2262,11 +2266,12 @@
 /// We will usually do some general checks and data transformations in this layer,
 /// like normalizing path from input, checking whether the path refers to one file or one directory,
 /// and so on.
-/// Read [`Operator::concepts`][docs::concepts] for more about [`Operator::Operator`].
+///
+/// Read [`concepts`][crate::docs::concepts] for more about [`Operator`].
 ///
 /// # Examples
 ///
-/// Read more backend init examples in [`Operator::services`]
+/// Read more backend init examples in [`services`]
 ///
 /// ```
 /// # use anyhow::Result;
@@ -2409,7 +2414,7 @@
     ///
     /// ## Reuse Metadata
     ///
-    /// For fetch metadata of entries returned by [`Operator::Lister`], it's better to use
+    /// For fetch metadata of entries returned by [`Lister`], it's better to use
     /// [`Operator::list_with`] and [`Operator::lister_with`] with `metakey` query like
     /// `Metakey::ContentLength | Metakey::LastModified` so that we can avoid extra stat requests.
     ///
@@ -2442,7 +2447,7 @@
     ///
     /// ## Reuse Metadata
     ///
-    /// For fetch metadata of entries returned by [`Operator::Lister`], it's better to use
+    /// For fetch metadata of entries returned by [`Lister`], it's better to use
     /// [`Operator::list_with`] and [`Operator::lister_with`] with `metakey` query like
     /// `Metakey::ContentLength | Metakey::LastModified` so that we can avoid extra requests.
     ///
@@ -2872,7 +2877,10 @@
     /// # use opendal::Operator;
     /// # use opendal::Scheme;
     /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
-    /// let r = op.reader_with("path/to/file").chunk(4 * 1024 * 1024).await?;
+    /// let r = op
+    ///     .reader_with("path/to/file")
+    ///     .chunk(4 * 1024 * 1024)
+    ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
@@ -3927,8 +3935,8 @@
 
     <span class="doccomment">/// List entries that starts with given `path` in parent dir.
     ///
-    /// This function will create a new [`Operator::Lister`] to list entries. Users can stop
-    /// listing via dropping this [`Operator::Lister`].
+    /// This function will create a new [`Lister`] to list entries. Users can stop
+    /// listing via dropping this [`Lister`].
     ///
     /// # Notes
     ///
@@ -3974,8 +3982,8 @@
 
     <span class="doccomment">/// List entries that starts with given `path` in parent dir with options.
     ///
-    /// This function will create a new [`Operator::Lister`] to list entries. Users can stop listing via
-    /// dropping this [`Operator::Lister`].
+    /// This function will create a new [`Lister`] to list entries. Users can stop listing via
+    /// dropping this [`Lister`].
     ///
     /// # Options
     ///

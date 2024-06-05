@@ -1769,12 +1769,12 @@
     <span class="kw">use </span>std::sync::Arc;
     <span class="kw">use </span>std::sync::Mutex;
 
-    <span class="kw">use </span><span class="kw">crate</span>::layers::LoggingLayer;
     <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>futures::TryStreamExt;
     <span class="kw">use </span>tracing_subscriber::filter::LevelFilter;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::layers::LoggingLayer;
 
     <span class="attr">#[derive(Default, Clone)]
     </span><span class="kw">struct </span>MockBuilder {

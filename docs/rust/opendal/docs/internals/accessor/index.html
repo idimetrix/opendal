@@ -77,7 +77,7 @@ the additional overhead of dynamic dispatch.</p>
 <li>Most APIs accept <code>path</code> and <code>OpXxx</code>, and returns <code>RpXxx</code>.</li>
 <li>Most APIs have <code>async</code> and <code>blocking</code> variants, they share the same semantics but may have different underlying implementations.</li>
 </ul>
-<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> can declare their capabilities via <a href="crate::raw::AccessInfo"><code>AccessorInfo</code></a>’s <code>set_capability</code>:</p>
+<p><a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a> can declare their capabilities via <a href="../../../raw/struct.AccessorInfo.html" title="struct opendal::raw::AccessorInfo"><code>AccessorInfo</code></a>’s <code>set_capability</code>:</p>
 
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Access <span class="kw">for </span>MyBackend {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {

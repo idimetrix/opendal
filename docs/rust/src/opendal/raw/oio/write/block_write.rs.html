@@ -347,7 +347,6 @@
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
 <a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -374,7 +373,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// BlockWrite is used to implement [`Write`] based on block
+<span class="doccomment">/// BlockWrite is used to implement [`oio::Write`] based on block
 /// uploads. By implementing BlockWrite, services don't need to
 /// care about the details of uploading blocks.
 ///
@@ -413,8 +412,7 @@
     /// - All the data has been written to the buffer and we can perform the upload at once.
     </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
-    <span class="doccomment">/// write_block will write a block of the data and returns the result
-    /// [`Block`].
+    <span class="doccomment">/// write_block will write a block of the data.
     ///
     /// BlockWriter will call this API and stores the result in
     /// order.
@@ -442,7 +440,7 @@
     bytes: Buffer,
 }
 
-<span class="doccomment">/// BlockWriter will implements [`Write`] based on block
+<span class="doccomment">/// BlockWriter will implements [`oio::Write`] based on block
 /// uploads.
 </span><span class="kw">pub struct </span>BlockWriter&lt;W: BlockWrite&gt; {
     w: Arc&lt;W&gt;,

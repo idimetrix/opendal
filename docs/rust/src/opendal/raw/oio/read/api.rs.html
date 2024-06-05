@@ -311,7 +311,7 @@
 <span class="doccomment">/// ReadDyn is the dyn version of [`Read`] make it possible to use as
 /// `Box&lt;dyn ReadDyn&gt;`.
 </span><span class="kw">pub trait </span>ReadDyn: Unpin + Send + Sync {
-    <span class="doccomment">/// The dyn version of [`Read::read_at`].
+    <span class="doccomment">/// The dyn version of [`Read::read`].
     ///
     /// This function returns a boxed future to make it object safe.
     </span><span class="kw">fn </span>read_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt;;

@@ -98,7 +98,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// OneShotWrite is used to implement [`Write`] based on one shot operation.
+<span class="doccomment">/// OneShotWrite is used to implement [`oio::Write`] based on one shot operation.
 /// By implementing OneShotWrite, services don't need to care about the details.
 ///
 /// For example, S3 `PUT Object` and fs `write_all`.
@@ -111,7 +111,7 @@
     </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
-<span class="doccomment">/// OneShotWrite is used to implement [`Write`] based on one shot.
+<span class="doccomment">/// OneShotWrite is used to implement [`oio::Write`] based on one shot.
 </span><span class="kw">pub struct </span>OneShotWriter&lt;W: OneShotWrite&gt; {
     inner: W,
     buffer: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,

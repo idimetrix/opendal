@@ -76,6 +76,7 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -95,7 +96,8 @@
 
 </span><span class="kw">use </span>bb8::PooledConnection;
 <span class="kw">use </span>bytes::BytesMut;
-<span class="kw">use </span>futures::{AsyncRead, AsyncReadExt};
+<span class="kw">use </span>futures::AsyncRead;
+<span class="kw">use </span>futures::AsyncReadExt;
 
 <span class="kw">use </span><span class="kw">super</span>::backend::Manager;
 <span class="kw">use </span><span class="kw">super</span>::err::parse_error;

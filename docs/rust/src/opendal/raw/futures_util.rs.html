@@ -505,6 +505,8 @@
 <a href="#505" id="505">505</a>
 <a href="#506" id="506">506</a>
 <a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -528,10 +530,12 @@
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>futures::poll;
 <span class="kw">use </span>futures::stream::FuturesOrdered;
+<span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::StreamExt;
-<span class="kw">use </span>futures::{poll, FutureExt};
+
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// BoxedFuture is the type alias of [`futures::future::BoxFuture`].
 ///

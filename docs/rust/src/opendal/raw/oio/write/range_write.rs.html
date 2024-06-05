@@ -402,7 +402,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// RangeWrite is used to implement [`Write`] based on range write.
+<span class="doccomment">/// RangeWrite is used to implement [`oio::Write`] based on range write.
 ///
 /// # Services
 ///
@@ -505,7 +505,7 @@
     }
 }
 
-<span class="doccomment">/// RangeWriter will implements [`Write`] based on range write.
+<span class="doccomment">/// RangeWriter will implements [`oio::Write`] based on range write.
 </span><span class="kw">pub struct </span>RangeWriter&lt;W: RangeWrite&gt; {
     location: <span class="prelude-ty">Option</span>&lt;Arc&lt;String&gt;&gt;,
     next_offset: u64,

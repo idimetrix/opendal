@@ -421,6 +421,7 @@
 <a href="#421" id="421">421</a>
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -440,13 +441,14 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>futures::select;
+<span class="kw">use </span>futures::Future;
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::{select, Future};
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// MultipartWrite is used to implement [`Write`] based on multipart
+<span class="doccomment">/// MultipartWrite is used to implement [`oio::Write`] based on multipart
 /// uploads. By implementing MultipartWrite, services don't need to
 /// care about the details of uploading parts.
 ///
@@ -546,7 +548,7 @@
     bytes: Buffer,
 }
 
-<span class="doccomment">/// MultipartWriter will implements [`Write`] based on multipart
+<span class="doccomment">/// MultipartWriter will implements [`oio::Write`] based on multipart
 /// uploads.
 </span><span class="kw">pub struct </span>MultipartWriter&lt;W: MultipartWrite&gt; {
     w: Arc&lt;W&gt;,

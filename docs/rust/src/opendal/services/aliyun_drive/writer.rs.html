@@ -270,6 +270,9 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -292,16 +295,19 @@
 <span class="kw">use </span>base64::engine::general_purpose;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Buf;
-
-<span class="kw">use </span>md5::{Digest, Md5};
+<span class="kw">use </span>md5::Digest;
+<span class="kw">use </span>md5::Md5;
 <span class="kw">use </span>sha1::Sha1;
 <span class="kw">use </span>tokio::sync::RwLock;
 
+<span class="kw">use </span><span class="kw">super</span>::core::AliyunDriveCore;
+<span class="kw">use </span><span class="kw">super</span>::core::RapidUpload;
+<span class="kw">use </span><span class="kw">super</span>::core::UploadUrlResponse;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::services::aliyun_drive::core::{CheckNameMode, CreateResponse, CreateType};
+<span class="kw">use </span><span class="kw">crate</span>::services::aliyun_drive::core::CheckNameMode;
+<span class="kw">use </span><span class="kw">crate</span>::services::aliyun_drive::core::CreateResponse;
+<span class="kw">use </span><span class="kw">crate</span>::services::aliyun_drive::core::CreateType;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="kw">use </span><span class="kw">super</span>::core::{AliyunDriveCore, RapidUpload, UploadUrlResponse};
 
 <span class="kw">pub type </span>AliyunDriveWriters = oio::MultipartWriter&lt;AliyunDriveWriter&gt;;
 
