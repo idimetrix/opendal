@@ -6,7 +6,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <!-- Release notes generated using configuration in .github/release.yml at main -->
 <h3 id="v0470---2024-06-07"><a class="doc-anchor" href="#v0470---2024-06-07">§</a><a href="https://github.com/apache/opendal/compare/v0.46.0...v0.47.0">v0.47.0</a> - 2024-06-07</h3><h4 id="added"><a class="doc-anchor" href="#added">§</a>Added</h4>
 <ul>
-<li>feat(core/types): change oio::BlockingReader to Arc<dyn oio::BlockingReader> by @hoslo in https://github.com/apache/opendal/pull/4577</li>
+<li>feat(core/types): change oio::BlockingReader to <code>Arc&lt;dyn oio::BlockingReader&gt;</code> by @hoslo in https://github.com/apache/opendal/pull/4577</li>
 <li>fix: format_object_meta should not require metakeys that don’t exist by @rebasedming in https://github.com/apache/opendal/pull/4582</li>
 <li>feat: add checksums to MultiPartComplete by @JWackerbauer in https://github.com/apache/opendal/pull/4580</li>
 <li>feat(doc): update object_store_opendal README by @hanxuanliang in https://github.com/apache/opendal/pull/4606</li>
@@ -51,6 +51,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>fix(ofs): Close file during flush by @Xuanwo in https://github.com/apache/opendal/pull/4680</li>
 <li>fix(core): RetryLayer could panic when other threads raises panic by @Xuanwo in https://github.com/apache/opendal/pull/4685</li>
 <li>fix(core/prometheus): Fix metrics from prometheus not correct for reader by @Xuanwo in https://github.com/apache/opendal/pull/4691</li>
+<li>fix(core/oio): Make ConcurrentTasks cancel safe by only pop after ready by @Xuanwo in https://github.com/apache/opendal/pull/4707</li>
 </ul>
 <h4 id="docs"><a class="doc-anchor" href="#docs">§</a>Docs</h4>
 <ul>
@@ -82,6 +83,7 @@ and this project adheres to <a href="https://semver.org/">Semantic Versioning</a
 <li>chore(core): Fix unit tests by @Xuanwo in https://github.com/apache/opendal/pull/4684</li>
 <li>chore(core): Add unit and bench tests for concurrent tasks by @Xuanwo in https://github.com/apache/opendal/pull/4695</li>
 <li>chore: bump version to 0.47.0 by @tisonkun in https://github.com/apache/opendal/pull/4701</li>
+<li>chore: Update changelogs for v0.47 by @Xuanwo in https://github.com/apache/opendal/pull/4706</li>
 </ul>
 <h3 id="v0460---2024-05-02"><a class="doc-anchor" href="#v0460---2024-05-02">§</a><a href="https://github.com/apache/opendal/compare/v0.45.1...v0.46.0">v0.46.0</a> - 2024-05-02</h3><h4 id="added-1"><a class="doc-anchor" href="#added-1">§</a>Added</h4>
 <ul>
