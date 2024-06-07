@@ -929,6 +929,14 @@
 <a href="#929" id="929">929</a>
 <a href="#930" id="930">930</a>
 <a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1370,16 +1378,24 @@
             })<span class="question-mark">?
         </span>};
 
-        <span class="kw">let </span>config_loader = AzureStorageConfig {
-            account_name: <span class="self">self
-                </span>.config
-                .account_name
-                .clone()
-                .or_else(|| infer_storage_name_from_endpoint(endpoint.as_str())),
-            account_key: <span class="self">self</span>.config.account_key.clone(),
-            sas_token: <span class="self">self</span>.config.sas_token.clone(),
-            ..Default::default()
-        };
+        <span class="kw">let </span><span class="kw-2">mut </span>config_loader = AzureStorageConfig::default().from_env();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self
+            </span>.config
+            .account_name
+            .clone()
+            .or_else(|| infer_storage_name_from_endpoint(endpoint.as_str()))
+        {
+            config_loader.account_name = <span class="prelude-val">Some</span>(v);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.account_key.clone() {
+            config_loader.account_key = <span class="prelude-val">Some</span>(v);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.sas_token.clone() {
+            config_loader.sas_token = <span class="prelude-val">Some</span>(v);
+        }
 
         <span class="kw">let </span>encryption_key =
             <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.encryption_key {
