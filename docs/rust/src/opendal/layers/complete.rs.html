@@ -947,6 +947,13 @@
 <a href="#947" id="947">947</a>
 <a href="#948" id="948">948</a>
 <a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1372,28 +1379,35 @@
         }
 
         <span class="comment">// Calculate buffer size.
-        </span><span class="kw">let </span>chunk_size = args.chunk().map(|<span class="kw-2">mut </span>size| {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_max_size {
-                size = size.min(v);
-            }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_min_size {
-                size = size.max(v);
-            }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_align_size {
-                <span class="comment">// Make sure size &gt;= size first.
-                </span>size = size.max(v);
-                size -= size % v;
-            }
+        // If `chunk` is not set, we use `write_multi_min_size` or `write_multi_align_size`
+        // as the default size.
+        </span><span class="kw">let </span>chunk_size = args
+            .chunk()
+            .or(capability.write_multi_min_size)
+            .or(capability.write_multi_align_size)
+            .map(|<span class="kw-2">mut </span>size| {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_max_size {
+                    size = size.min(v);
+                }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_min_size {
+                    size = size.max(v);
+                }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_align_size {
+                    <span class="comment">// Make sure size &gt;= size first.
+                    </span>size = size.max(v);
+                    size -= size % v;
+                }
 
-            size
-        });
+                size
+            });
+        <span class="kw">let </span>exact = args.chunk().is_some() || capability.write_multi_align_size.is_some();
 
         <span class="kw">let </span>(rp, w) = <span class="self">self</span>.inner.write(path, args.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>w = CompleteWriter::new(w);
 
         <span class="kw">let </span>w = <span class="kw">match </span>chunk_size {
             <span class="prelude-val">None </span>=&gt; TwoWays::One(w),
-            <span class="prelude-val">Some</span>(size) =&gt; TwoWays::Two(oio::ChunkedWriter::new(w, size)),
+            <span class="prelude-val">Some</span>(size) =&gt; TwoWays::Two(oio::ChunkedWriter::new(w, size, exact)),
         };
 
         <span class="prelude-val">Ok</span>((rp, w))
