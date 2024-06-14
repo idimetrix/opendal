@@ -137,7 +137,7 @@
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
     <span class="kw">let </span>message = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs).into_owned();
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(ErrorKind::Unexpected, message);
 
     err = with_error_response_context(err, parts);
 

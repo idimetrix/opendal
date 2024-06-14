@@ -1307,7 +1307,7 @@
 
         <span class="kw">let </span>path_id = <span class="self">self</span>.path_cache.get(base).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"read path not found: {}"</span>, base),
+            <span class="macro">format!</span>(<span class="string">"read path not found: {}"</span>, base),
         ))<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(docwsid) = path_id.strip_prefix(<span class="string">"FILE::com.apple.CloudDocs::"</span>) {
@@ -1334,12 +1334,12 @@
 
         <span class="kw">let </span>file_id = <span class="self">self</span>.path_cache.get(base).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, base),
+            <span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, base),
         ))<span class="question-mark">?</span>;
 
         <span class="kw">let </span>folder_id = <span class="self">self</span>.path_cache.get(parent).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, parent),
+            <span class="macro">format!</span>(<span class="string">"stat path not found: {}"</span>, parent),
         ))<span class="question-mark">?</span>;
 
         <span class="kw">let </span>node = <span class="self">self</span>.get_root(<span class="kw-2">&amp;</span>folder_id).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1468,7 +1468,7 @@
         }
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, message);
 
     err = with_error_response_context(err, parts);
 

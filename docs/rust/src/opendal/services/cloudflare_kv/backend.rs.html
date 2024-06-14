@@ -662,7 +662,7 @@
                     serde_json::from_reader(body.reader()).map_err(|e| {
                         Error::new(
                             ErrorKind::Unexpected,
-                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
+                            <span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
                         )
                     })<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(response.result.into_iter().map(|r| r.name).collect())

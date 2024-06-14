@@ -130,7 +130,7 @@
         (kind, retryable) = parse_cfkv_error_code(err.errors).unwrap_or((kind, retryable));
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, message);
 
     err = with_error_response_context(err, parts);
 

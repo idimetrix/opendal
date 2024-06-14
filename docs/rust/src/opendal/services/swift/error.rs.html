@@ -139,7 +139,7 @@
 
     <span class="kw">let </span>message = parse_error_response(<span class="kw-2">&amp;</span>bs);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, message);
 
     err = with_error_response_context(err, parts);
 

@@ -556,7 +556,7 @@
                     </span><span class="kw">if </span>signer.auth_info.repo_id.is_empty() {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                             ErrorKind::NotFound,
-                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"repo {} not found"</span>, <span class="self">self</span>.repo_name),
+                            <span class="macro">format!</span>(<span class="string">"repo {} not found"</span>, <span class="self">self</span>.repo_name),
                         ));
                     }
                 }

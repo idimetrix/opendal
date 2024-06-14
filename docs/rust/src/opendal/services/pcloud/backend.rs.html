@@ -692,10 +692,10 @@
                     serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">let </span>result = resp.result;
                 <span class="kw">if </span>result == <span class="number">2010 </span>|| result == <span class="number">2055 </span>|| result == <span class="number">2002 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
                 <span class="kw">if </span>result != <span class="number">0 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(md) = resp.metadata {
@@ -703,7 +703,7 @@
                     <span class="kw">return </span>md.map(RpStat::new);
                 }
 
-                <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)))
+                <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)))
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
@@ -754,7 +754,7 @@
 
                 <span class="comment">// pCloud returns 2005 or 2009 if the file or folder is not found
                 </span><span class="kw">if </span>result != <span class="number">0 </span>&amp;&amp; result != <span class="number">2005 </span>&amp;&amp; result != <span class="number">2009 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
 
                 <span class="prelude-val">Ok</span>(RpDelete::default())
@@ -786,10 +786,10 @@
                     serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">let </span>result = resp.result;
                 <span class="kw">if </span>result == <span class="number">2009 </span>|| result == <span class="number">2010 </span>|| result == <span class="number">2055 </span>|| result == <span class="number">2002 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
                 <span class="kw">if </span>result != <span class="number">0 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
 
                 <span class="prelude-val">Ok</span>(RpCopy::default())
@@ -816,10 +816,10 @@
                     serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">let </span>result = resp.result;
                 <span class="kw">if </span>result == <span class="number">2009 </span>|| result == <span class="number">2010 </span>|| result == <span class="number">2055 </span>|| result == <span class="number">2002 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
                 <span class="kw">if </span>result != <span class="number">0 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
 
                 <span class="prelude-val">Ok</span>(RpRename::default())

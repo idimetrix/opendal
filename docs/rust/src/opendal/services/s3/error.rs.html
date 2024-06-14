@@ -157,7 +157,6 @@
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
 <a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -195,9 +194,8 @@
 }
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
-    <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
-    <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
+</span><span class="kw">pub fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
+    <span class="kw">let </span>(parts, body) = resp.into_parts();
 
     <span class="kw">let </span>(<span class="kw-2">mut </span>kind, <span class="kw-2">mut </span>retryable) = <span class="kw">match </span>parts.status.as_u16() {
         <span class="number">403 </span>=&gt; (ErrorKind::PermissionDenied, <span class="bool-val">false</span>),
@@ -210,15 +208,15 @@
         <span class="kw">_ </span>=&gt; (ErrorKind::Unexpected, <span class="bool-val">false</span>),
     };
 
-    <span class="kw">let </span>(message, s3_err) = de::from_reader::&lt;<span class="kw">_</span>, S3Error&gt;(bs.clone().reader())
+    <span class="kw">let </span>(message, s3_err) = de::from_reader::&lt;<span class="kw">_</span>, S3Error&gt;(body.clone().reader())
         .map(|s3_err| (<span class="macro">format!</span>(<span class="string">"{s3_err:?}"</span>), <span class="prelude-val">Some</span>(s3_err)))
-        .unwrap_or_else(|<span class="kw">_</span>| (String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs).into_owned(), <span class="prelude-val">None</span>));
+        .unwrap_or_else(|<span class="kw">_</span>| (String::from_utf8_lossy(body.chunk()).into_owned(), <span class="prelude-val">None</span>));
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(s3_err) = s3_err {
         (kind, retryable) = parse_s3_error_code(s3_err.code.as_str()).unwrap_or((kind, retryable));
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, message);
 
     err = with_error_response_context(err, parts);
 
@@ -226,14 +224,14 @@
         err = err.set_temporary();
     }
 
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 
 <span class="doccomment">/// Util function to build [`Error`] from a [`S3Error`] object.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_s3_error(s3_error: S3Error, parts: Parts) -&gt; Error {
     <span class="kw">let </span>(kind, retryable) =
         parse_s3_error_code(s3_error.code.as_str()).unwrap_or((ErrorKind::Unexpected, <span class="bool-val">false</span>));
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{s3_error:?}"</span>));
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="macro">format!</span>(<span class="string">"{s3_error:?}"</span>));
 
     err = with_error_response_context(err, parts);
 

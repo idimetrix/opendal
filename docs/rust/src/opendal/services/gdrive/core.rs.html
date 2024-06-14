@@ -516,7 +516,7 @@
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>file_id = <span class="self">self</span>.path_cache.get(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
+            <span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
         ))<span class="question-mark">?</span>;
 
         <span class="comment">// The file metadata in the Google Drive API is very complex.
@@ -536,7 +536,7 @@
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>path_id = <span class="self">self</span>.path_cache.get(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
+            <span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
         ))<span class="question-mark">?</span>;
 
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
@@ -585,7 +585,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>source_file_id = <span class="self">self</span>.path_cache.get(source).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"source path not found: {}"</span>, source),
+            <span class="macro">format!</span>(<span class="string">"source path not found: {}"</span>, source),
         ))<span class="question-mark">?</span>;
         <span class="kw">let </span>source_parent = get_parent(source);
         <span class="kw">let </span>source_parent_id = <span class="self">self

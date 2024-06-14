@@ -196,7 +196,7 @@
                 <span class="kw">let </span>id =
                     parse_header_to_str(resp.headers(), X_UPYUN_MULTI_UUID)<span class="question-mark">?</span>.ok_or(Error::new(
                         ErrorKind::Unexpected,
-                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{} header is missing"</span>, X_UPYUN_MULTI_UUID),
+                        <span class="macro">format!</span>(<span class="string">"{} header is missing"</span>, X_UPYUN_MULTI_UUID),
                     ))<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(id.to_string())

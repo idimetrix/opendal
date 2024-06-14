@@ -589,7 +589,7 @@
             <span class="string">"{} not found, maybe not in github action environment?"</span>,
             env_var_name
         );
-        Error::new(ErrorKind::ConfigInvalid, <span class="kw-2">&amp;</span>text)
+        Error::new(ErrorKind::ConfigInvalid, text)
             .with_operation(operation)
             .set_source(err)
     })

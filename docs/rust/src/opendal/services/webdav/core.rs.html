@@ -1224,7 +1224,7 @@
         <span class="kw">if </span>code &gt;= <span class="number">400 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unexpected,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"propfind response is unexpected: {} {}"</span>, code, text),
+                <span class="macro">format!</span>(<span class="string">"propfind response is unexpected: {} {}"</span>, code, text),
             ));
         }
     }

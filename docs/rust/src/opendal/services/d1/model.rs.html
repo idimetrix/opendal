@@ -164,14 +164,14 @@
         <span class="kw">let </span>response: D1Response = serde_json::from_slice(bs).map_err(|e| {
             Error::new(
                 <span class="kw">crate</span>::ErrorKind::Unexpected,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
+                <span class="macro">format!</span>(<span class="string">"failed to parse error response: {}"</span>, e),
             )
         })<span class="question-mark">?</span>;
 
         <span class="kw">if </span>!response.success {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 <span class="kw">crate</span>::ErrorKind::Unexpected,
-                <span class="kw-2">&amp;</span>String::from_utf8_lossy(bs),
+                String::from_utf8_lossy(bs),
             ));
         }
         <span class="prelude-val">Ok</span>(response)

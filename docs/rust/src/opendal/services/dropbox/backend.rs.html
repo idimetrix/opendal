@@ -368,7 +368,7 @@
             <span class="kw">if </span><span class="string">"file" </span>== decoded_response.tag {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::NotADirectory,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"it's not a directory {}"</span>, path),
+                    <span class="macro">format!</span>(<span class="string">"it's not a directory {}"</span>, path),
                 ));
             }
         }
@@ -414,7 +414,7 @@
                     } <span class="kw">else </span>{
                         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                             ErrorKind::Unexpected,
-                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"no size found for file {}"</span>, path),
+                            <span class="macro">format!</span>(<span class="string">"no size found for file {}"</span>, path),
                         ));
                     }
                 }
@@ -554,7 +554,7 @@
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unexpected,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="macro">format!</span>(
                     <span class="string">"delete batch failed with unexpected tag {}"</span>,
                     decoded_response.tag
                 ),

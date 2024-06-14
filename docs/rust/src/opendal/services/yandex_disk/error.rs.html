@@ -156,7 +156,7 @@
         .map(|yandex_disk_err| (<span class="macro">format!</span>(<span class="string">"{yandex_disk_err:?}"</span>), <span class="prelude-val">Some</span>(yandex_disk_err)))
         .unwrap_or_else(|<span class="kw">_</span>| (String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs).into_owned(), <span class="prelude-val">None</span>));
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>message);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, message);
 
     err = with_error_response_context(err, parts);
 

@@ -94,7 +94,7 @@
         ),
     };
 
-    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span>msg).set_source(hdfs_error);
+    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, msg).set_source(hdfs_error);
 
     <span class="kw">if </span>retryable {
         err = err.set_temporary();

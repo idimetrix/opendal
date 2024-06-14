@@ -1091,7 +1091,7 @@
         <span class="kw">let </span>op = op.into();
         Error::new(
             ErrorKind::Unsupported,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"service {scheme} doesn't support operation {op}"</span>),
+            <span class="macro">format!</span>(<span class="string">"service {scheme} doesn't support operation {op}"</span>),
         )
         .with_operation(op)
     }
@@ -1371,7 +1371,7 @@
         <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="macro">format!</span>(
                     <span class="string">"service {} doesn't support operation write with append"</span>,
                     <span class="self">self</span>.info().scheme()
                 ),
@@ -1496,7 +1496,7 @@
         <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="macro">format!</span>(
                     <span class="string">"service {} doesn't support operation write with append"</span>,
                     <span class="self">self</span>.info().scheme()
                 ),
