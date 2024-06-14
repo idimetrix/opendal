@@ -576,26 +576,6 @@
 <a href="#576" id="576">576</a>
 <a href="#577" id="577">577</a>
 <a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -721,7 +701,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>tokener = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
         <span class="kw">if </span>tokener.expire_at &lt; Utc::now().timestamp() || tokener.access_token.is_none() {
             <span class="kw">let </span>res = <span class="self">self</span>.get_access_token(<span class="kw-2">&amp;</span>tokener.refresh_token).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>output: RefresTokenResponse =
+            <span class="kw">let </span>output: RefreshTokenResponse =
                 serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             tokener.access_token = <span class="prelude-val">Some</span>(output.access_token);
             tokener.expire_at = output.expires_in + Utc::now().timestamp();
@@ -1010,7 +990,7 @@
 }
 
 <span class="attr">#[derive(Debug, Deserialize)]
-</span><span class="kw">pub struct </span>RefresTokenResponse {
+</span><span class="kw">pub struct </span>RefreshTokenResponse {
     <span class="kw">pub </span>access_token: String,
     <span class="kw">pub </span>expires_in: i64,
     <span class="kw">pub </span>refresh_token: String,
@@ -1018,9 +998,6 @@
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub struct </span>DriveInfoResponse {
-    <span class="kw">pub </span>user_id: String,
-    <span class="kw">pub </span>name: String,
-    <span class="kw">pub </span>avatar: String,
     <span class="kw">pub </span>default_drive_id: String,
     <span class="kw">pub </span>resource_drive_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>backup_drive_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -1042,22 +1019,13 @@
 
 <span class="attr">#[derive(Deserialize)]
 </span><span class="kw">pub struct </span>UploadUrlResponse {
-    <span class="kw">pub </span>drive_id: String,
-    <span class="kw">pub </span>file_id: String,
-    <span class="kw">pub </span>upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>part_info_list: <span class="prelude-ty">Option</span>&lt;Vec&lt;PartInfo&gt;&gt;,
 }
 
 <span class="attr">#[derive(Deserialize)]
 </span><span class="kw">pub struct </span>CreateResponse {
-    <span class="kw">pub </span>drive_id: String,
     <span class="kw">pub </span>file_id: String,
-    <span class="kw">pub </span>status: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>parent_file_id: String,
     <span class="kw">pub </span>upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>file_name: String,
-    <span class="kw">pub </span>available: <span class="prelude-ty">Option</span>&lt;bool&gt;,
-    <span class="kw">pub </span>exist: <span class="prelude-ty">Option</span>&lt;bool&gt;,
     <span class="kw">pub </span>rapid_upload: <span class="prelude-ty">Option</span>&lt;bool&gt;,
     <span class="kw">pub </span>part_info_list: <span class="prelude-ty">Option</span>&lt;Vec&lt;PartInfo&gt;&gt;,
 }
@@ -1079,32 +1047,24 @@
 
 <span class="attr">#[derive(Deserialize)]
 </span><span class="kw">pub struct </span>CopyResponse {
-    <span class="kw">pub </span>drive_id: String,
     <span class="kw">pub </span>file_id: String,
 }
 
 <span class="attr">#[derive(Deserialize)]
 </span><span class="kw">pub struct </span>AliyunDriveFile {
-    <span class="kw">pub </span>drive_id: String,
     <span class="kw">pub </span>file_id: String,
     <span class="kw">pub </span>parent_file_id: String,
     <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="kw">pub </span>file_extension: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>content_hash: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>category: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="attr">#[serde(rename = <span class="string">"type"</span>)]
     </span><span class="kw">pub </span>path_type: String,
-    <span class="kw">pub </span>created_at: String,
     <span class="kw">pub </span>updated_at: String,
 }
 
 <span class="attr">#[derive(Deserialize)]
 </span><span class="kw">pub struct </span>GetDownloadUrlResponse {
     <span class="kw">pub </span>url: String,
-    <span class="kw">pub </span>expiration: String,
-    <span class="kw">pub </span>method: String,
 }
 
 <span class="attr">#[derive(Serialize)]

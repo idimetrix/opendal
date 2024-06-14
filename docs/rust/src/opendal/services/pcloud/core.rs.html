@@ -432,10 +432,6 @@
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -851,11 +847,9 @@
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub struct </span>StatMetadata {
-    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>modified: String,
     <span class="kw">pub </span>isfolder: bool,
     <span class="kw">pub </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="kw">pub </span>contenttype: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="attr">#[derive(Debug, Deserialize)]
@@ -866,12 +860,10 @@
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub struct </span>ListMetadata {
-    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>path: String,
     <span class="kw">pub </span>modified: String,
     <span class="kw">pub </span>isfolder: bool,
     <span class="kw">pub </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="kw">pub </span>contenttype: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>contents: <span class="prelude-ty">Option</span>&lt;Vec&lt;ListMetadata&gt;&gt;,
 }
 </code></pre></div></section></main></body></html>
