@@ -175,6 +175,17 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -198,7 +209,7 @@
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">super</span>::error::parse_error;
+<span class="kw">use </span><span class="kw">super</span>::error::{from_s3_error, parse_error, S3Error};
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -335,7 +346,18 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
+            StatusCode::OK =&gt; {
+                <span class="comment">// still check if there is any error because S3 might return error for status code 200
+                // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html#API_CompleteMultipartUpload_Example_4
+                </span><span class="kw">let </span>(parts, body) = resp.into_parts();
+                <span class="kw">let </span>maybe_error: S3Error =
+                    quick_xml::de::from_reader(body.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+                <span class="kw">if </span>!maybe_error.code.is_empty() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(from_s3_error(maybe_error, parts));
+                }
+
+                <span class="prelude-val">Ok</span>(())
+            }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
