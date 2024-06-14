@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["OpendalFs"]};
+window.SIDEBAR_ITEMS={struct:["OpendalFs"]};

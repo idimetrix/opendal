@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.apache.opendal"},{"l":"org.apache.opendal.layer"}];updateSearchResults();
+packageSearchIndex=[{l:"All Packages",u:"allpackages-index.html"},{l:"org.apache.opendal"},{l:"org.apache.opendal.layer"}],updateSearchResults();

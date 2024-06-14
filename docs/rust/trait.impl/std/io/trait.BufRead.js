@@ -1,3 +1,1 @@
-(function() {var implementors = {
-"opendal":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/std/io/trait.BufRead.html\" title=\"trait std::io::BufRead\">BufRead</a> for <a class=\"struct\" href=\"opendal/struct.StdReader.html\" title=\"struct opendal::StdReader\">StdReader</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+!function(){var t={opendal:[['impl <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.BufRead.html" title="trait std::io::BufRead">BufRead</a> for <a class="struct" href="opendal/struct.StdReader.html" title="struct opendal::StdReader">StdReader</a>']]};window.register_implementors?window.register_implementors(t):window.pending_implementors=t}();

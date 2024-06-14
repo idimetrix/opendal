@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["opendal"];
+window.ALL_CRATES=["opendal"];

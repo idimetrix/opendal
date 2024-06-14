@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkopendal_website=self.webpackChunkopendal_website||[]).push([[7912],{2737:e=>{e.exports=JSON.parse('{"permalink":"/blog/tags/owo","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

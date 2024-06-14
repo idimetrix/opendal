@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["TokioExecutor"]};
+window.SIDEBAR_ITEMS={struct:["TokioExecutor"]};

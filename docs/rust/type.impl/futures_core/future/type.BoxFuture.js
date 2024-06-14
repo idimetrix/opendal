@@ -1,3 +1,1 @@
-(function() {var type_impls = {
-"opendal":[]
-};if (window.register_type_impls) {window.register_type_impls(type_impls);} else {window.pending_type_impls = type_impls;}})()
+!function(){var i={opendal:[]};window.register_type_impls?window.register_type_impls(i):window.pending_type_impls=i}();

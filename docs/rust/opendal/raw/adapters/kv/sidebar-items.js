@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Backend","Metadata"],"trait":["Adapter"]};
+window.SIDEBAR_ITEMS={struct:["Backend","Metadata"],trait:["Adapter"]};

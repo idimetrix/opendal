@@ -1,3 +1,1 @@
-(function() {var implementors = {
-"opendal":[["impl Buf for <a class=\"struct\" href=\"opendal/struct.Buffer.html\" title=\"struct opendal::Buffer\">Buffer</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+!function(){var e={opendal:[['impl Buf for <a class="struct" href="opendal/struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>']]};window.register_implementors?window.register_implementors(e):window.pending_implementors=e}();
