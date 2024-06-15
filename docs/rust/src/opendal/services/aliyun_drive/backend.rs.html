@@ -484,6 +484,9 @@
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -535,18 +538,24 @@
     ///
     /// default to `/` if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// access_token of this backend.
+    ///
+    /// Solution for client-only purpose. #4733
+    ///
+    /// required if no client_id, client_secret and refresh_token are provided.
+    </span><span class="kw">pub </span>access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// client_id of this backend.
     ///
-    /// required.
-    </span><span class="kw">pub </span>client_id: String,
+    /// required if no access_token is provided.
+    </span><span class="kw">pub </span>client_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// client_secret of this backend.
     ///
-    /// required.
-    </span><span class="kw">pub </span>client_secret: String,
+    /// required if no access_token is provided.
+    </span><span class="kw">pub </span>client_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// refresh_token of this backend.
     ///
-    /// required.
-    </span><span class="kw">pub </span>refresh_token: String,
+    /// required if no access_token is provided.
+    </span><span class="kw">pub </span>refresh_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// drive_type of this backend.
     ///
     /// All operations will happen under this type of drive.
@@ -605,23 +614,30 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Set access_token of this backend.
+    </span><span class="kw">pub fn </span>access_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, access_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.config.access_token = <span class="prelude-val">Some</span>(access_token.to_string());
+
+        <span class="self">self
+    </span>}
+
     <span class="doccomment">/// Set client_id of this backend.
     </span><span class="kw">pub fn </span>client_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.config.client_id = client_id.to_string();
+        <span class="self">self</span>.config.client_id = <span class="prelude-val">Some</span>(client_id.to_string());
 
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set client_secret of this backend.
     </span><span class="kw">pub fn </span>client_secret(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_secret: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.config.client_secret = client_secret.to_string();
+        <span class="self">self</span>.config.client_secret = <span class="prelude-val">Some</span>(client_secret.to_string());
 
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set refresh_token of this backend.
     </span><span class="kw">pub fn </span>refresh_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, refresh_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.config.refresh_token = refresh_token.to_string();
+        <span class="self">self</span>.config.refresh_token = <span class="prelude-val">Some</span>(refresh_token.to_string());
 
         <span class="self">self
     </span>}
@@ -682,32 +698,26 @@
             })<span class="question-mark">?
         </span>};
 
-        <span class="kw">let </span>client_id = <span class="self">self</span>.config.client_id.clone();
-        <span class="kw">if </span>client_id.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(
-                Error::new(ErrorKind::ConfigInvalid, <span class="string">"client_id is missing."</span>)
+        <span class="kw">let </span>sign = <span class="kw">match </span><span class="self">self</span>.config.access_token.clone() {
+            <span class="prelude-val">Some</span>(access_token) <span class="kw">if </span>!access_token.is_empty() =&gt; {
+                AliyunDriveSign::Access(access_token)
+            }
+            <span class="kw">_ </span>=&gt; <span class="kw">match </span>(
+                <span class="self">self</span>.config.client_id.clone(),
+                <span class="self">self</span>.config.client_secret.clone(),
+                <span class="self">self</span>.config.refresh_token.clone(),
+            ) {
+                (<span class="prelude-val">Some</span>(client_id), <span class="prelude-val">Some</span>(client_secret), <span class="prelude-val">Some</span>(refresh_token)) <span class="kw">if
+                    </span>!client_id.is_empty() &amp;&amp; !client_secret.is_empty() &amp;&amp; !refresh_token.is_empty() =&gt; {
+                    AliyunDriveSign::Refresh(client_id, client_secret, refresh_token, <span class="prelude-val">None</span>, <span class="number">0</span>)
+                }
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                        ErrorKind::ConfigInvalid,
+                        <span class="string">"access_token and a set of client_id, client_secret, and refresh_token are both missing."</span>)
                     .with_operation(<span class="string">"Builder::build"</span>)
-                    .with_context(<span class="string">"service"</span>, Scheme::AliyunDrive),
-            );
-        }
-
-        <span class="kw">let </span>client_secret = <span class="self">self</span>.config.client_secret.clone();
-        <span class="kw">if </span>client_secret.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(
-                Error::new(ErrorKind::ConfigInvalid, <span class="string">"client_secret is missing."</span>)
-                    .with_operation(<span class="string">"Builder::build"</span>)
-                    .with_context(<span class="string">"service"</span>, Scheme::AliyunDrive),
-            );
-        }
-
-        <span class="kw">let </span>refresh_token = <span class="self">self</span>.config.refresh_token.clone();
-        <span class="kw">if </span>refresh_token.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(
-                Error::new(ErrorKind::ConfigInvalid, <span class="string">"refresh_token is missing."</span>)
-                    .with_operation(<span class="string">"Builder::build"</span>)
-                    .with_context(<span class="string">"service"</span>, Scheme::AliyunDrive),
-            );
-        }
+                    .with_context(<span class="string">"service"</span>, Scheme::AliyunDrive)),
+            },
+        };
 
         <span class="kw">let </span>drive_type = <span class="kw">match </span><span class="self">self</span>.config.drive_type.as_str() {
             <span class="string">"" </span>| <span class="string">"default" </span>=&gt; DriveType::Default,
@@ -729,15 +739,11 @@
             core: Arc::new(AliyunDriveCore {
                 endpoint: <span class="string">"https://openapi.alipan.com"</span>.to_string(),
                 root,
-                client_id,
-                client_secret,
                 drive_type,
                 rapid_upload,
                 signer: Arc::new(Mutex::new(AliyunDriveSigner {
                     drive_id: <span class="prelude-val">None</span>,
-                    access_token: <span class="prelude-val">None</span>,
-                    refresh_token,
-                    expire_at: <span class="number">0</span>,
+                    sign,
                 })),
                 client,
             }),

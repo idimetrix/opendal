@@ -576,6 +576,33 @@
 <a href="#576" id="576">576</a>
 <a href="#577" id="577">577</a>
 <a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -626,18 +653,20 @@
     </span>Resource,
 }
 
+<span class="doccomment">/// Available Aliyun Drive Signer Set
+</span><span class="kw">pub enum </span>AliyunDriveSign {
+    Refresh(String, String, String, <span class="prelude-ty">Option</span>&lt;String&gt;, i64),
+    Access(String),
+}
+
 <span class="kw">pub struct </span>AliyunDriveSigner {
     <span class="kw">pub </span>drive_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>refresh_token: String,
-    <span class="kw">pub </span>expire_at: i64,
+    <span class="kw">pub </span>sign: AliyunDriveSign,
 }
 
 <span class="kw">pub struct </span>AliyunDriveCore {
     <span class="kw">pub </span>endpoint: String,
     <span class="kw">pub </span>root: String,
-    <span class="kw">pub </span>client_id: String,
-    <span class="kw">pub </span>client_secret: String,
     <span class="kw">pub </span>drive_type: DriveType,
     <span class="kw">pub </span>rapid_upload: bool,
 
@@ -656,6 +685,12 @@
 
 <span class="kw">impl </span>AliyunDriveCore {
     <span class="kw">async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>req: Request&lt;Buffer&gt;, token: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="comment">// AliyunDrive raise NullPointerException if you haven't set a user-agent.
+        </span>req.headers_mut().insert(
+            header::USER_AGENT,
+            HeaderValue::from_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"opendal/{}"</span>, VERSION))
+                .expect(<span class="string">"user agent must be valid header value"</span>),
+        );
         <span class="kw">if </span>req.method() == Method::POST {
             req.headers_mut().insert(
                 header::CONTENT_TYPE,
@@ -676,12 +711,17 @@
         <span class="prelude-val">Ok</span>(res.into_body())
     }
 
-    <span class="kw">async fn </span>get_access_token(<span class="kw-2">&amp;</span><span class="self">self</span>, refresh_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+    <span class="kw">async fn </span>get_access_token(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        client_id: <span class="kw-2">&amp;</span>str,
+        client_secret: <span class="kw-2">&amp;</span>str,
+        refresh_token: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span>AccessTokenRequest {
             refresh_token,
             grant_type: <span class="string">"refresh_token"</span>,
-            client_id: <span class="kw-2">&amp;</span><span class="self">self</span>.client_id,
-            client_secret: <span class="kw-2">&amp;</span><span class="self">self</span>.client_secret,
+            client_id,
+            client_secret,
         })
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>req = Request::post(<span class="macro">format!</span>(<span class="string">"{}/oauth/access_token"</span>, <span class="self">self</span>.endpoint))
@@ -698,17 +738,31 @@
     </span>}
 
     <span class="kw">pub async fn </span>get_token_and_drive(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="prelude-ty">Option</span>&lt;String&gt;, String)&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>tokener = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
-        <span class="kw">if </span>tokener.expire_at &lt; Utc::now().timestamp() || tokener.access_token.is_none() {
-            <span class="kw">let </span>res = <span class="self">self</span>.get_access_token(<span class="kw-2">&amp;</span>tokener.refresh_token).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>output: RefreshTokenResponse =
-                serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-            tokener.access_token = <span class="prelude-val">Some</span>(output.access_token);
-            tokener.expire_at = output.expires_in + Utc::now().timestamp();
-            tokener.refresh_token = output.refresh_token;
-        }
-        <span class="kw">let </span><span class="prelude-val">Some</span>(drive_id) = <span class="kw-2">&amp;</span>tokener.drive_id <span class="kw">else </span>{
-            <span class="kw">let </span>res = <span class="self">self</span>.get_drive_id(tokener.access_token.as_deref()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>signer = <span class="self">self</span>.signer.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>token = <span class="kw">match </span><span class="kw-2">&amp;mut </span>signer.sign {
+            AliyunDriveSign::Access(access_token) =&gt; <span class="prelude-val">Some</span>(access_token.clone()),
+            AliyunDriveSign::Refresh(
+                client_id,
+                client_secret,
+                refresh_token,
+                access_token,
+                expire_at,
+            ) =&gt; {
+                <span class="kw">if </span><span class="kw-2">*</span>expire_at &lt; Utc::now().timestamp() || access_token.is_none() {
+                    <span class="kw">let </span>res = <span class="self">self
+                        </span>.get_access_token(client_id, client_secret, refresh_token)
+                        .<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>output: RefreshTokenResponse = serde_json::from_reader(res.reader())
+                        .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    <span class="kw-2">*</span>access_token = <span class="prelude-val">Some</span>(output.access_token);
+                    <span class="kw-2">*</span>expire_at = output.expires_in + Utc::now().timestamp();
+                    <span class="kw-2">*</span>refresh_token = output.refresh_token;
+                }
+                access_token.clone()
+            }
+        };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(drive_id) = <span class="kw-2">&amp;</span>signer.drive_id <span class="kw">else </span>{
+            <span class="kw">let </span>res = <span class="self">self</span>.get_drive_id(token.as_deref()).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>output: DriveInfoResponse =
                 serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             <span class="kw">let </span>drive_id = <span class="kw">match </span><span class="self">self</span>.drive_type {
@@ -716,10 +770,10 @@
                 DriveType::Backup =&gt; output.backup_drive_id.unwrap_or(output.default_drive_id),
                 DriveType::Resource =&gt; output.resource_drive_id.unwrap_or(output.default_drive_id),
             };
-            tokener.drive_id = <span class="prelude-val">Some</span>(drive_id.clone());
-            <span class="kw">return </span><span class="prelude-val">Ok</span>((tokener.access_token.clone(), drive_id));
+            signer.drive_id = <span class="prelude-val">Some</span>(drive_id.clone());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>((token, drive_id));
         };
-        <span class="prelude-val">Ok</span>((tokener.access_token.clone(), drive_id.clone()))
+        <span class="prelude-val">Ok</span>((token, drive_id.clone()))
     }
 
     <span class="kw">pub async fn </span>get_by_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
