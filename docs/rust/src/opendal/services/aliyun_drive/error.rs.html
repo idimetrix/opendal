@@ -53,6 +53,7 @@
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -96,6 +97,7 @@
             <span class="prelude-val">Some</span>(code) <span class="kw">if </span>code == <span class="string">"PreHashMatched" </span>=&gt; (ErrorKind::IsSameFile, <span class="bool-val">false</span>),
             <span class="kw">_ </span>=&gt; (ErrorKind::Unexpected, <span class="bool-val">false</span>),
         },
+        <span class="number">409 </span>=&gt; (ErrorKind::AlreadyExists, <span class="bool-val">false</span>),
         <span class="number">429 </span>=&gt; <span class="kw">match </span>code {
             <span class="prelude-val">Some</span>(code) <span class="kw">if </span>code == <span class="string">"TooManyRequests" </span>=&gt; (ErrorKind::RateLimited, <span class="bool-val">true</span>),
             <span class="kw">_ </span>=&gt; (ErrorKind::Unexpected, <span class="bool-val">false</span>),
