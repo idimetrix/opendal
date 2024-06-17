@@ -60,6 +60,9 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -77,27 +80,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>dav_server::fs::DavMetaData;
-<span class="kw">use </span>dav_server::fs::FsError;
+</span><span class="kw">use </span>dav_server::fs::FsError;
+<span class="kw">use </span>dav_server::fs::{DavMetaData, FsResult};
 <span class="kw">use </span>opendal::Metadata;
+<span class="kw">use </span>std::time::SystemTime;
 
-<span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>WebdavMetaData {
+<span class="doccomment">/// OpendalMetaData is a `DavMetaData` implementation for opendal.
+</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>OpendalMetaData {
     metadata: Metadata,
 }
 
-<span class="kw">impl </span>WebdavMetaData {
-    <span class="kw">pub fn </span>new(metadata: Metadata) -&gt; <span class="self">Self </span>{
-        WebdavMetaData { metadata }
+<span class="kw">impl </span>OpendalMetaData {
+    <span class="doccomment">/// Create a new opendal metadata.
+    </span><span class="kw">pub fn </span>new(metadata: Metadata) -&gt; <span class="self">Self </span>{
+        OpendalMetaData { metadata }
     }
 }
 
-<span class="kw">impl </span>DavMetaData <span class="kw">for </span>WebdavMetaData {
+<span class="kw">impl </span>DavMetaData <span class="kw">for </span>OpendalMetaData {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="self">self</span>.metadata.content_length()
     }
 
-    <span class="kw">fn </span>modified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; dav_server::fs::FsResult&lt;std::time::SystemTime&gt; {
+    <span class="kw">fn </span>modified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FsResult&lt;SystemTime&gt; {
         <span class="kw">match </span><span class="self">self</span>.metadata.last_modified() {
             <span class="prelude-val">Some</span>(t) =&gt; <span class="prelude-val">Ok</span>(t.into()),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(FsError::GeneralFailure),
@@ -108,15 +114,15 @@
         <span class="self">self</span>.metadata.is_dir()
     }
 
-    <span class="kw">fn </span>is_file(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.metadata.is_file()
-    }
-
     <span class="kw">fn </span>etag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
         <span class="self">self</span>.metadata.etag().map(|s| s.to_string())
     }
 
-    <span class="kw">fn </span>status_changed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; dav_server::fs::FsResult&lt;std::time::SystemTime&gt; {
+    <span class="kw">fn </span>is_file(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.metadata.is_file()
+    }
+
+    <span class="kw">fn </span>status_changed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FsResult&lt;SystemTime&gt; {
         <span class="self">self</span>.metadata
             .last_modified()
             .map_or(<span class="prelude-val">Err</span>(FsError::GeneralFailure), |t| <span class="prelude-val">Ok</span>(t.into()))

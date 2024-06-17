@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/opendalfs.rs`."><title>opendalfs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="dav_server_opendalfs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (0bf471f33 2024-04-13)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../dav_server_opendalfs/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/fs.rs`."><title>fs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="dav_server_opendalfs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (0bf471f33 2024-04-13)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../dav_server_opendalfs/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -196,18 +196,6 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -225,40 +213,67 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::path::Path;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Poll::Ready;
-
-<span class="kw">use </span>dav_server::davpath::DavPath;
-<span class="kw">use </span>dav_server::fs::DavDirEntry;
-<span class="kw">use </span>dav_server::fs::DavFile;
-<span class="kw">use </span>dav_server::fs::DavFileSystem;
+</span><span class="kw">use </span>dav_server::davpath::DavPath;
 <span class="kw">use </span>dav_server::fs::DavMetaData;
 <span class="kw">use </span>dav_server::fs::FsError;
+<span class="kw">use </span>dav_server::fs::{DavDirEntry, FsFuture};
+<span class="kw">use </span>dav_server::fs::{DavFile, FsStream};
+<span class="kw">use </span>dav_server::fs::{DavFileSystem, ReadDirMeta};
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures_util::Stream;
-<span class="kw">use </span>futures_util::StreamExt;
-<span class="kw">use </span>opendal::Lister;
+<span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>opendal::Operator;
+<span class="kw">use </span>std::path::Path;
 
-<span class="kw">use </span><span class="kw">super</span>::file::convert_error;
-<span class="kw">use </span><span class="kw">super</span>::file::WebdavFile;
-<span class="kw">use </span><span class="kw">super</span>::metadata::WebdavMetaData;
-<span class="kw">use </span><span class="kw">crate</span>::dir_entry::WebDAVDirEntry;
+<span class="kw">use </span><span class="kw">super</span>::dir::OpendalStream;
+<span class="kw">use </span><span class="kw">super</span>::file::OpendalFile;
+<span class="kw">use </span><span class="kw">super</span>::metadata::OpendalMetaData;
+<span class="kw">use </span><span class="kw">super</span>::utils::convert_error;
 
-<span class="attr">#[derive(Clone)]
+<span class="doccomment">/// OpendalFs is a `DavFileSystem` implementation for opendal.
+///
+/// ```
+/// use anyhow::Result;
+/// use dav_server::davpath::DavPath;
+/// use dav_server::fs::DavFileSystem;
+/// use dav_server_opendalfs::OpendalFs;
+/// use opendal::services::Memory;
+/// use opendal::Operator;
+///
+/// #[tokio::test]
+/// async fn test() -&gt; Result&lt;()&gt; {
+///     let op = Operator::new(Memory::default())?.finish();
+///
+///     let webdavfs = OpendalFs::new(op);
+///
+///     let metadata = webdavfs
+///         .metadata(&amp;DavPath::new("/").unwrap())
+///         .await
+///         .unwrap();
+///     println!("{}", metadata.is_dir());
+///
+///     Ok(())
+/// }
+/// ```
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>OpendalFs {
     <span class="kw">pub </span>op: Operator,
+}
+
+<span class="kw">impl </span>OpendalFs {
+    <span class="doccomment">/// Create a new `OpendalFs` instance.
+    </span><span class="kw">pub fn </span>new(op: Operator) -&gt; Box&lt;OpendalFs&gt; {
+        Box::new(OpendalFs { op })
+    }
 }
 
 <span class="kw">impl </span>DavFileSystem <span class="kw">for </span>OpendalFs {
     <span class="kw">fn </span>open&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>dav_server::davpath::DavPath,
-        _options: dav_server::fs::OpenOptions,
-    ) -&gt; dav_server::fs::FsFuture&lt;Box&lt;<span class="kw">dyn </span>dav_server::fs::DavFile&gt;&gt; {
+        path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath,
+        options: dav_server::fs::OpenOptions,
+    ) -&gt; FsFuture&lt;Box&lt;<span class="kw">dyn </span>DavFile&gt;&gt; {
         <span class="kw">async move </span>{
-            <span class="kw">let </span>file = WebdavFile::new(<span class="self">self</span>.op.clone(), path.clone());
+            <span class="kw">let </span>file = OpendalFile::open(<span class="self">self</span>.op.clone(), path.clone(), options).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(Box::new(file) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>DavFile&gt;)
         }
         .boxed()
@@ -266,29 +281,25 @@
 
     <span class="kw">fn </span>read_dir&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>dav_server::davpath::DavPath,
-        _meta: dav_server::fs::ReadDirMeta,
-    ) -&gt; dav_server::fs::FsFuture&lt;dav_server::fs::FsStream&lt;Box&lt;<span class="kw">dyn </span>dav_server::fs::DavDirEntry&gt;&gt;&gt;
-    {
+        path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath,
+        _meta: ReadDirMeta,
+    ) -&gt; FsFuture&lt;FsStream&lt;Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;&gt;&gt; {
         <span class="kw">async move </span>{
             <span class="self">self</span>.op
                 .lister(path.as_url_string().as_str())
                 .<span class="kw">await
-                </span>.map(|lister| DavStream::new(<span class="self">self</span>.op.clone(), lister).boxed())
+                </span>.map(|lister| OpendalStream::new(<span class="self">self</span>.op.clone(), lister).boxed())
                 .map_err(convert_error)
         }
         .boxed()
     }
 
-    <span class="kw">fn </span>metadata&lt;<span class="lifetime">'a</span>&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>dav_server::davpath::DavPath,
-    ) -&gt; dav_server::fs::FsFuture&lt;Box&lt;<span class="kw">dyn </span>dav_server::fs::DavMetaData&gt;&gt; {
+    <span class="kw">fn </span>metadata&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;Box&lt;<span class="kw">dyn </span>DavMetaData&gt;&gt; {
         <span class="kw">async move </span>{
             <span class="kw">let </span>opendal_metadata = <span class="self">self</span>.op.stat(path.as_url_string().as_str()).<span class="kw">await</span>;
             <span class="kw">match </span>opendal_metadata {
                 <span class="prelude-val">Ok</span>(metadata) =&gt; {
-                    <span class="kw">let </span>webdav_metadata = WebdavMetaData::new(metadata);
+                    <span class="kw">let </span>webdav_metadata = OpendalMetaData::new(metadata);
                     <span class="prelude-val">Ok</span>(Box::new(webdav_metadata) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>DavMetaData&gt;)
                 }
                 <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(convert_error(e)),
@@ -297,7 +308,7 @@
         .boxed()
     }
 
-    <span class="kw">fn </span>create_dir&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; dav_server::fs::FsFuture&lt;()&gt; {
+    <span class="kw">fn </span>create_dir&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;()&gt; {
         <span class="kw">async move </span>{
             <span class="kw">let </span>path = path.as_url_string();
 
@@ -308,7 +319,7 @@
             <span class="kw">match </span><span class="self">self</span>.op.is_exist(parent.to_str().unwrap()).<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>(exist) =&gt; {
                     <span class="kw">if </span>!exist &amp;&amp; parent != Path::new(<span class="string">"/"</span>) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(dav_server::fs::FsError::NotFound);
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(FsError::NotFound);
                     }
                 }
                 <span class="prelude-val">Err</span>(e) =&gt; {
@@ -321,7 +332,7 @@
             </span><span class="kw">let </span>exist = <span class="self">self</span>.op.is_exist(path).<span class="kw">await</span>;
             <span class="kw">match </span>exist {
                 <span class="prelude-val">Ok</span>(exist) =&gt; <span class="kw">match </span>exist {
-                    <span class="bool-val">true </span>=&gt; <span class="prelude-val">Err</span>(dav_server::fs::FsError::Exists),
+                    <span class="bool-val">true </span>=&gt; <span class="prelude-val">Err</span>(FsError::Exists),
                     <span class="bool-val">false </span>=&gt; {
                         <span class="kw">let </span>res = <span class="self">self</span>.op.create_dir(path).<span class="kw">await</span>;
                         <span class="kw">match </span>res {
@@ -336,7 +347,11 @@
         .boxed()
     }
 
-    <span class="kw">fn </span>remove_file&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; dav_server::fs::FsFuture&lt;()&gt; {
+    <span class="kw">fn </span>remove_dir&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;()&gt; {
+        <span class="self">self</span>.remove_file(path)
+    }
+
+    <span class="kw">fn </span>remove_file&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;()&gt; {
         <span class="kw">async move </span>{
             <span class="self">self</span>.op
                 .delete(path.as_url_string().as_str())
@@ -346,26 +361,7 @@
         .boxed()
     }
 
-    <span class="kw">fn </span>remove_dir&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; dav_server::fs::FsFuture&lt;()&gt; {
-        <span class="self">self</span>.remove_file(path)
-    }
-
-    <span class="kw">fn </span>copy&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, from: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath, to: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; dav_server::fs::FsFuture&lt;()&gt; {
-        <span class="kw">async move </span>{
-            <span class="kw">let </span>from_path = from
-                .as_rel_ospath()
-                .to_str()
-                .ok_or(FsError::GeneralFailure)<span class="question-mark">?</span>;
-            <span class="kw">let </span>to_path = to.as_rel_ospath().to_str().ok_or(FsError::GeneralFailure)<span class="question-mark">?</span>;
-            <span class="self">self</span>.op
-                .copy(from_path, to_path)
-                .<span class="kw">await
-                </span>.map_err(convert_error)
-        }
-        .boxed()
-    }
-
-    <span class="kw">fn </span>rename&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, from: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath, to: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; dav_server::fs::FsFuture&lt;()&gt; {
+    <span class="kw">fn </span>rename&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, from: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath, to: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;()&gt; {
         <span class="kw">async move </span>{
             <span class="kw">let </span>from_path = from
                 .as_rel_ospath()
@@ -382,40 +378,20 @@
         }
         .boxed()
     }
-}
 
-<span class="kw">impl </span>OpendalFs {
-    <span class="kw">pub fn </span>new(op: Operator) -&gt; Box&lt;OpendalFs&gt; {
-        Box::new(OpendalFs { op })
-    }
-}
-
-<span class="kw">struct </span>DavStream {
-    op: Operator,
-    lister: Lister,
-}
-
-<span class="kw">impl </span>Stream <span class="kw">for </span>DavStream {
-    <span class="kw">type </span>Item = Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;;
-
-    <span class="kw">fn </span>poll_next(
-        <span class="self">self</span>: std::pin::Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>std::task::Context&lt;<span class="lifetime">'_</span>&gt;,
-    ) -&gt; std::task::Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
-        <span class="kw">let </span>dav_stream = <span class="self">self</span>.get_mut();
-        <span class="kw">match </span><span class="macro">ready!</span>(dav_stream.lister.poll_next_unpin(cx)) {
-            <span class="prelude-val">Some</span>(entry) =&gt; {
-                <span class="kw">let </span>webdav_entry = WebDAVDirEntry::new(entry.unwrap(), dav_stream.op.clone());
-                Ready(<span class="prelude-val">Some</span>(Box::new(webdav_entry) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;))
-            }
-            <span class="prelude-val">None </span>=&gt; Ready(<span class="prelude-val">None</span>),
+    <span class="kw">fn </span>copy&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, from: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath, to: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>DavPath) -&gt; FsFuture&lt;()&gt; {
+        <span class="kw">async move </span>{
+            <span class="kw">let </span>from_path = from
+                .as_rel_ospath()
+                .to_str()
+                .ok_or(FsError::GeneralFailure)<span class="question-mark">?</span>;
+            <span class="kw">let </span>to_path = to.as_rel_ospath().to_str().ok_or(FsError::GeneralFailure)<span class="question-mark">?</span>;
+            <span class="self">self</span>.op
+                .copy(from_path, to_path)
+                .<span class="kw">await
+                </span>.map_err(convert_error)
         }
-    }
-}
-
-<span class="kw">impl </span>DavStream {
-    <span class="kw">fn </span>new(op: Operator, lister: Lister) -&gt; <span class="self">Self </span>{
-        DavStream { op, lister }
+        .boxed()
     }
 }
 </code></pre></div></section></main></body></html>
