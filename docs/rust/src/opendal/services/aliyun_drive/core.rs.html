@@ -602,6 +602,18 @@
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
 <a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -774,9 +786,21 @@
         <span class="prelude-val">Ok</span>((token, drive_id.clone()))
     }
 
-    <span class="kw">pub async fn </span>get_by_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span>file_path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+    <span class="kw">pub fn </span>build_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, rooted: bool) -&gt; String {
+        <span class="kw">let </span>file_path = <span class="kw">if </span>rooted {
+            build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)
+        } <span class="kw">else </span>{
+            build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)
+        };
         <span class="kw">let </span>file_path = file_path.strip_suffix(<span class="string">'/'</span>).unwrap_or(<span class="kw-2">&amp;</span>file_path);
+        <span class="kw">if </span>file_path.is_empty() {
+            <span class="kw">return </span><span class="string">"/"</span>.to_string();
+        }
+        file_path.to_string()
+    }
+
+    <span class="kw">pub async fn </span>get_by_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>file_path = <span class="self">self</span>.build_path(path, <span class="bool-val">true</span>);
         <span class="kw">let </span>req = Request::post(<span class="macro">format!</span>(
             <span class="string">"{}/adrive/v1.0/openFile/get_by_path"</span>,
             <span class="self">self</span>.endpoint
@@ -784,7 +808,7 @@
         <span class="kw">let </span>(token, drive_id) = <span class="self">self</span>.get_token_and_drive().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span>GetByPathRequest {
             drive_id: <span class="kw-2">&amp;</span>drive_id,
-            file_path,
+            file_path: <span class="kw-2">&amp;</span>file_path,
         })
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
         <span class="kw">let </span>req = req
@@ -794,7 +818,7 @@
     </span>}
 
     <span class="kw">pub async fn </span>ensure_dir_exists(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>file_path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path.strip_suffix(<span class="string">'/'</span>).unwrap_or(path));
+        <span class="kw">let </span>file_path = <span class="self">self</span>.build_path(path, <span class="bool-val">false</span>);
         <span class="kw">if </span>file_path == <span class="string">"/" </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="string">"root"</span>.to_string());
         }
