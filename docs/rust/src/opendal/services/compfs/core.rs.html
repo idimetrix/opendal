@@ -147,63 +147,6 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -221,103 +164,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::thread::JoinHandle;
+</span><span class="kw">use </span>compio::{buf::IoBuf, dispatcher::Dispatcher};
+<span class="kw">use </span>std::{future::Future, path::PathBuf};
 
-<span class="kw">use </span>compio::buf::IoBuf;
-<span class="kw">use </span>compio::runtime::RuntimeBuilder;
-<span class="kw">use </span>futures::channel::mpsc;
-<span class="kw">use </span>futures::channel::mpsc::SendError;
-<span class="kw">use </span>futures::channel::oneshot;
-<span class="kw">use </span>futures::future::LocalBoxFuture;
-<span class="kw">use </span>futures::SinkExt;
-<span class="kw">use </span>futures::StreamExt;
-
-<span class="kw">use </span><span class="kw">crate</span>::Buffer;
-
-<span class="doccomment">/// This is arbitrary, but since all tasks are spawned instantly, we shouldn't need a too big buffer.
-</span><span class="kw">const </span>CHANNEL_SIZE: usize = <span class="number">4</span>;
-
-<span class="kw">fn </span>task&lt;F, Fut, T&gt;(func: F) -&gt; (Task&lt;T&gt;, SpawnTask)
-<span class="kw">where
-    </span>F: (FnOnce() -&gt; Fut) + Send + <span class="lifetime">'static</span>,
-    Fut: Future&lt;Output = T&gt;,
-    T: Send + <span class="lifetime">'static</span>,
-{
-    <span class="kw">let </span>(tx, recv) = oneshot::channel();
-
-    <span class="kw">let </span>boxed = Box::new(|| {
-        Box::pin(<span class="kw">async move </span>{
-            <span class="kw">let </span>res = func().<span class="kw">await</span>;
-            tx.send(res).ok();
-        }) <span class="kw">as _
-    </span>});
-
-    (Task(recv), SpawnTask(boxed))
-}
-
-<span class="doccomment">/// A task handle that can be used to retrieve result spawned into [`CompioThread`].
-</span><span class="kw">pub struct </span>Task&lt;T&gt;(oneshot::Receiver&lt;T&gt;);
-
-<span class="doccomment">/// Type erased task that can be spawned into a [`CompioThread`].
-</span><span class="kw">struct </span>SpawnTask(Box&lt;<span class="kw">dyn </span>(FnOnce() -&gt; LocalBoxFuture&lt;<span class="lifetime">'static</span>, ()&gt;) + Send&gt;);
-
-<span class="kw">impl </span>SpawnTask {
-    <span class="kw">fn </span>call(<span class="self">self</span>) -&gt; LocalBoxFuture&lt;<span class="lifetime">'static</span>, ()&gt; {
-        (<span class="self">self</span>.<span class="number">0</span>)()
-    }
-}
-
-<span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>CompioThread {
-    thread: JoinHandle&lt;()&gt;,
-    handle: SpawnHandle,
-}
-
-<span class="kw">impl </span>CompioThread {
-    <span class="kw">pub fn </span>new(builder: RuntimeBuilder) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(send, <span class="kw-2">mut </span>recv) = mpsc::channel(CHANNEL_SIZE);
-        <span class="kw">let </span>handle = SpawnHandle(send);
-        <span class="kw">let </span>thread = std::thread::spawn(<span class="kw">move </span>|| {
-            <span class="kw">let </span>rt = builder.build().expect(<span class="string">"failed to create runtime"</span>);
-            rt.block_on(<span class="kw">async </span>{
-                <span class="kw">while let </span><span class="prelude-val">Some</span>(task) = recv.next().<span class="kw">await </span>{
-                    rt.spawn(task.call()).detach();
-                }
-            });
-        });
-        <span class="self">Self </span>{ thread, handle }
-    }
-
-    <span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, func: F) -&gt; <span class="prelude-ty">Result</span>&lt;Task&lt;T&gt;, SendError&gt;
-    <span class="kw">where
-        </span>F: (FnOnce() -&gt; Fut) + Send + <span class="lifetime">'static</span>,
-        Fut: Future&lt;Output = T&gt;,
-        T: Send + <span class="lifetime">'static</span>,
-    {
-        <span class="self">self</span>.handle.clone().spawn(func).<span class="kw">await
-    </span>}
-
-    <span class="kw">pub fn </span>handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SpawnHandle {
-        <span class="self">self</span>.handle.clone()
-    }
-}
-
-<span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>SpawnHandle(mpsc::Sender&lt;SpawnTask&gt;);
-
-<span class="kw">impl </span>SpawnHandle {
-    <span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func: F) -&gt; <span class="prelude-ty">Result</span>&lt;Task&lt;T&gt;, SendError&gt;
-    <span class="kw">where
-        </span>F: (FnOnce() -&gt; Fut) + Send + <span class="lifetime">'static</span>,
-        Fut: Future&lt;Output = T&gt;,
-        T: Send + <span class="lifetime">'static</span>,
-    {
-        <span class="kw">let </span>(task, spawn) = task(func);
-        <span class="self">self</span>.<span class="number">0</span>.send(spawn).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(task)
-    }
-}
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">unsafe impl </span>IoBuf <span class="kw">for </span>Buffer {
     <span class="kw">fn </span>as_buf_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*const </span>u8 {
@@ -331,6 +182,41 @@
     <span class="kw">fn </span>buf_capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="comment">// `Bytes` doesn't expose uninitialized capacity, so treat it as the same as `len`
         </span><span class="self">self</span>.current().len()
+    }
+}
+
+<span class="attr">#[derive(Debug)]
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>CompfsCore {
+    <span class="kw">pub </span>root: PathBuf,
+    <span class="kw">pub </span>dispatcher: Dispatcher,
+    <span class="kw">pub </span>buf_pool: oio::PooledBuf,
+}
+
+<span class="kw">impl </span>CompfsCore {
+    <span class="kw">pub async fn </span>exec&lt;Fn, Fut, R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: Fn) -&gt; <span class="kw">crate</span>::Result&lt;R&gt;
+    <span class="kw">where
+        </span>Fn: FnOnce() -&gt; Fut + Send + <span class="lifetime">'static</span>,
+        Fut: Future&lt;Output = std::io::Result&lt;R&gt;&gt; + <span class="lifetime">'static</span>,
+        R: Send + <span class="lifetime">'static</span>,
+    {
+        <span class="self">self</span>.dispatcher
+            .dispatch(f)
+            .map_err(|<span class="kw">_</span>| Error::new(ErrorKind::Unexpected, <span class="string">"compio spawn io task failed"</span>))<span class="question-mark">?
+            </span>.<span class="kw">await
+            </span>.map_err(|<span class="kw">_</span>| Error::new(ErrorKind::Unexpected, <span class="string">"compio task cancelled"</span>))<span class="question-mark">?
+            </span>.map_err(new_std_io_error)
+    }
+
+    <span class="kw">pub async fn </span>exec_blocking&lt;Fn, R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: Fn) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;
+    <span class="kw">where
+        </span>Fn: FnOnce() -&gt; R + Send + <span class="lifetime">'static</span>,
+        R: Send + <span class="lifetime">'static</span>,
+    {
+        <span class="self">self</span>.dispatcher
+            .dispatch_blocking(f)
+            .map_err(|<span class="kw">_</span>| Error::new(ErrorKind::Unexpected, <span class="string">"compio spawn blocking task failed"</span>))<span class="question-mark">?
+            </span>.<span class="kw">await
+            </span>.map_err(|<span class="kw">_</span>| Error::new(ErrorKind::Unexpected, <span class="string">"compio task cancelled"</span>))
     }
 }
 
