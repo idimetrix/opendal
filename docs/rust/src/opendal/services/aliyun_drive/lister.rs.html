@@ -143,6 +143,25 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -183,8 +202,10 @@
 }
 
 <span class="kw">pub struct </span>AliyunDriveParent {
-    <span class="kw">pub </span>parent_path: String,
-    <span class="kw">pub </span>parent_file_id: String,
+    <span class="kw">pub </span>file_id: String,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>path: String,
+    <span class="kw">pub </span>updated_at: String,
 }
 
 <span class="kw">impl </span>AliyunDriveLister {
@@ -209,15 +230,32 @@
         };
 
         <span class="kw">let </span>offset = <span class="kw">if </span>ctx.token.is_empty() {
+            <span class="kw">if </span>!parent.path.ends_with(<span class="string">'/'</span>) {
+                <span class="comment">// List "dir" should contains "dir/".
+                </span><span class="kw">let </span>path = <span class="kw">if </span>!parent.path.starts_with(<span class="string">'/'</span>) {
+                    <span class="macro">format!</span>(<span class="string">"/{}"</span>, parent.path)
+                } <span class="kw">else </span>{
+                    parent.path.clone()
+                };
+                ctx.entries.push_back(Entry::new(
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}/"</span>, path),
+                    Metadata::new(EntryMode::DIR).with_last_modified(
+                        parent
+                            .updated_at
+                            .parse::&lt;chrono::DateTime&lt;Utc&gt;&gt;()
+                            .map_err(|e| {
+                                Error::new(ErrorKind::Unexpected, <span class="string">"parse last modified time"</span>)
+                                    .set_source(e)
+                            })<span class="question-mark">?</span>,
+                    ),
+                ));
+            }
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(ctx.token.clone())
         };
 
-        <span class="kw">let </span>res = <span class="self">self
-            </span>.core
-            .list(<span class="kw-2">&amp;</span>parent.parent_file_id, <span class="self">self</span>.limit, offset)
-            .<span class="kw">await</span>;
+        <span class="kw">let </span>res = <span class="self">self</span>.core.list(<span class="kw-2">&amp;</span>parent.file_id, <span class="self">self</span>.limit, offset).<span class="kw">await</span>;
         <span class="kw">let </span>res = <span class="kw">match </span>res {
             <span class="prelude-val">Err</span>(err) <span class="kw">if </span>err.kind() == ErrorKind::NotFound =&gt; {
                 ctx.done = <span class="bool-val">true</span>;
@@ -237,10 +275,10 @@
         <span class="kw">let </span>n = result.items.len();
 
         <span class="kw">for </span>item <span class="kw">in </span>result.items {
-            <span class="kw">let </span>path = <span class="kw">if </span>parent.parent_path.starts_with(<span class="string">'/'</span>) {
-                build_abs_path(<span class="kw-2">&amp;</span>parent.parent_path, <span class="kw-2">&amp;</span>item.name)
+            <span class="kw">let </span>path = <span class="kw">if </span>parent.path.starts_with(<span class="string">'/'</span>) {
+                build_abs_path(<span class="kw-2">&amp;</span>parent.path, <span class="kw-2">&amp;</span>item.name)
             } <span class="kw">else </span>{
-                build_abs_path(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{}"</span>, <span class="kw-2">&amp;</span>parent.parent_path), <span class="kw-2">&amp;</span>item.name)
+                build_abs_path(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{}"</span>, <span class="kw-2">&amp;</span>parent.path), <span class="kw-2">&amp;</span>item.name)
             };
 
             <span class="kw">let </span>(path, md) = <span class="kw">if </span>item.path_type == <span class="string">"folder" </span>{
