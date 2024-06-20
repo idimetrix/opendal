@@ -109,7 +109,7 @@
 }
 
 <span class="kw">impl </span>CompfsLister {
-    <span class="kw">pub fn </span>new(core: Arc&lt;CompfsCore&gt;, read_dir: ReadDir) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(core: Arc&lt;CompfsCore&gt;, read_dir: ReadDir) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             core,
             read_dir: <span class="prelude-val">Some</span>(read_dir),

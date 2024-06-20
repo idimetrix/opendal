@@ -55,6 +55,7 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -88,7 +89,7 @@
 }
 
 <span class="kw">impl </span>CompfsReader {
-    <span class="kw">pub fn </span>new(core: Arc&lt;CompfsCore&gt;, file: compio::fs::File, range: BytesRange) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(core: Arc&lt;CompfsCore&gt;, file: compio::fs::File, range: BytesRange) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ core, file, range }
     }
 }
@@ -97,13 +98,14 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
 
+        <span class="kw">let </span>pos = <span class="self">self</span>.range.offset();
         <span class="kw">let </span>len = <span class="self">self</span>.range.size().expect(<span class="string">"range size is always Some"</span>);
         bs.reserve(len <span class="kw">as _</span>);
         <span class="kw">let </span>f = <span class="self">self</span>.file.clone();
         <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self
             </span>.core
             .exec(<span class="kw">move </span>|| <span class="kw">async move </span>{
-                <span class="kw">let </span>(<span class="kw">_</span>, bs) = <span class="macro">buf_try!</span>(@<span class="kw">try </span>f.read_at(bs, len).<span class="kw">await</span>);
+                <span class="kw">let </span>(<span class="kw">_</span>, bs) = <span class="macro">buf_try!</span>(@<span class="kw">try </span>f.read_at(bs, pos).<span class="kw">await</span>);
                 <span class="prelude-val">Ok</span>(bs)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;

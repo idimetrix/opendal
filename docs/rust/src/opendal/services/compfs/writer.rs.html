@@ -92,7 +92,7 @@
 }
 
 <span class="kw">impl </span>CompfsWriter {
-    <span class="kw">pub fn </span>new(core: Arc&lt;CompfsCore&gt;, file: Cursor&lt;File&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(core: Arc&lt;CompfsCore&gt;, file: Cursor&lt;File&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ core, file }
     }
 }

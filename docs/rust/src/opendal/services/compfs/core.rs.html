@@ -147,6 +147,10 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -193,6 +197,10 @@
 }
 
 <span class="kw">impl </span>CompfsCore {
+    <span class="kw">pub fn </span>prepare_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; PathBuf {
+        <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>))
+    }
+
     <span class="kw">pub async fn </span>exec&lt;Fn, Fut, R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: Fn) -&gt; <span class="kw">crate</span>::Result&lt;R&gt;
     <span class="kw">where
         </span>Fn: FnOnce() -&gt; Fut + Send + <span class="lifetime">'static</span>,
