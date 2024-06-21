@@ -470,8 +470,6 @@
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
 <a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -517,31 +515,31 @@
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>AliyunDriveConfig {
-    <span class="doccomment">/// The Root of this backend.
+    <span class="doccomment">/// root of this backend.
     ///
     /// All operations will happen under this root.
     ///
-    /// Default to `/` if not set.
+    /// default to `/` if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The access_token of this backend.
+    <span class="doccomment">/// access_token of this backend.
     ///
     /// Solution for client-only purpose. #4733
     ///
-    /// Required if no client_id, client_secret and refresh_token are provided.
+    /// required if no client_id, client_secret and refresh_token are provided.
     </span><span class="kw">pub </span>access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The client_id of this backend.
+    <span class="doccomment">/// client_id of this backend.
     ///
-    /// Required if no access_token is provided.
+    /// required if no access_token is provided.
     </span><span class="kw">pub </span>client_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The client_secret of this backend.
+    <span class="doccomment">/// client_secret of this backend.
     ///
-    /// Required if no access_token is provided.
+    /// required if no access_token is provided.
     </span><span class="kw">pub </span>client_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The refresh_token of this backend.
+    <span class="doccomment">/// refresh_token of this backend.
     ///
-    /// Required if no access_token is provided.
+    /// required if no access_token is provided.
     </span><span class="kw">pub </span>refresh_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The drive_type of this backend.
+    <span class="doccomment">/// drive_type of this backend.
     ///
     /// All operations will happen under this type of drive.
     ///
@@ -580,7 +578,7 @@
 }
 
 <span class="kw">impl </span>AliyunDriveBuilder {
-    <span class="doccomment">/// Set the root of this backend.
+    <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -816,8 +814,8 @@
         </span><span class="kw">let </span>parent_path = get_parent(to);
         <span class="kw">let </span>parent_file_id = <span class="self">self</span>.core.ensure_dir_exists(parent_path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="comment">// if from and to are going to be placed in the same folder,
-        // copy_path will fail as we cannot change the name during this action.
+        <span class="comment">// if from and to are going to be placed in the same folder
+        // copy_path will fail as we cannot change name during this action.
         // it has to be auto renamed.
         </span><span class="kw">let </span>auto_rename = file.parent_file_id == parent_file_id;
         <span class="kw">let </span>res = <span class="self">self
@@ -919,10 +917,8 @@
                 <span class="kw">let </span>file: AliyunDriveFile =
                     serde_json::from_reader(res.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Some</span>(AliyunDriveParent {
-                    file_id: file.file_id,
-                    name: file.name,
-                    path: path.to_string(),
-                    updated_at: file.updated_at,
+                    parent_path: path.to_string(),
+                    parent_file_id: file.file_id,
                 })
             }
         };
