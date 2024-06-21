@@ -148,6 +148,20 @@
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -172,7 +186,6 @@
 
 <span class="kw">use </span><span class="self">self</span>::oio::Entry;
 <span class="kw">use </span><span class="kw">super</span>::core::AliyunDriveCore;
-<span class="kw">use </span><span class="kw">super</span>::core::AliyunDriveFile;
 <span class="kw">use </span><span class="kw">super</span>::core::AliyunDriveFileList;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
@@ -189,8 +202,10 @@
 }
 
 <span class="kw">pub struct </span>AliyunDriveParent {
-    <span class="kw">pub </span>parent_path: String,
-    <span class="kw">pub </span>parent_file_id: String,
+    <span class="kw">pub </span>file_id: String,
+    <span class="kw">pub </span>name: String,
+    <span class="kw">pub </span>path: String,
+    <span class="kw">pub </span>updated_at: String,
 }
 
 <span class="kw">impl </span>AliyunDriveLister {
@@ -215,15 +230,32 @@
         };
 
         <span class="kw">let </span>offset = <span class="kw">if </span>ctx.token.is_empty() {
+            <span class="kw">if </span>!parent.path.ends_with(<span class="string">'/'</span>) {
+                <span class="comment">// List "dir" should contains "dir/".
+                </span><span class="kw">let </span>path = <span class="kw">if </span>!parent.path.starts_with(<span class="string">'/'</span>) {
+                    <span class="macro">format!</span>(<span class="string">"/{}"</span>, parent.path)
+                } <span class="kw">else </span>{
+                    parent.path.clone()
+                };
+                ctx.entries.push_back(Entry::new(
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}/"</span>, path),
+                    Metadata::new(EntryMode::DIR).with_last_modified(
+                        parent
+                            .updated_at
+                            .parse::&lt;chrono::DateTime&lt;Utc&gt;&gt;()
+                            .map_err(|e| {
+                                Error::new(ErrorKind::Unexpected, <span class="string">"parse last modified time"</span>)
+                                    .set_source(e)
+                            })<span class="question-mark">?</span>,
+                    ),
+                ));
+            }
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(ctx.token.clone())
         };
 
-        <span class="kw">let </span>res = <span class="self">self
-            </span>.core
-            .list(<span class="kw-2">&amp;</span>parent.parent_file_id, <span class="self">self</span>.limit, offset)
-            .<span class="kw">await</span>;
+        <span class="kw">let </span>res = <span class="self">self</span>.core.list(<span class="kw-2">&amp;</span>parent.file_id, <span class="self">self</span>.limit, offset).<span class="kw">await</span>;
         <span class="kw">let </span>res = <span class="kw">match </span>res {
             <span class="prelude-val">Err</span>(err) <span class="kw">if </span>err.kind() == ErrorKind::NotFound =&gt; {
                 ctx.done = <span class="bool-val">true</span>;
@@ -243,20 +275,16 @@
         <span class="kw">let </span>n = result.items.len();
 
         <span class="kw">for </span>item <span class="kw">in </span>result.items {
-            <span class="kw">let </span>res = <span class="self">self</span>.core.get(<span class="kw-2">&amp;</span>item.file_id).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>file: AliyunDriveFile =
-                serde_json::from_reader(res.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
-
-            <span class="kw">let </span>path = <span class="kw">if </span>parent.parent_path.starts_with(<span class="string">'/'</span>) {
-                build_abs_path(<span class="kw-2">&amp;</span>parent.parent_path, <span class="kw-2">&amp;</span>file.name)
+            <span class="kw">let </span>path = <span class="kw">if </span>parent.path.starts_with(<span class="string">'/'</span>) {
+                build_abs_path(<span class="kw-2">&amp;</span>parent.path, <span class="kw-2">&amp;</span>item.name)
             } <span class="kw">else </span>{
-                build_abs_path(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{}"</span>, <span class="kw-2">&amp;</span>parent.parent_path), <span class="kw-2">&amp;</span>file.name)
+                build_abs_path(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{}"</span>, <span class="kw-2">&amp;</span>parent.path), <span class="kw-2">&amp;</span>item.name)
             };
 
-            <span class="kw">let </span>(path, md) = <span class="kw">if </span>file.path_type == <span class="string">"folder" </span>{
+            <span class="kw">let </span>(path, md) = <span class="kw">if </span>item.path_type == <span class="string">"folder" </span>{
                 <span class="kw">let </span>path = <span class="macro">format!</span>(<span class="string">"{}/"</span>, path);
                 <span class="kw">let </span>meta = Metadata::new(EntryMode::DIR).with_last_modified(
-                    file.updated_at
+                    item.updated_at
                         .parse::&lt;chrono::DateTime&lt;Utc&gt;&gt;()
                         .map_err(|e| {
                             Error::new(ErrorKind::Unexpected, <span class="string">"parse last modified time"</span>)
@@ -266,17 +294,17 @@
                 (path, meta)
             } <span class="kw">else </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>meta = Metadata::new(EntryMode::FILE).with_last_modified(
-                    file.updated_at
+                    item.updated_at
                         .parse::&lt;chrono::DateTime&lt;Utc&gt;&gt;()
                         .map_err(|e| {
                             Error::new(ErrorKind::Unexpected, <span class="string">"parse last modified time"</span>)
                                 .set_source(e)
                         })<span class="question-mark">?</span>,
                 );
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = file.size {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = item.size {
                     meta = meta.with_content_length(v);
                 }
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = file.content_type {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = item.content_type {
                     meta = meta.with_content_type(v);
                 }
                 (path, meta)

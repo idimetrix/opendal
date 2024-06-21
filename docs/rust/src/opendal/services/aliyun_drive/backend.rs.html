@@ -470,6 +470,20 @@
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
 <a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -515,31 +529,31 @@
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>AliyunDriveConfig {
-    <span class="doccomment">/// root of this backend.
+    <span class="doccomment">/// The Root of this backend.
     ///
     /// All operations will happen under this root.
     ///
-    /// default to `/` if not set.
+    /// Default to `/` if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// access_token of this backend.
+    <span class="doccomment">/// The access_token of this backend.
     ///
     /// Solution for client-only purpose. #4733
     ///
-    /// required if no client_id, client_secret and refresh_token are provided.
+    /// Required if no client_id, client_secret and refresh_token are provided.
     </span><span class="kw">pub </span>access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// client_id of this backend.
+    <span class="doccomment">/// The client_id of this backend.
     ///
-    /// required if no access_token is provided.
+    /// Required if no access_token is provided.
     </span><span class="kw">pub </span>client_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// client_secret of this backend.
+    <span class="doccomment">/// The client_secret of this backend.
     ///
-    /// required if no access_token is provided.
+    /// Required if no access_token is provided.
     </span><span class="kw">pub </span>client_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// refresh_token of this backend.
+    <span class="doccomment">/// The refresh_token of this backend.
     ///
-    /// required if no access_token is provided.
+    /// Required if no access_token is provided.
     </span><span class="kw">pub </span>refresh_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// drive_type of this backend.
+    <span class="doccomment">/// The drive_type of this backend.
     ///
     /// All operations will happen under this type of drive.
     ///
@@ -578,7 +592,7 @@
 }
 
 <span class="kw">impl </span>AliyunDriveBuilder {
-    <span class="doccomment">/// Set root of this backend.
+    <span class="doccomment">/// Set the root of this backend.
     ///
     /// All operations will happen under this root.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -712,6 +726,7 @@
                     sign,
                 })),
                 client,
+                dir_lock: Arc::new(Mutex::new(())),
             }),
         })
     }
@@ -814,8 +829,8 @@
         </span><span class="kw">let </span>parent_path = get_parent(to);
         <span class="kw">let </span>parent_file_id = <span class="self">self</span>.core.ensure_dir_exists(parent_path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="comment">// if from and to are going to be placed in the same folder
-        // copy_path will fail as we cannot change name during this action.
+        <span class="comment">// if from and to are going to be placed in the same folder,
+        // copy_path will fail as we cannot change the name during this action.
         // it has to be auto renamed.
         </span><span class="kw">let </span>auto_rename = file.parent_file_id == parent_file_id;
         <span class="kw">let </span>res = <span class="self">self
@@ -917,8 +932,10 @@
                 <span class="kw">let </span>file: AliyunDriveFile =
                     serde_json::from_reader(res.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Some</span>(AliyunDriveParent {
-                    parent_path: path.to_string(),
-                    parent_file_id: file.file_id,
+                    file_id: file.file_id,
+                    name: file.name,
+                    path: path.to_string(),
+                    updated_at: file.updated_at,
                 })
             }
         };
@@ -931,6 +948,17 @@
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>parent_path = get_parent(path);
         <span class="kw">let </span>parent_file_id = <span class="self">self</span>.core.ensure_dir_exists(parent_path).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="comment">// write can overwrite
+        </span><span class="kw">match </span><span class="self">self</span>.core.get_by_path(path).<span class="kw">await </span>{
+            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>err.kind() == ErrorKind::NotFound =&gt; {}
+            <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
+            <span class="prelude-val">Ok</span>(res) =&gt; {
+                <span class="kw">let </span>file: AliyunDriveFile =
+                    serde_json::from_reader(res.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
+                <span class="self">self</span>.core.delete_path(<span class="kw-2">&amp;</span>file.file_id).<span class="kw">await</span><span class="question-mark">?</span>;
+            }
+        };
 
         <span class="kw">let </span>executor = args.executor().cloned();
 

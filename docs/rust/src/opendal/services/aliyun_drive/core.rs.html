@@ -614,6 +614,8 @@
 <a href="#614" id="614">614</a>
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -656,11 +658,11 @@
     </span>Default,
     <span class="doccomment">/// Use the backup type of Aliyun Drive.
     ///
-    /// fallback to the default type if no backup drive found.
+    /// Fallback to the default type if no backup drive is found.
     </span>Backup,
     <span class="doccomment">/// Use the resource type of Aliyun Drive.
     ///
-    /// fallback to the default type if no resource drive found.
+    /// Fallback to the default type if no resource drive is found.
     </span>Resource,
 }
 
@@ -682,6 +684,7 @@
 
     <span class="kw">pub </span>signer: Arc&lt;Mutex&lt;AliyunDriveSigner&gt;&gt;,
     <span class="kw">pub </span>client: HttpClient,
+    <span class="kw">pub </span>dir_lock: Arc&lt;Mutex&lt;()&gt;&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>AliyunDriveCore {
@@ -826,6 +829,7 @@
         <span class="kw">let </span>paths = file_path.split(<span class="string">'/'</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
         <span class="kw">let </span><span class="kw-2">mut </span>parent: <span class="prelude-ty">Option</span>&lt;String&gt; = <span class="prelude-val">None</span>;
         <span class="kw">for </span>path <span class="kw">in </span>paths {
+            <span class="kw">let </span>_guard = <span class="self">self</span>.dir_lock.lock().<span class="kw">await</span>;
             <span class="kw">let </span>res = <span class="self">self
                 </span>.create(
                     parent.as_deref(),
