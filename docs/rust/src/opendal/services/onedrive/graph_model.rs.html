@@ -291,12 +291,6 @@
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -321,8 +315,6 @@
 
 <span class="attr">#[derive(Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>GraphApiOnedriveListResponse {
-    <span class="attr">#[serde(rename = <span class="string">"@odata.count"</span>)]
-    </span><span class="kw">pub </span>odata_count: usize,
     <span class="attr">#[serde(rename = <span class="string">"@odata.nextLink"</span>)]
     </span><span class="kw">pub </span>next_link: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>value: Vec&lt;OneDriveItem&gt;,
@@ -447,7 +439,6 @@
 </span><span class="kw">fn </span>test_parse_one_drive_json() {
     <span class="kw">let </span>data = <span class="string">r#"{
         "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user_id')/drive/root/children",
-        "@odata.count": 1,
         "value": [
             {
                 "createdDateTime": "2020-01-01T00:00:00Z",
@@ -519,7 +510,6 @@
     }"#</span>;
 
     <span class="kw">let </span>response: GraphApiOnedriveListResponse = serde_json::from_str(data).unwrap();
-    <span class="macro">assert_eq!</span>(response.odata_count, <span class="number">1</span>);
     <span class="macro">assert_eq!</span>(response.value.len(), <span class="number">2</span>);
     <span class="kw">let </span>item = <span class="kw-2">&amp;</span>response.value[<span class="number">0</span>];
     <span class="macro">assert_eq!</span>(item.name, <span class="string">"name"</span>);
@@ -530,7 +520,6 @@
     <span class="kw">let </span>response_json = <span class="string">r#"
     {
         "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('great.cat%40outlook.com')/drive/root/children",
-        "@odata.count": 1,
         "value": [
           {
             "createdDateTime": "2023-02-01T00:51:02.803Z",
@@ -587,7 +576,6 @@
       }"#</span>;
 
     <span class="kw">let </span>response: GraphApiOnedriveListResponse = serde_json::from_str(response_json).unwrap();
-    <span class="macro">assert_eq!</span>(response.odata_count, <span class="number">1</span>);
     <span class="macro">assert_eq!</span>(response.value.len(), <span class="number">1</span>);
     <span class="kw">let </span>item = <span class="kw-2">&amp;</span>response.value[<span class="number">0</span>];
     <span class="kw">if let </span>ItemType::Folder { folder, .. } = <span class="kw-2">&amp;</span>item.item_type {
