@@ -983,7 +983,7 @@
                 // It's recommended that you use at least 8 MiB for the chunk size.
                 //
                 // Reference: [Perform resumable uploads](https://cloud.google.com/storage/docs/performing-resumable-uploads)
-                </span>write_multi_align_size: <span class="prelude-val">Some</span>(<span class="number">256 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
+                </span>write_multi_align_size: <span class="prelude-val">Some</span>(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
 
                 delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
@@ -1054,10 +1054,10 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>concurrent = args.concurrent();
         <span class="kw">let </span>executor = args.executor().cloned();
         <span class="kw">let </span>w = GcsWriter::new(<span class="self">self</span>.core.clone(), path, args);
-        <span class="kw">let </span>w = oio::RangeWriter::new(w, executor, concurrent);
+        <span class="comment">// Gcs can't support concurrent write, always use concurrent=1 for now.
+        </span><span class="kw">let </span>w = oio::RangeWriter::new(w, executor, <span class="number">1</span>);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }
