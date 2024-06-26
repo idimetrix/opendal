@@ -1,0 +1,1 @@
+searchState.loadedDescShard("fuse3_opendal",0,"Filesystem represents the filesystem that implements \u2026\nIn design, flush could be called multiple times for a \u2026\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.\nCreate a new filesystem with given operator, uid and gid.");
