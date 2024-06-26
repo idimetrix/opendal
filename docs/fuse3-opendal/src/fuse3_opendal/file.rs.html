@@ -64,6 +64,7 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -81,10 +82,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>fuse3::Errno;
-<span class="kw">use </span>opendal::Writer;
-<span class="kw">use </span>std::ffi::OsString;
+</span><span class="kw">use </span>std::ffi::OsString;
 <span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>fuse3::Errno;
+<span class="kw">use </span>opendal::Writer;
 <span class="kw">use </span>tokio::sync::Mutex;
 
 <span class="doccomment">/// Opened file represents file that opened in memory.
