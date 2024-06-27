@@ -803,7 +803,7 @@
 
     <span class="doccomment">/// Set the maximum concurrent write task amount.
     </span><span class="kw">pub fn </span>concurrent(<span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.map(|(args, bs)| (args.with_chunk(v), bs))
+        <span class="self">self</span>.map(|(args, bs)| (args.with_concurrent(v), bs))
     }
 
     <span class="doccomment">/// Set the content type of option
