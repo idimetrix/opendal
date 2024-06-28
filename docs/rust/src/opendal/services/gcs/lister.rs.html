@@ -214,7 +214,7 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>!resp.status().is_success() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
         <span class="kw">let </span>bytes = resp.into_body();
 

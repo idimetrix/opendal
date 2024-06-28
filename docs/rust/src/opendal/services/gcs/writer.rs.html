@@ -126,6 +126,27 @@
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -143,16 +164,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
-
+</span><span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span><span class="kw">super</span>::core::GcsCore;
+<span class="kw">use </span><span class="kw">super</span>::core::{CompleteMultipartUploadRequestPart, GcsCore, InitiateMultipartUploadResult};
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">pub type </span>GcsWriters = oio::RangeWriter&lt;GcsWriter&gt;;
+<span class="kw">pub type </span>GcsWriters = oio::MultipartWriter&lt;GcsWriter&gt;;
 
 <span class="kw">pub struct </span>GcsWriter {
     core: Arc&lt;GcsCore&gt;,
@@ -170,8 +191,8 @@
     }
 }
 
-<span class="kw">impl </span>oio::RangeWrite <span class="kw">for </span>GcsWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>GcsWriter {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = body.len() <span class="kw">as </span>u64;
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.gcs_insert_object_request(
             <span class="kw-2">&amp;</span>percent_encode_path(<span class="kw-2">&amp;</span><span class="self">self</span>.path),
@@ -188,69 +209,90 @@
 
         <span class="kw">match </span>status {
             StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
-    <span class="kw">async fn </span>initiate_range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_initiate_resumable_upload(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>status = resp.status();
-
-        <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = parse_location(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = bs {
-                    <span class="prelude-val">Ok</span>(location.to_string())
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">Err</span>(Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="string">"location is not in the response header"</span>,
-                    ))
-                }
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
-    }
-
-    <span class="kw">async fn </span>write_range(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>str, written: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = body.len() <span class="kw">as </span>u64;
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
-            </span>.core
-            .gcs_upload_in_resumable_upload(location, size, written, body)<span class="question-mark">?</span>;
-
-        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>status = resp.status();
-        <span class="kw">match </span>status {
-            StatusCode::OK | StatusCode::PERMANENT_REDIRECT =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-        }
-    }
-
-    <span class="kw">async fn </span>complete_range(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>str, written: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = body.len() <span class="kw">as </span>u64;
+    <span class="kw">async fn </span>initiate_part(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
-            .gcs_complete_resumable_upload(location, written, size, body)
+            .gcs_initiate_multipart_upload(<span class="kw-2">&amp;</span>percent_encode_path(<span class="kw-2">&amp;</span><span class="self">self</span>.path))
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>status = resp.status();
-        <span class="kw">match </span>status {
-            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        <span class="kw">if </span>!resp.status().is_success() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
+
+        <span class="kw">let </span>buf = resp.into_body();
+        <span class="kw">let </span>upload_id: InitiateMultipartUploadResult =
+            quick_xml::de::from_reader(buf.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(upload_id.upload_id)
     }
 
-    <span class="kw">async fn </span>abort_range(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_abort_resumable_upload(location).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>write_part(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        upload_id: <span class="kw-2">&amp;</span>str,
+        part_number: usize,
+        size: u64,
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;oio::MultipartPart&gt; {
+        <span class="comment">// Gcs requires part number must between [1..=10000]
+        </span><span class="kw">let </span>part_number = part_number + <span class="number">1</span>;
 
-        <span class="kw">match </span>resp.status().as_u16() {
-            <span class="comment">// gcs returns 499 if the upload aborted successfully
-            // reference: https://cloud.google.com/storage/docs/performing-resumable-uploads#cancel-upload-json
-            </span><span class="number">499 </span>=&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .gcs_upload_part(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id, part_number, size, body)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">if </span>!resp.status().is_success() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
+        }
+
+        <span class="kw">let </span>etag = parse_etag(resp.headers())<span class="question-mark">?
+            </span>.ok_or_else(|| {
+                Error::new(
+                    ErrorKind::Unexpected,
+                    <span class="string">"ETag not present in returning response"</span>,
+                )
+            })<span class="question-mark">?
+            </span>.to_string();
+
+        <span class="prelude-val">Ok</span>(oio::MultipartPart {
+            part_number,
+            etag,
+            checksum: <span class="prelude-val">None</span>,
+        })
+    }
+
+    <span class="kw">async fn </span>complete_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str, parts: <span class="kw-2">&amp;</span>[oio::MultipartPart]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>parts = parts
+            .iter()
+            .map(|p| CompleteMultipartUploadRequestPart {
+                part_number: p.part_number,
+                etag: p.etag.clone(),
+            })
+            .collect();
+
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .gcs_complete_multipart_upload(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id, parts)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">if </span>!resp.status().is_success() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">async fn </span>abort_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .gcs_abort_multipart_upload(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">match </span>resp.status() {
+            <span class="comment">// gcs returns code 204 if abort succeeds.
+            </span>StatusCode::NO_CONTENT =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

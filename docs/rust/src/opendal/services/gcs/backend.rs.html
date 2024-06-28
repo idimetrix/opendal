@@ -619,6 +619,12 @@
 <a href="#619" id="619">619</a>
 <a href="#620" id="620">620</a>
 <a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -978,12 +984,18 @@
                 write_can_empty: <span class="bool-val">true</span>,
                 write_can_multi: <span class="bool-val">true</span>,
                 write_with_content_type: <span class="bool-val">true</span>,
-                <span class="comment">// The buffer size should be a multiple of 256 KiB (256 x 1024 bytes), unless it's the last chunk that completes the upload.
-                // Larger chunk sizes typically make uploads faster, but note that there's a tradeoff between speed and memory usage.
-                // It's recommended that you use at least 8 MiB for the chunk size.
+                <span class="comment">// The min multipart size of Gcs is 5 MiB.
                 //
-                // Reference: [Perform resumable uploads](https://cloud.google.com/storage/docs/performing-resumable-uploads)
-                </span>write_multi_align_size: <span class="prelude-val">Some</span>(<span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
+                // ref: &lt;https://cloud.google.com/storage/docs/xml-api/put-object-multipart&gt;
+                </span>write_multi_min_size: <span class="prelude-val">Some</span>(<span class="number">5 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
+                <span class="comment">// The max multipart size of Gcs is 5 GiB.
+                //
+                // ref: &lt;https://cloud.google.com/storage/docs/xml-api/put-object-multipart&gt;
+                </span>write_multi_max_size: <span class="kw">if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">"64"</span>) {
+                    <span class="prelude-val">Some</span>(<span class="number">5 </span>* <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Some</span>(usize::MAX)
+                },
 
                 delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
@@ -1009,7 +1021,7 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_get_object_metadata(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>!resp.status().is_success() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>slc = resp.into_body();
@@ -1048,16 +1060,16 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
+        <span class="kw">let </span>concurrent = args.concurrent();
         <span class="kw">let </span>executor = args.executor().cloned();
         <span class="kw">let </span>w = GcsWriter::new(<span class="self">self</span>.core.clone(), path, args);
-        <span class="comment">// Gcs can't support concurrent write, always use concurrent=1 for now.
-        </span><span class="kw">let </span>w = oio::RangeWriter::new(w, executor, <span class="number">1</span>);
+        <span class="kw">let </span>w = oio::MultipartWriter::new(w, executor, concurrent);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }
@@ -1069,7 +1081,7 @@
         </span><span class="kw">if </span>resp.status().is_success() || resp.status() == StatusCode::NOT_FOUND {
             <span class="prelude-val">Ok</span>(RpDelete::default())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
+            <span class="prelude-val">Err</span>(parse_error(resp))
         }
     }
 
@@ -1091,7 +1103,7 @@
         <span class="kw">if </span>resp.status().is_success() {
             <span class="prelude-val">Ok</span>(RpCopy::default())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
+            <span class="prelude-val">Err</span>(parse_error(resp))
         }
     }
 
@@ -1165,7 +1177,7 @@
                 </span><span class="kw">if </span>resp.status().is_success() || resp.status() == StatusCode::NOT_FOUND {
                     batched_result.push((path, <span class="prelude-val">Ok</span>(RpDelete::default().into())));
                 } <span class="kw">else </span>{
-                    batched_result.push((path, <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)));
+                    batched_result.push((path, <span class="prelude-val">Err</span>(parse_error(resp))));
                 }
             }
 
@@ -1173,7 +1185,7 @@
         } <span class="kw">else </span>{
             <span class="comment">// If the overall request isn't formatted correctly and Cloud Storage is unable to parse it into sub-requests, you receive a 400 error.
             // Otherwise, Cloud Storage returns a 200 status code, even if some or all of the sub-requests fail.
-            </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
+            </span><span class="prelude-val">Err</span>(parse_error(resp))
         }
     }
 }
