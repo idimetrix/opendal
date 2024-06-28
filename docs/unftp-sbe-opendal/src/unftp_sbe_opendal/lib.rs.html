@@ -214,6 +214,7 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -252,6 +253,7 @@
 }
 
 <span class="doccomment">/// A wrapper around [`opendal::Metadata`] to implement [`libunftp::storage::Metadata`].
+</span><span class="attr">#[derive(Debug, Clone, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>OpendalMetadata(opendal::Metadata);
 
 <span class="kw">impl </span>storage::Metadata <span class="kw">for </span>OpendalMetadata {
