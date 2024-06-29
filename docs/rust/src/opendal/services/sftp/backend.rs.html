@@ -995,7 +995,7 @@
         <span class="kw">if </span>op.append() {
             option.append(<span class="bool-val">true</span>);
         } <span class="kw">else </span>{
-            option.write(<span class="bool-val">true</span>);
+            option.write(<span class="bool-val">true</span>).truncate(<span class="bool-val">true</span>);
         }
 
         <span class="kw">let </span>file = option.open(path).<span class="kw">await</span>.map_err(parse_sftp_error)<span class="question-mark">?</span>;
