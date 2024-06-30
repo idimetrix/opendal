@@ -484,6 +484,10 @@
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -758,7 +762,11 @@
                 <span class="comment">// The min multipart size of AliyunDrive is 100 KiB.
                 </span>write_multi_min_size: <span class="prelude-val">Some</span>(<span class="number">100 </span>* <span class="number">1024</span>),
                 <span class="comment">// The max multipart size of AliyunDrive is 5 GiB.
-                </span>write_multi_max_size: <span class="prelude-val">Some</span>(<span class="number">5 </span>* <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024</span>),
+                </span>write_multi_max_size: <span class="kw">if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">"64"</span>) {
+                    <span class="prelude-val">Some</span>(<span class="number">5 </span>* <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Some</span>(usize::MAX)
+                },
                 delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
                 rename: <span class="bool-val">true</span>,
