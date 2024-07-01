@@ -1183,9 +1183,6 @@
 <a href="#1183" id="1183">1183</a>
 <a href="#1184" id="1184">1184</a>
 <a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1203,9 +1200,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Buf;
-
-<span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
+</span><span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1818,8 +1813,8 @@
         FunctionWrite(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpWrite::default(), bs),
-            |inner, path, (args, <span class="kw-2">mut </span>bs)| {
+            (OpWrite::default(), OpWriter::default(), bs),
+            |inner, path, (args, options, bs)| {
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
@@ -1829,13 +1824,10 @@
                     );
                 }
 
-                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.blocking_write(<span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
-                <span class="kw">while </span>!bs.is_empty() {
-                    <span class="kw">let </span>n = w.write(bs.clone())<span class="question-mark">?</span>;
-                    bs.advance(n);
-                }
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span><span class="kw-2">mut </span>w = BlockingWriter::new(context)<span class="question-mark">?</span>;
+                w.write(bs)<span class="question-mark">?</span>;
                 w.close()<span class="question-mark">?</span>;
-
                 <span class="prelude-val">Ok</span>(())
             },
         ))
@@ -1891,8 +1883,8 @@
         FunctionWriter(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpWrite::default(),
-            |inner, path, args| {
+            (OpWrite::default(), OpWriter::default()),
+            |inner, path, (args, options)| {
                 <span class="kw">let </span>path = normalize_path(<span class="kw-2">&amp;</span>path);
 
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
@@ -1904,7 +1896,9 @@
                     );
                 }
 
-                BlockingWriter::create(inner.clone(), <span class="kw-2">&amp;</span>path, args)
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span>w = BlockingWriter::new(context)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(w)
             },
         ))
     }

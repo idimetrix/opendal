@@ -2233,6 +2233,11 @@
 <a href="#2233" id="2233">2233</a>
 <a href="#2234" id="2234">2234</a>
 <a href="#2235" id="2235">2235</a>
+<a href="#2236" id="2236">2236</a>
+<a href="#2237" id="2237">2237</a>
+<a href="#2238" id="2238">2238</a>
+<a href="#2239" id="2239">2239</a>
+<a href="#2240" id="2240">2240</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3318,8 +3323,11 @@
         OperatorFuture::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpWrite::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
-            |inner, path, args| <span class="kw">async move </span>{
+            (
+                OpWrite::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
+                OpWriter::default(),
+            ),
+            |inner, path, (args, options)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
@@ -3329,8 +3337,10 @@
                     );
                 }
 
-                Writer::create(inner, <span class="kw-2">&amp;</span>path, args).<span class="kw">await
-            </span>},
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span>w = Writer::new(context).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(w)
+            },
         )
     }
 
@@ -3464,9 +3474,10 @@
             path,
             (
                 OpWrite::default().merge_executor(<span class="self">self</span>.default_executor.clone()),
+                OpWriter::default(),
                 bs,
             ),
-            |inner, path, (args, bs)| <span class="kw">async move </span>{
+            |inner, path, (args, options, bs)| <span class="kw">async move </span>{
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
@@ -3476,11 +3487,10 @@
                     );
                 }
 
-                <span class="kw">let </span>(<span class="kw">_</span>, w) = inner.write(<span class="kw-2">&amp;</span>path, args).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>w = Writer::new(w);
-                w.write(bs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span><span class="kw-2">mut </span>w = Writer::new(context).<span class="kw">await</span><span class="question-mark">?</span>;
+                w.write(bs).<span class="kw">await</span><span class="question-mark">?</span>;
                 w.close().<span class="kw">await</span><span class="question-mark">?</span>;
-
                 <span class="prelude-val">Ok</span>(())
             },
         )

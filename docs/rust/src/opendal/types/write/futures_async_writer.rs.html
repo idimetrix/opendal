@@ -121,6 +121,19 @@
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
 <a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -163,7 +176,7 @@
 <span class="kw">impl </span>FuturesAsyncWriter {
     <span class="doccomment">/// NOTE: don't allow users to create directly.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(w: oio::Writer) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(w: WriteGenerator&lt;oio::Writer&gt;) -&gt; <span class="self">Self </span>{
         FuturesAsyncWriter {
             sink: BufferSink::new(w),
             buf: oio::FlexBuf::new(<span class="number">256 </span>* <span class="number">1024</span>),
@@ -236,10 +249,23 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
+    <span class="kw">use </span>std::collections::HashMap;
+    <span class="kw">use </span>std::sync::Arc;
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_trait() {
-        <span class="kw">let </span>v = FuturesAsyncWriter::new(Box::new(()));
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_trait() {
+        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default()).unwrap();
+
+        <span class="kw">let </span>acc = op.into_inner();
+        <span class="kw">let </span>ctx = Arc::new(WriteContext::new(
+            acc,
+            <span class="string">"test"</span>.to_string(),
+            OpWrite::new(),
+            OpWriter::new().with_chunk(<span class="number">1</span>),
+        ));
+        <span class="kw">let </span>write_gen = WriteGenerator::create(ctx).<span class="kw">await</span>.unwrap();
+
+        <span class="kw">let </span>v = FuturesAsyncWriter::new(write_gen);
 
         <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>Unpin + MaybeSend + Sync + <span class="lifetime">'static</span>&gt; = Box::new(v);
     }
