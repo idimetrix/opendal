@@ -575,6 +575,11 @@
 <a href="#575" id="575">575</a>
 <a href="#576" id="576">576</a>
 <a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -600,30 +605,41 @@
 
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
+<span class="kw">use </span>serde::Deserialize;
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::lister::FsLister;
 <span class="kw">use </span><span class="kw">super</span>::reader::FsReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriter;
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// config for file system
+</span><span class="attr">#[derive(Default, Deserialize, Debug)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>FsConfig {
+    <span class="doccomment">/// root dir for backend
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
+    <span class="doccomment">/// tmp dir for atomic write
+    </span><span class="kw">pub </span>atomic_write_dir: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
 
 <span class="doccomment">/// POSIX file system support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default, Debug)]
 </span><span class="kw">pub struct </span>FsBuilder {
-    root: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-    atomic_write_dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    config: FsConfig,
 }
 
 <span class="kw">impl </span>FsBuilder {
     <span class="doccomment">/// Set root for backend.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="kw">if </span>root.is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(PathBuf::from(root))
-        };
+        <span class="kw">if </span>!root.is_empty() {
+            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
+        }
 
         <span class="self">self
     </span>}
@@ -635,11 +651,9 @@
     /// - When append is enabled, we will not use atomic write
     /// to avoid data loss and performance issue.
     </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.atomic_write_dir = <span class="kw">if </span>dir.is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(PathBuf::from(dir))
-        };
+        <span class="kw">if </span>!dir.is_empty() {
+            <span class="self">self</span>.config.atomic_write_dir = <span class="prelude-val">Some</span>(dir.to_string());
+        }
 
         <span class="self">self
     </span>}
@@ -650,19 +664,15 @@
     <span class="kw">type </span>Accessor = FsBackend;
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = FsBuilder::default();
-
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"atomic_write_dir"</span>)
-            .map(|v| builder.atomic_write_dir(v));
-
-        builder
+        <span class="kw">let </span>config = FsConfig::deserialize(ConfigDeserializer::new(map))
+            .expect(<span class="string">"config deserialize must succeed"</span>);
+        FsBuilder { config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
-        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.root.take() {
+        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root.take().map(PathBuf::from) {
             <span class="prelude-val">Some</span>(root) =&gt; <span class="prelude-val">Ok</span>(root),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
@@ -683,7 +693,7 @@
             }
         }
 
-        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.atomic_write_dir.take();
+        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.config.atomic_write_dir.take().map(PathBuf::from);
 
         <span class="comment">// If atomic write dir is not exist, we must create it.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(d) = <span class="kw-2">&amp;</span>atomic_write_dir {
@@ -817,9 +827,9 @@
     ///
     /// There are three ways to get the total file length:
     ///
-    /// - call std::fs::metadata directly and than open. (400ns)
-    /// - open file first, and than use `f.metadata()` (300ns)
-    /// - open file first, and than use `seek`. (100ns)
+    /// - call std::fs::metadata directly and then open. (400ns)
+    /// - open file first, and then use `f.metadata()` (300ns)
+    /// - open file first, and then use `seek`. (100ns)
     ///
     /// Benchmark could be found [here](https://gist.github.com/Xuanwo/48f9cfbc3022ea5f865388bb62e1a70f)
     </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
