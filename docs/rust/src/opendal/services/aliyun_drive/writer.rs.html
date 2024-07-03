@@ -123,6 +123,86 @@
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -148,6 +228,9 @@
 };
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>tokio::sync::RwLock;
+
+<span class="kw">pub type </span>AliyunDriveWriters = oio::MultipartWriter&lt;AliyunDriveWriter&gt;;
 
 <span class="kw">pub struct </span>AliyunDriveWriter {
     core: Arc&lt;AliyunDriveCore&gt;,
@@ -156,9 +239,7 @@
     parent_file_id: String,
     name: String,
 
-    file_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    part_number: usize,
+    file_id: Arc&lt;RwLock&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt;&gt;,
 }
 
 <span class="kw">impl </span>AliyunDriveWriter {
@@ -168,84 +249,163 @@
             _op: op,
             parent_file_id: parent_file_id.to_string(),
             name: name.to_string(),
-            file_id: <span class="prelude-val">None</span>,
-            upload_id: <span class="prelude-val">None</span>,
-            part_number: <span class="number">1</span>, <span class="comment">// must start from 1
-        </span>}
+            file_id: Arc::new(RwLock::new(<span class="prelude-val">None</span>)),
+        }
     }
-}
 
-<span class="kw">impl </span>oio::Write <span class="kw">for </span>AliyunDriveWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>(upload_id, file_id) = <span class="kw">match </span>(<span class="self">self</span>.upload_id.as_ref(), <span class="self">self</span>.file_id.as_ref()) {
-            (<span class="prelude-val">Some</span>(upload_id), <span class="prelude-val">Some</span>(file_id)) =&gt; (upload_id, file_id),
-            <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>res = <span class="self">self
-                    </span>.core
-                    .create(
-                        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent_file_id),
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.name,
-                        CreateType::File,
-                        CheckNameMode::Refuse,
-                    )
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>output: CreateResponse =
-                    serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-                <span class="kw">if </span>output.exist.is_some_and(|x| x) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::AlreadyExists, <span class="string">"file exists"</span>));
-                }
-                <span class="self">self</span>.upload_id = output.upload_id;
-                <span class="self">self</span>.file_id = <span class="prelude-val">Some</span>(output.file_id);
-                (
-                    <span class="self">self</span>.upload_id.as_ref().expect(<span class="string">"cannot find upload_id"</span>),
-                    <span class="self">self</span>.file_id.as_ref().expect(<span class="string">"cannot find file_id"</span>),
-                )
-            }
+    <span class="kw">async fn </span>write_file_id(<span class="kw-2">&amp;</span><span class="self">self</span>, id: String) {
+        <span class="kw">let </span><span class="kw-2">mut </span>file_id = <span class="self">self</span>.file_id.write().<span class="kw">await</span>;
+
+        <span class="kw-2">*</span>file_id = <span class="prelude-val">Some</span>(id);
+    }
+
+    <span class="kw">async fn </span>read_file_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span>file_id = <span class="self">self</span>.file_id.read().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>file_id) = <span class="kw-2">*</span>file_id <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"cannot find file_id"</span>));
         };
+
+        <span class="prelude-val">Ok</span>(file_id.clone())
+    }
+
+    <span class="kw">async fn </span>write(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        body: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
+        upload_url: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_url) = upload_url {
+            <span class="kw">let </span><span class="prelude-val">Some</span>(body) = body <span class="kw">else </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::Unexpected,
+                    <span class="string">"cannot upload without body"</span>,
+                ));
+            };
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.core.upload(upload_url, body).<span class="kw">await </span>{
+                <span class="kw">if </span>err.kind() != ErrorKind::AlreadyExists {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+                }
+            };
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        }
 
         <span class="kw">let </span>res = <span class="self">self
             </span>.core
-            .get_upload_url(file_id, upload_id, <span class="prelude-val">Some</span>(<span class="self">self</span>.part_number))
+            .create(
+                <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent_file_id),
+                <span class="kw-2">&amp;</span><span class="self">self</span>.name,
+                CreateType::File,
+                CheckNameMode::Refuse,
+            )
+            .<span class="kw">await</span>;
+
+        <span class="kw">let </span>res = <span class="kw">match </span>res {
+            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>err.kind() == ErrorKind::IsSameFile =&gt; {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+            }
+            <span class="prelude-val">Err</span>(err) =&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+            }
+            <span class="prelude-val">Ok</span>(res) =&gt; res,
+        };
+
+        <span class="kw">let </span>output: CreateResponse =
+            serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.write_file_id(output.file_id).<span class="kw">await</span>;
+        <span class="kw">if </span>output.exist.is_some_and(|x| x) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::AlreadyExists, <span class="string">"file exists"</span>));
+        }
+
+        <span class="kw">if </span>output.upload_id.is_some() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(body) = body {
+                <span class="kw">let </span><span class="prelude-val">Some</span>(part_info_list) = output.part_info_list <span class="kw">else </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"cannot find upload_url"</span>));
+                };
+                <span class="kw">if </span>part_info_list.is_empty() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"cannot find upload_url"</span>));
+                }
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.core.upload(<span class="kw-2">&amp;</span>part_info_list[<span class="number">0</span>].upload_url, body).<span class="kw">await </span>{
+                    <span class="kw">if </span>err.kind() != ErrorKind::AlreadyExists {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+                    }
+                }
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(output.upload_id)
+    }
+
+    <span class="kw">async fn </span>complete(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>file_id = <span class="self">self</span>.read_file_id().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="self">self</span>.core.complete(<span class="kw-2">&amp;</span>file_id, upload_id).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>file_id = <span class="self">self</span>.read_file_id().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="self">self</span>.core.delete_path(<span class="kw-2">&amp;</span>file_id).<span class="kw">await
+    </span>}
+}
+
+<span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>AliyunDriveWriter {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: <span class="kw">crate</span>::Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>upload_id = <span class="self">self</span>.initiate_part().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.write_part(<span class="kw-2">&amp;</span>upload_id, <span class="number">0</span>, size, body).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="self">self</span>.complete(<span class="kw-2">&amp;</span>upload_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">async fn </span>initiate_part(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(upload_id) = <span class="self">self</span>.write(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unsupported, <span class="string">"cannot find upload_id"</span>));
+        };
+
+        <span class="prelude-val">Ok</span>(upload_id)
+    }
+
+    <span class="kw">async fn </span>write_part(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        upload_id: <span class="kw-2">&amp;</span>str,
+        part_number: usize,
+        _size: u64,
+        body: <span class="kw">crate</span>::Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;oio::MultipartPart&gt; {
+        <span class="kw">let </span>file_id = <span class="self">self</span>.read_file_id().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>res = <span class="self">self
+            </span>.core
+            .get_upload_url(<span class="kw-2">&amp;</span>file_id, upload_id, <span class="prelude-val">Some</span>(part_number + <span class="number">1</span>))
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>output: UploadUrlResponse =
             serde_json::from_reader(res.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(upload_url) = output
-            .part_info_list
-            .as_ref()
-            .and_then(|list| list.first())
-            .map(|part_info| <span class="kw-2">&amp;</span>part_info.upload_url)
-        <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(part_info_list) = output.part_info_list <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">"cannot find part_info_list"</span>,
+            ));
+        };
+        <span class="kw">if </span>part_info_list.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"cannot find upload_url"</span>));
-        };
+        }
+        <span class="self">self</span>.write(<span class="prelude-val">Some</span>(body), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>part_info_list[<span class="number">0</span>].upload_url))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>size = bs.len();
-
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.core.upload(upload_url, bs).<span class="kw">await </span>{
-            <span class="kw">if </span>err.kind() != ErrorKind::AlreadyExists {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-            }
-        };
-
-        <span class="self">self</span>.part_number += <span class="number">1</span>;
-
-        <span class="prelude-val">Ok</span>(size)
+        <span class="prelude-val">Ok</span>(oio::MultipartPart {
+            part_number,
+            etag: part_info_list[<span class="number">0</span>].etag.clone().unwrap_or(<span class="string">""</span>.to_string()),
+            checksum: <span class="prelude-val">None</span>,
+        })
     }
 
-    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>(<span class="prelude-val">Some</span>(upload_id), <span class="prelude-val">Some</span>(file_id)) = (<span class="self">self</span>.upload_id.as_ref(), <span class="self">self</span>.file_id.as_ref())
-        <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        };
-        <span class="self">self</span>.core.complete(file_id, upload_id).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>complete_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str, _parts: <span class="kw-2">&amp;</span>[oio::MultipartPart]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.complete(upload_id).<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(file_id) = <span class="self">self</span>.file_id.as_ref() <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        };
-        <span class="self">self</span>.core.delete_path(file_id).<span class="kw">await
+    <span class="kw">async fn </span>abort_part(<span class="kw-2">&amp;</span><span class="self">self</span>, _upload_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.delete().<span class="kw">await
     </span>}
 }
 </code></pre></div></section></main></body></html>

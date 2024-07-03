@@ -722,18 +722,6 @@
 <a href="#722" id="722">722</a>
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1311,6 +1299,7 @@
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpWrite {
     append: bool,
+    chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     concurrent: usize,
     content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -1342,6 +1331,27 @@
     /// Service could return `Unsupported` if the underlying storage does not support append.
     </span><span class="kw">pub fn </span>with_append(<span class="kw-2">mut </span><span class="self">self</span>, append: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.append = append;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the chunk from op.
+    ///
+    /// The chunk is used by service to decide the chunk size of the underlying writer.
+    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.chunk
+    }
+
+    <span class="doccomment">/// Set the chunk of op.
+    ///
+    /// If chunk is set, the data will be chunked by the underlying writer.
+    ///
+    /// ## NOTE
+    ///
+    /// Service could have their own minimum chunk size while perform write
+    /// operations like multipart uploads. So the chunk size may be larger than
+    /// the given buffer size.
+    </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk);
         <span class="self">self
     </span>}
 
@@ -1411,40 +1421,6 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(exec) = executor {
             <span class="kw">return </span><span class="self">self</span>.with_executor(exec);
         }
-        <span class="self">self
-    </span>}
-}
-
-<span class="doccomment">/// Args for `writer` operation.
-</span><span class="attr">#[derive(Debug, Clone, Default)]
-</span><span class="kw">pub struct </span>OpWriter {
-    chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-}
-
-<span class="kw">impl </span>OpWriter {
-    <span class="doccomment">/// Create a new `OpWriter`.
-    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::default()
-    }
-
-    <span class="doccomment">/// Get the chunk from op.
-    ///
-    /// The chunk is used by service to decide the chunk size of the underlying writer.
-    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="self">self</span>.chunk
-    }
-
-    <span class="doccomment">/// Set the chunk of op.
-    ///
-    /// If chunk is set, the data will be chunked by the underlying writer.
-    ///
-    /// ## NOTE
-    ///
-    /// Service could have their own minimum chunk size while perform write
-    /// operations like multipart uploads. So the chunk size may be larger than
-    /// the given buffer size.
-    </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk);
         <span class="self">self
     </span>}
 }
