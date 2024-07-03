@@ -530,6 +530,19 @@
 <a href="#530" id="530">530</a>
 <a href="#531" id="531">531</a>
 <a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -547,11 +560,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::{Debug, Display, Formatter};
-<span class="kw">use </span>std::future::IntoFuture;
-<span class="kw">use </span>std::ops::Range;
-
-<span class="kw">use </span><span class="kw">crate</span>::utils::<span class="kw-2">*</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::utils::<span class="kw-2">*</span>;
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::stream::BoxStream;
@@ -570,8 +579,12 @@
 <span class="kw">use </span>object_store::PutOptions;
 <span class="kw">use </span>object_store::PutPayload;
 <span class="kw">use </span>object_store::PutResult;
-<span class="kw">use </span>opendal::Operator;
 <span class="kw">use </span>opendal::{Buffer, Metakey};
+<span class="kw">use </span>opendal::{Operator, OperatorInfo};
+<span class="kw">use </span>std::fmt::{Debug, Display, Formatter};
+<span class="kw">use </span>std::future::IntoFuture;
+<span class="kw">use </span>std::ops::Range;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="doccomment">/// OpendalStore implements ObjectStore trait by using opendal.
 ///
@@ -625,24 +638,37 @@
 /// }
 /// ```
 </span><span class="kw">pub struct </span>OpendalStore {
+    info: Arc&lt;OperatorInfo&gt;,
     inner: Operator,
 }
 
 <span class="kw">impl </span>OpendalStore {
     <span class="doccomment">/// Create OpendalStore by given Operator.
     </span><span class="kw">pub fn </span>new(op: Operator) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ inner: op }
+        <span class="self">Self </span>{
+            info: op.info().into(),
+            inner: op,
+        }
+    }
+
+    <span class="doccomment">/// The metakey that requested by object_store, should align with its meta.
+    </span><span class="attr">#[inline]
+    </span><span class="kw">fn </span>metakey() -&gt; flagset::FlagSet&lt;Metakey&gt; {
+        Metakey::Mode
+            | Metakey::LastModified
+            | Metakey::ContentLength
+            | Metakey::Etag
+            | Metakey::Version
     }
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>OpendalStore {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span>info = <span class="self">self</span>.inner.info();
         f.debug_struct(<span class="string">"OpendalStore"</span>)
-            .field(<span class="string">"scheme"</span>, <span class="kw-2">&amp;</span>info.scheme())
-            .field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span>info.name())
-            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span>info.root())
-            .field(<span class="string">"capability"</span>, <span class="kw-2">&amp;</span>info.full_capability())
+            .field(<span class="string">"scheme"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.info.scheme())
+            .field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.info.name())
+            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.info.root())
+            .field(<span class="string">"capability"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.info.full_capability())
             .finish()
     }
 }
@@ -825,7 +851,7 @@
             <span class="kw">let </span>stream = <span class="self">self
                 </span>.inner
                 .lister_with(<span class="kw-2">&amp;</span>path)
-                .metakey(Metakey::ContentLength | Metakey::LastModified)
+                .metakey(<span class="self">Self</span>::metakey())
                 .recursive(<span class="bool-val">true</span>)
                 .<span class="kw">await
                 </span>.map_err(|err| format_object_store_error(err, <span class="kw-2">&amp;</span>path))<span class="question-mark">?</span>;
@@ -855,7 +881,7 @@
                 <span class="self">self</span>.inner
                     .lister_with(<span class="kw-2">&amp;</span>path)
                     .start_after(offset.as_ref())
-                    .metakey(Metakey::ContentLength | Metakey::LastModified)
+                    .metakey(<span class="self">Self</span>::metakey())
                     .recursive(<span class="bool-val">true</span>)
                     .into_future()
                     .into_send()
@@ -867,7 +893,7 @@
             } <span class="kw">else </span>{
                 <span class="self">self</span>.inner
                     .lister_with(<span class="kw-2">&amp;</span>path)
-                    .metakey(Metakey::ContentLength | Metakey::LastModified)
+                    .metakey(<span class="self">Self</span>::metakey())
                     .recursive(<span class="bool-val">true</span>)
                     .into_future()
                     .into_send()
@@ -889,7 +915,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>stream = <span class="self">self
             </span>.inner
             .lister_with(<span class="kw-2">&amp;</span>path)
-            .metakey(Metakey::Mode | Metakey::ContentLength | Metakey::LastModified)
+            .metakey(<span class="self">Self</span>::metakey())
             .into_future()
             .into_send()
             .<span class="kw">await

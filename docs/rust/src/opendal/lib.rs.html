@@ -357,7 +357,7 @@
     <span class="doccomment">/// This is used to make sure our public API implement Send + Sync
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_trait() {
-        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>AssertSendSync&gt; = Box::new(Writer::new(Box::new(())));
+        <span class="kw">let _</span>: Box&lt;<span class="kw">dyn </span>AssertSendSync&gt; = Box::new(Capability::default());
     }
 }
 </code></pre></div></section></main></body></html>
