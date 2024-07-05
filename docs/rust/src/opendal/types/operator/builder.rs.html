@@ -418,6 +418,8 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -642,6 +644,8 @@
             </span>Scheme::MiniMoka =&gt; <span class="self">Self</span>::from_map::&lt;services::MiniMoka&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-moka"</span>)]
             </span>Scheme::Moka =&gt; <span class="self">Self</span>::from_map::&lt;services::Moka&gt;(map)<span class="question-mark">?</span>.finish(),
+            <span class="attr">#[cfg(feature = <span class="string">"services-monoiofs"</span>)]
+            </span>Scheme::Monoiofs =&gt; <span class="self">Self</span>::from_map::&lt;services::Monoiofs&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-mysql"</span>)]
             </span>Scheme::Mysql =&gt; <span class="self">Self</span>::from_map::&lt;services::Mysql&gt;(map)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-obs"</span>)]

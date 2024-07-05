@@ -140,7 +140,7 @@ builder.external_id(<span class="kw-2">&amp;</span>cfg.external_id);
 <span class="kw">pub struct </span>S3Builder {
     config: S3Config,
     
-    customed_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
+    customized_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
 }</code></pre></div>
 <h2 id="drawbacks"><a class="doc-anchor" href="#drawbacks">§</a>Drawbacks</h2><h3 id="api-surface"><a class="doc-anchor" href="#api-surface">§</a>API Surface</h3>
