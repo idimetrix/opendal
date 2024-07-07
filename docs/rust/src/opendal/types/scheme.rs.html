@@ -478,12 +478,6 @@
 <a href="#478" id="478">478</a>
 <a href="#479" id="479">479</a>
 <a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -591,8 +585,6 @@
     </span>MiniMoka,
     <span class="doccomment">/// [moka][crate::services::Moka]: moka backend support.
     </span>Moka,
-    <span class="doccomment">/// [monoiofs][crate::services::Monoiofs]: monoio fs services.
-    </span>Monoiofs,
     <span class="doccomment">/// [obs][crate::services::Obs]: Huawei Cloud OBS services.
     </span>Obs,
     <span class="doccomment">/// [onedrive][crate::services::Onedrive]: Microsoft OneDrive services.
@@ -739,8 +731,6 @@
             </span>Scheme::MiniMoka,
             <span class="attr">#[cfg(feature = <span class="string">"services-moka"</span>)]
             </span>Scheme::Moka,
-            <span class="attr">#[cfg(feature = <span class="string">"services-monoiofs"</span>)]
-            </span>Scheme::Monoiofs,
             <span class="attr">#[cfg(feature = <span class="string">"services-mysql"</span>)]
             </span>Scheme::Mysql,
             <span class="attr">#[cfg(feature = <span class="string">"services-obs"</span>)]
@@ -860,7 +850,6 @@
             <span class="string">"sqlite" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Sqlite),
             <span class="string">"mini_moka" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::MiniMoka),
             <span class="string">"moka" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Moka),
-            <span class="string">"monoiofs" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Monoiofs),
             <span class="string">"obs" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Obs),
             <span class="string">"onedrive" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Onedrive),
             <span class="string">"persy" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Persy),
@@ -927,7 +916,6 @@
             Scheme::Memory =&gt; <span class="string">"memory"</span>,
             Scheme::MiniMoka =&gt; <span class="string">"mini_moka"</span>,
             Scheme::Moka =&gt; <span class="string">"moka"</span>,
-            Scheme::Monoiofs =&gt; <span class="string">"monoiofs"</span>,
             Scheme::Obs =&gt; <span class="string">"obs"</span>,
             Scheme::Onedrive =&gt; <span class="string">"onedrive"</span>,
             Scheme::Persy =&gt; <span class="string">"persy"</span>,
