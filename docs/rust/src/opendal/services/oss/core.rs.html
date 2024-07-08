@@ -892,6 +892,33 @@
 <a href="#892" id="892">892</a>
 <a href="#893" id="893">893</a>
 <a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -941,6 +968,8 @@
     <span class="kw">pub const </span>X_OSS_SERVER_SIDE_ENCRYPTION_KEY_ID: <span class="kw-2">&amp;</span>str = <span class="string">"x-oss-server-side-encryption-key-id"</span>;
 
     <span class="kw">pub const </span>RESPONSE_CONTENT_DISPOSITION: <span class="kw-2">&amp;</span>str = <span class="string">"response-content-disposition"</span>;
+
+    <span class="kw">pub const </span>OSS_QUERY_VERSION_ID: <span class="kw-2">&amp;</span>str = <span class="string">"versionId"</span>;
 }
 
 <span class="kw">pub struct </span>OssCore {
@@ -1130,12 +1159,12 @@
     <span class="kw">pub fn </span>oss_get_object_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        range: BytesRange,
         is_presign: bool,
         args: <span class="kw-2">&amp;</span>OpRead,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
+        <span class="kw">let </span>range = args.range();
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
 
         <span class="comment">// Add query arguments to the URL based on response overrides
@@ -1145,6 +1174,13 @@
                 <span class="string">"{}={}"</span>,
                 constants::RESPONSE_CONTENT_DISPOSITION,
                 percent_encode_path(override_content_disposition)
+            ))
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(version) = args.version() {
+            query_args.push(<span class="macro">format!</span>(
+                <span class="string">"{}={}"</span>,
+                constants::OSS_QUERY_VERSION_ID,
+                percent_encode_path(version)
             ))
         }
 
@@ -1174,10 +1210,25 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">fn </span>oss_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">fn </span>oss_delete_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(<span class="bool-val">false</span>);
-        <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
+        <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>query_args = Vec::new();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(version) = args.version() {
+            query_args.push(<span class="macro">format!</span>(
+                <span class="string">"{}={}"</span>,
+                constants::OSS_QUERY_VERSION_ID,
+                percent_encode_path(version)
+            ))
+        }
+
+        <span class="kw">if </span>!query_args.is_empty() {
+            url.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"?{}"</span>, query_args.join(<span class="string">"&amp;"</span>)));
+        }
+
         <span class="kw">let </span>req = Request::delete(<span class="kw-2">&amp;</span>url);
 
         <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
@@ -1189,18 +1240,31 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         is_presign: bool,
-        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        args: <span class="kw-2">&amp;</span>OpStat,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>endpoint = <span class="self">self</span>.get_endpoint(is_presign);
-        <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
+        <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(<span class="string">"{}/{}"</span>, endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>query_args = Vec::new();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(version) = args.version() {
+            query_args.push(<span class="macro">format!</span>(
+                <span class="string">"{}={}"</span>,
+                constants::OSS_QUERY_VERSION_ID,
+                percent_encode_path(version)
+            ))
+        }
+
+        <span class="kw">if </span>!query_args.is_empty() {
+            url.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"?{}"</span>, query_args.join(<span class="string">"&amp;"</span>)));
+        }
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::head(<span class="kw-2">&amp;</span>url);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = if_match {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = args.if_match() {
             req = req.header(IF_MATCH, if_match)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
             req = req.header(IF_NONE_MATCH, if_none_match);
         }
         <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
@@ -1252,24 +1316,14 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>oss_get_object(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        range: BytesRange,
-        args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_get_object_request(path, range, <span class="bool-val">false</span>, args)<span class="question-mark">?</span>;
+    <span class="kw">pub async fn </span>oss_get_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_get_object_request(path, <span class="bool-val">false</span>, args)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>oss_head_object(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_head_object_request(path, <span class="bool-val">false</span>, if_match, if_none_match)<span class="question-mark">?</span>;
+    <span class="kw">pub async fn </span>oss_head_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_head_object_request(path, <span class="bool-val">false</span>, args)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -1325,8 +1379,8 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>oss_delete_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_delete_object_request(path)<span class="question-mark">?</span>;
+    <span class="kw">pub async fn </span>oss_delete_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.oss_delete_object_request(path, args)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}

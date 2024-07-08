@@ -1043,21 +1043,27 @@
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>resp = <span class="self">self
-            </span>.core
-            .oss_head_object(path, args.if_match(), args.if_none_match())
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_head_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; parse_into_metadata(path, resp.headers()).map(RpStat::new),
+            StatusCode::OK =&gt; {
+                <span class="kw">let </span>headers = resp.headers();
+                <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
+
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_header_to_str(headers, <span class="string">"x-oss-version-id"</span>)<span class="question-mark">? </span>{
+                    meta.set_version(v);
+                }
+
+                <span class="prelude-val">Ok</span>(RpStat::new(meta))
+            }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_get_object(path, args.range(), <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_get_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -1089,8 +1095,8 @@
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }
 
-    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_delete_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.oss_delete_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::NO_CONTENT | StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
@@ -1122,14 +1128,8 @@
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="comment">// We will not send this request out, just for signing.
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = <span class="kw">match </span>args.operation() {
-            PresignOperation::Stat(v) =&gt; {
-                <span class="self">self</span>.core
-                    .oss_head_object_request(path, <span class="bool-val">true</span>, v.if_match(), v.if_none_match())<span class="question-mark">?
-            </span>}
-            PresignOperation::Read(v) =&gt; {
-                <span class="self">self</span>.core
-                    .oss_get_object_request(path, BytesRange::default(), <span class="bool-val">true</span>, v)<span class="question-mark">?
-            </span>}
+            PresignOperation::Stat(v) =&gt; <span class="self">self</span>.core.oss_head_object_request(path, <span class="bool-val">true</span>, v)<span class="question-mark">?</span>,
+            PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.oss_get_object_request(path, <span class="bool-val">true</span>, v)<span class="question-mark">?</span>,
             PresignOperation::Write(v) =&gt; {
                 <span class="self">self</span>.core
                     .oss_put_object_request(path, <span class="prelude-val">None</span>, v, Buffer::new(), <span class="bool-val">true</span>)<span class="question-mark">?
