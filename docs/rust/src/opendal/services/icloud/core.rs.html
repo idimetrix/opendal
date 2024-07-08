@@ -1072,7 +1072,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="comment">// Updata SessionData cookies.We need obtain `X-APPLE-WEBAUTH-USER` cookie to get file.
+        <span class="comment">// Update SessionData cookies.We need obtain `X-APPLE-WEBAUTH-USER` cookie to get file.
         </span><span class="self">self</span>.update(<span class="kw-2">&amp;</span>resp)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>bs = resp.into_body();

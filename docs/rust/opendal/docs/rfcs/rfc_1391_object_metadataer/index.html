@@ -32,7 +32,7 @@
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>content_length = om.content_length().<span class="kw">await</span>;
 <span class="kw">let </span>etag = om.etag().<span class="kw">await</span>;</code></pre></div>
-<p>During the whole lifetime of the coresbonding <code>Object</code> or <code>ObjectMetadataer</code>, we make sure that at most one <code>stat</code> call is sent. After this change, users will never get an <code>ObjectMetadata</code> anymore.</p>
+<p>During the whole lifetime of the corresponding <code>Object</code> or <code>ObjectMetadataer</code>, we make sure that at most one <code>stat</code> call is sent. After this change, users will never get an <code>ObjectMetadata</code> anymore.</p>
 <h2 id="reference-level-explanation"><a class="doc-anchor" href="#reference-level-explanation">§</a>Reference-level explanation</h2>
 <p>We will introduce a bitmap to store the state of all object metadata fields separately. Everytime users call <code>key</code> on metadata, we will check as following:</p>
 <ul>

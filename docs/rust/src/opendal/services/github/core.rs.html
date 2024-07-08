@@ -443,7 +443,7 @@
 
 <span class="kw">impl </span>GithubCore {
     <span class="kw">pub async fn </span>get_file_sha(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
-        <span class="comment">// if the token is not set, we shhould not try to get the sha of the file.
+        <span class="comment">// if the token is not set, we should not try to get the sha of the file.
         </span><span class="kw">if </span><span class="self">self</span>.token.is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::PermissionDenied,
