@@ -1583,7 +1583,7 @@
 </span><span class="kw">pub struct </span>S3Builder {
     config: S3Config,
 
-    customed_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
+    customized_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
 }
 
@@ -1928,12 +1928,12 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adding a customed credential load for service.
+    <span class="doccomment">/// Adding a customized credential load for service.
     ///
-    /// If customed_credential_load has been set, we will ignore all other
+    /// If customized_credential_load has been set, we will ignore all other
     /// credential load methods.
-    </span><span class="kw">pub fn </span>customed_credential_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.customed_credential_load = <span class="prelude-val">Some</span>(cred);
+    </span><span class="kw">pub fn </span>customized_credential_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.customized_credential_load = <span class="prelude-val">Some</span>(cred);
         <span class="self">self
     </span>}
 
@@ -2156,7 +2156,7 @@
 
         S3Builder {
             config,
-            customed_credential_load: <span class="prelude-val">None</span>,
+            customized_credential_load: <span class="prelude-val">None</span>,
             http_client: <span class="prelude-val">None</span>,
         }
     }
@@ -2286,8 +2286,8 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>loader: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt; = <span class="prelude-val">None</span>;
-        <span class="comment">// If customed_credential_load is set, we will use it.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customed_credential_load.take() {
+        <span class="comment">// If customized_credential_load is set, we will use it.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customized_credential_load.take() {
             loader = <span class="prelude-val">Some</span>(v);
         }
 

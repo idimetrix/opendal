@@ -713,7 +713,7 @@
     config: GcsConfig,
 
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
-    customed_token_loader: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;&gt;,
+    customized_token_loader: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>GcsBuilder {
@@ -816,9 +816,9 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Specify the customed token loader used by this service.
-    </span><span class="kw">pub fn </span>customed_token_loader(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token_load: Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.customed_token_loader = <span class="prelude-val">Some</span>(token_load);
+    <span class="doccomment">/// Specify the customized token loader used by this service.
+    </span><span class="kw">pub fn </span>customized_token_loader(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token_load: Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.customized_token_loader = <span class="prelude-val">Some</span>(token_load);
         <span class="self">self
     </span>}
 
@@ -927,8 +927,8 @@
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(cred)) = cred_loader.load() {
             token_loader = token_loader.with_credentials(cred)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(loader) = <span class="self">self</span>.customed_token_loader.take() {
-            token_loader = token_loader.with_customed_token_loader(loader)
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(loader) = <span class="self">self</span>.customized_token_loader.take() {
+            token_loader = token_loader.with_customized_token_loader(loader)
         }
 
         <span class="kw">let </span>signer = GoogleSigner::new(<span class="string">"storage"</span>);
