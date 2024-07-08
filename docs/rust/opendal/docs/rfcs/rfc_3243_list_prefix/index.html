@@ -75,7 +75,7 @@ abc/def_dir/xyz_dir/
 <tr><td>create dir without <code>/</code></td><td><code>xyz</code></td><td>Ok with <code>xyz/</code> created</td></tr>
 </tbody></table>
 </div><h2 id="reference-level-explanation"><a class="doc-anchor" href="#reference-level-explanation">§</a>Reference-level explanation</h2>
-<p>For POSIX-alike services, we will:</p>
+<p>For POSIX-like services, we will:</p>
 <ul>
 <li>Simulate the list prefix behavior by listing the parent dir and filter the children that matches the prefix.</li>
 <li>Return <code>NotFound</code> while stat an existing file with <code>/</code></li>

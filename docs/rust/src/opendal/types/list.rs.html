@@ -481,7 +481,7 @@
 
         <span class="comment">// Trying to pull more tasks if there are more space.
         </span><span class="kw">if </span><span class="self">self</span>.tasks.has_remaining() {
-            <span class="comment">// Building future is we have a lister available.
+            <span class="comment">// Building future if we have a lister available.
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>lister) = <span class="self">self</span>.lister.take() {
                 <span class="kw">let </span>fut = <span class="kw">async move </span>{
                     <span class="kw">let </span>res = lister.next_dyn().<span class="kw">await</span>;
