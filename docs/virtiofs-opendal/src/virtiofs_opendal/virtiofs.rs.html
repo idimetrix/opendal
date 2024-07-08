@@ -467,7 +467,7 @@
     ) -&gt; io::Result&lt;()&gt; {
         <span class="kw">if </span>evset != EventSet::IN {
             <span class="kw">return </span><span class="prelude-val">Err</span>(new_unexpected_error(
-                <span class="string">"failed to handle handle event other than input event"</span>,
+                <span class="string">"failed to handle event other than input event"</span>,
                 <span class="prelude-val">None</span>,
             )
             .into());
