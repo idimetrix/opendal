@@ -56,6 +56,18 @@
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -85,31 +97,43 @@
 </span><span class="kw">pub struct </span>CompfsReader {
     core: Arc&lt;CompfsCore&gt;,
     file: compio::fs::File,
-    range: BytesRange,
+    offset: u64,
+    end: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 }
 
 <span class="kw">impl </span>CompfsReader {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(core: Arc&lt;CompfsCore&gt;, file: compio::fs::File, range: BytesRange) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ core, file, range }
+        <span class="self">Self </span>{
+            core,
+            file,
+            offset: range.offset(),
+            end: range.size().map(|v| v + range.offset()),
+        }
     }
 }
 
 <span class="kw">impl </span>oio::Read <span class="kw">for </span>CompfsReader {
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
+        <span class="kw">let </span>pos = <span class="self">self</span>.offset;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = <span class="self">self</span>.end {
+            <span class="kw">if </span>end &gt;= pos {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Buffer::new());
+            }
+        }
 
-        <span class="kw">let </span>pos = <span class="self">self</span>.range.offset();
-        <span class="kw">let </span>len = <span class="self">self</span>.range.size().expect(<span class="string">"range size is always Some"</span>);
-        bs.reserve(len <span class="kw">as _</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self</span>.core.buf_pool.get();
+        <span class="comment">// reserve 64KB buffer by default, we should allow user to configure this or make it adaptive.
+        </span>bs.reserve(<span class="number">64 </span>* <span class="number">1024</span>);
         <span class="kw">let </span>f = <span class="self">self</span>.file.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="self">self
+        <span class="kw">let </span>(n, <span class="kw-2">mut </span>bs) = <span class="self">self
             </span>.core
             .exec(<span class="kw">move </span>|| <span class="kw">async move </span>{
-                <span class="kw">let </span>(<span class="kw">_</span>, bs) = <span class="macro">buf_try!</span>(@<span class="kw">try </span>f.read_at(bs, pos).<span class="kw">await</span>);
-                <span class="prelude-val">Ok</span>(bs)
+                <span class="kw">let </span>(n, bs) = <span class="macro">buf_try!</span>(@<span class="kw">try </span>f.read_at(bs, pos).<span class="kw">await</span>);
+                <span class="prelude-val">Ok</span>((n, bs))
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>frozen = bs.split().freeze();
+        <span class="kw">let </span>frozen = bs.split_to(n).freeze();
+        <span class="self">self</span>.offset += frozen.len() <span class="kw">as </span>u64;
         <span class="self">self</span>.core.buf_pool.put(bs);
         <span class="prelude-val">Ok</span>(Buffer::from(frozen))
     }
