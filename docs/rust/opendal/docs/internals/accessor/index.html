@@ -89,7 +89,7 @@ the additional overhead of dynamic dispatch.</p>
                 ..Default::default()
         });
 
-        am
+        am.into()
     }
 }</code></pre></div>
 <p>Now that you have mastered <a href="../../../raw/trait.Access.html" title="trait opendal::raw::Access"><code>Access</code></a>, let’s go and implement our own backend!</p>
@@ -235,7 +235,7 @@ to communicate with the super-powered ducks!</p>
                     ..Default::default()
             });
 
-        am
+        am.into()
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {

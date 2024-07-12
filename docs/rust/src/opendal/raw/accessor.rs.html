@@ -910,6 +910,7 @@
 <a href="#910" id="910">910</a>
 <a href="#911" id="911">911</a>
 <a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -992,7 +993,7 @@
     ///
     /// - scheme: declare the scheme of backend.
     /// - capabilities: declare the capabilities of current backend.
-    </span><span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo;
+    </span><span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt;;
 
     <span class="doccomment">/// Invoke the `create` operation on the specified path
     ///
@@ -1311,7 +1312,7 @@
 /// `Box&lt;dyn AccessDyn&gt;`.
 </span><span class="kw">pub trait </span>AccessDyn: Send + Sync + Debug + Unpin {
     <span class="doccomment">/// Dyn version of [`Accessor::info`]
-    </span><span class="kw">fn </span>info_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo;
+    </span><span class="kw">fn </span>info_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt;;
     <span class="doccomment">/// Dyn version of [`Accessor::create_dir`]
     </span><span class="kw">fn </span>create_dir_dyn&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
@@ -1396,7 +1397,7 @@
         BlockingLister = oio::BlockingLister,
     &gt;,
 {
-    <span class="kw">fn </span>info_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.info()
     }
 
@@ -1519,7 +1520,7 @@
     <span class="kw">type </span>Lister = oio::Lister;
     <span class="kw">type </span>BlockingLister = oio::BlockingLister;
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.info_dyn()
     }
 
@@ -1605,7 +1606,7 @@
     <span class="kw">type </span>BlockingWriter = ();
     <span class="kw">type </span>BlockingLister = ();
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         AccessorInfo {
             scheme: Scheme::Custom(<span class="string">"dummy"</span>),
             root: <span class="string">""</span>.to_string(),
@@ -1613,6 +1614,7 @@
             native_capability: Capability::default(),
             full_capability: Capability::default(),
         }
+        .into()
     }
 }
 
@@ -1629,7 +1631,7 @@
     <span class="kw">type </span>BlockingWriter = T::BlockingWriter;
     <span class="kw">type </span>BlockingLister = T::BlockingLister;
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.as_ref().info()
     }
 

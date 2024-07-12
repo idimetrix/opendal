@@ -684,6 +684,7 @@
 <a href="#684" id="684">684</a>
 <a href="#685" id="685">685</a>
 <a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -703,6 +704,7 @@
 
 </span><span class="kw">use </span>core::fmt::Debug;
 <span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
@@ -1222,7 +1224,7 @@
     <span class="kw">type </span>BlockingWriter = ();
     <span class="kw">type </span>BlockingLister = ();
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_scheme(Scheme::Webhdfs)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
@@ -1242,7 +1244,7 @@
 
                 ..Default::default()
             });
-        am
+        am.into()
     }
 
     <span class="doccomment">/// Create a file or directory

@@ -1363,6 +1363,7 @@
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
 <a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1383,6 +1384,7 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::sync::atomic::AtomicU64;
 <span class="kw">use </span>std::sync::atomic::Ordering;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>futures::FutureExt;
@@ -1586,7 +1588,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="macro">debug!</span>(
             target: LOGGING_TARGET,
             <span class="string">"service={} operation={} -&gt; started"</span>,

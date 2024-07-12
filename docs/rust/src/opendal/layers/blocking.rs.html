@@ -342,6 +342,8 @@
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -359,7 +361,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>tokio::runtime::Handle;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>tokio::runtime::Handle;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -522,10 +526,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.inner.info();
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.inner.info().as_ref().clone();
         meta.full_capability_mut().blocking = <span class="bool-val">true</span>;
-        meta
+        meta.into()
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {

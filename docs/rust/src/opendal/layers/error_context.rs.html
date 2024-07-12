@@ -482,6 +482,7 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -501,6 +502,7 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>futures::TryFutureExt;
 
@@ -540,7 +542,7 @@
 
 <span class="doccomment">/// Provide error context wrapper for backend.
 </span><span class="kw">pub struct </span>ErrorContextAccessor&lt;A: Access&gt; {
-    meta: AccessorInfo,
+    meta: Arc&lt;AccessorInfo&gt;,
     inner: A,
 }
 
@@ -563,7 +565,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.meta.clone()
     }
 

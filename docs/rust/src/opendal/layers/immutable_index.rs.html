@@ -434,6 +434,7 @@
 <a href="#434" id="434">434</a>
 <a href="#435" id="435">435</a>
 <a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -453,6 +454,7 @@
 
 </span><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::vec::IntoIter;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -581,14 +583,14 @@
     }
 
     <span class="doccomment">/// Add list capabilities for underlying storage services.
-    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.inner.info();
+    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>meta = (<span class="kw-2">*</span><span class="self">self</span>.inner.info()).clone();
 
         <span class="kw">let </span>cap = meta.full_capability_mut();
         cap.list = <span class="bool-val">true</span>;
         cap.list_with_recursive = <span class="bool-val">true</span>;
 
-        meta
+        meta.into()
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {

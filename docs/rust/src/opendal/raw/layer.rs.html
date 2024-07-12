@@ -392,6 +392,7 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -410,6 +411,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>futures::Future;
 
@@ -533,7 +535,7 @@
 
     <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Inner;
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.inner().info()
     }
 
@@ -640,7 +642,7 @@
     <span class="kw">type </span>Lister = L::Lister;
     <span class="kw">type </span>BlockingLister = L::BlockingLister;
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>L).metadata()
     }
 
@@ -752,10 +754,10 @@
         <span class="kw">type </span>Lister = ();
         <span class="kw">type </span>BlockingLister = ();
 
-        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
             am.set_scheme(Scheme::Custom(<span class="string">"test"</span>));
-            am
+            am.into()
         }
 
         <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {

@@ -318,6 +318,7 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -336,6 +337,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>opentelemetry::global;
@@ -395,7 +397,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span>tracer = global::tracer(<span class="string">"opendal"</span>);
         tracer.in_span(<span class="string">"metadata"</span>, |_cx| <span class="self">self</span>.inner.info())
     }
