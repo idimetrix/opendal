@@ -482,8 +482,6 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -871,14 +869,13 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
         <span class="self">self</span>.inner
             .write(bs)
             .<span class="kw">await
-            </span>.map(|n| {
-                <span class="self">self</span>.processed += n <span class="kw">as </span>u64;
-                n
+            </span>.map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
             })
             .map_err(|err| {
                 err.with_operation(WriteOperation::Write)
@@ -909,13 +906,12 @@
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
         <span class="self">self</span>.inner
             .write(bs)
-            .map(|n| {
-                <span class="self">self</span>.processed += n <span class="kw">as </span>u64;
-                n
+            .map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
             })
             .map_err(|err| {
                 err.with_operation(WriteOperation::BlockingWrite)

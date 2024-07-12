@@ -121,7 +121,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>GhacWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
         <span class="kw">let </span>offset = <span class="self">self</span>.size;
 
@@ -144,7 +144,7 @@
         }
 
         <span class="self">self</span>.size += size <span class="kw">as </span>u64;
-        <span class="prelude-val">Ok</span>(size)
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

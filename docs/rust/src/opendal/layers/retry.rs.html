@@ -1729,7 +1729,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">use </span>backon::RetryableWithContext;
 
         <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
@@ -1797,7 +1797,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
@@ -2041,8 +2041,8 @@
     </span><span class="kw">struct </span>MockWriter {}
 
     <span class="kw">impl </span>oio::Write <span class="kw">for </span>MockWriter {
-        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-            <span class="prelude-val">Ok</span>(bs.len())
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Ok</span>(())
         }
 
         <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

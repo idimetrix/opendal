@@ -408,10 +408,10 @@
 }
 
 <span class="kw">impl</span>&lt;W: PositionWrite&gt; oio::Write <span class="kw">for </span>PositionWriter&lt;W&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.cache.is_none() {
-            <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
+            <span class="kw">let _ </span>= <span class="self">self</span>.fill_cache(bs);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
         <span class="kw">let </span>bytes = <span class="self">self</span>.cache.clone().expect(<span class="string">"pending write must exist"</span>);
@@ -428,8 +428,8 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
         <span class="self">self</span>.next_offset += length;
-        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-        <span class="prelude-val">Ok</span>(size)
+        <span class="kw">let _ </span>= <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

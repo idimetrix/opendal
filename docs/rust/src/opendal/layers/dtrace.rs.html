@@ -454,8 +454,6 @@
 <a href="#454" id="454">454</a>
 <a href="#455" id="455">455</a>
 <a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -837,15 +835,14 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, writer_write_start, c_path.as_ptr());
         <span class="self">self</span>.inner
             .write(bs)
             .<span class="kw">await
-            </span>.map(|n| {
-                <span class="macro">probe_lazy!</span>(opendal, writer_write_ok, c_path.as_ptr(), n);
-                n
+            </span>.map(|<span class="kw">_</span>| {
+                <span class="macro">probe_lazy!</span>(opendal, writer_write_ok, c_path.as_ptr());
             })
             .map_err(|err| {
                 <span class="macro">probe_lazy!</span>(opendal, writer_write_error, c_path.as_ptr());
@@ -885,14 +882,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>DtraceLayerWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>c_path = CString::new(<span class="self">self</span>.path.clone()).unwrap();
         <span class="macro">probe_lazy!</span>(opendal, blocking_writer_write_start, c_path.as_ptr());
         <span class="self">self</span>.inner
             .write(bs)
-            .map(|n| {
-                <span class="macro">probe_lazy!</span>(opendal, blocking_writer_write_ok, c_path.as_ptr(), n);
-                n
+            .map(|<span class="kw">_</span>| {
+                <span class="macro">probe_lazy!</span>(opendal, blocking_writer_write_ok, c_path.as_ptr());
             })
             .map_err(|err| {
                 <span class="macro">probe_lazy!</span>(opendal, blocking_writer_write_error, c_path.as_ptr());

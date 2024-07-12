@@ -105,8 +105,6 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -189,7 +187,7 @@
 <span class="kw">where
     </span>W: AppendWrite,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>offset = <span class="kw">match </span><span class="self">self</span>.offset {
             <span class="prelude-val">Some</span>(offset) =&gt; offset,
             <span class="prelude-val">None </span>=&gt; {
@@ -200,12 +198,10 @@
         };
 
         <span class="kw">let </span>size = bs.len();
-        <span class="self">self</span>.inner
-            .append(offset, size <span class="kw">as </span>u64, Buffer::from(bs.to_bytes()))
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.inner.append(offset, size <span class="kw">as </span>u64, bs).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Update offset after succeed.
         </span><span class="self">self</span>.offset = <span class="prelude-val">Some</span>(offset + size <span class="kw">as </span>u64);
-        <span class="prelude-val">Ok</span>(size)
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

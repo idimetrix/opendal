@@ -307,7 +307,7 @@
 }
 
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write&gt; oio::Write <span class="kw">for </span>TwoWays&lt;ONE, TWO&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
             <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,
@@ -366,7 +366,7 @@
 <span class="kw">impl</span>&lt;ONE: oio::Write, TWO: oio::Write, THREE: oio::Write&gt; oio::Write
     <span class="kw">for </span>ThreeWays&lt;ONE, TWO, THREE&gt;
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::One(v) =&gt; v.write(bs).<span class="kw">await</span>,
             <span class="self">Self</span>::Two(v) =&gt; v.write(bs).<span class="kw">await</span>,

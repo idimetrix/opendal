@@ -112,6 +112,9 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -167,7 +170,7 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>FtpWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>path = <span class="kw">if let </span><span class="prelude-val">Some</span>(tmp_path) = <span class="kw-2">&amp;</span><span class="self">self</span>.tmp_path {
             tmp_path
         } <span class="kw">else </span>{
@@ -183,17 +186,20 @@
             ));
         }
 
-        <span class="kw">let </span>size = <span class="self">self
-            </span>.data_stream
-            .as_mut()
-            .unwrap()
-            .write(bs.chunk())
-            .<span class="kw">await
-            </span>.map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"copy from ftp stream"</span>).set_source(err)
-            })<span class="question-mark">?</span>;
+        <span class="kw">while </span>bs.has_remaining() {
+            <span class="kw">let </span>n = <span class="self">self
+                </span>.data_stream
+                .as_mut()
+                .unwrap()
+                .write(bs.chunk())
+                .<span class="kw">await
+                </span>.map_err(|err| {
+                    Error::new(ErrorKind::Unexpected, <span class="string">"copy from ftp stream"</span>).set_source(err)
+                })<span class="question-mark">?</span>;
+            bs.advance(n);
+        }
 
-        <span class="prelude-val">Ok</span>(size)
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

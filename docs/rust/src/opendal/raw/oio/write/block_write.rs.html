@@ -511,10 +511,10 @@
 <span class="kw">where
     </span>W: BlockWrite,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.started &amp;&amp; <span class="self">self</span>.cache.is_none() {
-            <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(size);
+            <span class="self">self</span>.fill_cache(bs);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
         <span class="comment">// The block upload process has been started.
@@ -530,8 +530,8 @@
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
-        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-        <span class="prelude-val">Ok</span>(size)
+        <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

@@ -904,6 +904,10 @@
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
 <a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1648,7 +1652,9 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
             WriteOperation::Write.into_static(),
@@ -1664,12 +1670,12 @@
         timer.observe_duration();
 
         <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(n) =&gt; {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="self">self</span>.stats
                     .bytes_total
                     .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                <span class="prelude-val">Ok</span>(n)
+                    .observe(size <span class="kw">as </span>f64);
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
@@ -1728,7 +1734,9 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
             Operation::BlockingWrite.into_static(),
@@ -1744,12 +1752,12 @@
         timer.observe_duration();
 
         <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(n) =&gt; {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="self">self</span>.stats
                     .bytes_total
                     .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                <span class="prelude-val">Ok</span>(n)
+                    .observe(size <span class="kw">as </span>f64);
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());

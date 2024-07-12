@@ -270,8 +270,6 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -516,10 +514,9 @@
 </span><span class="kw">unsafe impl</span>&lt;S: Adapter&gt; Sync <span class="kw">for </span>KvWriter&lt;S&gt; {}
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::Write <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>ret = bs.len();
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.buffer.push(bs);
-        <span class="prelude-val">Ok</span>(ret)
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -534,10 +531,9 @@
 }
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::BlockingWrite <span class="kw">for </span>KvWriter&lt;S&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>ret = bs.len();
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.buffer.push(bs);
-        <span class="prelude-val">Ok</span>(ret)
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

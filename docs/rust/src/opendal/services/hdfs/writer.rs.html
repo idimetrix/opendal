@@ -100,6 +100,16 @@
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -155,10 +165,15 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>HdfsWriter&lt;hdrs::AsyncFile&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
 
-        f.write(bs.chunk()).<span class="kw">await</span>.map_err(new_std_io_error)
+        <span class="kw">while </span>bs.has_remaining() {
+            <span class="kw">let </span>n = f.write(bs.chunk()).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+            bs.advance(n);
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -184,9 +199,14 @@
 }
 
 <span class="kw">impl </span>oio::BlockingWrite <span class="kw">for </span>HdfsWriter&lt;hdrs::File&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.f.as_mut().expect(<span class="string">"HdfsWriter must be initialized"</span>);
-        f.write(bs.chunk()).map_err(new_std_io_error)
+        <span class="kw">while </span>bs.has_remaining() {
+            <span class="kw">let </span>n = f.write(bs.chunk()).map_err(new_std_io_error)<span class="question-mark">?</span>;
+            bs.advance(n);
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

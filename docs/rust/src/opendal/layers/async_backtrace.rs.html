@@ -377,7 +377,7 @@
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>AsyncBacktraceWrapper&lt;R&gt; {
     <span class="attr">#[async_backtrace::framed]
-    </span><span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    </span><span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.write(bs).<span class="kw">await
     </span>}
 
@@ -393,7 +393,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>AsyncBacktraceWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.write(bs)
     }
 

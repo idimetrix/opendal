@@ -839,6 +839,7 @@
 <a href="#839" id="839">839</a>
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1626,17 +1627,17 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>size = bs.len();
 
         <span class="self">self</span>.inner
             .write(bs)
             .<span class="kw">await
-            </span>.map(|n| {
-                <span class="self">self</span>.bytes_counter.increment(n <span class="kw">as </span>u64);
+            </span>.map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.bytes_counter.increment(size <span class="kw">as </span>u64);
                 <span class="self">self</span>.requests_duration_seconds
                     .record(start.elapsed().as_secs_f64());
-                n
             })
             .map_err(|err| {
                 <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
@@ -1660,12 +1661,13 @@
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>MetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+
         <span class="self">self</span>.inner
             .write(bs)
-            .map(|n| {
-                <span class="self">self</span>.bytes_counter.increment(n <span class="kw">as </span>u64);
-                n
+            .map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.bytes_counter.increment(size <span class="kw">as </span>u64);
             })
             .map_err(|err| {
                 <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());

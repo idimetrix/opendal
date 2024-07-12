@@ -66,6 +66,10 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -83,13 +87,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::{io::Cursor, sync::Arc};
-
-<span class="kw">use </span>compio::{buf::buf_try, fs::File, io::AsyncWrite};
-
-<span class="kw">use </span><span class="kw">super</span>::core::CompfsCore;
+</span><span class="kw">use </span><span class="kw">super</span>::core::CompfsCore;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>compio::io::AsyncWriteExt;
+<span class="kw">use </span>compio::{buf::buf_try, fs::File};
+<span class="kw">use </span>std::{io::Cursor, sync::Arc};
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>CompfsWriter {
@@ -104,17 +107,22 @@
 }
 
 <span class="kw">impl </span>oio::Write <span class="kw">for </span>CompfsWriter {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="doccomment">/// FIXME
+    ///
+    /// the write_all doesn't work correctly if `bs` is non-contiguous.
+    ///
+    /// The IoBuf::buf_len() only returns the length of the current buffer.
+    </span><span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>file = <span class="self">self</span>.file.clone();
 
-        <span class="kw">let </span>n = <span class="self">self
-            </span>.core
+        <span class="self">self</span>.core
             .exec(<span class="kw">move </span>|| <span class="kw">async move </span>{
-                <span class="kw">let </span>(n, <span class="kw">_</span>) = <span class="macro">buf_try!</span>(@<span class="kw">try </span>file.write(bs).<span class="kw">await</span>);
-                <span class="prelude-val">Ok</span>(n)
+                <span class="macro">buf_try!</span>(@<span class="kw">try </span>file.write_all(bs).<span class="kw">await</span>);
+                <span class="prelude-val">Ok</span>(())
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(n)
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

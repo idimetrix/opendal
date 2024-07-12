@@ -118,7 +118,6 @@
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -224,10 +223,9 @@
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             };
 
-            <span class="kw">let </span>n = w
-                .write(Buffer::from(bs))
+            w.write(Buffer::from(bs))
                 .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))<span class="question-mark">?</span>;
-            <span class="self">self</span>.buf.advance(n);
+            <span class="self">self</span>.buf.clean();
         }
     }
 }

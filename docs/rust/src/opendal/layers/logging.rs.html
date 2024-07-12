@@ -1363,9 +1363,6 @@
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
 <a href="#1365" id="1365">1365</a>
-<a href="#1366" id="1366">1366</a>
-<a href="#1367" id="1367">1367</a>
-<a href="#1368" id="1368">1368</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2440,21 +2437,20 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">match </span><span class="self">self</span>.inner.write(bs.clone()).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                <span class="self">self</span>.written += n <span class="kw">as </span>u64;
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+        <span class="kw">match </span><span class="self">self</span>.inner.write(bs).<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">trace!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} written={}B -&gt; input data {}B, write {}B"</span>,
+                    <span class="string">"service={} operation={} path={} written={}B -&gt; data write {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     WriteOperation::Write,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
-                    bs.len(),
-                    n,
+                    size,
                 );
-                <span class="prelude-val">Ok</span>(n)
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
@@ -2538,21 +2534,19 @@
 }
 
 <span class="kw">impl</span>&lt;W: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner.write(bs.clone()) {
-            <span class="prelude-val">Ok</span>(n) =&gt; {
-                <span class="self">self</span>.written += n <span class="kw">as </span>u64;
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">trace!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">"service={} operation={} path={} written={}B -&gt; input data {}B, write {}B"</span>,
+                    <span class="string">"service={} operation={} path={} written={}B -&gt; data write {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
                     WriteOperation::BlockingWrite,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
                     bs.len(),
-                    n
                 );
-                <span class="prelude-val">Ok</span>(n)
+                <span class="prelude-val">Ok</span>(())
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.ctx.error_level(<span class="kw-2">&amp;</span>err) {
