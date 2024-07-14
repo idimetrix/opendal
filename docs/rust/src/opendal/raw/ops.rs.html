@@ -734,6 +734,19 @@
 <a href="#734" id="734">734</a>
 <a href="#735" id="735">735</a>
 <a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -755,7 +768,8 @@
 //!
 //! By using ops, users can add more context for operation.
 
-</span><span class="kw">use </span>std::time::Duration;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>flagset::FlagSet;
 
@@ -1273,24 +1287,24 @@
         <span class="self">self</span>.override_content_disposition.as_deref()
     }
 
-    <span class="doccomment">/// Sets the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_cache_control(<span class="kw-2">mut </span><span class="self">self</span>, cache_control: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_cache_control = <span class="prelude-val">Some</span>(cache_control.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_cache_control.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_type(<span class="kw-2">mut </span><span class="self">self</span>, content_type: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_type = <span class="prelude-val">Some</span>(content_type.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_type.as_deref()
     }
@@ -1316,6 +1330,7 @@
     content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
     executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;,
+    user_metadata: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
 }
 
 <span class="kw">impl </span>OpWrite {
@@ -1413,6 +1428,17 @@
         }
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Set the user defined metadata of the op
+    </span><span class="kw">pub fn </span>with_user_metadata(<span class="kw-2">mut </span><span class="self">self</span>, metadata: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.user_metadata = <span class="prelude-val">Some</span>(metadata);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the user defined metadata from the op
+    </span><span class="kw">pub fn </span>user_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;&gt; {
+        <span class="self">self</span>.user_metadata.as_ref()
+    }
 }
 
 <span class="doccomment">/// Args for `writer` operation.

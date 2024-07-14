@@ -550,6 +550,26 @@
 <a href="#550" id="550">550</a>
 <a href="#551" id="551">551</a>
 <a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -570,6 +590,7 @@
 </span><span class="kw">use </span>chrono::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>flagset::flags;
 <span class="kw">use </span>flagset::FlagSet;
+<span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -597,6 +618,7 @@
     etag: <span class="prelude-ty">Option</span>&lt;String&gt;,
     last_modified: <span class="prelude-ty">Option</span>&lt;DateTime&lt;Utc&gt;&gt;,
     version: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    user_metadata: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
 }
 
 <span class="kw">impl </span>Metadata {
@@ -623,6 +645,7 @@
             etag: <span class="prelude-val">None</span>,
             content_disposition: <span class="prelude-val">None</span>,
             version: <span class="prelude-val">None</span>,
+            user_metadata: <span class="prelude-val">None</span>,
         }
     }
 
@@ -639,7 +662,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Check if there metadata already contains given metakey.
+    <span class="doccomment">/// Check if the metadata already contains given metakey.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>contains_metakey(<span class="kw-2">&amp;</span><span class="self">self</span>, metakey: <span class="kw">impl </span>Into&lt;FlagSet&lt;Metakey&gt;&gt;) -&gt; bool {
         <span class="kw">let </span>input_metakey = metakey.into();
 
@@ -1059,6 +1082,21 @@
         <span class="self">self</span>.metakey |= Metakey::Version;
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// User defined metadata of this entry
+    ///
+    /// The prefix of the user defined metadata key(for example: in oss, it's x-oss-meta-)
+    /// is remove from the key
+    </span><span class="kw">pub fn </span>user_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;&gt; {
+        <span class="self">self</span>.user_metadata.as_ref()
+    }
+
+    <span class="doccomment">/// Set user defined metadata of this entry
+    </span><span class="kw">pub fn </span>with_user_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: HashMap&lt;String, String&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.user_metadata = <span class="prelude-val">Some</span>(data);
+        <span class="self">self</span>.metakey |= Metakey::UserMetaData;
+        <span class="self">self
+    </span>}
 }
 
 <span class="macro">flags!</span> {
@@ -1100,6 +1138,8 @@
         </span>LastModified,
         <span class="doccomment">/// Key for version.
         </span>Version,
+        <span class="doccomment">/// Key for user metadata
+        </span>UserMetaData,
     }
 }
 </code></pre></div></section></main></body></html>

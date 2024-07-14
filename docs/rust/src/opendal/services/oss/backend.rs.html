@@ -601,6 +601,9 @@
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -710,7 +713,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set a endpoint for generating presigned urls.
+    <span class="doccomment">/// Set an endpoint for generating presigned urls.
     ///
     /// You can offer a public endpoint like &lt;https://oss-cn-beijing.aliyuncs.com&gt; to return a presinged url for
     /// public accessors, along with an internal endpoint like &lt;https://oss-cn-beijing-internal.aliyuncs.com&gt;
@@ -1019,6 +1022,7 @@
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Some</span>(usize::MAX)
                 },
+                write_with_user_metadata: <span class="bool-val">true</span>,
 
                 delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
@@ -1050,7 +1054,9 @@
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
                 <span class="kw">let </span>headers = resp.headers();
-                <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>meta =
+                    <span class="self">self</span>.core
+                        .parse_metadata(path, constants::X_OSS_META_PREFIX, resp.headers())<span class="question-mark">?</span>;
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_header_to_str(headers, <span class="string">"x-oss-version-id"</span>)<span class="question-mark">? </span>{
                     meta.set_version(v);
