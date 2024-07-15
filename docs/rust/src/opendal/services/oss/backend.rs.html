@@ -604,6 +604,10 @@
 <a href="#604" id="604">604</a>
 <a href="#605" id="605">605</a>
 <a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -780,7 +784,11 @@
                         .with_context(<span class="string">"service"</span>, Scheme::Oss)
                         .with_context(<span class="string">"endpoint"</span>, <span class="kw-2">&amp;</span>ep)
                 })<span class="question-mark">?</span>;
-                <span class="kw">let </span>full_host = <span class="macro">format!</span>(<span class="string">"{bucket}.{host}"</span>);
+                <span class="kw">let </span>full_host = <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = uri.port_u16() {
+                    <span class="macro">format!</span>(<span class="string">"{bucket}.{host}:{port}"</span>)
+                } <span class="kw">else </span>{
+                    <span class="macro">format!</span>(<span class="string">"{bucket}.{host}"</span>)
+                };
                 <span class="kw">let </span>endpoint = <span class="kw">match </span>uri.scheme_str() {
                     <span class="prelude-val">Some</span>(scheme_str) =&gt; <span class="kw">match </span>scheme_str {
                         <span class="string">"http" </span>| <span class="string">"https" </span>=&gt; <span class="macro">format!</span>(<span class="string">"{scheme_str}://{full_host}"</span>),
