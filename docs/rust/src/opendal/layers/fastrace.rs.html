@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/minitrace.rs`."><title>minitrace.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/fastrace.rs`."><title>fastrace.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -375,8 +375,8 @@
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>fastrace::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>minitrace::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
@@ -384,7 +384,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Add [minitrace](https://docs.rs/minitrace/) for every operations.
+<span class="doccomment">/// Add [fastrace](https://docs.rs/fastrace/) for every operations.
 ///
 /// # Examples
 ///
@@ -392,13 +392,13 @@
 ///
 /// ```no_build
 /// use anyhow::Result;
-/// use opendal::layers::MinitraceLayer;
+/// use opendal::layers::FastraceLayer;
 /// use opendal::services;
 /// use opendal::Operator;
 ///
 /// let _ = Operator::new(services::Memory::default())
 ///     .expect("must init")
-///     .layer(MinitraceLayer)
+///     .layer(FastraceLayer)
 ///     .finish();
 /// ```
 ///
@@ -409,17 +409,17 @@
 ///
 /// use anyhow::Result;
 /// use futures::executor::block_on;
-/// use minitrace::collector::Config;
-/// use minitrace::prelude::*;
-/// use opendal::layers::MinitraceLayer;
+/// use fastrace::collector::Config;
+/// use fastrace::prelude::*;
+/// use opendal::layers::FastraceLayer;
 /// use opendal::services;
 /// use opendal::Operator;
 ///
 /// fn main() -&gt; Result&lt;(), Box&lt;dyn Error + MaybeSend + Sync + 'static&gt;&gt; {
 ///     let reporter =
-///         minitrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse().unwrap(), "opendal")
+///         fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse().unwrap(), "opendal")
 ///             .unwrap();
-///     minitrace::set_reporter(reporter, Config::default());
+///     fastrace::set_reporter(reporter, Config::default());
 ///
 ///     {
 ///         let root = Span::root("op", SpanContext::random());
@@ -429,7 +429,7 @@
 ///                 let _ = dotenvy::dotenv();
 ///                 let op = Operator::new(services::Memory::default())
 ///                     .expect("init operator must succeed")
-///                     .layer(MinitraceLayer)
+///                     .layer(FastraceLayer)
 ///                     .finish();
 ///                 op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes())
 ///                     .await
@@ -441,7 +441,7 @@
 ///         );
 ///     }
 ///
-///     minitrace::flush();
+///     fastrace::flush();
 ///
 ///     Ok(())
 /// }
@@ -449,47 +449,47 @@
 ///
 /// # Output
 ///
-/// OpenDAL is using [`minitrace`](https://docs.rs/minitrace/latest/minitrace/) for tracing internally.
+/// OpenDAL is using [`fastrace`](https://docs.rs/fastrace/latest/fastrace/) for tracing internally.
 ///
-/// To enable minitrace output, please init one of the reporter that `minitrace` supports.
+/// To enable fastrace output, please init one of the reporter that `fastrace` supports.
 ///
 /// For example:
 ///
 /// ```no_build
-/// extern crate minitrace_jaeger;
+/// extern crate fastrace_jaeger;
 ///
-/// use minitrace::collector::Config;
+/// use fastrace::collector::Config;
 ///
 /// let reporter =
-///     minitrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse().unwrap(), "opendal")
+///     fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse().unwrap(), "opendal")
 ///         .unwrap();
-/// minitrace::set_reporter(reporter, Config::default());
+/// fastrace::set_reporter(reporter, Config::default());
 /// ```
 ///
-/// For real-world usage, please take a look at [`minitrace-datadog`](https://crates.io/crates/minitrace-datadog) or [`minitrace-jaeger`](https://crates.io/crates/minitrace-jaeger) .
-</span><span class="kw">pub struct </span>MinitraceLayer;
+/// For real-world usage, please take a look at [`fastrace-datadog`](https://crates.io/crates/fastrace-datadog) or [`fastrace-jaeger`](https://crates.io/crates/fastrace-jaeger) .
+</span><span class="kw">pub struct </span>FastraceLayer;
 
-<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>MinitraceLayer {
-    <span class="kw">type </span>LayeredAccess = MinitraceAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>FastraceLayer {
+    <span class="kw">type </span>LayeredAccess = FastraceAccessor&lt;A&gt;;
 
     <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
-        MinitraceAccessor { inner }
+        FastraceAccessor { inner }
     }
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>MinitraceAccessor&lt;A&gt; {
+</span><span class="kw">pub struct </span>FastraceAccessor&lt;A&gt; {
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>MinitraceAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>FastraceAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = MinitraceWrapper&lt;A::Reader&gt;;
-    <span class="kw">type </span>BlockingReader = MinitraceWrapper&lt;A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer = MinitraceWrapper&lt;A::Writer&gt;;
-    <span class="kw">type </span>BlockingWriter = MinitraceWrapper&lt;A::BlockingWriter&gt;;
-    <span class="kw">type </span>Lister = MinitraceWrapper&lt;A::Lister&gt;;
-    <span class="kw">type </span>BlockingLister = MinitraceWrapper&lt;A::BlockingLister&gt;;
+    <span class="kw">type </span>Reader = FastraceWrapper&lt;A::Reader&gt;;
+    <span class="kw">type </span>BlockingReader = FastraceWrapper&lt;A::BlockingReader&gt;;
+    <span class="kw">type </span>Writer = FastraceWrapper&lt;A::Writer&gt;;
+    <span class="kw">type </span>BlockingWriter = FastraceWrapper&lt;A::BlockingWriter&gt;;
+    <span class="kw">type </span>Lister = FastraceWrapper&lt;A::Lister&gt;;
+    <span class="kw">type </span>BlockingLister = FastraceWrapper&lt;A::BlockingLister&gt;;
 
     <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Inner {
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
@@ -513,7 +513,7 @@
                 v.map(|(rp, r)| {
                     (
                         rp,
-                        MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ReadOperation"</span>), r),
+                        FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ReadOperation"</span>), r),
                     )
                 })
             })
@@ -528,7 +528,7 @@
                 v.map(|(rp, r)| {
                     (
                         rp,
-                        MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"WriteOperation"</span>), r),
+                        FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"WriteOperation"</span>), r),
                     )
                 })
             })
@@ -563,7 +563,7 @@
                 v.map(|(rp, s)| {
                     (
                         rp,
-                        MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ListOperation"</span>), s),
+                        FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ListOperation"</span>), s),
                     )
                 })
             })
@@ -590,7 +590,7 @@
         <span class="self">self</span>.inner.blocking_read(path, args).map(|(rp, r)| {
             (
                 rp,
-                MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ReadOperation"</span>), r),
+                FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"ReadOperation"</span>), r),
             )
         })
     }
@@ -600,7 +600,7 @@
         <span class="self">self</span>.inner.blocking_write(path, args).map(|(rp, r)| {
             (
                 rp,
-                MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"WriteOperation"</span>), r),
+                FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"WriteOperation"</span>), r),
             )
         })
     }
@@ -630,31 +630,31 @@
         <span class="self">self</span>.inner.blocking_list(path, args).map(|(rp, it)| {
             (
                 rp,
-                MinitraceWrapper::new(Span::enter_with_local_parent(<span class="string">"PageOperation"</span>), it),
+                FastraceWrapper::new(Span::enter_with_local_parent(<span class="string">"PageOperation"</span>), it),
             )
         })
     }
 }
 
-<span class="kw">pub struct </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">pub struct </span>FastraceWrapper&lt;R&gt; {
     span: Span,
     inner: R,
 }
 
-<span class="kw">impl</span>&lt;R&gt; MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R&gt; FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>new(span: Span, inner: R) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ span, inner }
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="attr">#[trace(enter_on_poll = <span class="bool-val">true</span>)]
     </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.inner.read().<span class="kw">await
     </span>}
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ReadOperation::BlockingRead.into_static());
@@ -662,7 +662,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Write.into_static());
@@ -682,7 +682,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::BlockingWrite.into_static());
@@ -696,14 +696,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="attr">#[trace(enter_on_poll = <span class="bool-val">true</span>)]
     </span><span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="self">self</span>.inner.next().<span class="kw">await
     </span>}
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>MinitraceWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
         <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ListOperation::BlockingNext.into_static());
