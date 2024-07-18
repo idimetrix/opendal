@@ -754,6 +754,36 @@
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -779,6 +809,8 @@
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>futures::TryFutureExt;
+<span class="kw">use </span>prometheus_client::encoding::EncodeLabel;
+<span class="kw">use </span>prometheus_client::encoding::EncodeLabelSet;
 <span class="kw">use </span>prometheus_client::metrics::counter::Counter;
 <span class="kw">use </span>prometheus_client::metrics::family::Family;
 <span class="kw">use </span>prometheus_client::metrics::histogram;
@@ -837,7 +869,7 @@
 /// ```
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>PrometheusClientLayer {
-    metrics: PrometheusClientMetrics,
+    metrics: PrometheusClientMetricDefinitions,
 }
 
 <span class="kw">impl </span>PrometheusClientLayer {
@@ -845,7 +877,7 @@
     /// that do NOT call this method multiple times with a same registry. If you want initialize multiple
     /// [`PrometheusClientLayer`] with a single registry, you should use [`Arc::clone`] instead.
     </span><span class="kw">pub fn </span>new(registry: <span class="kw-2">&amp;mut </span>Registry) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>metrics = PrometheusClientMetrics::register(registry);
+        <span class="kw">let </span>metrics = PrometheusClientMetricDefinitions::register(registry);
         <span class="self">Self </span>{ metrics }
     }
 }
@@ -856,8 +888,11 @@
     <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
         <span class="kw">let </span>scheme = meta.scheme();
+        <span class="kw">let </span>root = meta.root().to_string();
+        <span class="kw">let </span>name = meta.name().to_string();
 
-        <span class="kw">let </span>metrics = Arc::new(<span class="self">self</span>.metrics.clone());
+        <span class="kw">let </span>metrics =
+            PrometheusClientMetrics::new(Arc::new(<span class="self">self</span>.metrics.clone()), scheme, root, name);
         PrometheusAccessor {
             inner,
             metrics,
@@ -866,12 +901,53 @@
     }
 }
 
-<span class="kw">type </span>OperationLabels = [(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str); <span class="number">2</span>];
-<span class="kw">type </span>ErrorLabels = [(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str); <span class="number">3</span>];
+<span class="attr">#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+</span><span class="kw">struct </span>OperationLabels {
+    op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+    scheme: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+    root: Arc&lt;String&gt;,
+    namespace: Arc&lt;String&gt;,
+}
 
-<span class="doccomment">/// [`PrometheusClientMetrics`] provide the performance and IO metrics with the `prometheus-client` crate.
+<span class="kw">impl </span>EncodeLabelSet <span class="kw">for </span>OperationLabels {
+    <span class="kw">fn </span>encode(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">mut </span>encoder: prometheus_client::encoding::LabelSetEncoder,
+    ) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
+        (<span class="string">"op"</span>, <span class="self">self</span>.op).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"scheme"</span>, <span class="self">self</span>.scheme).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"root"</span>, <span class="self">self</span>.root.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="attr">#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+</span><span class="kw">struct </span>ErrorLabels {
+    op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+    scheme: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+    err: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+    root: Arc&lt;String&gt;,
+    namespace: Arc&lt;String&gt;,
+}
+
+<span class="kw">impl </span>EncodeLabelSet <span class="kw">for </span>ErrorLabels {
+    <span class="kw">fn </span>encode(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">mut </span>encoder: prometheus_client::encoding::LabelSetEncoder,
+    ) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
+        (<span class="string">"op"</span>, <span class="self">self</span>.op).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"scheme"</span>, <span class="self">self</span>.scheme).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"error"</span>, <span class="self">self</span>.err).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"root"</span>, <span class="self">self</span>.root.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="doccomment">/// [`PrometheusClientMetricDefinitions`] provide the definition about RED(Rate/Error/Duration) metrics with the `prometheus-client` crate.
 </span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">struct </span>PrometheusClientMetrics {
+</span><span class="kw">struct </span>PrometheusClientMetricDefinitions {
     <span class="doccomment">/// Total counter of the specific operation be called.
     </span>requests_total: Family&lt;OperationLabels, Counter&gt;,
     <span class="doccomment">/// Total counter of the errors.
@@ -884,7 +960,7 @@
     </span>bytes_total: Family&lt;OperationLabels, Counter&gt;,
 }
 
-<span class="kw">impl </span>PrometheusClientMetrics {
+<span class="kw">impl </span>PrometheusClientMetricDefinitions {
     <span class="kw">pub fn </span>register(registry: <span class="kw-2">&amp;mut </span>Registry) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>requests_total = Family::default();
         <span class="kw">let </span>errors_total = Family::default();
@@ -915,32 +991,78 @@
             bytes_total,
         }
     }
+}
 
-    <span class="kw">fn </span>increment_errors_total(<span class="kw-2">&amp;</span><span class="self">self</span>, scheme: Scheme, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, err: ErrorKind) {
-        <span class="kw">let </span>labels = [
-            (<span class="string">"scheme"</span>, scheme.into_static()),
-            (<span class="string">"op"</span>, op),
-            (<span class="string">"err"</span>, err.into_static()),
-        ];
-        <span class="self">self</span>.errors_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
+<span class="attr">#[derive(Clone, Debug)]
+</span><span class="kw">struct </span>PrometheusClientMetrics {
+    metrics: Arc&lt;PrometheusClientMetricDefinitions&gt;,
+    scheme: Scheme,
+    root: Arc&lt;String&gt;,
+    name: Arc&lt;String&gt;,
+}
+
+<span class="kw">impl </span>PrometheusClientMetrics {
+    <span class="kw">fn </span>new(
+        metrics: Arc&lt;PrometheusClientMetricDefinitions&gt;,
+        scheme: Scheme,
+        root: String,
+        name: String,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            metrics,
+            scheme,
+            root: Arc::new(root),
+            name: Arc::new(name),
+        }
+    }
+
+    <span class="kw">fn </span>increment_errors_total(<span class="kw-2">&amp;</span><span class="self">self</span>, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, err: ErrorKind) {
+        <span class="kw">let </span>labels = ErrorLabels {
+            op,
+            scheme: <span class="self">self</span>.scheme.into_static(),
+            err: err.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+        };
+        <span class="self">self</span>.metrics.errors_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
     }
 
     <span class="kw">fn </span>increment_request_total(<span class="kw-2">&amp;</span><span class="self">self</span>, scheme: Scheme, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) {
-        <span class="kw">let </span>labels = [(<span class="string">"scheme"</span>, scheme.into_static()), (<span class="string">"op"</span>, op)];
-        <span class="self">self</span>.requests_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
+        <span class="kw">let </span>labels = OperationLabels {
+            op,
+            scheme: scheme.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+        };
+        <span class="self">self</span>.metrics.requests_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
     }
 
     <span class="kw">fn </span>observe_bytes_total(<span class="kw-2">&amp;</span><span class="self">self</span>, scheme: Scheme, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, bytes: usize) {
-        <span class="kw">let </span>labels = [(<span class="string">"scheme"</span>, scheme.into_static()), (<span class="string">"op"</span>, op)];
-        <span class="self">self</span>.bytes_histogram
+        <span class="kw">let </span>labels = OperationLabels {
+            op,
+            scheme: scheme.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+        };
+        <span class="self">self</span>.metrics
+            .bytes_histogram
             .get_or_create(<span class="kw-2">&amp;</span>labels)
             .observe(bytes <span class="kw">as </span>f64);
-        <span class="self">self</span>.bytes_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc_by(bytes <span class="kw">as </span>u64);
+        <span class="self">self</span>.metrics
+            .bytes_total
+            .get_or_create(<span class="kw-2">&amp;</span>labels)
+            .inc_by(bytes <span class="kw">as </span>u64);
     }
 
     <span class="kw">fn </span>observe_request_duration(<span class="kw-2">&amp;</span><span class="self">self</span>, scheme: Scheme, op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, duration: Duration) {
-        <span class="kw">let </span>labels = [(<span class="string">"scheme"</span>, scheme.into_static()), (<span class="string">"op"</span>, op)];
-        <span class="self">self</span>.request_duration_seconds
+        <span class="kw">let </span>labels = OperationLabels {
+            op,
+            scheme: scheme.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+        };
+        <span class="self">self</span>.metrics
+            .request_duration_seconds
             .get_or_create(<span class="kw-2">&amp;</span>labels)
             .observe(duration.as_secs_f64());
     }
@@ -949,7 +1071,7 @@
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>PrometheusAccessor&lt;A: Access&gt; {
     inner: A,
-    metrics: Arc&lt;PrometheusClientMetrics&gt;,
+    metrics: PrometheusClientMetrics,
     scheme: Scheme,
 }
 
@@ -987,11 +1109,8 @@
             start_time.elapsed(),
         );
         create_res.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::CreateDir.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::CreateDir.into_static(), e.kind());
             e
         })
     }
@@ -1014,11 +1133,8 @@
                 PrometheusMetricWrapper::new(r, <span class="self">self</span>.metrics.clone(), <span class="self">self</span>.scheme),
             )),
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    Operation::Read.into_static(),
-                    err.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(Operation::Read.into_static(), err.kind());
                 <span class="prelude-val">Err</span>(err)
             }
         }
@@ -1045,11 +1161,8 @@
                 PrometheusMetricWrapper::new(w, <span class="self">self</span>.metrics.clone(), <span class="self">self</span>.scheme),
             )),
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    Operation::Write.into_static(),
-                    err.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(Operation::Write.into_static(), err.kind());
                 <span class="prelude-val">Err</span>(err)
             }
         }
@@ -1064,11 +1177,8 @@
             </span>.inner
             .stat(path, args)
             .inspect_err(|e| {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    Operation::Stat.into_static(),
-                    e.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(Operation::Stat.into_static(), e.kind());
             })
             .<span class="kw">await</span>;
 
@@ -1078,11 +1188,8 @@
             start_time.elapsed(),
         );
         stat_res.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::Stat.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::Stat.into_static(), e.kind());
             e
         })
     }
@@ -1100,11 +1207,8 @@
             start_time.elapsed(),
         );
         delete_res.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::Delete.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::Delete.into_static(), e.kind());
             e
         })
     }
@@ -1122,11 +1226,8 @@
             start_time.elapsed(),
         );
         list_res.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::List.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::List.into_static(), e.kind());
             e
         })
     }
@@ -1144,11 +1245,8 @@
             start_time.elapsed(),
         );
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::Batch.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::Batch.into_static(), e.kind());
             e
         })
     }
@@ -1166,11 +1264,8 @@
             start_time.elapsed(),
         );
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::Presign.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::Presign.into_static(), e.kind());
             e
         })
     }
@@ -1188,11 +1283,8 @@
             start_time.elapsed(),
         );
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingCreateDir.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingCreateDir.into_static(), e.kind());
             e
         })
     }
@@ -1209,11 +1301,8 @@
         });
 
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingRead.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingRead.into_static(), e.kind());
             e
         })
     }
@@ -1230,11 +1319,8 @@
         });
 
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingWrite.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingWrite.into_static(), e.kind());
             e
         })
     }
@@ -1252,11 +1338,8 @@
         );
 
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingStat.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingStat.into_static(), e.kind());
             e
         })
     }
@@ -1274,11 +1357,8 @@
             start_time.elapsed(),
         );
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingDelete.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingDelete.into_static(), e.kind());
             e
         })
     }
@@ -1296,11 +1376,8 @@
             start_time.elapsed(),
         );
         result.map_err(|e| {
-            <span class="self">self</span>.metrics.increment_errors_total(
-                <span class="self">self</span>.scheme,
-                Operation::BlockingList.into_static(),
-                e.kind(),
-            );
+            <span class="self">self</span>.metrics
+                .increment_errors_total(Operation::BlockingList.into_static(), e.kind());
             e
         })
     }
@@ -1309,12 +1386,12 @@
 <span class="kw">pub struct </span>PrometheusMetricWrapper&lt;R&gt; {
     inner: R,
 
-    metrics: Arc&lt;PrometheusClientMetrics&gt;,
+    metrics: PrometheusClientMetrics,
     scheme: Scheme,
 }
 
 <span class="kw">impl</span>&lt;R&gt; PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>new(inner: R, metrics: Arc&lt;PrometheusClientMetrics&gt;, scheme: Scheme) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(inner: R, metrics: PrometheusClientMetrics, scheme: Scheme) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner,
             metrics,
@@ -1342,11 +1419,8 @@
                 <span class="prelude-val">Ok</span>(bs)
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    ReadOperation::Read.into_static(),
-                    e.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(ReadOperation::Read.into_static(), e.kind());
                 <span class="prelude-val">Err</span>(e)
             }
         }
@@ -1372,11 +1446,8 @@
                 bs
             })
             .map_err(|e| {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    ReadOperation::BlockingRead.into_static(),
-                    e.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(ReadOperation::BlockingRead.into_static(), e.kind());
                 e
             })
     }
@@ -1403,11 +1474,8 @@
                 );
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    WriteOperation::Write.into_static(),
-                    err.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(WriteOperation::Write.into_static(), err.kind());
                 err
             })
     }
@@ -1426,11 +1494,8 @@
                 );
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    WriteOperation::Abort.into_static(),
-                    err.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(WriteOperation::Abort.into_static(), err.kind());
                 err
             })
     }
@@ -1449,11 +1514,8 @@
                 );
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
-                    WriteOperation::Close.into_static(),
-                    err.kind(),
-                );
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(WriteOperation::Close.into_static(), err.kind());
                 err
             })
     }
@@ -1480,7 +1542,6 @@
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
                     WriteOperation::BlockingWrite.into_static(),
                     err.kind(),
                 );
@@ -1502,7 +1563,6 @@
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics.increment_errors_total(
-                    <span class="self">self</span>.scheme,
                     WriteOperation::BlockingClose.into_static(),
                     err.kind(),
                 );
