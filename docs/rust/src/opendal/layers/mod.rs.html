@@ -101,6 +101,11 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -155,6 +160,11 @@
 </span><span class="kw">mod </span>metrics;
 <span class="attr">#[cfg(feature = <span class="string">"layers-metrics"</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::metrics::MetricsLayer;
+
+<span class="attr">#[cfg(feature = <span class="string">"layers-mime-guess"</span>)]
+</span><span class="kw">mod </span>mime_guess;
+<span class="attr">#[cfg(feature = <span class="string">"layers-mime-guess"</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::mime_guess::MimeGuessLayer;
 
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus"</span>)]
 </span><span class="kw">mod </span>prometheus;
