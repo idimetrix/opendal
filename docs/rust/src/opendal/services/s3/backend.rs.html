@@ -1362,8 +1362,6 @@
 <a href="#1362" id="1362">1362</a>
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
-<a href="#1365" id="1365">1365</a>
-<a href="#1366" id="1366">1366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1405,7 +1403,7 @@
 <span class="kw">use </span>reqsign::AwsDefaultLoader;
 <span class="kw">use </span>reqsign::AwsV4Signer;
 <span class="kw">use </span>reqwest::Url;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -1430,7 +1428,7 @@
 <span class="kw">const </span>DEFAULT_BATCH_MAX_OPERATIONS: usize = <span class="number">1000</span>;
 
 <span class="doccomment">/// Config for Aws S3 and compatible services (including minio, digitalocean space, Tencent Cloud Object Storage(COS) and so on) support.
-</span><span class="attr">#[derive(Default, Deserialize)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>S3Config {
@@ -2170,11 +2168,9 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>S3Builder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::S3;
     <span class="kw">type </span>Accessor = S3Backend;
+    <span class="kw">type </span>Config = S3Config;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = S3Config::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         S3Builder {
             config,
             customized_credential_load: <span class="prelude-val">None</span>,

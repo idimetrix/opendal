@@ -124,8 +124,6 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -148,14 +146,14 @@
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::core::MonoiofsCore;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for monoiofs services support.
-</span><span class="attr">#[derive(Default, Deserialize, Debug)]
+</span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>MonoiofsConfig {
@@ -190,12 +188,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MonoiofsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Monoiofs;
-
     <span class="kw">type </span>Accessor = MonoiofsBackend;
+    <span class="kw">type </span>Config = MonoiofsConfig;
 
-    <span class="kw">fn </span>from_map(map: std::collections::HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = MonoiofsConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize should success"</span>);
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         MonoiofsBuilder { config }
     }
 

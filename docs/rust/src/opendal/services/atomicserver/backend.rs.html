@@ -457,11 +457,6 @@
 <a href="#457" id="457">457</a>
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -479,8 +474,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
 <span class="kw">use </span>atomic_lib::agents::Agent;
@@ -500,7 +494,7 @@
 <span class="doccomment">/// Atomicserver service support.
 
 /// Config for Atomicserver services support
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>AtomicserverConfig {
@@ -579,14 +573,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>AtomicserverBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Atomicserver;
     <span class="kw">type </span>Accessor = AtomicserverBackend;
+    <span class="kw">type </span>Config = AtomicserverConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Deserialize the configuration from the HashMap.
-        </span><span class="kw">let </span>config = AtomicserverConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        <span class="comment">// Create an AtomicserverBuilder instance with the deserialized config.
-        </span>AtomicserverBuilder { config }
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {

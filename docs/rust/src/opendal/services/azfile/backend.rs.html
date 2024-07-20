@@ -440,6 +440,9 @@
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
 <a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -457,8 +460,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -468,7 +470,7 @@
 <span class="kw">use </span>reqsign::AzureStorageConfig;
 <span class="kw">use </span>reqsign::AzureStorageLoader;
 <span class="kw">use </span>reqsign::AzureStorageSigner;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::core::AzfileCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -482,14 +484,20 @@
 </span><span class="kw">const </span>DEFAULT_AZFILE_ENDPOINT_SUFFIX: <span class="kw-2">&amp;</span>str = <span class="string">"file.core.windows.net"</span>;
 
 <span class="doccomment">/// Azure File services support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>AzfileConfig {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    share_name: String,
-    account_name: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    account_key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    sas_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The root path for azfile.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The endpoint for azfile.
+    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The share name for azfile.
+    </span><span class="kw">pub </span>share_name: String,
+    <span class="doccomment">/// The account name for azfile.
+    </span><span class="kw">pub </span>account_name: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The account key for azfile.
+    </span><span class="kw">pub </span>account_key: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The sas token for azfile.
+    </span><span class="kw">pub </span>sas_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>AzfileConfig {
@@ -605,12 +613,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>AzfileBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Azfile;
     <span class="kw">type </span>Accessor = AzfileBackend;
+    <span class="kw">type </span>Config = AzfileConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = AzfileConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        AzfileBuilder {
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
             config,
             http_client: <span class="prelude-val">None</span>,
         }

@@ -418,6 +418,9 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -435,8 +438,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::str;
 
 <span class="kw">use </span>bytes::Buf;
@@ -456,7 +458,7 @@
 <span class="kw">use </span>hrana_client_proto::Value;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Uri;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
@@ -464,17 +466,23 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for Libsqlservices support.
-</span><span class="attr">#[derive(Default, Deserialize)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>LibsqlConfig {
-    connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    auth_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Connection string for libsql service.
+    </span><span class="kw">pub </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Authentication token for libsql service.
+    </span><span class="kw">pub </span>auth_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
-    table: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Table name for libsql service.
+    </span><span class="kw">pub </span>table: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Key field name for libsql service.
+    </span><span class="kw">pub </span>key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Value field name for libsql service.
+    </span><span class="kw">pub </span>value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Root for libsql service.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>LibsqlConfig {
@@ -582,11 +590,9 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>LibsqlBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Libsql;
     <span class="kw">type </span>Accessor = LibsqlBackend;
+    <span class="kw">type </span>Config = LibsqlConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = LibsqlConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         LibsqlBuilder { config }
     }
 

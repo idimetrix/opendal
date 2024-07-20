@@ -608,6 +608,16 @@
 <a href="#608" id="608">608</a>
 <a href="#609" id="609">609</a>
 <a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -625,20 +635,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::collections::HashSet;
+</span><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
-
-<span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>http::Response;
-<span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>http::Uri;
-<span class="kw">use </span>log::debug;
-<span class="kw">use </span>reqsign::AliyunConfig;
-<span class="kw">use </span>reqsign::AliyunLoader;
-<span class="kw">use </span>reqsign::AliyunOssSigner;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -647,34 +647,51 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::oss::writer::OssWriters;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::Response;
+<span class="kw">use </span>http::StatusCode;
+<span class="kw">use </span>http::Uri;
+<span class="kw">use </span>log::debug;
+<span class="kw">use </span>reqsign::AliyunConfig;
+<span class="kw">use </span>reqsign::AliyunLoader;
+<span class="kw">use </span>reqsign::AliyunOssSigner;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">const </span>DEFAULT_BATCH_MAX_OPERATIONS: usize = <span class="number">1000</span>;
 
-<span class="doccomment">/// Aliyun Object Storage Service (OSS) support
-</span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
-</span><span class="kw">pub struct </span>OssBuilder {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+<span class="doccomment">/// Config for Aliyun Object Storage Service (OSS) support.
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>OssConfig {
+    <span class="doccomment">/// Root for oss.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
-    endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    presign_endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    bucket: String,
+    <span class="doccomment">/// Endpoint for oss.
+    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Presign endpoint for oss.
+    </span><span class="kw">pub </span>presign_endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Bucket for oss.
+    </span><span class="kw">pub </span>bucket: String,
 
     <span class="comment">// OSS features
-    </span>server_side_encryption: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    server_side_encryption_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    allow_anonymous: bool,
+    </span><span class="doccomment">/// Server side encryption for oss.
+    </span><span class="kw">pub </span>server_side_encryption: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Server side encryption key id for oss.
+    </span><span class="kw">pub </span>server_side_encryption_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Allow anonymous for oss.
+    </span><span class="kw">pub </span>allow_anonymous: bool,
 
     <span class="comment">// authenticate options
-    </span>access_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    access_key_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
+    </span><span class="doccomment">/// Access key id for oss.
+    </span><span class="kw">pub </span>access_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Access key secret for oss.
+    </span><span class="kw">pub </span>access_key_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// batch_max_operations
-    </span>batch_max_operations: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    </span><span class="kw">pub </span>batch_max_operations: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>OssBuilder {
+<span class="kw">impl </span>Debug <span class="kw">for </span>OssConfig {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"Builder"</span>);
         d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
@@ -686,12 +703,29 @@
     }
 }
 
+<span class="doccomment">/// Aliyun Object Storage Service (OSS) support
+</span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[derive(Default)]
+</span><span class="kw">pub struct </span>OssBuilder {
+    config: OssConfig,
+    http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>OssBuilder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"OssBuilder"</span>);
+
+        d.field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
+        d.finish_non_exhaustive()
+    }
+}
+
 <span class="kw">impl </span>OssBuilder {
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="kw">if </span>root.is_empty() {
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(root.to_string())
@@ -702,7 +736,7 @@
 
     <span class="doccomment">/// Set bucket name of this backend.
     </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.bucket = bucket.to_string();
+        <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
     </span>}
@@ -711,7 +745,7 @@
     </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
-            </span><span class="self">self</span>.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
+            </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
         }
 
         <span class="self">self
@@ -728,7 +762,7 @@
     </span><span class="kw">pub fn </span>presign_endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
-            </span><span class="self">self</span>.presign_endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
+            </span><span class="self">self</span>.config.presign_endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
         }
 
         <span class="self">self
@@ -740,7 +774,7 @@
     /// - If not, we will try to load it from environment.
     </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.access_key_id = <span class="prelude-val">Some</span>(v.to_string())
+            <span class="self">self</span>.config.access_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
 
         <span class="self">self
@@ -752,7 +786,7 @@
     /// - If not, we will try to load it from environment.
     </span><span class="kw">pub fn </span>access_key_secret(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.access_key_secret = <span class="prelude-val">Some</span>(v.to_string())
+            <span class="self">self</span>.config.access_key_secret = <span class="prelude-val">Some</span>(v.to_string())
         }
 
         <span class="self">self
@@ -830,7 +864,7 @@
     ///     4. If a specific CMK ID is specified, include the `x-oss-server-side-encryption-key-id` parameter in the request, and set its value to the specified CMK ID.
     </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.server_side_encryption = <span class="prelude-val">Some</span>(v.to_string())
+            <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(v.to_string())
         }
         <span class="self">self
     </span>}
@@ -842,14 +876,14 @@
     /// This option only takes effect when server_side_encryption equals to KMS.
     </span><span class="kw">pub fn </span>server_side_encryption_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.server_side_encryption_key_id = <span class="prelude-val">Some</span>(v.to_string())
+            <span class="self">self</span>.config.server_side_encryption_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set maximum batch operations of this backend.
     </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.batch_max_operations = <span class="prelude-val">Some</span>(batch_max_operations);
+        <span class="self">self</span>.config.batch_max_operations = <span class="prelude-val">Some</span>(batch_max_operations);
 
         <span class="self">self
     </span>}
@@ -857,7 +891,7 @@
     <span class="doccomment">/// Allow anonymous will allow opendal to send request without signing
     /// when credential is not loaded.
     </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.allow_anonymous = <span class="bool-val">true</span>;
+        <span class="self">self</span>.config.allow_anonymous = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 }
@@ -865,40 +899,24 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>OssBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Oss;
     <span class="kw">type </span>Accessor = OssBackend;
+    <span class="kw">type </span>Config = OssConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = OssBuilder::default();
-
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"bucket"</span>).map(|v| builder.bucket(v));
-        map.get(<span class="string">"endpoint"</span>).map(|v| builder.endpoint(v));
-        map.get(<span class="string">"presign_endpoint"</span>)
-            .map(|v| builder.presign_endpoint(v));
-        map.get(<span class="string">"access_key_id"</span>).map(|v| builder.access_key_id(v));
-        map.get(<span class="string">"access_key_secret"</span>)
-            .map(|v| builder.access_key_secret(v));
-        map.get(<span class="string">"server_side_encryption"</span>)
-            .map(|v| builder.server_side_encryption(v));
-        map.get(<span class="string">"server_side_encryption_key_id"</span>)
-            .map(|v| builder.server_side_encryption_key_id(v));
-        map.get(<span class="string">"batch_max_operations"</span>)
-            .map(|v| builder.batch_max_operations(v.parse::&lt;usize&gt;().unwrap()));
-        map.get(<span class="string">"allow_anonymous"</span>)
-            .filter(|v| <span class="kw-2">*</span>v == <span class="string">"on" </span>|| <span class="kw-2">*</span>v == <span class="string">"true"</span>)
-            .map(|<span class="kw">_</span>| builder.allow_anonymous());
-
-        builder
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        OssBuilder {
+            config,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
-        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root.clone().unwrap_or_default());
+        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
         <span class="macro">debug!</span>(<span class="string">"backend use root {}"</span>, <span class="kw-2">&amp;</span>root);
 
         <span class="comment">// Handle endpoint, region and bucket name.
-        </span><span class="kw">let </span>bucket = <span class="kw">match </span><span class="self">self</span>.bucket.is_empty() {
-            <span class="bool-val">false </span>=&gt; <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.bucket),
+        </span><span class="kw">let </span>bucket = <span class="kw">match </span><span class="self">self</span>.config.bucket.is_empty() {
+            <span class="bool-val">false </span>=&gt; <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.config.bucket),
             <span class="bool-val">true </span>=&gt; <span class="prelude-val">Err</span>(
                 Error::new(ErrorKind::ConfigInvalid, <span class="string">"The bucket is misconfigured"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Oss),
@@ -916,17 +934,18 @@
 
         <span class="comment">// Retrieve endpoint and host by parsing the endpoint option and bucket. If presign_endpoint is not
         // set, take endpoint as default presign_endpoint.
-        </span><span class="kw">let </span>(endpoint, host) = <span class="self">self</span>.parse_endpoint(<span class="kw-2">&amp;</span><span class="self">self</span>.endpoint, bucket)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>(endpoint, host) = <span class="self">self</span>.parse_endpoint(<span class="kw-2">&amp;</span><span class="self">self</span>.config.endpoint, bucket)<span class="question-mark">?</span>;
         <span class="macro">debug!</span>(<span class="string">"backend use bucket {}, endpoint: {}"</span>, <span class="kw-2">&amp;</span>bucket, <span class="kw-2">&amp;</span>endpoint);
 
-        <span class="kw">let </span>presign_endpoint = <span class="kw">if </span><span class="self">self</span>.presign_endpoint.is_some() {
-            <span class="self">self</span>.parse_endpoint(<span class="kw-2">&amp;</span><span class="self">self</span>.presign_endpoint, bucket)<span class="question-mark">?</span>.<span class="number">0
+        <span class="kw">let </span>presign_endpoint = <span class="kw">if </span><span class="self">self</span>.config.presign_endpoint.is_some() {
+            <span class="self">self</span>.parse_endpoint(<span class="kw-2">&amp;</span><span class="self">self</span>.config.presign_endpoint, bucket)<span class="question-mark">?
+                </span>.<span class="number">0
         </span>} <span class="kw">else </span>{
             endpoint.clone()
         };
         <span class="macro">debug!</span>(<span class="string">"backend use presign_endpoint: {}"</span>, <span class="kw-2">&amp;</span>presign_endpoint);
 
-        <span class="kw">let </span>server_side_encryption = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.server_side_encryption {
+        <span class="kw">let </span>server_side_encryption = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.server_side_encryption {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
             <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Some</span>(
                 build_header_value(v)
@@ -934,7 +953,7 @@
             ),
         };
 
-        <span class="kw">let </span>server_side_encryption_key_id = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.server_side_encryption_key_id {
+        <span class="kw">let </span>server_side_encryption_key_id = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.server_side_encryption_key_id {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
             <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Some</span>(
                 build_header_value(v)
@@ -946,11 +965,11 @@
         <span class="comment">// Load cfg from env first.
         </span>cfg = cfg.from_env();
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.access_key_id.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id.take() {
             cfg.access_key_id = <span class="prelude-val">Some</span>(v);
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.access_key_secret.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_secret.take() {
             cfg.access_key_secret = <span class="prelude-val">Some</span>(v);
         }
 
@@ -959,7 +978,8 @@
         <span class="kw">let </span>signer = AliyunOssSigner::new(bucket);
 
         <span class="kw">let </span>batch_max_operations = <span class="self">self
-            </span>.batch_max_operations
+            </span>.config
+            .batch_max_operations
             .unwrap_or(DEFAULT_BATCH_MAX_OPERATIONS);
         <span class="macro">debug!</span>(<span class="string">"Backend build finished"</span>);
 
@@ -970,7 +990,7 @@
                 endpoint,
                 host,
                 presign_endpoint,
-                allow_anonymous: <span class="self">self</span>.allow_anonymous,
+                allow_anonymous: <span class="self">self</span>.config.allow_anonymous,
                 signer,
                 loader,
                 client,

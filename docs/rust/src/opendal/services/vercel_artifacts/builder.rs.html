@@ -81,6 +81,35 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -98,19 +127,47 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
+</span><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
-<span class="kw">use </span><span class="kw">super</span>::backend::VercelArtifactsBackend;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
 <span class="kw">use </span><span class="kw">crate</span>::raw::HttpClient;
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="kw">use </span><span class="kw">super</span>::backend::VercelArtifactsBackend;
+
+<span class="doccomment">/// Config for Vercel Cache support.
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>VercelArtifactsConfig {
+    <span class="doccomment">/// The access token for Vercel.
+    </span><span class="kw">pub </span>access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>VercelArtifactsConfig {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"VercelArtifactsConfig"</span>)
+            .field(<span class="string">"access_token"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;redacted&gt;"</span>)
+            .finish()
+    }
+}
 
 <span class="doccomment">/// [Vercel Cache](https://vercel.com/docs/concepts/monorepos/remote-caching) backend support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>VercelArtifactsBuilder {
-    access_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: VercelArtifactsConfig,
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>VercelArtifactsBuilder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"VercelArtifactsBuilder"</span>);
+        d.field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
+        d.finish_non_exhaustive()
+    }
 }
 
 <span class="kw">impl </span>VercelArtifactsBuilder {
@@ -118,7 +175,7 @@
     ///
     /// default: no access token, which leads to failure
     </span><span class="kw">pub fn </span>access_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, access_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.access_token = <span class="prelude-val">Some</span>(access_token.to_string());
+        <span class="self">self</span>.config.access_token = <span class="prelude-val">Some</span>(access_token.to_string());
         <span class="self">self
     </span>}
 
@@ -136,13 +193,14 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>VercelArtifactsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::VercelArtifacts;
-
     <span class="kw">type </span>Accessor = VercelArtifactsBackend;
+    <span class="kw">type </span>Config = VercelArtifactsConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">Self</span>::default();
-        map.get(<span class="string">"access_token"</span>).map(|v| builder.access_token(v));
-        builder
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            config,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
@@ -155,7 +213,7 @@
             })<span class="question-mark">?
         </span>};
 
-        <span class="kw">match </span><span class="self">self</span>.access_token.clone() {
+        <span class="kw">match </span><span class="self">self</span>.config.access_token.clone() {
             <span class="prelude-val">Some</span>(access_token) =&gt; <span class="prelude-val">Ok</span>(VercelArtifactsBackend {
                 access_token,
                 client,

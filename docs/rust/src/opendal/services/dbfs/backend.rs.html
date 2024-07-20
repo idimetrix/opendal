@@ -301,15 +301,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::core::DbfsCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -319,11 +318,14 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// [Dbfs](https://docs.databricks.com/api/azure/workspace/dbfs)'s REST API support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>DbfsConfig {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The root for dbfs.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The endpoint for dbfs.
+    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The token for dbfs.
+    </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>DbfsConfig {
@@ -397,11 +399,9 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>DbfsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Dbfs;
     <span class="kw">type </span>Accessor = DbfsBackend;
+    <span class="kw">type </span>Config = DbfsConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = DbfsConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ config }
     }
 

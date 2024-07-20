@@ -935,8 +935,6 @@
 <a href="#935" id="935">935</a>
 <a href="#936" id="936">936</a>
 <a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -969,7 +967,7 @@
 <span class="kw">use </span>reqsign::AzureStorageConfig;
 <span class="kw">use </span>reqsign::AzureStorageLoader;
 <span class="kw">use </span>reqsign::AzureStorageSigner;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>sha2::Digest;
 <span class="kw">use </span>sha2::Sha256;
 
@@ -994,7 +992,7 @@
 <span class="kw">const </span>AZBLOB_BATCH_LIMIT: usize = <span class="number">256</span>;
 
 <span class="doccomment">/// Azure Storage Blob services support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>AzblobConfig {
     <span class="doccomment">/// The root of Azblob service backend.
     ///
@@ -1335,12 +1333,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>AzblobBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Azblob;
     <span class="kw">type </span>Accessor = AzblobBackend;
+    <span class="kw">type </span>Config = AzblobConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = AzblobConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        AzblobBuilder {
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
             config,
             http_client: <span class="prelude-val">None</span>,
         }

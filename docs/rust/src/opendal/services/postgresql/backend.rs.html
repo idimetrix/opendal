@@ -352,9 +352,6 @@
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
 <a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -372,15 +369,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>bb8::Pool;
 <span class="kw">use </span>bb8_postgres::PostgresConnectionManager;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>tokio::sync::OnceCell;
 <span class="kw">use </span>tokio_postgres::Config;
 
@@ -389,7 +385,7 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for PostgreSQL services support.
-</span><span class="attr">#[derive(Default, Deserialize)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>PostgresqlConfig {
@@ -400,13 +396,13 @@
     /// Default to `/` if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// the connection string of postgres server
-    </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    </span><span class="kw">pub </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// the table of postgresql
-    </span>table: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    </span><span class="kw">pub </span>table: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// the key field of postgresql
-    </span>key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    </span><span class="kw">pub </span>key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// the value field of postgresql
-    </span>value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    </span><span class="kw">pub </span>value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>PostgresqlConfig {
@@ -521,11 +517,9 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>PostgresqlBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Postgresql;
     <span class="kw">type </span>Accessor = PostgresqlBackend;
+    <span class="kw">type </span>Config = PostgresqlConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = PostgresqlConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         PostgresqlBuilder { config }
     }
 

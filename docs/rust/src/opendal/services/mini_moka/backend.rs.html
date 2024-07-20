@@ -190,10 +190,6 @@
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
 <a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -211,33 +207,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::time::Duration;
-
-<span class="kw">use </span>log::debug;
-<span class="kw">use </span>mini_moka::sync::Cache;
-<span class="kw">use </span>mini_moka::sync::CacheBuilder;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>log::debug;
+<span class="kw">use </span>mini_moka::sync::Cache;
+<span class="kw">use </span>mini_moka::sync::CacheBuilder;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="doccomment">/// Config for mini-moka support.
+</span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>MiniMokaConfig {
+    <span class="doccomment">/// Sets the max capacity of the cache.
+    ///
+    /// Refer to [`mini-moka::sync::CacheBuilder::max_capacity`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.max_capacity)
+    </span><span class="kw">pub </span>max_capacity: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    <span class="doccomment">/// Sets the time to live of the cache.
+    ///
+    /// Refer to [`mini-moka::sync::CacheBuilder::time_to_live`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_live)
+    </span><span class="kw">pub </span>time_to_live: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
+    <span class="doccomment">/// Sets the time to idle of the cache.
+    ///
+    /// Refer to [`mini-moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_idle)
+    </span><span class="kw">pub </span>time_to_idle: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
+}
 
 <span class="doccomment">/// [mini-moka](https://github.com/moka-rs/mini-moka) backend support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default, Debug)]
 </span><span class="kw">pub struct </span>MiniMokaBuilder {
-    <span class="doccomment">/// Sets the max capacity of the cache.
-    ///
-    /// Refer to [`mini-moka::sync::CacheBuilder::max_capacity`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.max_capacity)
-    </span>max_capacity: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="doccomment">/// Sets the time to live of the cache.
-    ///
-    /// Refer to [`mini-moka::sync::CacheBuilder::time_to_live`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_live)
-    </span>time_to_live: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="doccomment">/// Sets the time to idle of the cache.
-    ///
-    /// Refer to [`mini-moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_idle)
-    </span>time_to_idle: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
+    config: MiniMokaConfig,
 }
 
 <span class="kw">impl </span>MiniMokaBuilder {
@@ -246,7 +249,7 @@
     /// Refer to [`mini-moka::sync::CacheBuilder::max_capacity`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.max_capacity)
     </span><span class="kw">pub fn </span>max_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>v != <span class="number">0 </span>{
-            <span class="self">self</span>.max_capacity = <span class="prelude-val">Some</span>(v);
+            <span class="self">self</span>.config.max_capacity = <span class="prelude-val">Some</span>(v);
         }
         <span class="self">self
     </span>}
@@ -256,7 +259,7 @@
     /// Refer to [`mini-moka::sync::CacheBuilder::time_to_live`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_live)
     </span><span class="kw">pub fn </span>time_to_live(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
-            <span class="self">self</span>.time_to_live = <span class="prelude-val">Some</span>(v);
+            <span class="self">self</span>.config.time_to_live = <span class="prelude-val">Some</span>(v);
         }
         <span class="self">self
     </span>}
@@ -266,7 +269,7 @@
     /// Refer to [`mini-moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/mini-moka/latest/mini_moka/sync/struct.CacheBuilder.html#method.time_to_idle)
     </span><span class="kw">pub fn </span>time_to_idle(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
-            <span class="self">self</span>.time_to_idle = <span class="prelude-val">Some</span>(v);
+            <span class="self">self</span>.config.time_to_idle = <span class="prelude-val">Some</span>(v);
         }
         <span class="self">self
     </span>}
@@ -275,21 +278,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>MiniMokaBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::MiniMoka;
     <span class="kw">type </span>Accessor = MiniMokaBackend;
+    <span class="kw">type </span>Config = MiniMokaConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = MiniMokaBuilder::default();
-
-        map.get(<span class="string">"max_capacity"</span>)
-            .map(|v| v.parse::&lt;u64&gt;().map(|v| builder.max_capacity(v)));
-        map.get(<span class="string">"time_to_live"</span>).map(|v| {
-            v.parse::&lt;u64&gt;()
-                .map(|v| builder.time_to_live(Duration::from_secs(v)))
-        });
-        map.get(<span class="string">"time_to_idle"</span>).map(|v| {
-            v.parse::&lt;u64&gt;()
-                .map(|v| builder.time_to_idle(Duration::from_secs(v)))
-        });
-        builder
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
@@ -298,13 +290,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder: CacheBuilder&lt;String, typed_kv::Value, <span class="kw">_</span>&gt; = Cache::builder();
         <span class="comment">// Use entries' bytes as capacity weigher.
         </span>builder = builder.weigher(|k, v| (k.len() + v.size()) <span class="kw">as </span>u32);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.max_capacity {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.max_capacity {
             builder = builder.max_capacity(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.time_to_live {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.time_to_live {
             builder = builder.time_to_live(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.time_to_idle {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.time_to_idle {
             builder = builder.time_to_idle(v)
         }
 

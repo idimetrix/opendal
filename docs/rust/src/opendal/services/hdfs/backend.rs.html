@@ -670,11 +670,6 @@
 <a href="#670" id="670">670</a>
 <a href="#671" id="671">671</a>
 <a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -692,8 +687,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::io::SeekFrom;
@@ -702,7 +696,7 @@
 
 <span class="kw">use </span>futures::AsyncWriteExt;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">super</span>::lister::HdfsLister;
@@ -714,7 +708,7 @@
 <span class="doccomment">/// [Hadoop Distributed File System (HDFS™)](https://hadoop.apache.org/) support.
 ///
 /// Config for Hdfs services support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>HdfsConfig {
@@ -836,14 +830,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>HdfsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Hdfs;
     <span class="kw">type </span>Accessor = HdfsBackend;
+    <span class="kw">type </span>Config = HdfsConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Deserialize the configuration from the HashMap.
-        </span><span class="kw">let </span>config = HdfsConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        <span class="comment">// Create an HdfsBuilder instance with the deserialized config.
-        </span>HdfsBuilder { config }
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        HdfsBuilder { config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {

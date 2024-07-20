@@ -317,21 +317,6 @@
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -349,8 +334,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -358,7 +342,7 @@
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">super</span>::core::Entry;
 <span class="kw">use </span><span class="kw">super</span>::core::GithubCore;
@@ -369,8 +353,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for backblaze Github services support.
-</span><span class="attr">#[derive(Default, Deserialize)]
+<span class="doccomment">/// Config for backblaze GitHub services support.
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>GithubConfig {
@@ -378,17 +362,17 @@
     ///
     /// All operations will happen under this root.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Github access_token.
+    <span class="doccomment">/// GitHub access_token.
     ///
     /// optional.
     /// If not provided, the backend will only support read operations for public repositories.
     /// And rate limit will be limited to 60 requests per hour.
     </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Github repo owner.
+    <span class="doccomment">/// GitHub repo owner.
     ///
     /// required.
     </span><span class="kw">pub </span>owner: String,
-    <span class="doccomment">/// Github repo name.
+    <span class="doccomment">/// GitHub repo name.
     ///
     /// required.
     </span><span class="kw">pub </span>repo: String,
@@ -411,7 +395,6 @@
 #[derive(Default)]
 </span><span class="kw">pub struct </span>GithubBuilder {
     config: GithubConfig,
-
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
 }
 
@@ -476,23 +459,10 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>GithubBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Github;
     <span class="kw">type </span>Accessor = GithubBackend;
+    <span class="kw">type </span>Config = GithubConfig;
 
-    <span class="doccomment">/// Converts a HashMap into an GithubBuilder instance.
-    ///
-    /// # Arguments
-    ///
-    /// * `map` - A HashMap containing the configuration values.
-    ///
-    /// # Returns
-    ///
-    /// Returns an instance of GithubBuilder.
-    </span><span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Deserialize the configuration from the HashMap.
-        </span><span class="kw">let </span>config = GithubConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        <span class="comment">// Create an GithubBuilder instance with the deserialized config.
-        </span>GithubBuilder {
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        GithubBuilder {
             config,
             http_client: <span class="prelude-val">None</span>,
         }

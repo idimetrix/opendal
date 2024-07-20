@@ -292,6 +292,18 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -319,30 +331,52 @@
 <span class="kw">use </span>mongodb::options::GridFsBucketOptions;
 <span class="kw">use </span>mongodb::options::GridFsFindOptions;
 <span class="kw">use </span>mongodb::GridFsBucket;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::new_std_io_error;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
-</span><span class="kw">pub struct </span>GridFsBuilder {
-    connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    database: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    bucket: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    chunk_size: <span class="prelude-ty">Option</span>&lt;u32&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+<span class="doccomment">/// Config for Grid file system support.
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>GridFsConfig {
+    <span class="doccomment">/// The connection string of the MongoDB service.
+    </span><span class="kw">pub </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The database name of the MongoDB GridFs service to read/write.
+    </span><span class="kw">pub </span>database: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The bucket name of the MongoDB GridFs service to read/write.
+    </span><span class="kw">pub </span>bucket: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The chunk size of the MongoDB GridFs service used to break the user file into chunks.
+    </span><span class="kw">pub </span>chunk_size: <span class="prelude-ty">Option</span>&lt;u32&gt;,
+    <span class="doccomment">/// The working directory, all operations will be performed under it.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>GridFsBuilder {
+<span class="kw">impl </span>Debug <span class="kw">for </span>GridFsConfig {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"GridFsBuilder"</span>)
+        f.debug_struct(<span class="string">"GridFsConfig"</span>)
             .field(<span class="string">"database"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.database)
             .field(<span class="string">"bucket"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
             .field(<span class="string">"chunk_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chunk_size)
             .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .finish()
+    }
+}
+
+<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[derive(Default)]
+</span><span class="kw">pub struct </span>GridFsBuilder {
+    config: GridFsConfig,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>GridFsBuilder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"GridFsBuilder"</span>);
+        d.field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
+        d.finish_non_exhaustive()
     }
 }
 
@@ -369,7 +403,7 @@
     /// For more information, please refer to [MongoDB Connection String URI Format](https://docs.mongodb.com/manual/reference/connection-string/).
     </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.connection_string = <span class="prelude-val">Some</span>(v.to_string());
+            <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
         <span class="self">self
     </span>}
@@ -379,7 +413,7 @@
     /// default: "/"
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.root = <span class="prelude-val">Some</span>(root.to_owned());
+            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
         <span class="self">self
     </span>}
@@ -387,7 +421,7 @@
     <span class="doccomment">/// Set the database name of the MongoDB GridFs service to read/write.
     </span><span class="kw">pub fn </span>database(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!database.is_empty() {
-            <span class="self">self</span>.database = <span class="prelude-val">Some</span>(database.to_string());
+            <span class="self">self</span>.config.database = <span class="prelude-val">Some</span>(database.to_string());
         }
         <span class="self">self
     </span>}
@@ -397,7 +431,7 @@
     /// Default to `fs` if not specified.
     </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>!bucket.is_empty() {
-            <span class="self">self</span>.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
+            <span class="self">self</span>.config.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
         }
         <span class="self">self
     </span>}
@@ -407,7 +441,7 @@
     /// Default to `255 KiB` if not specified.
     </span><span class="kw">pub fn </span>chunk_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chunk_size: u32) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>chunk_size &gt; <span class="number">0 </span>{
-            <span class="self">self</span>.chunk_size = <span class="prelude-val">Some</span>(chunk_size);
+            <span class="self">self</span>.config.chunk_size = <span class="prelude-val">Some</span>(chunk_size);
         }
         <span class="self">self
     </span>}
@@ -415,25 +449,15 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>GridFsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Mongodb;
-
     <span class="kw">type </span>Accessor = GridFsBackend;
+    <span class="kw">type </span>Config = GridFsConfig;
 
-    <span class="kw">fn </span>from_map(map: std::collections::HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">Self</span>::default();
-
-        map.get(<span class="string">"connection_string"</span>)
-            .map(|v| builder.connection_string(v));
-        map.get(<span class="string">"database"</span>).map(|v| builder.database(v));
-        map.get(<span class="string">"bucket"</span>).map(|v| builder.bucket(v));
-        map.get(<span class="string">"chunk_size"</span>)
-            .map(|v| builder.chunk_size(v.parse::&lt;u32&gt;().unwrap_or_default()));
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-
-        builder
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        GridFsBuilder { config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>conn = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.connection_string.clone() {
+        <span class="kw">let </span>conn = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.connection_string.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -442,18 +466,18 @@
                 )
             }
         };
-        <span class="kw">let </span>database = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.database.clone() {
+        <span class="kw">let </span>database = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.database.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"database is required"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Gridfs))
             }
         };
-        <span class="kw">let </span>bucket = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.bucket.clone() {
+        <span class="kw">let </span>bucket = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.bucket.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; <span class="string">"fs"</span>.to_string(),
         };
-        <span class="kw">let </span>chunk_size = <span class="self">self</span>.chunk_size.unwrap_or(<span class="number">255</span>);
+        <span class="kw">let </span>chunk_size = <span class="self">self</span>.config.chunk_size.unwrap_or(<span class="number">255</span>);
 
         <span class="prelude-val">Ok</span>(GridFsBackend::new(Adapter {
             connection_string: conn,

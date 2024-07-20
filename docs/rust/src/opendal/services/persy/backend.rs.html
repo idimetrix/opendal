@@ -261,6 +261,9 @@
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -278,12 +281,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::str;
 
 <span class="kw">use </span>persy;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>tokio::task;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
@@ -294,34 +297,42 @@
 <span class="kw">use </span><span class="kw">crate</span>::Scheme;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
+<span class="doccomment">/// Config for persy service support.
+</span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>PersyConfig {
+    <span class="doccomment">/// That path to the persy data file. The directory in the path must already exist.
+    </span><span class="kw">pub </span>datafile: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// That name of the persy segment.
+    </span><span class="kw">pub </span>segment: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// That name of the persy index.
+    </span><span class="kw">pub </span>index: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
 <span class="doccomment">/// persy service support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
+#[derive(Default, Debug)]
 </span><span class="kw">pub struct </span>PersyBuilder {
-    <span class="doccomment">/// That path to the persy data file. The directory in the path must already exist.
-    </span>datafile: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// That name of the persy segment.
-    </span>segment: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// That name of the persy index.
-    </span>index: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: PersyConfig,
 }
 
 <span class="kw">impl </span>PersyBuilder {
     <span class="doccomment">/// Set the path to the persy data directory. Will create if not exists.
     </span><span class="kw">pub fn </span>datafile(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.datafile = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.datafile = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the name of the persy segment. Will create if not exists.
     </span><span class="kw">pub fn </span>segment(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.segment = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.segment = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the name of the persy index. Will create if not exists.
     </span><span class="kw">pub fn </span>index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.index = <span class="prelude-val">Some</span>(path.into());
+        <span class="self">self</span>.config.index = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 }
@@ -329,31 +340,26 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>PersyBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Persy;
     <span class="kw">type </span>Accessor = PersyBackend;
+    <span class="kw">type </span>Config = PersyConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = PersyBuilder::default();
-
-        map.get(<span class="string">"datafile"</span>).map(|v| builder.datafile(v));
-        map.get(<span class="string">"segment"</span>).map(|v| builder.segment(v));
-        map.get(<span class="string">"index"</span>).map(|v| builder.index(v));
-
-        builder
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ config }
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>datafile_path = <span class="self">self</span>.datafile.take().ok_or_else(|| {
+        <span class="kw">let </span>datafile_path = <span class="self">self</span>.config.datafile.take().ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"datafile is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Persy)
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>segment_name = <span class="self">self</span>.segment.take().ok_or_else(|| {
+        <span class="kw">let </span>segment_name = <span class="self">self</span>.config.segment.take().ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"segment is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Persy)
         })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>segment = segment_name.clone();
 
-        <span class="kw">let </span>index_name = <span class="self">self</span>.index.take().ok_or_else(|| {
+        <span class="kw">let </span>index_name = <span class="self">self</span>.config.index.take().ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"index is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Persy)
         })<span class="question-mark">?</span>;

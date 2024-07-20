@@ -152,9 +152,6 @@
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -172,21 +169,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
 <span class="kw">use </span>dashmap::DashMap;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// [dashmap](https://github.com/xacrimon/dashmap) backend support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone, Debug)]
+</span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>DashmapConfig {
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// The root path for dashmap.
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="doccomment">/// [dashmap](https://github.com/xacrimon/dashmap) backend support.
@@ -207,11 +203,9 @@
 <span class="kw">impl </span>Builder <span class="kw">for </span>DashmapBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Dashmap;
     <span class="kw">type </span>Accessor = DashmapBackend;
+    <span class="kw">type </span>Config = DashmapConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = DashmapConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
+    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ config }
     }
 
