@@ -539,7 +539,7 @@
         map.insert(<span class="string">"root"</span>.to_string(), <span class="string">"/"</span>.to_string());
         map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"http://127.0.0.1:39999"</span>.to_string());
 
-        <span class="kw">let </span>builder = AlluxioBuilder::from_map(map);
+        <span class="kw">let </span>builder = AlluxioBuilder::from_map(map).unwrap();
 
         <span class="macro">assert_eq!</span>(builder.config.root, <span class="prelude-val">Some</span>(<span class="string">"/"</span>.to_string()));
         <span class="macro">assert_eq!</span>(

@@ -21,7 +21,7 @@
         ]
         .into_iter()
         .collect(),
-    );
+    ).unwrap();
 
     <span class="comment">// Create a new operator
     </span><span class="kw">let </span>operator = Operator::new(builder).unwrap().finish();

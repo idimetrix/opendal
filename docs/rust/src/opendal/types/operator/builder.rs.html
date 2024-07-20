@@ -536,7 +536,7 @@
     </span><span class="kw">pub fn </span>from_map&lt;B: Builder&gt;(
         map: HashMap&lt;String, String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;OperatorBuilder&lt;<span class="kw">impl </span>Access&gt;&gt; {
-        <span class="kw">let </span>acc = B::from_map(map).build()<span class="question-mark">?</span>;
+        <span class="kw">let </span>acc = B::from_map(map)<span class="question-mark">?</span>.build()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(OperatorBuilder::new(acc))
     }
 
