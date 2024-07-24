@@ -615,16 +615,16 @@
 
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::lister::FsLister;
 <span class="kw">use </span><span class="kw">super</span>::reader::FsReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriters;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// config for file system
 </span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -636,6 +636,12 @@
 
     <span class="doccomment">/// tmp dir for atomic write
     </span><span class="kw">pub </span>atomic_write_dir: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>FsConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        FsBuilder { config: <span class="self">self </span>}
+    }
 }
 
 <span class="doccomment">/// POSIX file system support.
@@ -672,17 +678,12 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>FsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Fs;
-    <span class="kw">type </span>Accessor = FsBackend;
     <span class="kw">type </span>Config = FsConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
-        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root.take().map(PathBuf::from) {
+        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root.map(PathBuf::from) {
             <span class="prelude-val">Some</span>(root) =&gt; <span class="prelude-val">Ok</span>(root),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
@@ -703,7 +704,7 @@
             }
         }
 
-        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.config.atomic_write_dir.take().map(PathBuf::from);
+        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.config.atomic_write_dir.map(PathBuf::from);
 
         <span class="comment">// If atomic write dir is not exist, we must create it.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(d) = <span class="kw-2">&amp;</span>atomic_write_dir {
@@ -747,7 +748,6 @@
             })
             .unwrap_or(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>))<span class="question-mark">?</span>;
 
-        <span class="macro">debug!</span>(<span class="string">"backend build finished: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
         <span class="prelude-val">Ok</span>(FsBackend {
             core: Arc::new(FsCore {
                 root,

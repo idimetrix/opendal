@@ -147,6 +147,9 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -164,11 +167,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span><span class="kw">super</span>::core::{CompleteMultipartUploadRequestPart, GcsCore, InitiateMultipartUploadResult};
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::StatusCode;
+
+<span class="kw">use </span><span class="kw">super</span>::core::CompleteMultipartUploadRequestPart;
+<span class="kw">use </span><span class="kw">super</span>::core::GcsCore;
+<span class="kw">use </span><span class="kw">super</span>::core::InitiateMultipartUploadResult;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;

@@ -586,10 +586,10 @@
 //!     type Config = DuckConfig;
 //!
 //!     fn from_config(config: Self::Config) -&gt; Self {
-//!        DuckBuilder { config }
+//!        DuckBuilder { config: self }
 //!     }
 //!
-//!     fn build(&amp;mut self) -&gt; Result&lt;Self::Accessor&gt; {
+//!     fn build(self) -&gt; Result&lt;impl Access&gt;  {
 //!         debug!("backend build started: {:?}", &amp;self);
 //!
 //!         let root = normalize_root(&amp;self.config.root.clone().unwrap_or_default());

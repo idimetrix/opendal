@@ -124,6 +124,8 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -146,7 +148,8 @@
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::MonoiofsCore;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -163,6 +166,12 @@
     ///
     /// Builder::build will return error if not set.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>MonoiofsConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        MonoiofsBuilder { config: <span class="self">self </span>}
+    }
 }
 
 <span class="doccomment">/// File system support via [`monoio`].
@@ -188,15 +197,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MonoiofsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Monoiofs;
-    <span class="kw">type </span>Accessor = MonoiofsBackend;
     <span class="kw">type </span>Config = MonoiofsConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        MonoiofsBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>root = <span class="self">self</span>.config.root.take().map(PathBuf::from).ok_or(
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>root = <span class="self">self</span>.config.root.map(PathBuf::from).ok_or(
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"root is not specified"</span>)
                 .with_operation(<span class="string">"Builder::build"</span>),
         )<span class="question-mark">?</span>;

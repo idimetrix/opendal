@@ -297,6 +297,8 @@
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -317,7 +319,8 @@
 </span><span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>bb8::RunError;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::net::TcpStream;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
@@ -345,6 +348,12 @@
     </span><span class="kw">pub </span>password: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// The default ttl for put operations.
     </span><span class="kw">pub </span>default_ttl: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>MemcachedConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        MemcachedBuilder { config: <span class="self">self </span>}
+    }
 }
 
 <span class="doccomment">/// [Memcached](https://memcached.org/) service support.
@@ -396,14 +405,9 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MemcachedBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Memcached;
-    <span class="kw">type </span>Accessor = MemcachedBackend;
     <span class="kw">type </span>Config = MemcachedConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        MemcachedBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="kw">let </span>endpoint = <span class="self">self</span>.config.endpoint.clone().ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"endpoint is empty"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Memcached)

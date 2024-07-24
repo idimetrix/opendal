@@ -688,7 +688,7 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::layers::LoggingLayer;
-    <span class="kw">use </span><span class="kw">crate</span>::services::Http;
+    <span class="kw">use </span><span class="kw">crate</span>::services::HttpConfig;
     <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
     <span class="kw">use </span><span class="kw">crate</span>::Operator;
 
@@ -701,12 +701,12 @@
             iil.insert(i.to_string())
         }
 
-        <span class="kw">let </span>op = Http::from_map({
+        <span class="kw">let </span>op = HttpConfig::from_iter({
             <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
             map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"https://xuanwo.io"</span>.to_string());
             map
         })
-        .and_then(Operator::new)<span class="question-mark">?
+        .and_then(Operator::from_config)<span class="question-mark">?
         </span>.layer(LoggingLayer::default())
         .layer(iil)
         .finish();
@@ -739,12 +739,12 @@
             iil.insert(i.to_string())
         }
 
-        <span class="kw">let </span>op = Http::from_map({
+        <span class="kw">let </span>op = HttpConfig::from_iter({
             <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
             map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"https://xuanwo.io"</span>.to_string());
             map
         })
-        .and_then(Operator::new)<span class="question-mark">?
+        .and_then(Operator::from_config)<span class="question-mark">?
         </span>.layer(LoggingLayer::default())
         .layer(iil)
         .finish();
@@ -783,12 +783,12 @@
             iil.insert(i.to_string())
         }
 
-        <span class="kw">let </span>op = Http::from_map({
+        <span class="kw">let </span>op = HttpConfig::from_iter({
             <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
             map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"https://xuanwo.io"</span>.to_string());
             map
         })
-        .and_then(Operator::new)<span class="question-mark">?
+        .and_then(Operator::from_config)<span class="question-mark">?
         </span>.layer(LoggingLayer::default())
         .layer(iil)
         .finish();
@@ -841,12 +841,12 @@
             iil.insert(i.to_string())
         }
 
-        <span class="kw">let </span>op = Http::from_map({
+        <span class="kw">let </span>op = HttpConfig::from_iter({
             <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
             map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"https://xuanwo.io"</span>.to_string());
             map
         })
-        .and_then(Operator::new)<span class="question-mark">?
+        .and_then(Operator::from_config)<span class="question-mark">?
         </span>.layer(LoggingLayer::default())
         .layer(iil)
         .finish();

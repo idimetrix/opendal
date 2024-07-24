@@ -249,6 +249,7 @@
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -270,7 +271,8 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::str;
 
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::task;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
@@ -304,6 +306,12 @@
             .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .field(<span class="string">"tree"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tree)
             .finish()
+    }
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>SledConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        SledBuilder { config: <span class="self">self </span>}
     }
 }
 
@@ -344,15 +352,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>SledBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Sled;
-    <span class="kw">type </span>Accessor = SledBackend;
     <span class="kw">type </span>Config = SledConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        SledBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>datadir_path = <span class="self">self</span>.config.datadir.take().ok_or_else(|| {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>datadir_path = <span class="self">self</span>.config.datadir.ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"datadir is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Sled)
         })<span class="question-mark">?</span>;
@@ -368,7 +371,6 @@
         </span><span class="kw">let </span>tree_name = <span class="self">self
             </span>.config
             .tree
-            .take()
             .unwrap_or_else(|| DEFAULT_TREE_ID.to_string());
 
         <span class="kw">let </span>tree = db.open_tree(<span class="kw-2">&amp;</span>tree_name).map_err(|e| {

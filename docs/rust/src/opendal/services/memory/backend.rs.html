@@ -165,6 +165,8 @@
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
 <a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -187,9 +189,11 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::sync::Mutex;
 
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
+<span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">///Config for memory.
@@ -199,6 +203,12 @@
 </span><span class="kw">pub struct </span>MemoryConfig {
     <span class="doccomment">/// root of the backend.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>MemoryConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        MemoryBuilder { config: <span class="self">self </span>}
+    }
 }
 
 <span class="doccomment">/// In memory service support. (BTreeMap Based)
@@ -218,14 +228,9 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MemoryBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Memory;
-    <span class="kw">type </span>Accessor = MemoryBackend;
     <span class="kw">type </span>Config = MemoryConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        MemoryBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="kw">let </span>adapter = Adapter {
             inner: Arc::new(Mutex::new(BTreeMap::default())),
         };
@@ -321,7 +326,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_accessor_metadata_name() {

@@ -270,6 +270,12 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -287,15 +293,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::{io::Cursor, sync::Arc};
+</span><span class="kw">use </span>std::io::Cursor;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>compio::{dispatcher::Dispatcher, fs::OpenOptions};
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>compio::dispatcher::Dispatcher;
+<span class="kw">use </span>compio::fs::OpenOptions;
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
+<span class="kw">use </span><span class="kw">super</span>::core::CompfsCore;
+<span class="kw">use </span><span class="kw">super</span>::lister::CompfsLister;
+<span class="kw">use </span><span class="kw">super</span>::reader::CompfsReader;
+<span class="kw">use </span><span class="kw">super</span>::writer::CompfsWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="kw">use super</span>::{core::CompfsCore, lister::CompfsLister, reader::CompfsReader, writer::CompfsWriter};
 
 <span class="doccomment">/// compio-based file system support.
 </span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -304,6 +315,12 @@
     ///
     /// All operations will happen under this root.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>CompfsConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        CompfsBuilder { config: <span class="self">self </span>}
+    }
 }
 
 <span class="doccomment">/// [`compio`]-based file system support.
@@ -327,15 +344,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>CompfsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Compfs;
-    <span class="kw">type </span>Accessor = CompfsBackend;
     <span class="kw">type </span>Config = CompfsConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root.take() {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root {
             <span class="prelude-val">Some</span>(root) =&gt; <span class="prelude-val">Ok</span>(root),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,

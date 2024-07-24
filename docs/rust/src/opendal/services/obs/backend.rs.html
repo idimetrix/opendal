@@ -421,6 +421,10 @@
 <a href="#421" id="421">421</a>
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -438,8 +442,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::{Debug, Formatter};
+</span><span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>http::Response;
+<span class="kw">use </span>http::StatusCode;
+<span class="kw">use </span>http::Uri;
+<span class="kw">use </span>log::debug;
+<span class="kw">use </span>reqsign::HuaweicloudObsConfig;
+<span class="kw">use </span>reqsign::HuaweicloudObsCredentialLoader;
+<span class="kw">use </span>reqsign::HuaweicloudObsSigner;
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::ObsCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -448,14 +463,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::obs::writer::ObsWriters;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>http::Response;
-<span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>http::Uri;
-<span class="kw">use </span>log::debug;
-<span class="kw">use </span>reqsign::HuaweicloudObsConfig;
-<span class="kw">use </span>reqsign::HuaweicloudObsCredentialLoader;
-<span class="kw">use </span>reqsign::HuaweicloudObsSigner;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="doccomment">/// Config for Huawei-Cloud Object Storage Service (OBS) support.
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -483,6 +490,15 @@
             .field(<span class="string">"secret_access_key"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;redacted&gt;"</span>)
             .field(<span class="string">"bucket"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
             .finish()
+    }
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>ObsConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        ObsBuilder {
+            config: <span class="self">self</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -576,20 +592,12 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>ObsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Obs;
-    <span class="kw">type </span>Accessor = ObsBackend;
     <span class="kw">type </span>Config = ObsConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        ObsBuilder {
-            config,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
-        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.take().unwrap_or_default());
+        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.unwrap_or_default());
         <span class="macro">debug!</span>(<span class="string">"backend use root {}"</span>, root);
 
         <span class="kw">let </span>bucket = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.bucket {
@@ -626,7 +634,7 @@
         };
         <span class="macro">debug!</span>(<span class="string">"backend use endpoint {}"</span>, <span class="kw-2">&amp;</span>endpoint);
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
             client
         } <span class="kw">else </span>{
             HttpClient::new().map_err(|err| {
@@ -639,11 +647,11 @@
         <span class="comment">// Load cfg from env first.
         </span>cfg = cfg.from_env();
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id {
             cfg.access_key_id = <span class="prelude-val">Some</span>(v);
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key {
             cfg.secret_access_key = <span class="prelude-val">Some</span>(v);
         }
 

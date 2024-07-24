@@ -1362,6 +1362,8 @@
 <a href="#1362" id="1362">1362</a>
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1403,7 +1405,8 @@
 <span class="kw">use </span>reqsign::AwsDefaultLoader;
 <span class="kw">use </span>reqsign::AwsV4Signer;
 <span class="kw">use </span>reqwest::Url;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -1585,6 +1588,16 @@
             .field(<span class="string">"region"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region);
 
         d.finish_non_exhaustive()
+    }
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>S3Config {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        S3Builder {
+            config: <span class="self">self</span>,
+            customized_credential_load: <span class="prelude-val">None</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -2167,18 +2180,9 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>S3Builder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::S3;
-    <span class="kw">type </span>Accessor = S3Backend;
     <span class="kw">type </span>Config = S3Config;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        S3Builder {
-            config,
-            customized_credential_load: <span class="prelude-val">None</span>,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
@@ -2253,15 +2257,6 @@
             }
         };
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
-            client
-        } <span class="kw">else </span>{
-            HttpClient::new().map_err(|err| {
-                err.with_operation(<span class="string">"Builder::build"</span>)
-                    .with_context(<span class="string">"service"</span>, Scheme::S3)
-            })<span class="question-mark">?
-        </span>};
-
         <span class="comment">// This is our current config.
         </span><span class="kw">let </span><span class="kw-2">mut </span>cfg = AwsConfig::default();
         <span class="kw">if </span>!<span class="self">self</span>.config.disable_config_load {
@@ -2272,7 +2267,7 @@
             }
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.region.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.region.clone() {
             cfg.region = <span class="prelude-val">Some</span>(v);
         }
         <span class="kw">if </span>cfg.region.is_none() {
@@ -2292,24 +2287,33 @@
         <span class="macro">debug!</span>(<span class="string">"backend use endpoint: {endpoint}"</span>);
 
         <span class="comment">// Setting all value from user input if available.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id.take() {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id {
             cfg.access_key_id = <span class="prelude-val">Some</span>(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key {
             cfg.secret_access_key = <span class="prelude-val">Some</span>(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.session_token.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.session_token {
             cfg.session_token = <span class="prelude-val">Some</span>(v)
         }
 
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
+            client
+        } <span class="kw">else </span>{
+            HttpClient::new().map_err(|err| {
+                err.with_operation(<span class="string">"Builder::build"</span>)
+                    .with_context(<span class="string">"service"</span>, Scheme::S3)
+            })<span class="question-mark">?
+        </span>};
+
         <span class="kw">let </span><span class="kw-2">mut </span>loader: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt; = <span class="prelude-val">None</span>;
         <span class="comment">// If customized_credential_load is set, we will use it.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customized_credential_load.take() {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customized_credential_load {
             loader = <span class="prelude-val">Some</span>(v);
         }
 
         <span class="comment">// If role_arn is set, we must use AssumeRoleLoad.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(role_arn) = <span class="self">self</span>.config.role_arn.take() {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(role_arn) = <span class="self">self</span>.config.role_arn {
             <span class="comment">// use current env as source credential loader.
             </span><span class="kw">let </span>default_loader = AwsDefaultLoader::new(client.client(), cfg.clone());
 
@@ -2355,7 +2359,7 @@
             </span>.config
             .batch_max_operations
             .unwrap_or(DEFAULT_BATCH_MAX_OPERATIONS);
-        <span class="macro">debug!</span>(<span class="string">"backend build finished"</span>);
+
         <span class="prelude-val">Ok</span>(S3Backend {
             core: Arc::new(S3Core {
                 bucket: bucket.to_string(),

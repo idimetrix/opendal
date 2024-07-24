@@ -337,27 +337,6 @@
 <a href="#337" id="337">337</a>
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -685,37 +664,16 @@
 
 <span class="attr">#[derive(Default, Debug, Clone, Deserialize)]
 </span><span class="kw">pub struct </span>ListResponse {
-    <span class="kw">pub </span>size: u64,
-    <span class="kw">pub </span>sha: String,
-    <span class="attr">#[serde(rename = <span class="string">"type"</span>)]
-    </span><span class="kw">pub </span>type_field: String,
     <span class="kw">pub </span>git_url: String,
     <span class="kw">pub </span>entries: Vec&lt;Entry&gt;,
 }
 
 <span class="attr">#[derive(Default, Debug, Clone, Deserialize)]
 </span><span class="kw">pub struct </span>Entry {
-    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>path: String,
     <span class="kw">pub </span>sha: String,
     <span class="kw">pub </span>size: u64,
-    <span class="kw">pub </span>url: String,
-    <span class="kw">pub </span>html_url: String,
-    <span class="kw">pub </span>git_url: String,
-    <span class="kw">pub </span>download_url: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="attr">#[serde(rename = <span class="string">"type"</span>)]
     </span><span class="kw">pub </span>type_field: String,
-    <span class="kw">pub </span>content: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="kw">pub </span>encoding: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="attr">#[serde(rename = <span class="string">"_links"</span>)]
-    </span><span class="kw">pub </span>links: Links,
-}
-
-<span class="attr">#[derive(Default, Debug, Clone, Deserialize)]
-</span><span class="kw">pub struct </span>Links {
-    <span class="attr">#[serde(rename = <span class="string">"self"</span>)]
-    </span><span class="kw">pub </span>self_field: String,
-    <span class="kw">pub </span>git: String,
-    <span class="kw">pub </span>html: String,
 }
 </code></pre></div></section></main></body></html>

@@ -228,6 +228,12 @@
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -245,11 +251,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::{mem, path::PathBuf, sync::Mutex, time::Duration};
+</span><span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::path::PathBuf;
+<span class="kw">use </span>std::sync::Mutex;
+<span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>flume::{Receiver, Sender};
-<span class="kw">use </span>futures::{channel::oneshot, Future};
-<span class="kw">use </span>monoio::{FusionDriver, RuntimeBuilder};
+<span class="kw">use </span>flume::Receiver;
+<span class="kw">use </span>flume::Sender;
+<span class="kw">use </span>futures::channel::oneshot;
+<span class="kw">use </span>futures::Future;
+<span class="kw">use </span>monoio::FusionDriver;
+<span class="kw">use </span>monoio::RuntimeBuilder;
 
 <span class="doccomment">/// a boxed function that spawns task in current monoio runtime
 </span><span class="kw">type </span>TaskSpawner = Box&lt;<span class="kw">dyn </span>FnOnce() + Send&gt;;
@@ -365,12 +377,12 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::{sync::Arc, time::Duration};
+    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>std::time::Duration;
 
-    <span class="kw">use </span>futures::{
-        channel::mpsc::{<span class="self">self</span>, UnboundedSender},
-        StreamExt,
-    };
+    <span class="kw">use </span>futures::channel::mpsc::UnboundedSender;
+    <span class="kw">use </span>futures::channel::mpsc::{<span class="self">self</span>};
+    <span class="kw">use </span>futures::StreamExt;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 

@@ -464,6 +464,7 @@
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
 <a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -775,7 +776,8 @@
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
     <span class="kw">use </span>tokio::sync::Mutex;
-    <span class="kw">use </span>tokio::time::{sleep, timeout};
+    <span class="kw">use </span>tokio::time::sleep;
+    <span class="kw">use </span>tokio::time::timeout;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;

@@ -387,6 +387,8 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -412,7 +414,8 @@
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::Mutex;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
@@ -451,6 +454,15 @@
         ds.field(<span class="string">"email"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.email);
 
         ds.finish()
+    }
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>KoofrConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        KoofrBuilder {
+            config: <span class="self">self</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -538,18 +550,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>KoofrBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Koofr;
-    <span class="kw">type </span>Accessor = KoofrBackend;
     <span class="kw">type </span>Config = KoofrConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        KoofrBuilder {
-            config,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
-
     <span class="doccomment">/// Builds the backend and returns the result of KoofrBackend.
-    </span><span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    </span><span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
@@ -578,7 +582,7 @@
                 .with_context(<span class="string">"service"</span>, Scheme::Koofr)),
         }<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
             client
         } <span class="kw">else </span>{
             HttpClient::new().map_err(|err| {

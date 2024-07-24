@@ -323,6 +323,8 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -346,7 +348,8 @@
 
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::Mutex;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
@@ -392,6 +395,15 @@
         d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
         d.field(<span class="string">"is_china_mainland"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_china_mainland);
         d.finish_non_exhaustive()
+    }
+}
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>IcloudConfig {
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+        IcloudBuilder {
+            config: <span class="self">self</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -508,18 +520,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>IcloudBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Icloud;
-    <span class="kw">type </span>Accessor = IcloudBackend;
     <span class="kw">type </span>Config = IcloudConfig;
 
-    <span class="kw">fn </span>from_config(config: <span class="self">Self</span>::Config) -&gt; <span class="self">Self </span>{
-        IcloudBuilder {
-            config,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.take().unwrap_or_default());
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.unwrap_or_default());
 
         <span class="kw">let </span>apple_id = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.apple_id {
             <span class="prelude-val">Some</span>(apple_id) =&gt; <span class="prelude-val">Ok</span>(apple_id.clone()),
@@ -551,7 +555,7 @@
                 .with_context(<span class="string">"service"</span>, Scheme::Icloud)),
         }<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
             client
         } <span class="kw">else </span>{
             HttpClient::new().map_err(|err| {

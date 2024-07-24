@@ -517,6 +517,9 @@
 <a href="#517" id="517">517</a>
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -534,10 +537,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>std::sync::Arc;
 
 <span class="doccomment">/// WriteContext holds the immutable context for give write operation.
 </span><span class="kw">pub struct </span>WriteContext {
@@ -805,10 +809,9 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
+    <span class="kw">use </span>bytes::Buf;
+    <span class="kw">use </span>bytes::BufMut;
     <span class="kw">use </span>bytes::Bytes;
-    <span class="kw">use </span>bytes::{Buf, BufMut};
     <span class="kw">use </span>log::debug;
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
@@ -817,6 +820,9 @@
     <span class="kw">use </span>sha2::Digest;
     <span class="kw">use </span>sha2::Sha256;
     <span class="kw">use </span>tokio::sync::Mutex;
+
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
 
     <span class="kw">struct </span>MockWriter {
         buf: Arc&lt;Mutex&lt;Vec&lt;u8&gt;&gt;&gt;,
