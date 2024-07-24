@@ -554,7 +554,6 @@
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
-<a href="#557" id="557">557</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -936,7 +935,6 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>rand::rngs::ThreadRng;
@@ -950,7 +948,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_trait() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         op.write(
             <span class="string">"test"</span>,
             Buffer::from(<span class="macro">vec!</span>[Bytes::from(<span class="string">"Hello"</span>), Bytes::from(<span class="string">"World"</span>)]),
@@ -983,7 +981,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_reader_read() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -1000,7 +998,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_reader_read_with_chunk() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -1017,7 +1015,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_reader_read_with_concurrent() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();
@@ -1039,7 +1037,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_reader_read_into() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         <span class="kw">let </span>path = <span class="string">"test_file"</span>;
 
         <span class="kw">let </span>content = gen_random_bytes();

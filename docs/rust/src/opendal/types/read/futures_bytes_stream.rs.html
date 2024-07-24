@@ -156,7 +156,6 @@
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -239,7 +238,6 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use </span>bytes::Bytes;
@@ -250,7 +248,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_trait() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>acc = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>.into_inner();
+        <span class="kw">let </span>acc = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>.into_inner();
         <span class="kw">let </span>ctx = Arc::new(ReadContext::new(
             acc,
             <span class="string">"test"</span>.to_string(),
@@ -266,7 +264,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_futures_bytes_stream() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         op.write(
             <span class="string">"test"</span>,
             Buffer::from(<span class="macro">vec!</span>[Bytes::from(<span class="string">"Hello"</span>), Bytes::from(<span class="string">"World"</span>)]),
@@ -291,7 +289,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_futures_bytes_stream_with_concurrent() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>op = Operator::via_map(Scheme::Memory, HashMap::default())<span class="question-mark">?</span>;
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
         op.write(
             <span class="string">"test"</span>,
             Buffer::from(<span class="macro">vec!</span>[Bytes::from(<span class="string">"Hello"</span>), Bytes::from(<span class="string">"World"</span>)]),

@@ -157,7 +157,7 @@
         cfg.insert(<span class="string">"root"</span>.to_string(), root);
     }
 
-    <span class="kw">let </span>op = Operator::via_map(scheme, cfg).expect(<span class="string">"must succeed"</span>);
+    <span class="kw">let </span>op = Operator::via_iter(scheme, cfg).expect(<span class="string">"must succeed"</span>);
 
     <span class="attr">#[cfg(feature = <span class="string">"layers-chaos"</span>)]
     </span><span class="kw">let </span>op = { op.layer(layers::ChaosLayer::new(<span class="number">0.1</span>)) };
