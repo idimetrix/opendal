@@ -768,7 +768,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -784,7 +784,7 @@
     ///
     /// - `default`: using the default setting based on hadoop config.
     /// - `hdfs://127.0.0.1:9000`: connect to hdfs cluster.
-    </span><span class="kw">pub fn </span>name_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name_node: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>name_node(<span class="kw-2">mut </span><span class="self">self</span>, name_node: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!name_node.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.name_node = <span class="prelude-val">Some</span>(name_node.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -796,7 +796,7 @@
     <span class="doccomment">/// Set kerberos_ticket_cache_path of this backend
     ///
     /// This should be configured when kerberos is enabled.
-    </span><span class="kw">pub fn </span>kerberos_ticket_cache_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, kerberos_ticket_cache_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>kerberos_ticket_cache_path(<span class="kw-2">mut </span><span class="self">self</span>, kerberos_ticket_cache_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!kerberos_ticket_cache_path.is_empty() {
             <span class="self">self</span>.config.kerberos_ticket_cache_path = <span class="prelude-val">Some</span>(kerberos_ticket_cache_path.to_string())
         }
@@ -804,7 +804,7 @@
     </span>}
 
     <span class="doccomment">/// Set user of this backend
-    </span><span class="kw">pub fn </span>user(<span class="kw-2">&amp;mut </span><span class="self">self</span>, user: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>user(<span class="kw-2">mut </span><span class="self">self</span>, user: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!user.is_empty() {
             <span class="self">self</span>.config.user = <span class="prelude-val">Some</span>(user.to_string())
         }
@@ -814,7 +814,7 @@
     <span class="doccomment">/// Enable append capacity of this backend.
     ///
     /// This should be disabled when HDFS runs in non-distributed mode.
-    </span><span class="kw">pub fn </span>enable_append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable_append: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>enable_append(<span class="kw-2">mut </span><span class="self">self</span>, enable_append: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.enable_append = enable_append;
         <span class="self">self
     </span>}
@@ -825,7 +825,7 @@
     ///
     /// - When append is enabled, we will not use atomic write
     /// to avoid data loss and performance issue.
-    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.atomic_write_dir = <span class="kw">if </span>dir.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{

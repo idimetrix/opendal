@@ -583,7 +583,7 @@
     /// - "tcp" or "redis": unsecured redis connections
     /// - "rediss": secured redis connections
     /// - "unix" or "redis+unix": unix socket connection
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.to_owned());
         }
@@ -598,7 +598,7 @@
     /// - "tcp" or "redis": unsecured redis connections
     /// - "rediss": secured redis connections
     /// - "unix" or "redis+unix": unix socket connection
-    </span><span class="kw">pub fn </span>cluster_endpoints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cluster_endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>cluster_endpoints(<span class="kw-2">mut </span><span class="self">self</span>, cluster_endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!cluster_endpoints.is_empty() {
             <span class="self">self</span>.config.cluster_endpoints = <span class="prelude-val">Some</span>(cluster_endpoints.to_owned());
         }
@@ -608,7 +608,7 @@
     <span class="doccomment">/// set the username for redis
     ///
     /// default: no username
-    </span><span class="kw">pub fn </span>username(<span class="kw-2">&amp;mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>username(<span class="kw-2">mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!username.is_empty() {
             <span class="self">self</span>.config.username = <span class="prelude-val">Some</span>(username.to_owned());
         }
@@ -618,7 +618,7 @@
     <span class="doccomment">/// set the password for redis
     ///
     /// default: no password
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!password.is_empty() {
             <span class="self">self</span>.config.password = <span class="prelude-val">Some</span>(password.to_owned());
         }
@@ -628,7 +628,7 @@
     <span class="doccomment">/// set the db used in redis
     ///
     /// default: 0
-    </span><span class="kw">pub fn </span>db(<span class="kw-2">&amp;mut </span><span class="self">self</span>, db: i64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>db(<span class="kw-2">mut </span><span class="self">self</span>, db: i64) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.db = db;
         <span class="self">self
     </span>}
@@ -636,7 +636,7 @@
     <span class="doccomment">/// Set the default ttl for redis services.
     ///
     /// If set, we will specify `EX` for write operations.
-    </span><span class="kw">pub fn </span>default_ttl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ttl: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>default_ttl(<span class="kw-2">mut </span><span class="self">self</span>, ttl: Duration) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.default_ttl = <span class="prelude-val">Some</span>(ttl);
         <span class="self">self
     </span>}
@@ -644,7 +644,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }

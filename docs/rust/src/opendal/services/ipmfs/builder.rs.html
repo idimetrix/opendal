@@ -151,7 +151,6 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -228,10 +227,9 @@
 /// #[tokio::main]
 /// async fn main() -&gt; Result&lt;()&gt; {
 ///     // create backend builder
-///     let mut builder = Ipmfs::default();
-///
-///     // set the storage bucket for OpenDAL
-///     builder.endpoint("http://127.0.0.1:5001");
+///     let mut builder = Ipmfs::default()
+///         // set the storage bucket for OpenDAL
+///         .endpoint("http://127.0.0.1:5001");
 ///
 ///     let op: Operator = Operator::new(builder)?.finish();
 ///
@@ -246,7 +244,7 @@
 
 <span class="kw">impl </span>IpmfsBuilder {
     <span class="doccomment">/// Set root for ipfs.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -259,7 +257,7 @@
     <span class="doccomment">/// Set endpoint for ipfs.
     ///
     /// Default: http://localhost:5001
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.endpoint = <span class="kw">if </span>endpoint.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -274,7 +272,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

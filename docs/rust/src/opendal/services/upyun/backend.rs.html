@@ -382,7 +382,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for backblaze upyun services support.
+<span class="doccomment">/// Config for upyun services support.
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
@@ -442,7 +442,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -455,7 +455,7 @@
     <span class="doccomment">/// bucket of this backend.
     ///
     /// It is required. e.g. `test`
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
@@ -464,7 +464,7 @@
     <span class="doccomment">/// operator of this backend.
     ///
     /// It is required. e.g. `test`
-    </span><span class="kw">pub fn </span>operator(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operator: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>operator(<span class="kw-2">mut </span><span class="self">self</span>, operator: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.operator = <span class="kw">if </span>operator.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -477,7 +477,7 @@
     <span class="doccomment">/// password of this backend.
     ///
     /// It is required. e.g. `asecret`
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.password = <span class="kw">if </span>password.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -493,7 +493,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

@@ -363,7 +363,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -379,7 +379,7 @@
     ///
     /// - `default`: using the default setting based on hadoop config.
     /// - `hdfs://127.0.0.1:9000`: connect to hdfs cluster.
-    </span><span class="kw">pub fn </span>url(<span class="kw-2">&amp;mut </span><span class="self">self</span>, url: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>url(<span class="kw-2">mut </span><span class="self">self</span>, url: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!url.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.url = <span class="prelude-val">Some</span>(url.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -391,7 +391,7 @@
     <span class="doccomment">/// Enable append capacity of this backend.
     ///
     /// This should be disabled when HDFS runs in non-distributed mode.
-    </span><span class="kw">pub fn </span>enable_append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable_append: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>enable_append(<span class="kw-2">mut </span><span class="self">self</span>, enable_append: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.enable_append = enable_append;
         <span class="self">self
     </span>}

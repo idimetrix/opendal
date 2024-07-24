@@ -412,7 +412,7 @@
     /// - ... (any other options you wish to highlight)
     ///
     /// For more information, please refer to [MongoDB Connection String URI Format](https://docs.mongodb.com/manual/reference/connection-string/).
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
@@ -422,7 +422,7 @@
     <span class="doccomment">/// Set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
@@ -430,7 +430,7 @@
     </span>}
 
     <span class="doccomment">/// Set the database name of the MongoDB GridFs service to read/write.
-    </span><span class="kw">pub fn </span>database(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>database(<span class="kw-2">mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!database.is_empty() {
             <span class="self">self</span>.config.database = <span class="prelude-val">Some</span>(database.to_string());
         }
@@ -440,7 +440,7 @@
     <span class="doccomment">/// Set the bucket name of the MongoDB GridFs service to read/write.
     ///
     /// Default to `fs` if not specified.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!bucket.is_empty() {
             <span class="self">self</span>.config.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
         }
@@ -450,7 +450,7 @@
     <span class="doccomment">/// Set the chunk size of the MongoDB GridFs service used to break the user file into chunks.
     ///
     /// Default to `255 KiB` if not specified.
-    </span><span class="kw">pub fn </span>chunk_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chunk_size: u32) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>chunk_size(<span class="kw-2">mut </span><span class="self">self</span>, chunk_size: u32) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>chunk_size &gt; <span class="number">0 </span>{
             <span class="self">self</span>.config.chunk_size = <span class="prelude-val">Some</span>(chunk_size);
         }

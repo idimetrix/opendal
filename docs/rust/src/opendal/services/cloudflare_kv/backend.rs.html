@@ -463,7 +463,7 @@
 
 <span class="kw">impl </span>CloudflareKvBuilder {
     <span class="doccomment">/// Set the token used to authenticate with CloudFlare.
-    </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
             <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string())
         }
@@ -471,7 +471,7 @@
     </span>}
 
     <span class="doccomment">/// Set the account ID used to authenticate with CloudFlare.
-    </span><span class="kw">pub fn </span>account_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>account_id(<span class="kw-2">mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!account_id.is_empty() {
             <span class="self">self</span>.config.account_id = <span class="prelude-val">Some</span>(account_id.to_string())
         }
@@ -479,7 +479,7 @@
     </span>}
 
     <span class="doccomment">/// Set the namespace ID.
-    </span><span class="kw">pub fn </span>namespace_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, namespace_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>namespace_id(<span class="kw-2">mut </span><span class="self">self</span>, namespace_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!namespace_id.is_empty() {
             <span class="self">self</span>.config.namespace_id = <span class="prelude-val">Some</span>(namespace_id.to_string())
         }
@@ -487,7 +487,7 @@
     </span>}
 
     <span class="doccomment">/// Set the root within this backend.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }

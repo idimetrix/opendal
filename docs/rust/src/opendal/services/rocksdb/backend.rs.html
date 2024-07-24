@@ -232,10 +232,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+<span class="doccomment">/// Config for Rocksdb Service.
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
-</span><span class="doccomment">/// Config for Rocksdb Service.
 </span><span class="kw">pub struct </span>RocksdbConfig {
     <span class="doccomment">/// The path to the rocksdb data directory.
     </span><span class="kw">pub </span>datadir: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -260,7 +260,7 @@
 
 <span class="kw">impl </span>RocksdbBuilder {
     <span class="doccomment">/// Set the path to the rocksdb data directory. Will create if not exists.
-    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.datadir = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
@@ -268,7 +268,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }

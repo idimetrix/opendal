@@ -328,19 +328,19 @@
 
 <span class="kw">impl </span>PersyBuilder {
     <span class="doccomment">/// Set the path to the persy data directory. Will create if not exists.
-    </span><span class="kw">pub fn </span>datafile(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>datafile(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.datafile = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the name of the persy segment. Will create if not exists.
-    </span><span class="kw">pub fn </span>segment(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>segment(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.segment = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the name of the persy index. Will create if not exists.
-    </span><span class="kw">pub fn </span>index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>index(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.index = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}

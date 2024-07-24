@@ -2234,10 +2234,6 @@
 <a href="#2234" id="2234">2234</a>
 <a href="#2235" id="2235">2235</a>
 <a href="#2236" id="2236">2236</a>
-<a href="#2237" id="2237">2237</a>
-<a href="#2238" id="2238">2238</a>
-<a href="#2239" id="2239">2239</a>
-<a href="#2240" id="2240">2240</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2288,11 +2284,7 @@
 /// use opendal::Operator;
 /// async fn test() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = Fs::default();
-///     // Set the root for fs, all operations will happen under this root.
-///     //
-///     // NOTE: the root must be absolute path.
-///     builder.root("/tmp");
+///     let mut builder = Fs::default().root("/tmp");
 ///
 ///     // Build an `Operator` to start operating the storage.
 ///     let _: Operator = Operator::new(builder)?.finish();

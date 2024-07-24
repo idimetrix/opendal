@@ -573,7 +573,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Ftpservices support.
+<span class="doccomment">/// Config for Ftp services support.
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
@@ -620,7 +620,7 @@
 
 <span class="kw">impl </span>FtpBuilder {
     <span class="doccomment">/// set endpoint for ftp backend.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.endpoint = <span class="kw">if </span>endpoint.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -631,7 +631,7 @@
     </span>}
 
     <span class="doccomment">/// set root path for ftp backend.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -642,7 +642,7 @@
     </span>}
 
     <span class="doccomment">/// set user for ftp backend.
-    </span><span class="kw">pub fn </span>user(<span class="kw-2">&amp;mut </span><span class="self">self</span>, user: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>user(<span class="kw-2">mut </span><span class="self">self</span>, user: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.user = <span class="kw">if </span>user.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -653,7 +653,7 @@
     </span>}
 
     <span class="doccomment">/// set password for ftp backend.
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.password = <span class="kw">if </span>password.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -1026,27 +1026,27 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_build() {
         <span class="comment">// ftps scheme, should suffix with default port 21
-        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = FtpBuilder::default();
-        builder.endpoint(<span class="string">"ftps://ftp_server.local"</span>);
-        <span class="kw">let </span>b = builder.build();
+        </span><span class="kw">let </span>b = FtpBuilder::default()
+            .endpoint(<span class="string">"ftps://ftp_server.local"</span>)
+            .build();
         <span class="macro">assert!</span>(b.is_ok());
 
         <span class="comment">// ftp scheme
-        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = FtpBuilder::default();
-        builder.endpoint(<span class="string">"ftp://ftp_server.local:1234"</span>);
-        <span class="kw">let </span>b = builder.build();
+        </span><span class="kw">let </span>b = FtpBuilder::default()
+            .endpoint(<span class="string">"ftp://ftp_server.local:1234"</span>)
+            .build();
         <span class="macro">assert!</span>(b.is_ok());
 
         <span class="comment">// no scheme
-        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = FtpBuilder::default();
-        builder.endpoint(<span class="string">"ftp_server.local:8765"</span>);
-        <span class="kw">let </span>b = builder.build();
+        </span><span class="kw">let </span>b = FtpBuilder::default()
+            .endpoint(<span class="string">"ftp_server.local:8765"</span>)
+            .build();
         <span class="macro">assert!</span>(b.is_ok());
 
         <span class="comment">// invalid scheme
-        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = FtpBuilder::default();
-        builder.endpoint(<span class="string">"invalidscheme://ftp_server.local:8765"</span>);
-        <span class="kw">let </span>b = builder.build();
+        </span><span class="kw">let </span>b = FtpBuilder::default()
+            .endpoint(<span class="string">"invalidscheme://ftp_server.local:8765"</span>)
+            .build();
         <span class="macro">assert!</span>(b.is_err());
         <span class="kw">let </span>e = b.unwrap_err();
         <span class="macro">assert_eq!</span>(e.kind(), ErrorKind::ConfigInvalid);

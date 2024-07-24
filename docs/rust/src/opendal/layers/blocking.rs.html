@@ -338,12 +338,6 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -390,9 +384,7 @@
 /// #[tokio::main]
 /// async fn main() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = S3::default().bucket("test").region("us-east-1");
 ///
 ///     // Build an `BlockingOperator` with blocking layer to start operating the storage.
 ///     let _: BlockingOperator = Operator::new(builder)?
@@ -425,9 +417,7 @@
 ///
 /// fn blocking_fn() -&gt; Result&lt;BlockingOperator&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = S3::default().bucket("test").region("us-east-1");
 ///
 ///     let handle = tokio::runtime::Handle::try_current().unwrap();
 ///     let _guard = handle.enter();
@@ -465,9 +455,7 @@
 ///
 /// fn main() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = S3::default().bucket("test").region("us-east-1");
 ///
 ///     // Fetch the `EnterGuard` from global runtime.
 ///     let _guard = RUNTIME.enter();

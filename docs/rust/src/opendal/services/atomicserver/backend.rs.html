@@ -544,19 +544,19 @@
 
 <span class="kw">impl </span>AtomicserverBuilder {
     <span class="doccomment">/// Set the root for Atomicserver.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the server address for Atomicserver.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the private key for agent used for Atomicserver.
-    </span><span class="kw">pub fn </span>private_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, private_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>private_key(<span class="kw-2">mut </span><span class="self">self</span>, private_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.private_key = <span class="prelude-val">Some</span>(private_key.into());
         <span class="self">self
     </span>}
@@ -565,13 +565,13 @@
     /// For example, if the subject URL for the agent being used
     /// is ${endpoint}/agents/lTB+W3C/2YfDu9IAVleEy34uCmb56iXXuzWCKBVwdRI=
     /// Then the required public key is `lTB+W3C/2YfDu9IAVleEy34uCmb56iXXuzWCKBVwdRI=`
-    </span><span class="kw">pub fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>public_key(<span class="kw-2">mut </span><span class="self">self</span>, public_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.public_key = <span class="prelude-val">Some</span>(public_key.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the parent resource id (url) that Atomicserver uses to store resources under.
-    </span><span class="kw">pub fn </span>parent_resource_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, parent_resource_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>parent_resource_id(<span class="kw-2">mut </span><span class="self">self</span>, parent_resource_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.parent_resource_id = <span class="prelude-val">Some</span>(parent_resource_id.into());
         <span class="self">self
     </span>}

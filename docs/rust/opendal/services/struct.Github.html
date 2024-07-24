@@ -39,29 +39,28 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// create backend builder
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Github::default();
-
-    <span class="comment">// set the storage root for OpenDAL
-    </span>builder.root(<span class="string">"/"</span>);
-    <span class="comment">// set the access token for Github API
-    </span>builder.token(<span class="string">"your_access_token"</span>);
-    <span class="comment">// set the owner for Github
-    </span>builder.owner(<span class="string">"your_owner"</span>);
-    <span class="comment">// set the repository for Github
-    </span>builder.repo(<span class="string">"your_repo"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Github::default()
+        <span class="comment">// set the storage root for OpenDAL
+        </span>.root(<span class="string">"/"</span>)
+        <span class="comment">// set the access token for Github API
+        </span>.token(<span class="string">"your_access_token"</span>)
+        <span class="comment">// set the owner for Github
+        </span>.owner(<span class="string">"your_owner"</span>)
+        <span class="comment">// set the repository for Github
+        </span>.repo(<span class="string">"your_repo"</span>);
 
 
     <span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-GithubBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#101-148">source</a><a href="#impl-GithubBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Github.html" title="struct opendal::services::Github">GithubBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#105-113">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-GithubBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#101-148">source</a><a href="#impl-GithubBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Github.html" title="struct opendal::services::Github">GithubBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#105-113">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.token" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#118-122">source</a><h4 class="code-header">pub fn <a href="#method.token" class="fn">token</a>(&amp;mut self, token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Github access_token.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.token" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#118-122">source</a><h4 class="code-header">pub fn <a href="#method.token" class="fn">token</a>(self, token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Github access_token.</p>
 <p>required.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.owner" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#125-129">source</a><h4 class="code-header">pub fn <a href="#method.owner" class="fn">owner</a>(&amp;mut self, owner: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set Github repo owner.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.repo" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#132-136">source</a><h4 class="code-header">pub fn <a href="#method.repo" class="fn">repo</a>(&amp;mut self, repo: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set Github repo name.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#144-147">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.owner" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#125-129">source</a><h4 class="code-header">pub fn <a href="#method.owner" class="fn">owner</a>(self, owner: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set Github repo owner.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.repo" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#132-136">source</a><h4 class="code-header">pub fn <a href="#method.repo" class="fn">repo</a>(self, repo: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set Github repo name.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/github/backend.rs.html#144-147">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>

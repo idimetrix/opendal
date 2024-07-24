@@ -477,7 +477,7 @@
     /// If connection_string has been specified, other parameters will be ignored.
     ///
     /// For more information, please visit &lt;https://docs.rs/postgres/latest/postgres/config/struct.Config.html&gt;
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
@@ -487,7 +487,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
@@ -495,7 +495,7 @@
     </span>}
 
     <span class="doccomment">/// Set the table name of the postgresql service to read/write.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
             <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_string());
         }
@@ -505,7 +505,7 @@
     <span class="doccomment">/// Set the key field name of the postgresql service to read/write.
     ///
     /// Default to `key` if not specified.
-    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
             <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
@@ -515,7 +515,7 @@
     <span class="doccomment">/// Set the value field name of the postgresql service to read/write.
     ///
     /// Default to `value` if not specified.
-    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
             <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }

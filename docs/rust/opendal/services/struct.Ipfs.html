@@ -37,25 +37,24 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// create backend builder
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Ipfs::default();
-
-    <span class="comment">// set the endpoint for OpenDAL
-    </span>builder.endpoint(<span class="string">"https://ipfs.io"</span>);
-    <span class="comment">// set the root for OpenDAL
-    </span>builder.root(<span class="string">"/ipfs/QmPpCt1aYGb9JWJRmXRUnmJtVgeFFTJGzWFYEEX7bo9zGJ"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Ipfs::default()
+        <span class="comment">// set the endpoint for OpenDAL
+        </span>.endpoint(<span class="string">"https://ipfs.io"</span>)
+        <span class="comment">// set the root for OpenDAL
+        </span>.root(<span class="string">"/ipfs/QmPpCt1aYGb9JWJRmXRUnmJtVgeFFTJGzWFYEEX7bo9zGJ"</span>);
 
     <span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-IpfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#63-109">source</a><a href="#impl-IpfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Ipfs.html" title="struct opendal::services::Ipfs">IpfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#71-77">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of ipfs backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-IpfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#63-109">source</a><a href="#impl-IpfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Ipfs.html" title="struct opendal::services::Ipfs">IpfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#71-77">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of ipfs backend.</p>
 <p>Root must be a valid ipfs address like the following:</p>
 <ul>
 <li><code>/ipfs/QmPpCt1aYGb9JWJRmXRUnmJtVgeFFTJGzWFYEEX7bo9zGJ/</code> (IPFS with CID v0)</li>
 <li><code>/ipfs/bafybeibozpulxtpv5nhfa2ue3dcjx23ndh3gwr5vwllk7ptoyfwnfjjr4q/</code> (IPFS with  CID v1)</li>
 <li><code>/ipns/opendal.apache.org/</code> (IPNS)</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#90-97">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(&amp;mut self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set endpoint if ipfs backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#90-97">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set endpoint if ipfs backend.</p>
 <p>Endpoint must be a valid ipfs gateway which passed the <a href="https://ipfs.github.io/public-gateway-checker/">IPFS Gateway Checker</a></p>
 <p>Popular choices including:</p>
 <ul>
@@ -65,7 +64,7 @@ blocking</li>
 <li><code>https://cloudflare-ipfs.com</code></li>
 <li><code>http://127.0.0.1:8080</code> (ipfs daemon in local)</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#105-108">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/ipfs/backend.rs.html#105-108">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>

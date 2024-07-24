@@ -46,51 +46,51 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Create azdls backend builder.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Azdls::default();
-    <span class="comment">// Set the root for azdls, all operations will happen under this root.
-    //
-    // NOTE: the root must be absolute path.
-    </span>builder.root(<span class="string">"/path/to/dir"</span>);
-    <span class="comment">// Set the filesystem name, this is required.
-    </span>builder.filesystem(<span class="string">"test"</span>);
-    <span class="comment">// Set the endpoint, this is required.
-    //
-    // For examples:
-    // - "https://accountname.dfs.core.windows.net"
-    </span>builder.endpoint(<span class="string">"https://accountname.dfs.core.windows.net"</span>);
-    <span class="comment">// Set the account_name and account_key.
-    //
-    // OpenDAL will try load credential from the env.
-    // If credential not set and no valid credential in env, OpenDAL will
-    // send request without signing like anonymous user.
-    </span>builder.account_name(<span class="string">"account_name"</span>);
-    builder.account_key(<span class="string">"account_key"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Azdls::default()
+        <span class="comment">// Set the root for azdls, all operations will happen under this root.
+        //
+        // NOTE: the root must be absolute path.
+        </span>.root(<span class="string">"/path/to/dir"</span>)
+        <span class="comment">// Set the filesystem name, this is required.
+        </span>.filesystem(<span class="string">"test"</span>)
+        <span class="comment">// Set the endpoint, this is required.
+        //
+        // For examples:
+        // - "https://accountname.dfs.core.windows.net"
+        </span>.endpoint(<span class="string">"https://accountname.dfs.core.windows.net"</span>)
+        <span class="comment">// Set the account_name and account_key.
+        //
+        // OpenDAL will try load credential from the env.
+        // If credential not set and no valid credential in env, OpenDAL will
+        // send request without signing like anonymous user.
+        </span>.account_name(<span class="string">"account_name"</span>)
+        .account_key(<span class="string">"account_key"</span>);
 
     <span class="comment">// `Accessor` provides the low level APIs, we will use `Operator` normally.
     </span><span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-AzdlsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#110-178">source</a><a href="#impl-AzdlsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Azdls.html" title="struct opendal::services::Azdls">AzdlsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#114-120">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-AzdlsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#110-178">source</a><a href="#impl-AzdlsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Azdls.html" title="struct opendal::services::Azdls">AzdlsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#114-120">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.filesystem" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#123-127">source</a><h4 class="code-header">pub fn <a href="#method.filesystem" class="fn">filesystem</a>(&amp;mut self, filesystem: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set filesystem name of this backend.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#135-142">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(&amp;mut self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set endpoint of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.filesystem" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#123-127">source</a><h4 class="code-header">pub fn <a href="#method.filesystem" class="fn">filesystem</a>(self, filesystem: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set filesystem name of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#135-142">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set endpoint of this backend.</p>
 <p>Endpoint must be full uri, e.g.</p>
 <ul>
 <li>Azblob: <code>https://accountname.blob.core.windows.net</code></li>
 <li>Azurite: <code>http://127.0.0.1:10000/devstoreaccount1</code></li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.account_name" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#148-154">source</a><h4 class="code-header">pub fn <a href="#method.account_name" class="fn">account_name</a>(&amp;mut self, account_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set account_name of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.account_name" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#148-154">source</a><h4 class="code-header">pub fn <a href="#method.account_name" class="fn">account_name</a>(self, account_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set account_name of this backend.</p>
 <ul>
 <li>If account_name is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.account_key" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#160-166">source</a><h4 class="code-header">pub fn <a href="#method.account_key" class="fn">account_key</a>(&amp;mut self, account_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set account_key of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.account_key" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#160-166">source</a><h4 class="code-header">pub fn <a href="#method.account_key" class="fn">account_key</a>(self, account_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set account_key of this backend.</p>
 <ul>
 <li>If account_key is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#174-177">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/azdls/backend.rs.html#174-177">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes-1"><a class="doc-anchor" href="#notes-1">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>

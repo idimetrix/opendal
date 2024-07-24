@@ -402,7 +402,7 @@
     ///
     /// If user inputs endpoint without scheme, we will
     /// prepend `https://` to it.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.endpoint = <span class="kw">if </span>endpoint.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -414,7 +414,7 @@
     <span class="doccomment">/// Set container of this backend.
     ///
     /// All operations will happen under this container. It is required. e.g. `snapshots`
-    </span><span class="kw">pub fn </span>container(<span class="kw-2">&amp;mut </span><span class="self">self</span>, container: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>container(<span class="kw-2">mut </span><span class="self">self</span>, container: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.container = <span class="kw">if </span>container.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -426,7 +426,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }
@@ -437,7 +437,7 @@
     <span class="doccomment">/// Set the token of this backend.
     ///
     /// Default to empty string.
-    </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
             <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
         }

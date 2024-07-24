@@ -265,7 +265,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Mokaservices support.
+<span class="doccomment">/// Config for Moka services support.
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
@@ -317,7 +317,7 @@
 
 <span class="kw">impl </span>MokaBuilder {
     <span class="doccomment">/// Name for this cache instance.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.name = <span class="prelude-val">Some</span>(v.to_owned());
         }
@@ -327,7 +327,7 @@
     <span class="doccomment">/// Sets the max capacity of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::max_capacity`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.max_capacity)
-    </span><span class="kw">pub fn </span>max_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>max_capacity(<span class="kw-2">mut </span><span class="self">self</span>, v: u64) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>v != <span class="number">0 </span>{
             <span class="self">self</span>.config.max_capacity = <span class="prelude-val">Some</span>(v);
         }
@@ -337,7 +337,7 @@
     <span class="doccomment">/// Sets the time to live of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::time_to_live`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_live)
-    </span><span class="kw">pub fn </span>time_to_live(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>time_to_live(<span class="kw-2">mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
             <span class="self">self</span>.config.time_to_live = <span class="prelude-val">Some</span>(v);
         }
@@ -347,7 +347,7 @@
     <span class="doccomment">/// Sets the time to idle of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_idle)
-    </span><span class="kw">pub fn </span>time_to_idle(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>time_to_idle(<span class="kw-2">mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
             <span class="self">self</span>.config.time_to_idle = <span class="prelude-val">Some</span>(v);
         }
@@ -357,7 +357,7 @@
     <span class="doccomment">/// Sets the segments number of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::segments`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.segments)
-    </span><span class="kw">pub fn </span>segments(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>segments(<span class="kw-2">mut </span><span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(v != <span class="number">0</span>);
         <span class="self">self</span>.config.num_segments = <span class="prelude-val">Some</span>(v);
         <span class="self">self

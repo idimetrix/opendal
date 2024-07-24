@@ -41,19 +41,19 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Create fs backend builder.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Fs::default();
-    <span class="comment">// Set the root for fs, all operations will happen under this root.
-    //
-    // NOTE: the root must be absolute path.
-    </span>builder.root(<span class="string">"/tmp"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Fs::default()
+        <span class="comment">// Set the root for fs, all operations will happen under this root.
+        //
+        // NOTE: the root must be absolute path.
+        </span>.root(<span class="string">"/tmp"</span>);
 
     <span class="comment">// `Accessor` provides the low level APIs, we will use `Operator` normally.
     </span><span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-FsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#61-84">source</a><a href="#impl-FsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Fs.html" title="struct opendal::services::Fs">FsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#63-69">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root for backend.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#77-83">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(&amp;mut self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-FsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#61-84">source</a><a href="#impl-FsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Fs.html" title="struct opendal::services::Fs">FsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#63-69">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root for backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/fs/backend.rs.html#77-83">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <ul>
 <li>When append is enabled, we will not use atomic write

@@ -559,7 +559,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }
@@ -568,7 +568,7 @@
     </span>}
 
     <span class="doccomment">/// Set filesystem name of this backend.
-    </span><span class="kw">pub fn </span>filesystem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, filesystem: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>filesystem(<span class="kw-2">mut </span><span class="self">self</span>, filesystem: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.filesystem = filesystem.to_string();
 
         <span class="self">self
@@ -580,7 +580,7 @@
     ///
     /// - Azblob: `https://accountname.blob.core.windows.net`
     /// - Azurite: `http://127.0.0.1:10000/devstoreaccount1`
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string());
@@ -593,7 +593,7 @@
     ///
     /// - If account_name is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>account_name(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>account_name(<span class="kw-2">mut </span><span class="self">self</span>, account_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!account_name.is_empty() {
             <span class="self">self</span>.config.account_name = <span class="prelude-val">Some</span>(account_name.to_string());
         }
@@ -605,7 +605,7 @@
     ///
     /// - If account_key is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>account_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>account_key(<span class="kw-2">mut </span><span class="self">self</span>, account_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!account_key.is_empty() {
             <span class="self">self</span>.config.account_key = <span class="prelude-val">Some</span>(account_key.to_string());
         }
@@ -619,7 +619,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

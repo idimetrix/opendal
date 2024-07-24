@@ -311,19 +311,19 @@
 
 <span class="kw">impl </span>RedbBuilder {
     <span class="doccomment">/// Set the path to the redb data directory. Will create if not exists.
-    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.datadir = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the table name for Redb.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the root for Redb.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}

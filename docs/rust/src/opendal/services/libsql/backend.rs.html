@@ -468,7 +468,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Libsqlservices support.
+<span class="doccomment">/// Config for Libsql services support.
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
@@ -540,7 +540,7 @@
     /// - `http://example.com/db`
     /// - `https://example.com/db`
     /// - `libsql://example.com/db`
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
@@ -550,7 +550,7 @@
     <span class="doccomment">/// set the authentication token for libsql service.
     ///
     /// default: no authentication token
-    </span><span class="kw">pub fn </span>auth_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, auth_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>auth_token(<span class="kw-2">mut </span><span class="self">self</span>, auth_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!auth_token.is_empty() {
             <span class="self">self</span>.config.auth_token = <span class="prelude-val">Some</span>(auth_token.to_owned());
         }
@@ -560,7 +560,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
         }
@@ -568,7 +568,7 @@
     </span>}
 
     <span class="doccomment">/// Set the table name of the libsql service to read/write.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
             <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_string());
         }
@@ -578,7 +578,7 @@
     <span class="doccomment">/// Set the key field name of the libsql service to read/write.
     ///
     /// Default to `key` if not specified.
-    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
             <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
@@ -588,7 +588,7 @@
     <span class="doccomment">/// Set the value field name of the libsql service to read/write.
     ///
     /// Default to `value` if not specified.
-    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
             <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }

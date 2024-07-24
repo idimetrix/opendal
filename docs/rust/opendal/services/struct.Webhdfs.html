@@ -60,32 +60,32 @@ This issue, identified as <a href="https://issues.apache.org/jira/browse/HDFS-66
 
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>builder = Webhdfs::default();
-    <span class="comment">// set the root for WebHDFS, all operations will happen under this root
-    //
-    // Note:
-    // if the root is not exists, the builder will automatically create the
-    // root directory for you
-    // if the root exists and is a directory, the builder will continue working
-    // if the root exists and is a folder, the builder will fail on building backend
-    </span>builder.root(<span class="string">"/path/to/dir"</span>);
-    <span class="comment">// set the endpoint of webhdfs namenode, controlled by dfs.namenode.http-address
-    // default is http://127.0.0.1:9870
-    </span>builder.endpoint(<span class="string">"http://127.0.0.1:9870"</span>);
-    <span class="comment">// set the delegation_token for builder
-    </span>builder.delegation(<span class="string">"delegation_token"</span>);
-    <span class="comment">// set atomic_write_dir for builder
-    </span>builder.atomic_write_dir(<span class="string">".opendal_tmp/"</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>builder = Webhdfs::default()
+        <span class="comment">// set the root for WebHDFS, all operations will happen under this root
+        //
+        // Note:
+        // if the root is not exists, the builder will automatically create the
+        // root directory for you
+        // if the root exists and is a directory, the builder will continue working
+        // if the root exists and is a folder, the builder will fail on building backend
+        </span>.root(<span class="string">"/path/to/dir"</span>)
+        <span class="comment">// set the endpoint of webhdfs namenode, controlled by dfs.namenode.http-address
+        // default is http://127.0.0.1:9870
+        </span>.endpoint(<span class="string">"http://127.0.0.1:9870"</span>)
+        <span class="comment">// set the delegation_token for builder
+        </span>.delegation(<span class="string">"delegation_token"</span>)
+        <span class="comment">// set atomic_write_dir for builder
+        </span>.atomic_write_dir(<span class="string">".opendal_tmp/"</span>);
 
     <span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-WebhdfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#93-164">source</a><a href="#impl-WebhdfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Webhdfs.html" title="struct opendal::services::Webhdfs">WebhdfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#101-107">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set the working directory of this backend</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-WebhdfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#93-164">source</a><a href="#impl-WebhdfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Webhdfs.html" title="struct opendal::services::Webhdfs">WebhdfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#101-107">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set the working directory of this backend</p>
 <p>All operations will happen under this root</p>
 <h5 id="note"><a class="doc-anchor" href="#note">§</a>Note</h5>
 <p>The root will be automatically created if not exists.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#119-125">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(&amp;mut self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set the remote address of this backend
+</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#119-125">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set the remote address of this backend
 default to <code>http://127.0.0.1:9870</code></p>
 <p>Endpoints should be full uri, e.g.</p>
 <ul>
@@ -94,16 +94,16 @@ default to <code>http://127.0.0.1:9870</code></p>
 </ul>
 <p>If user inputs endpoint without scheme, we will
 prepend <code>http://</code> to it.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.delegation" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#133-138">source</a><h4 class="code-header">pub fn <a href="#method.delegation" class="fn">delegation</a>(&amp;mut self, delegation: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set the delegation token of this backend,
+</div></details><details class="toggle method-toggle" open><summary><section id="method.delegation" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#133-138">source</a><h4 class="code-header">pub fn <a href="#method.delegation" class="fn">delegation</a>(self, delegation: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set the delegation token of this backend,
 used for authentication</p>
 <h5 id="note-1"><a class="doc-anchor" href="#note-1">§</a>Note</h5>
 <p>The builder prefers using delegation token over username.
 If both are set, delegation token will be used.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.disable_list_batch" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#146-149">source</a><h4 class="code-header">pub fn <a href="#method.disable_list_batch" class="fn">disable_list_batch</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Disable batch listing</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.disable_list_batch" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#146-149">source</a><h4 class="code-header">pub fn <a href="#method.disable_list_batch" class="fn">disable_list_batch</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Disable batch listing</p>
 <h5 id="note-2"><a class="doc-anchor" href="#note-2">§</a>Note</h5>
 <p>When listing a directory, the backend will default to use batch listing.
 If disabled, the backend will list all files/directories in one request.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#156-163">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(&amp;mut self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#156-163">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>If not set, write multi not support, eg: <code>.opendal_tmp/</code>.</p>
 </div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Builder-for-WebhdfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#166-217">source</a><a href="#impl-Builder-for-WebhdfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="../trait.Builder.html" title="trait opendal::Builder">Builder</a> for <a class="struct" href="struct.Webhdfs.html" title="struct opendal::services::Webhdfs">WebhdfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.build" class="method trait-impl"><a class="src rightside" href="../../src/opendal/services/webhdfs/backend.rs.html#177-216">source</a><a href="#method.build" class="anchor">§</a><h4 class="code-header">fn <a href="../trait.Builder.html#tymethod.build" class="fn">build</a>(self) -&gt; <a class="type" href="../type.Result.html" title="type opendal::Result">Result</a>&lt;impl <a class="trait" href="../raw/trait.Access.html" title="trait opendal::raw::Access">Access</a>&gt;</h4></section></summary><div class="docblock"><p>build the backend</p>

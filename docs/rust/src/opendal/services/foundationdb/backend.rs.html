@@ -261,13 +261,13 @@
 
 <span class="kw">impl </span>FoundationdbBuilder {
     <span class="doccomment">/// Set the root for Foundationdb.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the config path for Foundationdb. If not set, will fallback to use default
-    </span><span class="kw">pub fn </span>config_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>config_path(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.config_path = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}

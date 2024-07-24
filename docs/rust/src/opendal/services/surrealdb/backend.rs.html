@@ -506,7 +506,7 @@
     /// - `wss://ip:port`
     /// - `http://ip:port`
     /// - `https://ip:port`
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, connection_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, connection_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!connection_string.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(connection_string.to_string());
         }
@@ -516,7 +516,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
         }
@@ -524,7 +524,7 @@
     </span>}
 
     <span class="doccomment">/// Set the table name of the surrealdb service for read/write.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
             <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_string());
         }
@@ -532,7 +532,7 @@
     </span>}
 
     <span class="doccomment">/// Set the username of the surrealdb service for signin.
-    </span><span class="kw">pub fn </span>username(<span class="kw-2">&amp;mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>username(<span class="kw-2">mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!username.is_empty() {
             <span class="self">self</span>.config.username = <span class="prelude-val">Some</span>(username.to_string());
         }
@@ -540,7 +540,7 @@
     </span>}
 
     <span class="doccomment">/// Set the password of the surrealdb service for signin.
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!password.is_empty() {
             <span class="self">self</span>.config.password = <span class="prelude-val">Some</span>(password.to_string());
         }
@@ -548,7 +548,7 @@
     </span>}
 
     <span class="doccomment">/// Set the namespace of the surrealdb service for read/write.
-    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">&amp;mut </span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">mut </span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!namespace.is_empty() {
             <span class="self">self</span>.config.namespace = <span class="prelude-val">Some</span>(namespace.to_string());
         }
@@ -556,7 +556,7 @@
     </span>}
 
     <span class="doccomment">/// Set the database of the surrealdb service for read/write.
-    </span><span class="kw">pub fn </span>database(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>database(<span class="kw-2">mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!database.is_empty() {
             <span class="self">self</span>.config.database = <span class="prelude-val">Some</span>(database.to_string());
         }
@@ -566,7 +566,7 @@
     <span class="doccomment">/// Set the key field name of the surrealdb service for read/write.
     ///
     /// Default to `key` if not specified.
-    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
             <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
@@ -576,7 +576,7 @@
     <span class="doccomment">/// Set the value field name of the surrealdb service for read/write.
     ///
     /// Default to `value` if not specified.
-    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
             <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }

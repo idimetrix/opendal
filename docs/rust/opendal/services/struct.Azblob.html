@@ -47,75 +47,72 @@ az storage container create --name test --connection-string &quot;DefaultEndpoin
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Create azblob backend builder.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Azblob::default();
-    <span class="comment">// Set the root for azblob, all operations will happen under this root.
-    //
-    // NOTE: the root must be absolute path.
-    </span>builder.root(<span class="string">"/path/to/dir"</span>);
-    <span class="comment">// Set the container name, this is required.
-    </span>builder.container(<span class="string">"test"</span>);
-    <span class="comment">// Set the endpoint, this is required.
-    //
-    // For examples:
-    // - "http://127.0.0.1:10000/devstoreaccount1"
-    // - "https://accountname.blob.core.windows.net"
-    </span>builder.endpoint(<span class="string">"http://127.0.0.1:10000/devstoreaccount1"</span>);
-    <span class="comment">// Set the account_name and account_key.
-    //
-    // OpenDAL will try load credential from the env.
-    // If credential not set and no valid credential in env, OpenDAL will
-    // send request without signing like anonymous user.
-    </span>builder.account_name(<span class="string">"devstoreaccount1"</span>);
-    builder.account_key(<span class="string">"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Azblob::default()
+        <span class="comment">// Set the root for azblob, all operations will happen under this root.
+        //
+        // NOTE: the root must be absolute path.
+        </span>.root(<span class="string">"/path/to/dir"</span>)
+        <span class="comment">// Set the container name, this is required.
+        </span>.container(<span class="string">"test"</span>)
+        <span class="comment">// Set the endpoint, this is required.
+        //
+        // For examples:
+        // - "http://127.0.0.1:10000/devstoreaccount1"
+        // - "https://accountname.blob.core.windows.net"
+        </span>.endpoint(<span class="string">"http://127.0.0.1:10000/devstoreaccount1"</span>)
+        <span class="comment">// Set the account_name and account_key.
+        //
+        // OpenDAL will try load credential from the env.
+        // If credential not set and no valid credential in env, OpenDAL will
+        // send request without signing like anonymous user.
+        </span>.account_name(<span class="string">"devstoreaccount1"</span>)
+        .account_key(<span class="string">"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="</span>);
 
     <span class="comment">// `Accessor` provides the low level APIs, we will use `Operator` normally.
     </span><span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-AzblobBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#147-404">source</a><a href="#impl-AzblobBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Azblob.html" title="struct opendal::services::Azblob">AzblobBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#151-157">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-AzblobBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#147-404">source</a><a href="#impl-AzblobBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Azblob.html" title="struct opendal::services::Azblob">AzblobBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#151-157">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.container" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#160-164">source</a><h4 class="code-header">pub fn <a href="#method.container" class="fn">container</a>(&amp;mut self, container: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set container name of this backend.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#172-179">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(&amp;mut self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set endpoint of this backend</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.container" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#160-164">source</a><h4 class="code-header">pub fn <a href="#method.container" class="fn">container</a>(self, container: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set container name of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#172-179">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set endpoint of this backend</p>
 <p>Endpoint must be full uri, e.g.</p>
 <ul>
 <li>Azblob: <code>https://accountname.blob.core.windows.net</code></li>
 <li>Azurite: <code>http://127.0.0.1:10000/devstoreaccount1</code></li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.account_name" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#185-191">source</a><h4 class="code-header">pub fn <a href="#method.account_name" class="fn">account_name</a>(&amp;mut self, account_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set account_name of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.account_name" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#185-191">source</a><h4 class="code-header">pub fn <a href="#method.account_name" class="fn">account_name</a>(self, account_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set account_name of this backend.</p>
 <ul>
 <li>If account_name is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.account_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#197-203">source</a><h4 class="code-header">pub fn <a href="#method.account_key" class="fn">account_key</a>(&amp;mut self, account_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set account_key of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.account_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#197-203">source</a><h4 class="code-header">pub fn <a href="#method.account_key" class="fn">account_key</a>(self, account_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set account_key of this backend.</p>
 <ul>
 <li>If account_key is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#217-223">source</a><h4 class="code-header">pub fn <a href="#method.encryption_key" class="fn">encryption_key</a>(&amp;mut self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set encryption_key of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#217-223">source</a><h4 class="code-header">pub fn <a href="#method.encryption_key" class="fn">encryption_key</a>(self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set encryption_key of this backend.</p>
 <h5 id="args"><a class="doc-anchor" href="#args">§</a>Args</h5>
 <p><code>v</code>: Base64-encoded key that matches algorithm specified in <code>encryption_algorithm</code>.</p>
 <h5 id="note"><a class="doc-anchor" href="#note">§</a>Note</h5>
 <p>This function is the low-level setting for SSE related features.</p>
 <p>SSE related options should be set carefully to make them works.
 Please use <code>server_side_encryption_with_*</code> helpers if even possible.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_key_sha256" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#237-243">source</a><h4 class="code-header">pub fn <a href="#method.encryption_key_sha256" class="fn">encryption_key_sha256</a>(&amp;mut self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set encryption_key_sha256 of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_key_sha256" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#237-243">source</a><h4 class="code-header">pub fn <a href="#method.encryption_key_sha256" class="fn">encryption_key_sha256</a>(self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set encryption_key_sha256 of this backend.</p>
 <h5 id="args-1"><a class="doc-anchor" href="#args-1">§</a>Args</h5>
 <p><code>v</code>: Base64-encoded SHA256 digest of the key specified in encryption_key.</p>
 <h5 id="note-1"><a class="doc-anchor" href="#note-1">§</a>Note</h5>
 <p>This function is the low-level setting for SSE related features.</p>
 <p>SSE related options should be set carefully to make them works.
 Please use <code>server_side_encryption_with_*</code> helpers if even possible.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_algorithm" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#257-263">source</a><h4 class="code-header">pub fn <a href="#method.encryption_algorithm" class="fn">encryption_algorithm</a>(&amp;mut self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set encryption_algorithm of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.encryption_algorithm" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#257-263">source</a><h4 class="code-header">pub fn <a href="#method.encryption_algorithm" class="fn">encryption_algorithm</a>(self, v: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set encryption_algorithm of this backend.</p>
 <h5 id="args-2"><a class="doc-anchor" href="#args-2">§</a>Args</h5>
 <p><code>v</code>: server-side encryption algorithm. (Available values: <code>AES256</code>)</p>
 <h5 id="note-2"><a class="doc-anchor" href="#note-2">§</a>Note</h5>
 <p>This function is the low-level setting for SSE related features.</p>
 <p>SSE related options should be set carefully to make them works.
 Please use <code>server_side_encryption_with_*</code> helpers if even possible.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.server_side_encryption_with_customer_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#278-285">source</a><h4 class="code-header">pub fn <a href="#method.server_side_encryption_with_customer_key" class="fn">server_side_encryption_with_customer_key</a>(
-    &amp;mut self,
-    key: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
-) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Enable server side encryption with customer key.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.server_side_encryption_with_customer_key" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#278-285">source</a><h4 class="code-header">pub fn <a href="#method.server_side_encryption_with_customer_key" class="fn">server_side_encryption_with_customer_key</a>(self, key: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>]) -&gt; Self</h4></section></summary><div class="docblock"><p>Enable server side encryption with customer key.</p>
 <p>As known as: CPK</p>
 <h5 id="args-3"><a class="doc-anchor" href="#args-3">§</a>Args</h5>
 <p><code>key</code>: Base64-encoded SHA256 digest of the key specified in encryption_key.</p>
@@ -123,18 +120,18 @@ Please use <code>server_side_encryption_with_*</code> helpers if even possible.<
 <p>Function that helps the user to set the server-side customer-provided encryption key, the key’s SHA256, and the algorithm.
 See <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/encryption-customer-provided-keys">Server-side encryption with customer-provided keys (CPK)</a>
 for more info.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.sas_token" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#294-300">source</a><h4 class="code-header">pub fn <a href="#method.sas_token" class="fn">sas_token</a>(&amp;mut self, sas_token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set sas_token of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sas_token" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#294-300">source</a><h4 class="code-header">pub fn <a href="#method.sas_token" class="fn">sas_token</a>(self, sas_token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set sas_token of this backend.</p>
 <ul>
 <li>If sas_token is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
 <p>See <a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview">Grant limited access to Azure Storage resources using shared access signatures (SAS)</a>
 for more info.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#308-311">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#308-311">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.batch_max_operations" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#314-318">source</a><h4 class="code-header">pub fn <a href="#method.batch_max_operations" class="fn">batch_max_operations</a>(&amp;mut self, batch_max_operations: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set maximum batch operations of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.batch_max_operations" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#314-318">source</a><h4 class="code-header">pub fn <a href="#method.batch_max_operations" class="fn">batch_max_operations</a>(self, batch_max_operations: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set maximum batch operations of this backend.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.from_connection_string" class="method"><a class="src rightside" href="../../src/opendal/services/azblob/backend.rs.html#347-403">source</a><h4 class="code-header">pub fn <a href="#method.from_connection_string" class="fn">from_connection_string</a>(conn: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="../type.Result.html" title="type opendal::Result">Result</a>&lt;Self&gt;</h4></section></summary><div class="docblock"><p>from_connection_string will make a builder from connection string</p>
 <p>connection string looks like:</p>
 <div class="example-wrap"><pre class="language-txt"><code>DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;

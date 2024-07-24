@@ -388,7 +388,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -401,7 +401,7 @@
     <span class="doccomment">/// api_key of this backend.
     ///
     /// required.
-    </span><span class="kw">pub fn </span>api_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, api_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>api_key(<span class="kw-2">mut </span><span class="self">self</span>, api_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.api_key = <span class="kw">if </span>api_key.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -412,7 +412,7 @@
     </span>}
 
     <span class="doccomment">/// Set bucket_id name of this backend.
-    </span><span class="kw">pub fn </span>bucket_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket_id(<span class="kw-2">mut </span><span class="self">self</span>, bucket_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket_id = bucket_id.to_string();
 
         <span class="self">self
@@ -424,7 +424,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

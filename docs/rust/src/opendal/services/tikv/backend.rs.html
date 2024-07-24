@@ -353,7 +353,7 @@
 
 <span class="kw">impl </span>TikvBuilder {
     <span class="doccomment">/// Set the network address of the TiKV service.
-    </span><span class="kw">pub fn </span>endpoints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoints: Vec&lt;String&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoints(<span class="kw-2">mut </span><span class="self">self</span>, endpoints: Vec&lt;String&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoints.is_empty() {
             <span class="self">self</span>.config.endpoints = <span class="prelude-val">Some</span>(endpoints)
         }
@@ -361,13 +361,13 @@
     </span>}
 
     <span class="doccomment">/// Set the insecure connection to TiKV.
-    </span><span class="kw">pub fn </span>insecure(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>insecure(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.insecure = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the certificate authority file path.
-    </span><span class="kw">pub fn </span>ca_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ca_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>ca_path(<span class="kw-2">mut </span><span class="self">self</span>, ca_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!ca_path.is_empty() {
             <span class="self">self</span>.config.ca_path = <span class="prelude-val">Some</span>(ca_path.to_string())
         }
@@ -375,7 +375,7 @@
     </span>}
 
     <span class="doccomment">/// Set the certificate file path.
-    </span><span class="kw">pub fn </span>cert_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cert_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>cert_path(<span class="kw-2">mut </span><span class="self">self</span>, cert_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!cert_path.is_empty() {
             <span class="self">self</span>.config.cert_path = <span class="prelude-val">Some</span>(cert_path.to_string())
         }
@@ -383,7 +383,7 @@
     </span>}
 
     <span class="doccomment">/// Set the key file path.
-    </span><span class="kw">pub fn </span>key_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_path(<span class="kw-2">mut </span><span class="self">self</span>, key_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_path.is_empty() {
             <span class="self">self</span>.config.key_path = <span class="prelude-val">Some</span>(key_path.to_string())
         }

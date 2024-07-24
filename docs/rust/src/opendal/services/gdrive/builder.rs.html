@@ -312,7 +312,7 @@
 
 <span class="kw">impl </span>GdriveBuilder {
     <span class="doccomment">/// Set root path of GoogleDrive folder.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
         <span class="self">self
     </span>}
@@ -327,7 +327,7 @@
     /// - An access token is valid for 1 hour.
     /// - If you want to use the access token for a long time,
     /// you can use the refresh token to get a new access token.
-    </span><span class="kw">pub fn </span>access_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, access_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>access_token(<span class="kw-2">mut </span><span class="self">self</span>, access_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.access_token = <span class="prelude-val">Some</span>(access_token.to_string());
         <span class="self">self
     </span>}
@@ -337,7 +337,7 @@
     /// You can get the refresh token via OAuth 2.0 Flow of GoogleDrive API.
     ///
     /// OpenDAL will use this refresh token to get a new access token when the old one is expired.
-    </span><span class="kw">pub fn </span>refresh_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, refresh_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>refresh_token(<span class="kw-2">mut </span><span class="self">self</span>, refresh_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.refresh_token = <span class="prelude-val">Some</span>(refresh_token.to_string());
         <span class="self">self
     </span>}
@@ -345,7 +345,7 @@
     <span class="doccomment">/// Set the client id for GoogleDrive.
     ///
     /// This is required for OAuth 2.0 Flow to refresh the access token.
-    </span><span class="kw">pub fn </span>client_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>client_id(<span class="kw-2">mut </span><span class="self">self</span>, client_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.client_id = <span class="prelude-val">Some</span>(client_id.to_string());
         <span class="self">self
     </span>}
@@ -353,7 +353,7 @@
     <span class="doccomment">/// Set the client secret for GoogleDrive.
     ///
     /// This is required for OAuth 2.0 Flow with refresh the access token.
-    </span><span class="kw">pub fn </span>client_secret(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_secret: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>client_secret(<span class="kw-2">mut </span><span class="self">self</span>, client_secret: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.client_secret = <span class="prelude-val">Some</span>(client_secret.to_string());
         <span class="self">self
     </span>}
@@ -364,7 +364,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, http_client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, http_client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(http_client);
         <span class="self">self
     </span>}

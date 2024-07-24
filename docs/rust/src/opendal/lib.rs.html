@@ -176,9 +176,6 @@
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -228,8 +225,7 @@
 //!
 //! fn main() -&gt; Result&lt;()&gt; {
 //!     // Pick a builder and configure it.
-//!     let mut builder = services::S3::default();
-//!     builder.bucket("test");
+//!     let mut builder = services::S3::default().bucket("test");
 //!
 //!     // Init an operator
 //!     let op = Operator::new(builder)?.finish();
@@ -254,8 +250,7 @@
 //! #[tokio::main]
 //! async fn main() -&gt; Result&lt;()&gt; {
 //!     // Pick a builder and configure it.
-//!     let mut builder = services::S3::default();
-//!     builder.bucket("test");
+//!     let mut builder = services::S3::default().bucket("test");
 //!
 //!     // Init an operator
 //!     let op = Operator::new(builder)?
@@ -288,8 +283,7 @@
 //! #[tokio::main]
 //! async fn main() -&gt; Result&lt;()&gt; {
 //!     // Pick a builder and configure it.
-//!     let mut builder = services::S3::default();
-//!     builder.bucket("test");
+//!     let mut builder = services::S3::default().bucket("test");
 //!
 //!     // Init an operator
 //!     let op = Operator::new(builder)?

@@ -435,7 +435,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -448,7 +448,7 @@
     <span class="doccomment">/// Your Apple id
     ///
     /// It is required. your Apple login email, e.g. `example@gmail.com`
-    </span><span class="kw">pub fn </span>apple_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, apple_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>apple_id(<span class="kw-2">mut </span><span class="self">self</span>, apple_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.apple_id = <span class="kw">if </span>apple_id.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -461,7 +461,7 @@
     <span class="doccomment">/// Your Apple id password
     ///
     /// It is required. your icloud login password, e.g. `password`
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.password = <span class="kw">if </span>password.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -474,7 +474,7 @@
     <span class="doccomment">/// Trust token and ds_web_auth_token is used for temporary access to the icloudDrive API.
     ///
     /// Authenticate using session token
-    </span><span class="kw">pub fn </span>trust_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, trust_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>trust_token(<span class="kw-2">mut </span><span class="self">self</span>, trust_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.trust_token = <span class="kw">if </span>trust_token.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -487,7 +487,7 @@
     <span class="doccomment">/// ds_web_auth_token must be set in Session
     ///
     /// Avoid Two Factor Authentication
-    </span><span class="kw">pub fn </span>ds_web_auth_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ds_web_auth_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>ds_web_auth_token(<span class="kw-2">mut </span><span class="self">self</span>, ds_web_auth_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.ds_web_auth_token = <span class="kw">if </span>ds_web_auth_token.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -501,7 +501,7 @@
     ///
     /// If in china mainland, we will connect to `https://www.icloud.com.cn`.
     /// Otherwise, we will connect to `https://www.icloud.com`.
-    </span><span class="kw">pub fn </span>is_china_mainland(<span class="kw-2">&amp;mut </span><span class="self">self</span>, is_china_mainland: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>is_china_mainland(<span class="kw-2">mut </span><span class="self">self</span>, is_china_mainland: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.is_china_mainland = is_china_mainland;
         <span class="self">self
     </span>}
@@ -512,7 +512,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

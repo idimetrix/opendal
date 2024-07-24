@@ -510,7 +510,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }
@@ -525,7 +525,7 @@
     /// # Examples
     ///
     /// - `https://cos.ap-singapore.myqcloud.com`
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string());
         }
@@ -536,7 +536,7 @@
     <span class="doccomment">/// Set secret_id of this backend.
     /// - If it is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>secret_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, secret_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>secret_id(<span class="kw-2">mut </span><span class="self">self</span>, secret_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!secret_id.is_empty() {
             <span class="self">self</span>.config.secret_id = <span class="prelude-val">Some</span>(secret_id.to_string());
         }
@@ -547,7 +547,7 @@
     <span class="doccomment">/// Set secret_key of this backend.
     /// - If it is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>secret_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, secret_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>secret_key(<span class="kw-2">mut </span><span class="self">self</span>, secret_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!secret_key.is_empty() {
             <span class="self">self</span>.config.secret_key = <span class="prelude-val">Some</span>(secret_key.to_string());
         }
@@ -557,7 +557,7 @@
 
     <span class="doccomment">/// Set bucket of this backend.
     /// The param is required.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!bucket.is_empty() {
             <span class="self">self</span>.config.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
         }
@@ -571,7 +571,7 @@
     /// For examples:
     ///
     /// - envs like `TENCENTCLOUD_SECRET_ID`
-    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_config_load = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -582,7 +582,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

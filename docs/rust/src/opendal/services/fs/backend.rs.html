@@ -653,7 +653,7 @@
 
 <span class="kw">impl </span>FsBuilder {
     <span class="doccomment">/// Set root for backend.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
         }
@@ -667,7 +667,7 @@
     ///
     /// - When append is enabled, we will not use atomic write
     /// to avoid data loss and performance issue.
-    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!dir.is_empty() {
             <span class="self">self</span>.config.atomic_write_dir = <span class="prelude-val">Some</span>(dir.to_string());
         }

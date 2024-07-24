@@ -322,8 +322,6 @@
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -624,9 +622,7 @@
     </span><span class="kw">async fn </span>test_invalid_lister() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let _ </span>= tracing_subscriber::fmt().try_init();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = Azblob::default();
-
-        builder
+        <span class="kw">let </span>builder = Azblob::default()
             .container(<span class="string">"container"</span>)
             .account_name(<span class="string">"account_name"</span>)
             .account_key(<span class="string">"account_key"</span>)

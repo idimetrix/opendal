@@ -737,7 +737,7 @@
 
 <span class="kw">impl </span>GcsBuilder {
     <span class="doccomment">/// set the working directory root of backend
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string())
         }
@@ -746,7 +746,7 @@
     </span>}
 
     <span class="doccomment">/// set the container's name
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
         <span class="self">self
     </span>}
@@ -762,7 +762,7 @@
     /// - full-control: `https://www.googleapis.com/auth/devstorage.full_control`
     ///
     /// Reference: [Cloud Storage authentication](https://cloud.google.com/storage/docs/authentication)
-    </span><span class="kw">pub fn </span>scope(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scope: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>scope(<span class="kw-2">mut </span><span class="self">self</span>, scope: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!scope.is_empty() {
             <span class="self">self</span>.config.scope = <span class="prelude-val">Some</span>(scope.to_string())
         };
@@ -773,7 +773,7 @@
     ///
     /// service account will be used for fetch token from vm metadata.
     /// If not set, we will try to fetch with `default` service account.
-    </span><span class="kw">pub fn </span>service_account(<span class="kw-2">&amp;mut </span><span class="self">self</span>, service_account: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>service_account(<span class="kw-2">mut </span><span class="self">self</span>, service_account: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!service_account.is_empty() {
             <span class="self">self</span>.config.service_account = <span class="prelude-val">Some</span>(service_account.to_string())
         };
@@ -781,7 +781,7 @@
     </span>}
 
     <span class="doccomment">/// set the endpoint GCS service uses
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.to_string())
         };
@@ -795,7 +795,7 @@
     /// we will use one of `credential` and `credential_path` to complete the OAuth2 authentication.
     ///
     /// Reference: [Google Cloud Storage Authentication](https://cloud.google.com/docs/authentication).
-    </span><span class="kw">pub fn </span>credential(<span class="kw-2">&amp;mut </span><span class="self">self</span>, credential: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>credential(<span class="kw-2">mut </span><span class="self">self</span>, credential: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!credential.is_empty() {
             <span class="self">self</span>.config.credential = <span class="prelude-val">Some</span>(credential.to_string())
         };
@@ -808,7 +808,7 @@
     /// we will use one of `credential` and `credential_path` to complete the OAuth2 authentication.
     ///
     /// Reference: [Google Cloud Storage Authentication](https://cloud.google.com/docs/authentication).
-    </span><span class="kw">pub fn </span>credential_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>credential_path(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!path.is_empty() {
             <span class="self">self</span>.config.credential_path = <span class="prelude-val">Some</span>(path.to_string())
         };
@@ -821,13 +821,13 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Specify the customized token loader used by this service.
-    </span><span class="kw">pub fn </span>customized_token_loader(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token_load: Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>customized_token_loader(<span class="kw-2">mut </span><span class="self">self</span>, token_load: Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.customized_token_loader = <span class="prelude-val">Some</span>(token_load);
         <span class="self">self
     </span>}
@@ -841,7 +841,7 @@
     /// - `private`
     /// - `projectPrivate`
     /// - `publicRead`
-    </span><span class="kw">pub fn </span>predefined_acl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, acl: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>predefined_acl(<span class="kw-2">mut </span><span class="self">self</span>, acl: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!acl.is_empty() {
             <span class="self">self</span>.config.predefined_acl = <span class="prelude-val">Some</span>(acl.to_string())
         };
@@ -855,7 +855,7 @@
     /// - `NEARLINE`
     /// - `COLDLINE`
     /// - `ARCHIVE`
-    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">&amp;mut </span><span class="self">self</span>, class: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">mut </span><span class="self">self</span>, class: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!class.is_empty() {
             <span class="self">self</span>.config.default_storage_class = <span class="prelude-val">Some</span>(class.to_string())
         };

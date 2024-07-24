@@ -737,7 +737,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -748,14 +748,14 @@
     </span>}
 
     <span class="doccomment">/// Set bucket name of this backend.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set endpoint of this backend.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -772,7 +772,7 @@
     ///
     /// - If presign_endpoint is set, we will use presign_endpoint on generating presigned urls.
     /// - if not, we will use endpoint as default.
-    </span><span class="kw">pub fn </span>presign_endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>presign_endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.presign_endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -785,7 +785,7 @@
     ///
     /// - If access_key_id is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.access_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -797,7 +797,7 @@
     ///
     /// - If access_key_secret is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>access_key_secret(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>access_key_secret(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.access_key_secret = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -811,7 +811,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}
@@ -875,7 +875,7 @@
     ///        or not specify the specific CMK ID for OSS-managed KMS key.
     ///     3. Include the `x-oss-server-side-encryption` parameter in the request and set its value to KMS.
     ///     4. If a specific CMK ID is specified, include the `x-oss-server-side-encryption-key-id` parameter in the request, and set its value to the specified CMK ID.
-    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -887,7 +887,7 @@
     /// # Notes
     ///
     /// This option only takes effect when server_side_encryption equals to KMS.
-    </span><span class="kw">pub fn </span>server_side_encryption_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -895,7 +895,7 @@
     </span>}
 
     <span class="doccomment">/// Set maximum batch operations of this backend.
-    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.batch_max_operations = <span class="prelude-val">Some</span>(batch_max_operations);
 
         <span class="self">self
@@ -903,7 +903,7 @@
 
     <span class="doccomment">/// Allow anonymous will allow opendal to send request without signing
     /// when credential is not loaded.
-    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.allow_anonymous = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}

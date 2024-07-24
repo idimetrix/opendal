@@ -528,7 +528,7 @@
     <span class="doccomment">/// set the network address of etcd service.
     ///
     /// default: "http://127.0.0.1:2379"
-    </span><span class="kw">pub fn </span>endpoints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoints(<span class="kw-2">mut </span><span class="self">self</span>, endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoints.is_empty() {
             <span class="self">self</span>.config.endpoints = <span class="prelude-val">Some</span>(endpoints.to_owned());
         }
@@ -538,7 +538,7 @@
     <span class="doccomment">/// set the username for etcd
     ///
     /// default: no username
-    </span><span class="kw">pub fn </span>username(<span class="kw-2">&amp;mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>username(<span class="kw-2">mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!username.is_empty() {
             <span class="self">self</span>.config.username = <span class="prelude-val">Some</span>(username.to_owned());
         }
@@ -548,7 +548,7 @@
     <span class="doccomment">/// set the password for etcd
     ///
     /// default: no password
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!password.is_empty() {
             <span class="self">self</span>.config.password = <span class="prelude-val">Some</span>(password.to_owned());
         }
@@ -558,7 +558,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
@@ -568,7 +568,7 @@
     <span class="doccomment">/// Set the certificate authority file path.
     ///
     /// default is None
-    </span><span class="kw">pub fn </span>ca_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ca_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>ca_path(<span class="kw-2">mut </span><span class="self">self</span>, ca_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!ca_path.is_empty() {
             <span class="self">self</span>.config.ca_path = <span class="prelude-val">Some</span>(ca_path.to_string())
         }
@@ -578,7 +578,7 @@
     <span class="doccomment">/// Set the certificate file path.
     ///
     /// default is None
-    </span><span class="kw">pub fn </span>cert_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cert_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>cert_path(<span class="kw-2">mut </span><span class="self">self</span>, cert_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!cert_path.is_empty() {
             <span class="self">self</span>.config.cert_path = <span class="prelude-val">Some</span>(cert_path.to_string())
         }
@@ -588,7 +588,7 @@
     <span class="doccomment">/// Set the key file path.
     ///
     /// default is None
-    </span><span class="kw">pub fn </span>key_path(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_path(<span class="kw-2">mut </span><span class="self">self</span>, key_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_path.is_empty() {
             <span class="self">self</span>.config.key_path = <span class="prelude-val">Some</span>(key_path.to_string())
         }

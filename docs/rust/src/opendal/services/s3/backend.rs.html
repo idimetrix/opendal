@@ -1359,11 +1359,6 @@
 <a href="#1359" id="1359">1359</a>
 <a href="#1360" id="1360">1360</a>
 <a href="#1361" id="1361">1361</a>
-<a href="#1362" id="1362">1362</a>
-<a href="#1363" id="1363">1363</a>
-<a href="#1364" id="1364">1364</a>
-<a href="#1365" id="1365">1365</a>
-<a href="#1366" id="1366">1366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1626,7 +1621,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -1637,7 +1632,7 @@
     </span>}
 
     <span class="doccomment">/// Set bucket name of this backend.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
@@ -1655,7 +1650,7 @@
     ///
     /// If user inputs endpoint without scheme like "s3.amazonaws.com", we
     /// will prepend "https://" before it.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -1670,7 +1665,7 @@
     /// If using a custom endpoint,
     /// - If region is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, region: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>region(<span class="kw-2">mut </span><span class="self">self</span>, region: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!region.is_empty() {
             <span class="self">self</span>.config.region = <span class="prelude-val">Some</span>(region.to_string())
         }
@@ -1682,7 +1677,7 @@
     ///
     /// - If access_key_id is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.access_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1694,7 +1689,7 @@
     ///
     /// - If secret_access_key is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>secret_access_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>secret_access_key(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.secret_access_key = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1706,7 +1701,7 @@
     ///
     /// If `role_arn` is set, we will use already known config as source
     /// credential to assume role with `role_arn`.
-    </span><span class="kw">pub fn </span>role_arn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>role_arn(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.role_arn = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1715,7 +1710,7 @@
     </span>}
 
     <span class="doccomment">/// Set external_id for this backend.
-    </span><span class="kw">pub fn </span>external_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>external_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.external_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1735,7 +1730,7 @@
     /// - `REDUCED_REDUNDANCY`
     /// - `STANDARD`
     /// - `STANDARD_IA`
-    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.default_storage_class = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1753,7 +1748,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1778,7 +1773,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_aws_kms_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_aws_kms_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_aws_kms_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1796,7 +1791,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_algorithm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_algorithm(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_algorithm = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1817,7 +1812,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_key(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_key = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1837,7 +1832,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_key_md5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_key_md5(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_key_md5 = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1850,7 +1845,7 @@
     /// As known as: SSE-KMS
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_aws_managed_kms_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_aws_managed_kms_key(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"aws:kms"</span>.to_string());
         <span class="self">self
     </span>}
@@ -1861,9 +1856,9 @@
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
     </span><span class="kw">pub fn </span>server_side_encryption_with_customer_managed_kms_key(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span><span class="self">self</span>,
         aws_kms_key_id: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"aws:kms"</span>.to_string());
         <span class="self">self</span>.config.server_side_encryption_aws_kms_key_id = <span class="prelude-val">Some</span>(aws_kms_key_id.to_string());
         <span class="self">self
@@ -1874,7 +1869,7 @@
     /// As known as: SSE-S3
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_s3_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_s3_key(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"AES256"</span>.to_string());
         <span class="self">self
     </span>}
@@ -1884,11 +1879,7 @@
     /// As known as: SSE-C
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_customer_key(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        algorithm: <span class="kw-2">&amp;</span>str,
-        key: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_customer_key(<span class="kw-2">mut </span><span class="self">self</span>, algorithm: <span class="kw-2">&amp;</span>str, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption_customer_algorithm = <span class="prelude-val">Some</span>(algorithm.to_string());
         <span class="self">self</span>.config.server_side_encryption_customer_key = <span class="prelude-val">Some</span>(BASE64_STANDARD.encode(key));
         <span class="self">self</span>.config.server_side_encryption_customer_key_md5 =
@@ -1901,7 +1892,7 @@
     /// # Warning
     ///
     /// session token's lifetime is short and requires users to refresh in time.
-    </span><span class="kw">pub fn </span>session_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>session_token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
             <span class="self">self</span>.config.session_token = <span class="prelude-val">Some</span>(token.to_string());
         }
@@ -1910,7 +1901,7 @@
 
     <span class="doccomment">/// Set temporary credential used in AWS S3 connections
     </span><span class="attr">#[deprecated(note = <span class="string">"Please use `session_token` instead"</span>)]
-    </span><span class="kw">pub fn </span>security_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>security_token(<span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.session_token(token)
     }
 
@@ -1921,7 +1912,7 @@
     ///
     /// - envs like `AWS_ACCESS_KEY_ID`
     /// - files like `~/.aws/config`
-    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_config_load = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1930,14 +1921,14 @@
     ///
     /// This option is used to disable the default behavior of opendal
     /// to load credential from ec2 metadata, a.k.a, IMDSv2
-    </span><span class="kw">pub fn </span>disable_ec2_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_ec2_metadata(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_ec2_metadata = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Allow anonymous will allow opendal to send request without signing
     /// when credential is not loaded.
-    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.allow_anonymous = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1947,7 +1938,7 @@
     ///
     /// - By default, opendal will send API to `https://s3.us-east-1.amazonaws.com/bucket_name`
     /// - Enabled, opendal will send API to `https://bucket_name.s3.us-east-1.amazonaws.com`
-    </span><span class="kw">pub fn </span>enable_virtual_host_style(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>enable_virtual_host_style(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.enable_virtual_host_style = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1955,7 +1946,7 @@
     <span class="doccomment">/// Disable stat with override so that opendal will not send stat request with override queries.
     ///
     /// For example, R2 doesn't support stat with `response_content_type` query.
-    </span><span class="kw">pub fn </span>disable_stat_with_override(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_stat_with_override(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_stat_with_override = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1964,7 +1955,7 @@
     ///
     /// If customized_credential_load has been set, we will ignore all other
     /// credential load methods.
-    </span><span class="kw">pub fn </span>customized_credential_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>customized_credential_load(<span class="kw-2">mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.customized_credential_load = <span class="prelude-val">Some</span>(cred);
         <span class="self">self
     </span>}
@@ -1975,7 +1966,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}
@@ -2045,7 +2036,7 @@
     }
 
     <span class="doccomment">/// Set maximum batch operations of this backend.
-    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.batch_max_operations = <span class="prelude-val">Some</span>(batch_max_operations);
 
         <span class="self">self
@@ -2056,7 +2047,7 @@
     ///
     /// Available options:
     /// - "crc32c"
-    </span><span class="kw">pub fn </span>checksum_algorithm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, checksum_algorithm: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>checksum_algorithm(<span class="kw-2">mut </span><span class="self">self</span>, checksum_algorithm: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.checksum_algorithm = <span class="prelude-val">Some</span>(checksum_algorithm.to_string());
 
         <span class="self">self
@@ -2640,9 +2631,9 @@
 
         <span class="kw">for </span>(bucket, enable_virtual_host_style, expected) <span class="kw">in </span>bucket_cases {
             <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(bucket);
+            b = b.bucket(bucket);
             <span class="kw">if </span>enable_virtual_host_style {
-                b.enable_virtual_host_style();
+                b = b.enable_virtual_host_style();
             }
             <span class="macro">assert_eq!</span>(b.is_bucket_valid(), expected)
         }
@@ -2660,10 +2651,9 @@
         ];
 
         <span class="kw">for </span>endpoint <span class="kw">in </span><span class="kw-2">&amp;</span>endpoint_cases {
-            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(<span class="string">"test"</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default().bucket(<span class="string">"test"</span>);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(endpoint) = endpoint {
-                b.endpoint(endpoint);
+                b = b.endpoint(endpoint);
             }
 
             <span class="kw">let </span>endpoint = b.build_endpoint(<span class="string">"us-east-2"</span>);
@@ -2671,11 +2661,11 @@
         }
 
         <span class="kw">for </span>endpoint <span class="kw">in </span><span class="kw-2">&amp;</span>endpoint_cases {
-            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(<span class="string">"test"</span>);
-            b.enable_virtual_host_style();
+            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default()
+                .bucket(<span class="string">"test"</span>)
+                .enable_virtual_host_style();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(endpoint) = endpoint {
-                b.endpoint(endpoint);
+                b = b.endpoint(endpoint);
             }
 
             <span class="kw">let </span>endpoint = b.build_endpoint(<span class="string">"us-east-2"</span>);

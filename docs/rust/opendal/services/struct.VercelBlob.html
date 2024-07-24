@@ -37,23 +37,22 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// create backend builder
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = VercelBlob::default();
-
-    <span class="comment">// set the storage bucket for OpenDAL
-    </span>builder.root(<span class="string">"/"</span>);
-    <span class="comment">// set the token for OpenDAL
-    </span>builder.token(<span class="string">"you_token"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = VercelBlob::default()
+        <span class="comment">// set the storage bucket for OpenDAL
+        </span>.root(<span class="string">"/"</span>)
+        <span class="comment">// set the token for OpenDAL
+        </span>.token(<span class="string">"you_token"</span>);
 
     <span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-VercelBlobBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#89-123">source</a><a href="#impl-VercelBlobBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.VercelBlob.html" title="struct opendal::services::VercelBlob">VercelBlobBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#93-101">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-VercelBlobBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#89-123">source</a><a href="#impl-VercelBlobBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.VercelBlob.html" title="struct opendal::services::VercelBlob">VercelBlobBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#93-101">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.token" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#107-111">source</a><h4 class="code-header">pub fn <a href="#method.token" class="fn">token</a>(&amp;mut self, token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Vercel Blob token.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.token" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#107-111">source</a><h4 class="code-header">pub fn <a href="#method.token" class="fn">token</a>(self, token: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Vercel Blob token.</p>
 <p>Get from Vercel environment variable <code>BLOB_READ_WRITE_TOKEN</code>.
 It is required.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#119-122">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/vercel_blob/backend.rs.html#119-122">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>

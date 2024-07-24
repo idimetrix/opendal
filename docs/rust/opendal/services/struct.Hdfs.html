@@ -103,42 +103,42 @@ hdrs = { version = &quot;&lt;version_number&gt;&quot;, features = [&quot;vendore
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Create fs backend builder.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Hdfs::default();
-    <span class="comment">// Set the name node for hdfs.
-    // If the string starts with a protocol type such as file://, hdfs://, or gs://, this protocol type will be used.
-    </span>builder.name_node(<span class="string">"hdfs://127.0.0.1:9000"</span>);
-    <span class="comment">// Set the root for hdfs, all operations will happen under this root.
-    //
-    // NOTE: the root must be absolute path.
-    </span>builder.root(<span class="string">"/tmp"</span>);
-    
-    <span class="comment">// Enable the append capacity for hdfs. 
-    // 
-    // Note: HDFS run in non-distributed mode doesn't support append.
-    </span>builder.enable_append(<span class="bool-val">true</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Hdfs::default()
+        <span class="comment">// Set the name node for hdfs.
+        // If the string starts with a protocol type such as file://, hdfs://, or gs://, this protocol type will be used.
+        </span>.name_node(<span class="string">"hdfs://127.0.0.1:9000"</span>)
+        <span class="comment">// Set the root for hdfs, all operations will happen under this root.
+        //
+        // NOTE: the root must be absolute path.
+        </span>.root(<span class="string">"/tmp"</span>)
+        
+        <span class="comment">// Enable the append capacity for hdfs. 
+        // 
+        // Note: HDFS run in non-distributed mode doesn't support append.
+        </span>.enable_append(<span class="bool-val">true</span>);
 
     <span class="comment">// `Accessor` provides the low level APIs, we will use `Operator` normally.
     </span><span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-HdfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#94-163">source</a><a href="#impl-HdfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Hdfs.html" title="struct opendal::services::Hdfs">HdfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#98-106">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-HdfsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#94-163">source</a><a href="#impl-HdfsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Hdfs.html" title="struct opendal::services::Hdfs">HdfsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#98-106">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.name_node" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#114-121">source</a><h4 class="code-header">pub fn <a href="#method.name_node" class="fn">name_node</a>(&amp;mut self, name_node: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set name_node of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.name_node" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#114-121">source</a><h4 class="code-header">pub fn <a href="#method.name_node" class="fn">name_node</a>(self, name_node: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set name_node of this backend.</p>
 <p>Valid format including:</p>
 <ul>
 <li><code>default</code>: using the default setting based on hadoop config.</li>
 <li><code>hdfs://127.0.0.1:9000</code>: connect to hdfs cluster.</li>
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.kerberos_ticket_cache_path" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#126-131">source</a><h4 class="code-header">pub fn <a href="#method.kerberos_ticket_cache_path" class="fn">kerberos_ticket_cache_path</a>(
-    &amp;mut self,
+    self,
     kerberos_ticket_cache_path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
-) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set kerberos_ticket_cache_path of this backend</p>
+) -&gt; Self</h4></section></summary><div class="docblock"><p>Set kerberos_ticket_cache_path of this backend</p>
 <p>This should be configured when kerberos is enabled.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.user" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#134-139">source</a><h4 class="code-header">pub fn <a href="#method.user" class="fn">user</a>(&amp;mut self, user: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set user of this backend</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.enable_append" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#144-147">source</a><h4 class="code-header">pub fn <a href="#method.enable_append" class="fn">enable_append</a>(&amp;mut self, enable_append: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Enable append capacity of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.user" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#134-139">source</a><h4 class="code-header">pub fn <a href="#method.user" class="fn">user</a>(self, user: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set user of this backend</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.enable_append" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#144-147">source</a><h4 class="code-header">pub fn <a href="#method.enable_append" class="fn">enable_append</a>(self, enable_append: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Enable append capacity of this backend.</p>
 <p>This should be disabled when HDFS runs in non-distributed mode.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#155-162">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(&amp;mut self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.atomic_write_dir" class="method"><a class="src rightside" href="../../src/opendal/services/hdfs/backend.rs.html#155-162">source</a><h4 class="code-header">pub fn <a href="#method.atomic_write_dir" class="fn">atomic_write_dir</a>(self, dir: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set temp dir for atomic write.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <ul>
 <li>When append is enabled, we will not use atomic write

@@ -454,7 +454,7 @@
     <span class="doccomment">/// Set api token for the cloudflare d1 service.
     ///
     /// create a api token from [here](https://dash.cloudflare.com/profile/api-tokens)
-    </span><span class="kw">pub fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
             <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
         }
@@ -465,7 +465,7 @@
     ///
     /// get the account identifier from Workers &amp; Pages -&gt; Overview -&gt; Account ID
     /// If not specified, it will return an error when building.
-    </span><span class="kw">pub fn </span>account_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>account_id(<span class="kw-2">mut </span><span class="self">self</span>, account_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!account_id.is_empty() {
             <span class="self">self</span>.config.account_id = <span class="prelude-val">Some</span>(account_id.to_string());
         }
@@ -476,7 +476,7 @@
     ///
     /// get the database identifier from Workers &amp; Pages -&gt; D1 -&gt; [Your Database] -&gt; Database ID
     /// If not specified, it will return an error when building.
-    </span><span class="kw">pub fn </span>database_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>database_id(<span class="kw-2">mut </span><span class="self">self</span>, database_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!database_id.is_empty() {
             <span class="self">self</span>.config.database_id = <span class="prelude-val">Some</span>(database_id.to_string());
         }
@@ -486,7 +486,7 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!root.is_empty() {
             <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
         }
@@ -496,7 +496,7 @@
     <span class="doccomment">/// Set the table name of the d1 service to read/write.
     ///
     /// If not specified, it will return an error when building.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
             <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_owned());
         }
@@ -506,7 +506,7 @@
     <span class="doccomment">/// Set the key field name of the d1 service to read/write.
     ///
     /// Default to `key` if not specified.
-    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
             <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
@@ -516,7 +516,7 @@
     <span class="doccomment">/// Set the value field name of the d1 service to read/write.
     ///
     /// Default to `value` if not specified.
-    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
             <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }

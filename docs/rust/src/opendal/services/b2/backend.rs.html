@@ -632,7 +632,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -643,7 +643,7 @@
     </span>}
 
     <span class="doccomment">/// application_key_id of this backend.
-    </span><span class="kw">pub fn </span>application_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, application_key_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>application_key_id(<span class="kw-2">mut </span><span class="self">self</span>, application_key_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.application_key_id = <span class="kw">if </span>application_key_id.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -654,7 +654,7 @@
     </span>}
 
     <span class="doccomment">/// application_key of this backend.
-    </span><span class="kw">pub fn </span>application_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, application_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>application_key(<span class="kw-2">mut </span><span class="self">self</span>, application_key: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.application_key = <span class="kw">if </span>application_key.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -666,7 +666,7 @@
 
     <span class="doccomment">/// Set bucket name of this backend.
     /// You can find it in &lt;https://secure.backblaze.com/b2_buckets.html&gt;
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
@@ -674,7 +674,7 @@
 
     <span class="doccomment">/// Set bucket id of this backend.
     /// You can find it in &lt;https://secure.backblaze.com/b2_buckets.html&gt;
-    </span><span class="kw">pub fn </span>bucket_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket_id(<span class="kw-2">mut </span><span class="self">self</span>, bucket_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket_id = bucket_id.to_string();
 
         <span class="self">self
@@ -686,7 +686,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}

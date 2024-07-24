@@ -40,26 +40,25 @@ blocking</li>
 <span class="attr">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// create backend builder
-    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Obs::default();
-
-    <span class="comment">// set the storage bucket for OpenDAL
-    </span>builder.bucket(<span class="string">"test"</span>);
-    builder.endpoint(<span class="string">"obs.cn-north-1.myhuaweicloud.com"</span>);
-    <span class="comment">// Set the access_key_id and secret_access_key.
-    //
-    // OpenDAL will try load credential from the env.
-    // If credential not set and no valid credential in env, OpenDAL will
-    // send request without signing like anonymous user.
-    </span>builder.access_key_id(<span class="string">"access_key_id"</span>);
-    builder.secret_access_key(<span class="string">"secret_access_key"</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = Obs::default()
+        <span class="comment">// set the storage bucket for OpenDAL
+        </span>.bucket(<span class="string">"test"</span>)
+        .endpoint(<span class="string">"obs.cn-north-1.myhuaweicloud.com"</span>)
+        <span class="comment">// Set the access_key_id and secret_access_key.
+        //
+        // OpenDAL will try load credential from the env.
+        // If credential not set and no valid credential in env, OpenDAL will
+        // send request without signing like anonymous user.
+        </span>.access_key_id(<span class="string">"access_key_id"</span>)
+        .secret_access_key(<span class="string">"secret_access_key"</span>);
 
     <span class="kw">let </span>op: Operator = Operator::new(builder)<span class="question-mark">?</span>.finish();
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-ObsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#94-164">source</a><a href="#impl-ObsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Obs.html" title="struct opendal::services::Obs">ObsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#98-104">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(&amp;mut self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-ObsBuilder" class="impl"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#94-164">source</a><a href="#impl-ObsBuilder" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Obs.html" title="struct opendal::services::Obs">ObsBuilder</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.root" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#98-104">source</a><h4 class="code-header">pub fn <a href="#method.root" class="fn">root</a>(self, root: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set root of this backend.</p>
 <p>All operations will happen under this root.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#114-120">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(&amp;mut self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set endpoint of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.endpoint" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#114-120">source</a><h4 class="code-header">pub fn <a href="#method.endpoint" class="fn">endpoint</a>(self, endpoint: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set endpoint of this backend.</p>
 <p>Both huaweicloud default domain and user domain endpoints are allowed.
 Please DO NOT add the bucket name to the endpoint.</p>
 <ul>
@@ -67,19 +66,19 @@ Please DO NOT add the bucket name to the endpoint.</p>
 <li><code>obs.cn-north-4.myhuaweicloud.com</code> (https by default)</li>
 <li><code>https://custom.obs.com</code> (port should not be set)</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.access_key_id" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#125-131">source</a><h4 class="code-header">pub fn <a href="#method.access_key_id" class="fn">access_key_id</a>(&amp;mut self, access_key_id: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set access_key_id of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.access_key_id" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#125-131">source</a><h4 class="code-header">pub fn <a href="#method.access_key_id" class="fn">access_key_id</a>(self, access_key_id: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set access_key_id of this backend.</p>
 <ul>
 <li>If it is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.secret_access_key" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#136-142">source</a><h4 class="code-header">pub fn <a href="#method.secret_access_key" class="fn">secret_access_key</a>(&amp;mut self, secret_access_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set secret_access_key of this backend.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.secret_access_key" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#136-142">source</a><h4 class="code-header">pub fn <a href="#method.secret_access_key" class="fn">secret_access_key</a>(self, secret_access_key: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set secret_access_key of this backend.</p>
 <ul>
 <li>If it is set, we will take user’s input first.</li>
 <li>If not, we will try to load it from environment.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.bucket" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#146-152">source</a><h4 class="code-header">pub fn <a href="#method.bucket" class="fn">bucket</a>(&amp;mut self, bucket: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Set bucket of this backend.
+</div></details><details class="toggle method-toggle" open><summary><section id="method.bucket" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#146-152">source</a><h4 class="code-header">pub fn <a href="#method.bucket" class="fn">bucket</a>(self, bucket: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Set bucket of this backend.
 The param is required.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#160-163">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(&amp;mut self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut Self</a></h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.http_client" class="method"><a class="src rightside" href="../../src/opendal/services/obs/backend.rs.html#160-163">source</a><h4 class="code-header">pub fn <a href="#method.http_client" class="fn">http_client</a>(self, client: <a class="struct" href="../raw/struct.HttpClient.html" title="struct opendal::raw::HttpClient">HttpClient</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Specify the http client that used by this service.</p>
 <h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
 <p>This API is part of OpenDAL’s Raw API. <code>HttpClient</code> could be changed
 during minor updates.</p>
