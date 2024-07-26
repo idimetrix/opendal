@@ -196,7 +196,7 @@
 </span><span class="attr">#![doc(
     html_logo_url = <span class="string">"https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg"
 </span>)]
-#![cfg_attr(docs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 </span><span class="doccomment">//! Apache OpenDAL™ is a data access layer that allows users to easily and
 //! efficiently retrieve data from various storage services in a unified way.
@@ -310,7 +310,7 @@
 <span class="kw">pub use </span>types::<span class="kw-2">*</span>;
 
 <span class="comment">// Public modules, they will be accessed like `opendal::layers::Xxxx`
-</span><span class="attr">#[cfg(docs)]
+</span><span class="attr">#[cfg(docsrs)]
 </span><span class="kw">pub mod </span>docs;
 <span class="kw">pub mod </span>layers;
 <span class="kw">pub mod </span>raw;

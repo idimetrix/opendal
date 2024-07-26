@@ -326,7 +326,7 @@
     ///
     /// - An access token is valid for 1 hour.
     /// - If you want to use the access token for a long time,
-    /// you can use the refresh token to get a new access token.
+    ///   you can use the refresh token to get a new access token.
     </span><span class="kw">pub fn </span>access_token(<span class="kw-2">mut </span><span class="self">self</span>, access_token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.access_token = <span class="prelude-val">Some</span>(access_token.to_string());
         <span class="self">self

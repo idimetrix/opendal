@@ -1358,7 +1358,6 @@
 <a href="#1358" id="1358">1358</a>
 <a href="#1359" id="1359">1359</a>
 <a href="#1360" id="1360">1360</a>
-<a href="#1361" id="1361">1361</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1508,13 +1507,13 @@
     <span class="doccomment">/// server_side_encryption_aws_kms_key_id for this backend
     ///
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is not set, S3 will use aws managed kms key to encrypt data.
+    ///   is not set, S3 will use aws managed kms key to encrypt data.
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is a valid kms key id, S3 will use the provided kms key to encrypt data.
+    ///   is a valid kms key id, S3 will use the provided kms key to encrypt data.
     /// - If the `server_side_encryption_aws_kms_key_id` is invalid or not found, an error will be
-    /// returned.
+    ///   returned.
     /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id`
-    /// is a noop.
+    ///   is a noop.
     </span><span class="kw">pub </span>server_side_encryption_aws_kms_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// server_side_encryption_customer_algorithm for this backend.
     ///
@@ -1759,13 +1758,12 @@
     <span class="doccomment">/// Set server_side_encryption_aws_kms_key_id for this backend
     ///
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is not set, S3 will use aws managed kms key to encrypt data.
+    ///   is not set, S3 will use aws managed kms key to encrypt data.
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is a valid kms key id, S3 will use the provided kms key to encrypt data.
+    ///   is a valid kms key id, S3 will use the provided kms key to encrypt data.
     /// - If the `server_side_encryption_aws_kms_key_id` is invalid or not found, an error will be
-    /// returned.
-    /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id`
-    /// is a noop.
+    ///   returned.
+    /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id` is a noop.
     ///
     /// # Note
     ///

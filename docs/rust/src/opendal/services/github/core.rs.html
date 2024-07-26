@@ -508,7 +508,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req_body = CreateOrUpdateContentsRequest {
             message: <span class="macro">format!</span>(<span class="string">"Write {} at {} via opendal"</span>, path, chrono::Local::now()),
-            content: base64::engine::general_purpose::STANDARD.encode(<span class="kw-2">&amp;</span>bs.to_bytes()),
+            content: base64::engine::general_purpose::STANDARD.encode(bs.to_bytes()),
             sha: <span class="prelude-val">None</span>,
         };
 

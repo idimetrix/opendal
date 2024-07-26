@@ -536,7 +536,7 @@
     ///
     /// - the total size of data is unknown.
     /// - the total size of data is known, but the size of current write
-    /// is less then the total size.
+    ///   is less then the total size.
     </span><span class="kw">fn </span>initiate_part(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;String&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// write_part will write a part of the data and returns the result
