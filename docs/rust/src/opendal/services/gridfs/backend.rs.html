@@ -301,12 +301,6 @@
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -327,13 +321,12 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
+<span class="kw">use </span>futures::AsyncReadExt;
 <span class="kw">use </span>futures::AsyncWriteExt;
-<span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>mongodb::bson::doc;
+<span class="kw">use </span>mongodb::gridfs::GridFsBucket;
 <span class="kw">use </span>mongodb::options::ClientOptions;
 <span class="kw">use </span>mongodb::options::GridFsBucketOptions;
-<span class="kw">use </span>mongodb::options::GridFsFindOptions;
-<span class="kw">use </span>mongodb::GridFsBucket;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::OnceCell;
@@ -554,41 +547,38 @@
     <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
-        <span class="kw">let </span>options = GridFsFindOptions::builder().limit(<span class="prelude-val">Some</span>(<span class="number">1</span>)).build();
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, options)
+        <span class="kw">let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>destination = Vec::new();
+        <span class="kw">let </span>file_id = doc.id;
+        <span class="kw">let </span><span class="kw-2">mut </span>stream = bucket
+            .open_download_stream(file_id)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-
-        <span class="kw">match </span>cursor.next().<span class="kw">await </span>{
-            <span class="prelude-val">Some</span>(doc) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>destination = Vec::new();
-                <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-                bucket
-                    .download_to_futures_0_3_writer(file_id, <span class="kw-2">&amp;mut </span>destination)
-                    .<span class="kw">await
-                    </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(destination)))
-            }
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        }
+        stream
+            .read_to_end(<span class="kw-2">&amp;mut </span>destination)
+            .<span class="kw">await
+            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(destination)))
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="comment">// delete old file if exists
         </span><span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
-        <span class="kw">let </span>options = GridFsFindOptions::builder().limit(<span class="prelude-val">Some</span>(<span class="number">1</span>)).build();
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, options)
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span>{
+            <span class="kw">let </span>file_id = doc.id;
+            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
+        };
+
+        <span class="comment">// set new file
+        </span><span class="kw">let </span><span class="kw-2">mut </span>upload_stream = bucket
+            .open_upload_stream(path)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(doc) = cursor.next().<span class="kw">await </span>{
-            <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        }
-        <span class="comment">// set new file
-        </span><span class="kw">let </span><span class="kw-2">mut </span>upload_stream = bucket.open_upload_stream(path, <span class="prelude-val">None</span>);
         upload_stream
             .write_all(<span class="kw-2">&amp;</span>value.to_vec())
             .<span class="kw">await
@@ -601,14 +591,12 @@
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, <span class="prelude-val">None</span>)
-            .<span class="kw">await
-            </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(doc) = cursor.next().<span class="kw">await </span>{
-            <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        }
+        <span class="kw">let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+
+        <span class="kw">let </span>file_id = doc.id;
+        bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }

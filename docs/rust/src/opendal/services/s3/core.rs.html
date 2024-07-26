@@ -1133,8 +1133,6 @@
 <a href="#1133" id="1133">1133</a>
 <a href="#1134" id="1134">1134</a>
 <a href="#1135" id="1135">1135</a>
-<a href="#1136" id="1136">1136</a>
-<a href="#1137" id="1137">1137</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2133,8 +2131,6 @@
             &lt;/CompleteMultipartUpload&gt;"#
                 </span><span class="comment">// Cleanup space and new line
                 </span>.replace([<span class="string">' '</span>, <span class="string">'\n'</span>], <span class="string">""</span>)
-                <span class="comment">// Escape `"` by hand to address &lt;https://github.com/tafia/quick-xml/issues/362&gt;
-                </span>.replace(<span class="string">'"'</span>, <span class="string">"&amp;quot;"</span>)
         )
     }
 

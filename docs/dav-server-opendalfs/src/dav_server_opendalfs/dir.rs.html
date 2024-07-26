@@ -84,6 +84,7 @@
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -101,7 +102,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>dav_server::fs::{DavDirEntry, DavMetaData};
+</span><span class="kw">use </span>dav_server::fs::{DavDirEntry, DavMetaData, FsResult};
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>futures::{FutureExt, Stream};
 <span class="kw">use </span>opendal::Operator;
@@ -127,14 +128,15 @@
 }
 
 <span class="kw">impl </span>Stream <span class="kw">for </span>OpendalStream {
-    <span class="kw">type </span>Item = Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;;
+    <span class="kw">type </span>Item = FsResult&lt;Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;&gt;;
 
     <span class="kw">fn </span>poll_next(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
         <span class="kw">let </span>dav_stream = <span class="self">self</span>.get_mut();
         <span class="kw">match </span><span class="macro">ready!</span>(dav_stream.lister.poll_next_unpin(cx)) {
             <span class="prelude-val">Some</span>(entry) =&gt; {
-                <span class="kw">let </span>webdav_entry = OpendalDirEntry::new(dav_stream.op.clone(), entry.unwrap());
-                Ready(<span class="prelude-val">Some</span>(Box::new(webdav_entry) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;))
+                <span class="kw">let </span>entry = entry.map_err(convert_error)<span class="question-mark">?</span>;
+                <span class="kw">let </span>webdav_entry = OpendalDirEntry::new(dav_stream.op.clone(), entry);
+                Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Box::new(webdav_entry) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;)))
             }
             <span class="prelude-val">None </span>=&gt; Ready(<span class="prelude-val">None</span>),
         }

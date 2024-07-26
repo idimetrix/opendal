@@ -309,7 +309,6 @@
 <a href="#309" id="309">309</a>
 <a href="#310" id="310">310</a>
 <a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -334,7 +333,6 @@
 <span class="kw">use </span>mongodb::bson::Binary;
 <span class="kw">use </span>mongodb::bson::Document;
 <span class="kw">use </span>mongodb::options::ClientOptions;
-<span class="kw">use </span>mongodb::options::UpdateOptions;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::OnceCell;
@@ -577,7 +575,7 @@
         <span class="kw">let </span>collection = <span class="self">self</span>.get_collection().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc!</span> {<span class="self">self</span>.key_field.as_str():path};
         <span class="kw">let </span>result = collection
-            .find_one(filter, <span class="prelude-val">None</span>)
+            .find_one(filter)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
         <span class="kw">match </span>result {
@@ -595,9 +593,9 @@
         <span class="kw">let </span>collection = <span class="self">self</span>.get_collection().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="self">self</span>.key_field.as_str(): path };
         <span class="kw">let </span>update = <span class="macro">doc!</span> { <span class="string">"$set"</span>: { <span class="self">self</span>.value_field.as_str(): Binary { subtype: mongodb::bson::spec::BinarySubtype::Generic, bytes: value.to_vec() } } };
-        <span class="kw">let </span>update_options = UpdateOptions::builder().upsert(<span class="bool-val">true</span>).build();
         collection
-            .update_one(filter, update, update_options)
+            .update_one(filter, update)
+            .upsert(<span class="bool-val">true</span>)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
 
@@ -608,7 +606,7 @@
         <span class="kw">let </span>collection = <span class="self">self</span>.get_collection().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>filter = <span class="macro">doc!</span> {<span class="self">self</span>.key_field.as_str():path};
         collection
-            .delete_one(filter, <span class="prelude-val">None</span>)
+            .delete_one(filter)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
