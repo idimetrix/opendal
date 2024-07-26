@@ -350,7 +350,6 @@
 <a href="#350" id="350">350</a>
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -539,9 +538,8 @@
     /// FuturesAsyncWriter is not a zero-cost abstraction. The underlying writer
     /// requires an owned [`Buffer`], which involves an extra copy operation.
     ///
-    /// FuturesAsyncWriters are automatically closed when they go out of scope. Errors detected on
-    /// closing are ignored by the implementation of Drop. Use the method `close` if these errors
-    /// must be manually handled.
+    /// FuturesAsyncWriter is required to call `close()` to make sure all
+    /// data have been written to the storage.
     ///
     /// # Examples
     ///
