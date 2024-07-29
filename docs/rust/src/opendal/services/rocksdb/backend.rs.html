@@ -233,7 +233,7 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Config for Rocksdb Service.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
 </span><span class="kw">pub struct </span>RocksdbConfig {

@@ -187,7 +187,7 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// cacache service support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
+</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>CacacheConfig {
     <span class="doccomment">/// That path to the cacache data directory.
     </span><span class="kw">pub </span>datadir: <span class="prelude-ty">Option</span>&lt;String&gt;,

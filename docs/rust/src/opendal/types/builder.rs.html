@@ -112,6 +112,7 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -131,6 +132,7 @@
 
 </span><span class="kw">use </span>serde::de::DeserializeOwned;
 <span class="kw">use </span>serde::Serialize;
+<span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -207,7 +209,7 @@
 ///     Ok(())
 /// }
 /// ```
-</span><span class="kw">pub trait </span>Configurator: Serialize + DeserializeOwned + <span class="lifetime">'static </span>{
+</span><span class="kw">pub trait </span>Configurator: Serialize + DeserializeOwned + Debug + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Deserialize from an iterator.
     ///
     /// This API is provided by opendal, developer should not implement it.
