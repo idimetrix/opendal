@@ -823,7 +823,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Add [prometheus](https://docs.rs/prometheus) for every operations.
+<span class="doccomment">/// Add [prometheus-client](https://docs.rs/prometheus-client) for every operation.
 ///
 /// # Examples
 ///
@@ -874,7 +874,7 @@
 
 <span class="kw">impl </span>PrometheusClientLayer {
     <span class="doccomment">/// Create PrometheusClientLayer while registering itself to this registry. Please keep in caution
-    /// that do NOT call this method multiple times with a same registry. If you want initialize multiple
+    /// that do NOT call this method multiple times with a same registry. If you want to initialize multiple
     /// [`PrometheusClientLayer`] with a single registry, you should use [`Arc::clone`] instead.
     </span><span class="kw">pub fn </span>new(registry: <span class="kw-2">&amp;mut </span>Registry) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>metrics = PrometheusClientMetricDefinitions::register(registry);
