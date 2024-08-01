@@ -895,10 +895,10 @@
         <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>conn {
             RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; {
-                conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
+                () = conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
             }
             RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; {
-                conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
+                () = conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
             }
         }
         <span class="prelude-val">Ok</span>(())

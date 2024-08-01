@@ -1101,7 +1101,7 @@
                     } <span class="kw">else </span>{
                         <span class="kw">let </span>err = Error::new(
                             ErrorKind::Unexpected,
-                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"delete failed with error {} {}"</span>, error.tag, error_cause),
+                            <span class="macro">format!</span>(<span class="string">"delete failed with error {} {}"</span>, error.tag, error_cause),
                         );
                         (<span class="string">""</span>.to_string(), <span class="prelude-val">Err</span>(err))
                     }
@@ -1110,7 +1110,7 @@
                     <span class="string">""</span>.to_string(),
                     <span class="prelude-val">Err</span>(Error::new(
                         ErrorKind::Unexpected,
-                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"delete failed with unexpected tag {}"</span>, entry.tag),
+                        <span class="macro">format!</span>(<span class="string">"delete failed with unexpected tag {}"</span>, entry.tag),
                     )),
                 ),
             };

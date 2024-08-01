@@ -2597,7 +2597,7 @@
                 <span class="comment">// set the error kind and mark temporary if retryable
                 </span><span class="kw">let </span>(kind, retryable) =
                     parse_s3_error_code(i.code.as_str()).unwrap_or((ErrorKind::Unexpected, <span class="bool-val">false</span>));
-                <span class="kw">let </span><span class="kw-2">mut </span>err: Error = Error::new(kind, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{i:?}"</span>));
+                <span class="kw">let </span><span class="kw-2">mut </span>err: Error = Error::new(kind, <span class="macro">format!</span>(<span class="string">"{i:?}"</span>));
                 <span class="kw">if </span>retryable {
                     err = err.set_temporary();
                 }
