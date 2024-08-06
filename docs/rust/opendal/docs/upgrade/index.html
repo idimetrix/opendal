@@ -43,7 +43,8 @@
 <p>Service implementers should update their code to use the <code>Configurator</code> trait instead:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Configurator <span class="kw">for </span>MemoryConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = MemoryBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         MemoryBuilder { config: <span class="self">self </span>}
     }
 }

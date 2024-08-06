@@ -248,6 +248,7 @@
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -295,7 +296,8 @@
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>RedbConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = RedbBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         RedbBuilder { config: <span class="self">self </span>}
     }
 }

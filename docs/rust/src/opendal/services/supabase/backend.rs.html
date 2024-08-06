@@ -254,6 +254,7 @@
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -312,7 +313,8 @@
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>SupabaseConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = SupabaseBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         SupabaseBuilder {
             config: <span class="self">self</span>,
             http_client: <span class="prelude-val">None</span>,

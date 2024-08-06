@@ -266,6 +266,7 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -314,7 +315,8 @@
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>PersyConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = PersyBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         PersyBuilder { config: <span class="self">self </span>}
     }
 }

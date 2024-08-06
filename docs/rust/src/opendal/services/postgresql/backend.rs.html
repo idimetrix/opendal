@@ -354,6 +354,7 @@
 <a href="#354" id="354">354</a>
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -425,7 +426,8 @@
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>PostgresqlConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = PostgresqlBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         PostgresqlBuilder { config: <span class="self">self </span>}
     }
 }

@@ -1358,6 +1358,7 @@
 <a href="#1358" id="1358">1358</a>
 <a href="#1359" id="1359">1359</a>
 <a href="#1360" id="1360">1360</a>
+<a href="#1361" id="1361">1361</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1586,7 +1587,8 @@
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>S3Config {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+    <span class="kw">type </span>Builder = S3Builder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         S3Builder {
             config: <span class="self">self</span>,
             customized_credential_load: <span class="prelude-val">None</span>,

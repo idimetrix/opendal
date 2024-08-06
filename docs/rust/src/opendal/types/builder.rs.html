@@ -113,6 +113,37 @@
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -209,7 +240,36 @@
 ///     Ok(())
 /// }
 /// ```
+///
+/// Some service builder might contain in memory options like `http_client` . Users can call
+/// `into_builder` to convert the configuration into a builder instead.
+///
+/// ```
+/// # use anyhow::Result;
+/// use std::collections::HashMap;
+///
+/// use opendal::services::S3Config;
+/// use opendal::{Configurator, Operator};///
+/// use opendal::raw::HttpClient;
+///
+/// async fn test() -&gt; Result&lt;()&gt; {
+///     let mut cfg = S3Config::default();
+///     cfg.root = Some("/".to_string());
+///     cfg.bucket = "test".to_string();
+///
+///     let builder = cfg.into_builder();
+///     let builder = builder.http_client(HttpClient::new()?);
+///
+///     // Build an `Operator` to start operating the storage.
+///     let op: Operator = Operator::new(builder)?.finish();
+///
+///     Ok(())
+/// }
+/// ```
 </span><span class="kw">pub trait </span>Configurator: Serialize + DeserializeOwned + Debug + <span class="lifetime">'static </span>{
+    <span class="doccomment">/// Associated builder for this configuration.
+    </span><span class="kw">type </span>Builder: Builder;
+
     <span class="doccomment">/// Deserialize from an iterator.
     ///
     /// This API is provided by opendal, developer should not implement it.
@@ -222,10 +282,12 @@
     }
 
     <span class="doccomment">/// Convert this configuration into a service builder.
-    </span><span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder;
+    </span><span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder;
 }
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>() {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {}
+    <span class="kw">type </span>Builder = ();
+
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {}
 }
 </code></pre></div></section></main></body></html>

@@ -190,6 +190,7 @@
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
 <a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -229,14 +230,14 @@
 </span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(default)]
 #[non_exhaustive]
-</span><span class="kw">pub struct </span>FoundationConfig {
+</span><span class="kw">pub struct </span>FoundationdbConfig {
     <span class="doccomment">///root of the backend.
     </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">///config_path for the backend.
     </span><span class="kw">pub </span>config_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>FoundationConfig {
+<span class="kw">impl </span>Debug <span class="kw">for </span>FoundationdbConfig {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"FoundationConfig"</span>);
 
@@ -247,8 +248,9 @@
     }
 }
 
-<span class="kw">impl </span>Configurator <span class="kw">for </span>FoundationConfig {
-    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Builder {
+<span class="kw">impl </span>Configurator <span class="kw">for </span>FoundationdbConfig {
+    <span class="kw">type </span>Builder = FoundationdbBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
         FoundationdbBuilder { config: <span class="self">self </span>}
     }
 }
@@ -256,7 +258,7 @@
 <span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>FoundationdbBuilder {
-    config: FoundationConfig,
+    config: FoundationdbConfig,
 }
 
 <span class="kw">impl </span>FoundationdbBuilder {
@@ -275,7 +277,7 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>FoundationdbBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Foundationdb;
-    <span class="kw">type </span>Config = FoundationConfig;
+    <span class="kw">type </span>Config = FoundationdbConfig;
 
     <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="kw">let </span>_network = Arc::new(<span class="kw">unsafe </span>{ foundationdb::boot() });
