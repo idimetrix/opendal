@@ -784,6 +784,17 @@
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
 <a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -843,6 +854,8 @@
 
     <span class="kw">pub </span>predefined_acl: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>default_storage_class: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
+    <span class="kw">pub </span>allow_anonymous: bool,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>GcsCore {
@@ -875,23 +888,30 @@
         }
     }
 
-    <span class="kw">fn </span>load_credential(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;GoogleCredential&gt; {
+    <span class="kw">fn </span>load_credential(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;GoogleCredential&gt;&gt; {
         <span class="kw">let </span>cred = <span class="self">self
             </span>.credential_loader
             .load()
             .map_err(new_request_credential_error)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cred) = cred {
-            <span class="prelude-val">Ok</span>(cred)
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::ConfigInvalid,
-                <span class="string">"no valid credential found"</span>,
-            ))
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(cred));
         }
+
+        <span class="kw">if </span><span class="self">self</span>.allow_anonymous {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        }
+
+        <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::ConfigInvalid,
+            <span class="string">"no valid credential found"</span>,
+        ))
     }
 
     <span class="kw">pub async fn </span>sign&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span><span class="self">self</span>.allow_anonymous {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        }
         <span class="kw">let </span>cred = <span class="self">self</span>.load_token().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="self">self</span>.signer
@@ -910,11 +930,13 @@
     }
 
     <span class="kw">pub async fn </span>sign_query&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;T&gt;, duration: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>cred = <span class="self">self</span>.load_credential()<span class="question-mark">?</span>;
-
-        <span class="self">self</span>.signer
-            .sign_query(req, duration, <span class="kw-2">&amp;</span>cred)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cred) = <span class="self">self</span>.load_credential()<span class="question-mark">? </span>{
+            <span class="self">self</span>.signer
+                .sign_query(req, duration, <span class="kw-2">&amp;</span>cred)
+                .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        }
 
         <span class="comment">// Always remove host header, let users' client to set it based on HTTP
         // version.
