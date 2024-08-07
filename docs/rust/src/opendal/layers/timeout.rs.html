@@ -516,9 +516,6 @@
 <a href="#516" id="516">516</a>
 <a href="#517" id="517">517</a>
 <a href="#518" id="518">518</a>
-<a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -540,9 +537,6 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -866,31 +860,31 @@
 <span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.read();
-        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ReadOperation::Read.into_static(), fut).<span class="kw">await
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, Operation::ReaderRead.into_static(), fut).<span class="kw">await
     </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.write(bs);
-        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, WriteOperation::Write.into_static(), fut).<span class="kw">await
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, Operation::WriterWrite.into_static(), fut).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.close();
-        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, WriteOperation::Close.into_static(), fut).<span class="kw">await
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, Operation::WriterClose.into_static(), fut).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.abort();
-        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, WriteOperation::Abort.into_static(), fut).<span class="kw">await
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, Operation::WriterAbort.into_static(), fut).<span class="kw">await
     </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>TimeoutWrapper&lt;R&gt; {
     <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">let </span>fut = <span class="self">self</span>.inner.next();
-        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, ListOperation::Next.into_static(), fut).<span class="kw">await
+        <span class="self">Self</span>::io_timeout(<span class="self">self</span>.timeout, Operation::ListerNext.into_static(), fut).<span class="kw">await
     </span>}
 }
 

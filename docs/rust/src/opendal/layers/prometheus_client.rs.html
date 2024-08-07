@@ -782,8 +782,6 @@
 <a href="#782" id="782">782</a>
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
-<a href="#785" id="785">785</a>
-<a href="#786" id="786">786</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -817,8 +815,6 @@
 <span class="kw">use </span>prometheus_client::metrics::histogram::Histogram;
 <span class="kw">use </span>prometheus_client::registry::Registry;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -1408,19 +1404,19 @@
             <span class="prelude-val">Ok</span>(bs) =&gt; {
                 <span class="self">self</span>.metrics.observe_bytes_total(
                     <span class="self">self</span>.scheme,
-                    ReadOperation::Read.into_static(),
+                    Operation::ReaderRead.into_static(),
                     bs.remaining(),
                 );
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    ReadOperation::Read.into_static(),
+                    Operation::ReaderRead.into_static(),
                     start.elapsed(),
                 );
                 <span class="prelude-val">Ok</span>(bs)
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="self">self</span>.metrics
-                    .increment_errors_total(ReadOperation::Read.into_static(), e.kind());
+                    .increment_errors_total(Operation::ReaderRead.into_static(), e.kind());
                 <span class="prelude-val">Err</span>(e)
             }
         }
@@ -1435,19 +1431,19 @@
             .map(|bs| {
                 <span class="self">self</span>.metrics.observe_bytes_total(
                     <span class="self">self</span>.scheme,
-                    ReadOperation::BlockingRead.into_static(),
+                    Operation::BlockingReaderRead.into_static(),
                     bs.remaining(),
                 );
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    ReadOperation::BlockingRead.into_static(),
+                    Operation::BlockingReaderRead.into_static(),
                     start.elapsed(),
                 );
                 bs
             })
             .map_err(|e| {
                 <span class="self">self</span>.metrics
-                    .increment_errors_total(ReadOperation::BlockingRead.into_static(), e.kind());
+                    .increment_errors_total(Operation::BlockingReaderRead.into_static(), e.kind());
                 e
             })
     }
@@ -1464,18 +1460,18 @@
             </span>.map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics.observe_bytes_total(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::Write.into_static(),
+                    Operation::WriterWrite.into_static(),
                     size,
                 );
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::Write.into_static(),
+                    Operation::WriterWrite.into_static(),
                     start.elapsed(),
                 );
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics
-                    .increment_errors_total(WriteOperation::Write.into_static(), err.kind());
+                    .increment_errors_total(Operation::WriterWrite.into_static(), err.kind());
                 err
             })
     }
@@ -1489,13 +1485,13 @@
             </span>.map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::Abort.into_static(),
+                    Operation::WriterAbort.into_static(),
                     start.elapsed(),
                 );
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics
-                    .increment_errors_total(WriteOperation::Abort.into_static(), err.kind());
+                    .increment_errors_total(Operation::WriterAbort.into_static(), err.kind());
                 err
             })
     }
@@ -1509,13 +1505,13 @@
             </span>.map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::Close.into_static(),
+                    Operation::WriterClose.into_static(),
                     start.elapsed(),
                 );
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics
-                    .increment_errors_total(WriteOperation::Close.into_static(), err.kind());
+                    .increment_errors_total(Operation::WriterClose.into_static(), err.kind());
                 err
             })
     }
@@ -1531,18 +1527,18 @@
             .map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics.observe_bytes_total(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::BlockingWrite.into_static(),
+                    Operation::BlockingWriterWrite.into_static(),
                     size,
                 );
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::BlockingWrite.into_static(),
+                    Operation::BlockingWriterWrite.into_static(),
                     start.elapsed(),
                 );
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics.increment_errors_total(
-                    WriteOperation::BlockingWrite.into_static(),
+                    Operation::BlockingWriterWrite.into_static(),
                     err.kind(),
                 );
                 err
@@ -1557,13 +1553,13 @@
             .map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics.observe_request_duration(
                     <span class="self">self</span>.scheme,
-                    WriteOperation::BlockingClose.into_static(),
+                    Operation::BlockingWriterClose.into_static(),
                     start.elapsed(),
                 );
             })
             .map_err(|err| {
                 <span class="self">self</span>.metrics.increment_errors_total(
-                    WriteOperation::BlockingClose.into_static(),
+                    Operation::BlockingWriterClose.into_static(),
                     err.kind(),
                 );
                 err

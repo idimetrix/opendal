@@ -1362,8 +1362,6 @@
 <a href="#1362" id="1362">1362</a>
 <a href="#1363" id="1363">1363</a>
 <a href="#1364" id="1364">1364</a>
-<a href="#1365" id="1365">1365</a>
-<a href="#1366" id="1366">1366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1394,8 +1392,6 @@
 <span class="kw">use </span>log::trace;
 <span class="kw">use </span>log::Level;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -2354,7 +2350,7 @@
                     target: LOGGING_TARGET,
                     <span class="string">"service={} operation={} path={} read={} -&gt; read returns {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
-                    ReadOperation::Read,
+                    Operation::ReaderRead,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.read.load(Ordering::Relaxed),
                     bs.remaining()
@@ -2368,7 +2364,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} read={} -&gt; read failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        ReadOperation::Read,
+                        Operation::ReaderRead,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.read.load(Ordering::Relaxed),
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2390,7 +2386,7 @@
                     target: LOGGING_TARGET,
                     <span class="string">"service={} operation={} path={} read={} -&gt; read returns {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
-                    ReadOperation::BlockingRead,
+                    Operation::BlockingReaderRead,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.read.load(Ordering::Relaxed),
                     bs.remaining()
@@ -2404,7 +2400,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} read={} -&gt; read failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        ReadOperation::BlockingRead,
+                        Operation::BlockingReaderRead,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.read.load(Ordering::Relaxed),
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2447,7 +2443,7 @@
                     target: LOGGING_TARGET,
                     <span class="string">"service={} operation={} path={} written={}B -&gt; data write {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
-                    WriteOperation::Write,
+                    Operation::WriterWrite,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
                     size,
@@ -2461,7 +2457,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} written={}B -&gt; data write failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        WriteOperation::Write,
+                        Operation::WriterWrite,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.written,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2479,7 +2475,7 @@
                     target: LOGGING_TARGET,
                     <span class="string">"service={} operation={} path={} written={}B -&gt; abort writer"</span>,
                     <span class="self">self</span>.ctx.scheme,
-                    WriteOperation::Abort,
+                    Operation::WriterAbort,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
                 );
@@ -2492,7 +2488,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} written={}B -&gt; abort writer failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        WriteOperation::Abort,
+                        Operation::WriterAbort,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.written,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2523,7 +2519,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} written={}B -&gt; data close failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        WriteOperation::Close,
+                        Operation::WriterClose,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.written,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2543,7 +2539,7 @@
                     target: LOGGING_TARGET,
                     <span class="string">"service={} operation={} path={} written={}B -&gt; data write {}B"</span>,
                     <span class="self">self</span>.ctx.scheme,
-                    WriteOperation::BlockingWrite,
+                    Operation::BlockingWriterWrite,
                     <span class="self">self</span>.path,
                     <span class="self">self</span>.written,
                     bs.len(),
@@ -2557,7 +2553,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} written={}B -&gt; data write failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        WriteOperation::BlockingWrite,
+                        Operation::BlockingWriterWrite,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.written,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),
@@ -2588,7 +2584,7 @@
                         lvl,
                         <span class="string">"service={} operation={} path={} written={}B -&gt; data close failed: {}"</span>,
                         <span class="self">self</span>.ctx.scheme,
-                        WriteOperation::BlockingClose,
+                        Operation::BlockingWriterClose,
                         <span class="self">self</span>.path,
                         <span class="self">self</span>.written,
                         <span class="self">self</span>.ctx.error_print(<span class="kw-2">&amp;</span>err),

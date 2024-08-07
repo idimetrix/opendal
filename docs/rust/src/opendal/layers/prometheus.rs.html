@@ -906,8 +906,6 @@
 <a href="#906" id="906">906</a>
 <a href="#907" id="907">907</a>
 <a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -941,8 +939,6 @@
 <span class="kw">use </span>prometheus::HistogramVec;
 <span class="kw">use </span>prometheus::Registry;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -1591,7 +1587,7 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            ReadOperation::Read.into_static(),
+            Operation::ReaderRead.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 
@@ -1623,7 +1619,7 @@
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            ReadOperation::BlockingRead.into_static(),
+            Operation::BlockingReaderRead.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 
@@ -1657,7 +1653,7 @@
 
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            WriteOperation::Write.into_static(),
+            Operation::WriterWrite.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 
@@ -1687,7 +1683,7 @@
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            WriteOperation::Abort.into_static(),
+            Operation::WriterAbort.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 
@@ -1711,7 +1707,7 @@
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            WriteOperation::Close.into_static(),
+            Operation::WriterClose.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 
@@ -1769,7 +1765,7 @@
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
             <span class="self">self</span>.scheme.into_static(),
-            WriteOperation::BlockingClose.into_static(),
+            Operation::BlockingWriterClose.into_static(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
         );
 

@@ -480,9 +480,6 @@
 <a href="#480" id="480">480</a>
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -506,9 +503,6 @@
 
 <span class="kw">use </span>futures::TryFutureExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -843,7 +837,7 @@
                 bs
             })
             .map_err(|err| {
-                err.with_operation(ReadOperation::Read)
+                err.with_operation(Operation::ReaderRead)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
@@ -861,7 +855,7 @@
                 bs
             })
             .map_err(|err| {
-                err.with_operation(ReadOperation::BlockingRead)
+                err.with_operation(Operation::BlockingReaderRead)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
@@ -880,7 +874,7 @@
                 <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
             })
             .map_err(|err| {
-                err.with_operation(WriteOperation::Write)
+                err.with_operation(Operation::WriterWrite)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"size"</span>, size.to_string())
@@ -890,7 +884,7 @@
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.close().<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(WriteOperation::Close)
+            err.with_operation(Operation::WriterClose)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                 .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
@@ -899,7 +893,7 @@
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(WriteOperation::Abort)
+            err.with_operation(Operation::WriterAbort)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                 .with_context(<span class="string">"processed"</span>, <span class="self">self</span>.processed.to_string())
@@ -916,7 +910,7 @@
                 <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
             })
             .map_err(|err| {
-                err.with_operation(WriteOperation::BlockingWrite)
+                err.with_operation(Operation::BlockingWriterWrite)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"size"</span>, size.to_string())
@@ -926,7 +920,7 @@
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.close().map_err(|err| {
-            err.with_operation(WriteOperation::BlockingClose)
+            err.with_operation(Operation::BlockingWriterClose)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                 .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
@@ -944,7 +938,7 @@
                 bs
             })
             .map_err(|err| {
-                err.with_operation(ListOperation::Next)
+                err.with_operation(Operation::ListerNext)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())
@@ -961,7 +955,7 @@
                 bs
             })
             .map_err(|err| {
-                err.with_operation(ListOperation::BlockingNext)
+                err.with_operation(Operation::BlockingListerNext)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
                     .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())

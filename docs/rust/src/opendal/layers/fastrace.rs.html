@@ -353,7 +353,6 @@
 <a href="#353" id="353">353</a>
 <a href="#354" id="354">354</a>
 <a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -378,9 +377,6 @@
 <span class="kw">use </span>fastrace::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>futures::FutureExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -657,7 +653,7 @@
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ReadOperation::BlockingRead.into_static());
+        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(Operation::BlockingReaderRead.into_static());
         <span class="self">self</span>.inner.read()
     }
 }
@@ -665,19 +661,19 @@
 <span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Write.into_static());
+        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(Operation::WriterWrite.into_static());
         <span class="self">self</span>.inner.write(bs)
     }
 
     <span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Abort.into_static());
+        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(Operation::WriterAbort.into_static());
         <span class="self">self</span>.inner.abort()
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::Close.into_static());
+        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(Operation::WriterClose.into_static());
         <span class="self">self</span>.inner.close()
     }
 }
@@ -685,13 +681,15 @@
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::BlockingWrite.into_static());
+        <span class="kw">let </span>_span =
+            LocalSpan::enter_with_local_parent(Operation::BlockingWriterWrite.into_static());
         <span class="self">self</span>.inner.write(bs)
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(WriteOperation::BlockingClose.into_static());
+        <span class="kw">let </span>_span =
+            LocalSpan::enter_with_local_parent(Operation::BlockingWriterClose.into_static());
         <span class="self">self</span>.inner.close()
     }
 }
@@ -706,7 +704,7 @@
 <span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>FastraceWrapper&lt;R&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         <span class="kw">let </span>_g = <span class="self">self</span>.span.set_local_parent();
-        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(ListOperation::BlockingNext.into_static());
+        <span class="kw">let </span>_span = LocalSpan::enter_with_local_parent(Operation::BlockingListerNext.into_static());
         <span class="self">self</span>.inner.next()
     }
 }

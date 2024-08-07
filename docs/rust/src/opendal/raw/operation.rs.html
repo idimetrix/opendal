@@ -107,6 +107,33 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -138,8 +165,16 @@
     </span>CreateDir,
     <span class="doccomment">/// Operation for [`crate::raw::Access::read`]
     </span>Read,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::Read::read`]
+    </span>ReaderRead,
     <span class="doccomment">/// Operation for [`crate::raw::Access::write`]
     </span>Write,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::Write::write`]
+    </span>WriterWrite,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::Write::close`]
+    </span>WriterClose,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::Write::abort`]
+    </span>WriterAbort,
     <span class="doccomment">/// Operation for [`crate::raw::Access::copy`]
     </span>Copy,
     <span class="doccomment">/// Operation for [`crate::raw::Access::rename`]
@@ -150,6 +185,8 @@
     </span>Delete,
     <span class="doccomment">/// Operation for [`crate::raw::Access::list`]
     </span>List,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::List::next`]
+    </span>ListerNext,
     <span class="doccomment">/// Operation for [`crate::raw::Access::batch`]
     </span>Batch,
     <span class="doccomment">/// Operation for [`crate::raw::Access::presign`]
@@ -158,8 +195,14 @@
     </span>BlockingCreateDir,
     <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_read`]
     </span>BlockingRead,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::BlockingRead::read`]
+    </span>BlockingReaderRead,
     <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_write`]
     </span>BlockingWrite,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::BlockingWrite::write`]
+    </span>BlockingWriterWrite,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::BlockingWrite::close`]
+    </span>BlockingWriterClose,
     <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_copy`]
     </span>BlockingCopy,
     <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_rename`]
@@ -170,6 +213,8 @@
     </span>BlockingDelete,
     <span class="doccomment">/// Operation for [`crate::raw::Access::blocking_list`]
     </span>BlockingList,
+    <span class="doccomment">/// Operation for [`crate::raw::oio::BlockingList::next`]
+    </span>BlockingListerNext,
 }
 
 <span class="kw">impl </span>Operation {
@@ -191,22 +236,31 @@
             Operation::Info =&gt; <span class="string">"metadata"</span>,
             Operation::CreateDir =&gt; <span class="string">"create_dir"</span>,
             Operation::Read =&gt; <span class="string">"read"</span>,
+            Operation::ReaderRead =&gt; <span class="string">"Reader::read"</span>,
             Operation::Write =&gt; <span class="string">"write"</span>,
+            Operation::WriterWrite =&gt; <span class="string">"Writer::write"</span>,
+            Operation::WriterClose =&gt; <span class="string">"Writer::close"</span>,
+            Operation::WriterAbort =&gt; <span class="string">"Writer::abort"</span>,
             Operation::Copy =&gt; <span class="string">"copy"</span>,
             Operation::Rename =&gt; <span class="string">"rename"</span>,
             Operation::Stat =&gt; <span class="string">"stat"</span>,
             Operation::Delete =&gt; <span class="string">"delete"</span>,
             Operation::List =&gt; <span class="string">"list"</span>,
+            Operation::ListerNext =&gt; <span class="string">"List::next"</span>,
             Operation::Presign =&gt; <span class="string">"presign"</span>,
             Operation::Batch =&gt; <span class="string">"batch"</span>,
             Operation::BlockingCreateDir =&gt; <span class="string">"blocking_create_dir"</span>,
             Operation::BlockingRead =&gt; <span class="string">"blocking_read"</span>,
+            Operation::BlockingReaderRead =&gt; <span class="string">"BlockingReader::read"</span>,
             Operation::BlockingWrite =&gt; <span class="string">"blocking_write"</span>,
+            Operation::BlockingWriterWrite =&gt; <span class="string">"BlockingWriter::write"</span>,
+            Operation::BlockingWriterClose =&gt; <span class="string">"BlockingWriter::close"</span>,
             Operation::BlockingCopy =&gt; <span class="string">"blocking_copy"</span>,
             Operation::BlockingRename =&gt; <span class="string">"blocking_rename"</span>,
             Operation::BlockingStat =&gt; <span class="string">"blocking_stat"</span>,
             Operation::BlockingDelete =&gt; <span class="string">"blocking_delete"</span>,
             Operation::BlockingList =&gt; <span class="string">"blocking_list"</span>,
+            Operation::BlockingListerNext =&gt; <span class="string">"BlockingLister::next"</span>,
         }
     }
 }
