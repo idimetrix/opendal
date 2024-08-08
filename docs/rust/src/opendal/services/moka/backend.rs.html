@@ -235,6 +235,27 @@
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
 <a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -289,6 +310,9 @@
     ///
     /// Refer to [`moka::sync::CacheBuilder::segments`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.segments)
     </span><span class="kw">pub </span>num_segments: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+
+    <span class="doccomment">/// root path of this backend
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>MokaConfig {
@@ -299,6 +323,7 @@
             .field(<span class="string">"time_to_live"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_to_live)
             .field(<span class="string">"time_to_idle"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_to_idle)
             .field(<span class="string">"num_segments"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.num_segments)
+            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .finish_non_exhaustive()
     }
 }
@@ -364,6 +389,17 @@
         <span class="self">self</span>.config.num_segments = <span class="prelude-val">Some</span>(v);
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Set root path of this backend
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>path.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(path.to_string())
+        };
+
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MokaBuilder {
@@ -391,9 +427,15 @@
         }
 
         <span class="macro">debug!</span>(<span class="string">"backend build finished: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="prelude-val">Ok</span>(MokaBackend::new(Adapter {
+
+        <span class="kw">let </span><span class="kw-2">mut </span>backend = MokaBackend::new(Adapter {
             inner: builder.build(),
-        }))
+        });
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.root {
+            backend = backend.with_root(<span class="kw-2">&amp;</span>v);
+        }
+
+        <span class="prelude-val">Ok</span>(backend)
     }
 }
 

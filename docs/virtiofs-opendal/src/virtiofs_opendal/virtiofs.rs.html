@@ -238,6 +238,95 @@
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -256,33 +345,41 @@
 // under the License.
 
 </span><span class="kw">use </span>std::io;
+<span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::sync::RwLock;
 
+<span class="kw">use </span>log::warn;
+<span class="kw">use </span>opendal::Operator;
 <span class="kw">use </span>vhost::vhost_user::message::VhostUserProtocolFeatures;
 <span class="kw">use </span>vhost::vhost_user::message::VhostUserVirtioFeatures;
 <span class="kw">use </span>vhost::vhost_user::Backend;
+<span class="kw">use </span>vhost::vhost_user::Listener;
 <span class="kw">use </span>vhost_user_backend::VhostUserBackend;
+<span class="kw">use </span>vhost_user_backend::VhostUserDaemon;
 <span class="kw">use </span>vhost_user_backend::VringMutex;
 <span class="kw">use </span>vhost_user_backend::VringState;
 <span class="kw">use </span>vhost_user_backend::VringT;
 <span class="kw">use </span>virtio_bindings::bindings::virtio_config::VIRTIO_F_VERSION_1;
 <span class="kw">use </span>virtio_bindings::bindings::virtio_ring::VIRTIO_RING_F_EVENT_IDX;
 <span class="kw">use </span>virtio_bindings::bindings::virtio_ring::VIRTIO_RING_F_INDIRECT_DESC;
-<span class="kw">use </span>vm_memory::ByteValued;
+<span class="kw">use </span>virtio_queue::DescriptorChain;
+<span class="kw">use </span>virtio_queue::QueueOwnedT;
+<span class="kw">use </span>vm_memory::GuestAddressSpace;
 <span class="kw">use </span>vm_memory::GuestMemoryAtomic;
+<span class="kw">use </span>vm_memory::GuestMemoryLoadGuard;
 <span class="kw">use </span>vm_memory::GuestMemoryMmap;
-<span class="kw">use </span>vm_memory::Le32;
 <span class="kw">use </span>vmm_sys_util::epoll::EventSet;
 <span class="kw">use </span>vmm_sys_util::eventfd::EventFd;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::filesystem::Filesystem;
+<span class="kw">use </span><span class="kw">crate</span>::virtiofs_util::Reader;
+<span class="kw">use </span><span class="kw">crate</span>::virtiofs_util::Writer;
 
 <span class="doccomment">/// Marks an event from the high priority queue.
 </span><span class="kw">const </span>HIPRIO_QUEUE_EVENT: u16 = <span class="number">0</span>;
 <span class="doccomment">/// Marks an event from the request queue.
 </span><span class="kw">const </span>REQ_QUEUE_EVENT: u16 = <span class="number">1</span>;
-<span class="doccomment">/// The maximum number of bytes in VirtioFsConfig tag field.
-</span><span class="kw">const </span>MAX_TAG_LEN: usize = <span class="number">36</span>;
 <span class="doccomment">/// The maximum queue size supported.
 </span><span class="kw">const </span>QUEUE_SIZE: usize = <span class="number">32768</span>;
 <span class="doccomment">/// The number of request queues supported.
@@ -293,6 +390,7 @@
 
 <span class="doccomment">/// VhostUserFsThread represents the actual worker process used to handle file system requests from VMs.
 </span><span class="kw">struct </span>VhostUserFsThread {
+    core: Filesystem,
     mem: <span class="prelude-ty">Option</span>&lt;GuestMemoryAtomic&lt;GuestMemoryMmap&gt;&gt;,
     vu_req: <span class="prelude-ty">Option</span>&lt;Backend&gt;,
     event_idx: bool,
@@ -300,16 +398,46 @@
 }
 
 <span class="kw">impl </span>VhostUserFsThread {
-    <span class="kw">fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;VhostUserFsThread&gt; {
+    <span class="kw">fn </span>new(core: Filesystem) -&gt; <span class="prelude-ty">Result</span>&lt;VhostUserFsThread&gt; {
         <span class="kw">let </span>event_fd = EventFd::new(libc::EFD_NONBLOCK).map_err(|err| {
             new_unexpected_error(<span class="string">"failed to create kill eventfd"</span>, <span class="prelude-val">Some</span>(err.into()))
         })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(VhostUserFsThread {
+            core,
             mem: <span class="prelude-val">None</span>,
             vu_req: <span class="prelude-val">None</span>,
             event_idx: <span class="bool-val">false</span>,
             kill_event_fd: event_fd,
         })
+    }
+
+    <span class="doccomment">/// This is used when the backend has processed a request and needs to notify the frontend.
+    </span><span class="kw">fn </span>return_descriptor(
+        vring_state: <span class="kw-2">&amp;mut </span>VringState,
+        head_index: u16,
+        event_idx: bool,
+        len: usize,
+    ) {
+        <span class="kw">if </span>vring_state.add_used(head_index, len <span class="kw">as </span>u32).is_err() {
+            <span class="macro">warn!</span>(<span class="string">"Failed to add used to used queue."</span>);
+        };
+        <span class="comment">// Check if the used queue needs to be signaled.
+        </span><span class="kw">if </span>event_idx {
+            <span class="kw">match </span>vring_state.needs_notification() {
+                <span class="prelude-val">Ok</span>(needs_notification) =&gt; {
+                    <span class="kw">if </span>needs_notification &amp;&amp; vring_state.signal_used_queue().is_err() {
+                        <span class="macro">warn!</span>(<span class="string">"Failed to signal used queue."</span>);
+                    }
+                }
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+                    <span class="kw">if </span>vring_state.signal_used_queue().is_err() {
+                        <span class="macro">warn!</span>(<span class="string">"Failed to signal used queue."</span>);
+                    };
+                }
+            }
+        } <span class="kw">else if </span>vring_state.signal_used_queue().is_err() {
+            <span class="macro">warn!</span>(<span class="string">"Failed to signal used queue."</span>);
+        }
     }
 
     <span class="doccomment">/// Process filesystem requests one at a time in a serialized manner.
@@ -323,10 +451,16 @@
             <span class="comment">// If EVENT_IDX is enabled, we could keep calling process_queue()
             // until it stops finding new request on the queue.
             </span><span class="kw">loop </span>{
-                vring_state.disable_notification().unwrap();
+                <span class="kw">if </span>vring_state.disable_notification().is_err() {
+                    <span class="macro">warn!</span>(<span class="string">"Failed to disable used queue notification."</span>);
+                }
                 <span class="self">self</span>.process_queue_serial(<span class="kw-2">&amp;mut </span>vring_state)<span class="question-mark">?</span>;
-                <span class="kw">if </span>!vring_state.enable_notification().unwrap() {
-                    <span class="kw">break</span>;
+                <span class="kw">if let </span><span class="prelude-val">Ok</span>(has_more) = vring_state.enable_notification() {
+                    <span class="kw">if </span>!has_more {
+                        <span class="kw">break</span>;
+                    }
+                } <span class="kw">else </span>{
+                    <span class="macro">warn!</span>(<span class="string">"Failed to enable used queue notification."</span>);
                 }
             }
         } <span class="kw">else </span>{
@@ -338,36 +472,60 @@
 
     <span class="doccomment">/// Forwards filesystem messages to specific functions and
     /// returns the filesystem request execution result.
-    </span><span class="kw">fn </span>process_queue_serial(<span class="kw-2">&amp;</span><span class="self">self</span>, _vring_state: <span class="kw-2">&amp;mut </span>VringState) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
-        <span class="macro">unimplemented!</span>()
+    </span><span class="kw">fn </span>process_queue_serial(<span class="kw-2">&amp;</span><span class="self">self</span>, vring_state: <span class="kw-2">&amp;mut </span>VringState) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>used_any = <span class="bool-val">false</span>;
+        <span class="kw">let </span>mem = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.mem {
+            <span class="prelude-val">Some</span>(m) =&gt; m.memory(),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(new_unexpected_error(<span class="string">"no memory configured"</span>, <span class="prelude-val">None</span>)),
+        };
+        <span class="kw">let </span>avail_chains: Vec&lt;DescriptorChain&lt;GuestMemoryLoadGuard&lt;GuestMemoryMmap&gt;&gt;&gt; = vring_state
+            .get_queue_mut()
+            .iter(mem.clone())
+            .map_err(|<span class="kw">_</span>| new_unexpected_error(<span class="string">"iterating through the queue failed"</span>, <span class="prelude-val">None</span>))<span class="question-mark">?
+            </span>.collect();
+        <span class="kw">for </span>chain <span class="kw">in </span>avail_chains {
+            used_any = <span class="bool-val">true</span>;
+            <span class="kw">let </span>head_index = chain.head_index();
+            <span class="kw">let </span>reader = Reader::new(<span class="kw-2">&amp;</span>mem, chain.clone())
+                .map_err(|<span class="kw">_</span>| new_unexpected_error(<span class="string">"creating a queue reader failed"</span>, <span class="prelude-val">None</span>))
+                .unwrap();
+            <span class="kw">let </span>writer = Writer::new(<span class="kw-2">&amp;</span>mem, chain.clone())
+                .map_err(|<span class="kw">_</span>| new_unexpected_error(<span class="string">"creating a queue writer failed"</span>, <span class="prelude-val">None</span>))
+                .unwrap();
+            <span class="kw">let </span>len = <span class="self">self
+                </span>.core
+                .handle_message(reader, writer)
+                .map_err(|<span class="kw">_</span>| new_unexpected_error(<span class="string">"processing a queue request failed"</span>, <span class="prelude-val">None</span>))
+                .unwrap();
+            VhostUserFsThread::return_descriptor(vring_state, head_index, <span class="self">self</span>.event_idx, len);
+        }
+        <span class="prelude-val">Ok</span>(used_any)
     }
 }
 
 <span class="doccomment">/// VhostUserFsBackend is a structure that implements the VhostUserBackend trait
 /// and implements concrete services for the vhost user backend server.
-</span><span class="kw">pub struct </span>VhostUserFsBackend {
-    tag: <span class="prelude-ty">Option</span>&lt;String&gt;,
+</span><span class="kw">struct </span>VhostUserFsBackend {
     thread: RwLock&lt;VhostUserFsThread&gt;,
 }
 
-<span class="attr">#[allow(dead_code)]
-</span><span class="kw">impl </span>VhostUserFsBackend {
-    <span class="kw">pub fn </span>new(tag: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;VhostUserFsBackend&gt; {
-        <span class="kw">let </span>thread = RwLock::new(VhostUserFsThread::new()<span class="question-mark">?</span>);
-        <span class="prelude-val">Ok</span>(VhostUserFsBackend { thread, tag })
+<span class="kw">impl </span>VhostUserFsBackend {
+    <span class="kw">fn </span>new(core: Filesystem) -&gt; <span class="prelude-ty">Result</span>&lt;VhostUserFsBackend&gt; {
+        <span class="kw">let </span>thread = RwLock::new(VhostUserFsThread::new(core)<span class="question-mark">?</span>);
+        <span class="prelude-val">Ok</span>(VhostUserFsBackend { thread })
+    }
+
+    <span class="kw">fn </span>kill(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.thread
+            .read()
+            .unwrap()
+            .kill_event_fd
+            .write(<span class="number">1</span>)
+            .map_err(|err| {
+                new_unexpected_error(<span class="string">"failed to write to kill eventfd"</span>, <span class="prelude-val">Some</span>(err.into()))
+            })
     }
 }
-
-<span class="doccomment">/// VirtioFsConfig will be serialized and used as
-/// the return value of get_config function in the VhostUserBackend trait.
-</span><span class="attr">#[repr(C)]
-#[derive(Clone, Copy)]
-</span><span class="kw">struct </span>VirtioFsConfig {
-    tag: [u8; MAX_TAG_LEN],
-    num_request_queues: Le32,
-}
-
-<span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>VirtioFsConfig {}
 
 <span class="kw">impl </span>VhostUserBackend <span class="kw">for </span>VhostUserFsBackend {
     <span class="kw">type </span>Bitmap = ();
@@ -395,43 +553,16 @@
     <span class="doccomment">/// Get available vhost protocol features.
     </span><span class="kw">fn </span>protocol_features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VhostUserProtocolFeatures {
         <span class="comment">// Align to the virtiofsd's protocol features here.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>protocol_features = VhostUserProtocolFeatures::MQ
+        </span>VhostUserProtocolFeatures::MQ
             | VhostUserProtocolFeatures::BACKEND_REQ
             | VhostUserProtocolFeatures::BACKEND_SEND_FD
             | VhostUserProtocolFeatures::REPLY_ACK
-            | VhostUserProtocolFeatures::CONFIGURE_MEM_SLOTS;
-        <span class="kw">if </span><span class="self">self</span>.tag.is_some() {
-            protocol_features |= VhostUserProtocolFeatures::CONFIG;
-        }
-        protocol_features
+            | VhostUserProtocolFeatures::CONFIGURE_MEM_SLOTS
     }
 
     <span class="doccomment">/// Enable or disabled the virtio EVENT_IDX feature.
     </span><span class="kw">fn </span>set_event_idx(<span class="kw-2">&amp;</span><span class="self">self</span>, enabled: bool) {
         <span class="self">self</span>.thread.write().unwrap().event_idx = enabled;
-    }
-
-    <span class="doccomment">/// Get virtio device configuration.
-    </span><span class="kw">fn </span>get_config(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32, size: u32) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">let </span>tag = <span class="self">self
-            </span>.tag
-            .as_ref()
-            .expect(<span class="string">"did not expect read of config if tag is not set."</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>fixed_len_tag = [<span class="number">0</span>; MAX_TAG_LEN];
-        fixed_len_tag[<span class="number">0</span>..tag.len()].copy_from_slice(tag.as_bytes());
-        <span class="kw">let </span>config = VirtioFsConfig {
-            tag: fixed_len_tag,
-            num_request_queues: Le32::from(REQUEST_QUEUES <span class="kw">as </span>u32),
-        };
-        <span class="kw">let </span><span class="kw-2">mut </span>result: Vec&lt;<span class="kw">_</span>&gt; = config
-            .as_slice()
-            .iter()
-            .skip(offset <span class="kw">as </span>usize)
-            .take(size <span class="kw">as </span>usize)
-            .copied()
-            .collect();
-        result.resize(size <span class="kw">as </span>usize, <span class="number">0</span>);
-        result
     }
 
     <span class="doccomment">/// Update guest memory regions.
@@ -476,6 +607,53 @@
         thread
             .handle_event_serial(device_event, vrings)
             .map_err(|err| err.into())
+    }
+}
+
+<span class="doccomment">/// VirtioFS is a structure that represents the virtiofs service.
+/// It is used to run the virtiofs service with the given operator and socket path.
+/// The operator is used to interact with the backend storage system.
+/// The socket path is used to communicate with the QEMU and VMs.
+</span><span class="kw">pub struct </span>VirtioFs {
+    socket_path: String,
+    filesystem_backend: Arc&lt;VhostUserFsBackend&gt;,
+}
+
+<span class="kw">impl </span>VirtioFs {
+    <span class="kw">pub fn </span>new(core: Operator, socket_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;VirtioFs&gt; {
+        <span class="kw">let </span>filesystem_core = Filesystem::new(core);
+        <span class="kw">let </span>filesystem_backend = Arc::new(VhostUserFsBackend::new(filesystem_core).unwrap());
+        <span class="prelude-val">Ok</span>(VirtioFs {
+            socket_path: socket_path.to_string(),
+            filesystem_backend,
+        })
+    }
+
+    <span class="comment">// Run the virtiofs service.
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>listener = Listener::new(<span class="kw-2">&amp;</span><span class="self">self</span>.socket_path, <span class="bool-val">true</span>)
+            .map_err(|<span class="kw">_</span>| new_unexpected_error(<span class="string">"failed to create listener"</span>, <span class="prelude-val">None</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>daemon = VhostUserDaemon::new(
+            String::from(<span class="string">"virtiofs-backend"</span>),
+            <span class="self">self</span>.filesystem_backend.clone(),
+            GuestMemoryAtomic::new(GuestMemoryMmap::new()),
+        )
+        .unwrap();
+        <span class="kw">if </span>daemon.start(listener).is_err() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(new_unexpected_error(<span class="string">"failed to start daemon"</span>, <span class="prelude-val">None</span>));
+        }
+        <span class="kw">if </span>daemon.wait().is_err() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(new_unexpected_error(<span class="string">"failed to wait daemon"</span>, <span class="prelude-val">None</span>));
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="comment">// Kill the virtiofs service.
+    </span><span class="kw">pub fn </span>kill(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span><span class="self">self</span>.filesystem_backend.kill().is_err() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(new_unexpected_error(<span class="string">"failed to kill backend"</span>, <span class="prelude-val">None</span>));
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div></section></main></body></html>

@@ -245,8 +245,6 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -345,8 +343,7 @@
     buffer: DescriptorChainConsumer&lt;<span class="lifetime">'a</span>, B&gt;,
 }
 
-<span class="attr">#[allow(dead_code)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, B: Bitmap + BitmapSlice + <span class="lifetime">'static</span>&gt; Reader&lt;<span class="lifetime">'a</span>, B&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, B: Bitmap + BitmapSlice + <span class="lifetime">'static</span>&gt; Reader&lt;<span class="lifetime">'a</span>, B&gt; {
     <span class="kw">pub fn </span>new&lt;M&gt;(
         mem: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>GuestMemoryMmap&lt;B&gt;,
         desc_chain: DescriptorChain&lt;M&gt;,
@@ -423,8 +420,7 @@
     buffer: DescriptorChainConsumer&lt;<span class="lifetime">'a</span>, B&gt;,
 }
 
-<span class="attr">#[allow(dead_code)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, B: Bitmap + BitmapSlice + <span class="lifetime">'static</span>&gt; Writer&lt;<span class="lifetime">'a</span>, B&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, B: Bitmap + BitmapSlice + <span class="lifetime">'static</span>&gt; Writer&lt;<span class="lifetime">'a</span>, B&gt; {
     <span class="kw">pub fn </span>new&lt;M&gt;(
         mem: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>GuestMemoryMmap&lt;B&gt;,
         desc_chain: DescriptorChain&lt;M&gt;,

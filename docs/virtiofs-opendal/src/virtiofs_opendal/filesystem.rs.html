@@ -131,6 +131,10 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -151,6 +155,7 @@
 </span><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::mem::size_of;
 
+<span class="kw">use </span>opendal::Operator;
 <span class="kw">use </span>vm_memory::ByteValued;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::<span class="kw-2">*</span>;
@@ -170,12 +175,15 @@
 
 <span class="doccomment">/// Filesystem is a filesystem implementation with opendal backend,
 /// and will decode and process messages from VMs.
-</span><span class="kw">pub struct </span>Filesystem {}
+</span><span class="kw">pub struct </span>Filesystem {
+    <span class="comment">// FIXME: #[allow(dead_code)] here should be removed in the future.
+    </span><span class="attr">#[allow(dead_code)]
+    </span>core: Operator,
+}
 
-<span class="attr">#[allow(dead_code)]
-</span><span class="kw">impl </span>Filesystem {
-    <span class="kw">pub fn </span>new() -&gt; Filesystem {
-        Filesystem {}
+<span class="kw">impl </span>Filesystem {
+    <span class="kw">pub fn </span>new(core: Operator) -&gt; Filesystem {
+        Filesystem { core }
     }
 
     <span class="kw">pub fn </span>handle_message(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>r: Reader, w: Writer) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
