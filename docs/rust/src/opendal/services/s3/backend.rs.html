@@ -1359,6 +1359,23 @@
 <a href="#1359" id="1359">1359</a>
 <a href="#1360" id="1360">1360</a>
 <a href="#1361" id="1361">1361</a>
+<a href="#1362" id="1362">1362</a>
+<a href="#1363" id="1363">1363</a>
+<a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1485,6 +1502,8 @@
     </span><span class="kw">pub </span>role_arn: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// external_id for this backend.
     </span><span class="kw">pub </span>external_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// role_session_name for this backend.
+    </span><span class="kw">pub </span>role_session_name: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Disable config load so that opendal will not load config from
     /// environment.
     ///
@@ -1714,6 +1733,15 @@
     </span><span class="kw">pub fn </span>external_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.external_id = <span class="prelude-val">Some</span>(v.to_string())
+        }
+
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set role_session_name for this backend.
+    </span><span class="kw">pub fn </span>role_session_name(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!v.is_empty() {
+            <span class="self">self</span>.config.role_session_name = <span class="prelude-val">Some</span>(v.to_string())
         }
 
         <span class="self">self
@@ -2309,13 +2337,19 @@
             </span><span class="kw">let </span>default_loader = AwsDefaultLoader::new(client.client(), cfg.clone());
 
             <span class="comment">// Build the config for assume role.
-            </span><span class="kw">let </span>assume_role_cfg = AwsConfig {
+            </span><span class="kw">let </span><span class="kw-2">mut </span>assume_role_cfg = AwsConfig {
                 region: <span class="prelude-val">Some</span>(region.clone()),
                 role_arn: <span class="prelude-val">Some</span>(role_arn),
                 external_id: <span class="self">self</span>.config.external_id.clone(),
                 sts_regional_endpoints: <span class="string">"regional"</span>.to_string(),
                 ..Default::default()
             };
+
+            <span class="comment">// override default role_session_name if set
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(name) = <span class="self">self</span>.config.role_session_name {
+                assume_role_cfg.role_session_name = name;
+            }
+
             <span class="kw">let </span>assume_role_loader = AwsAssumeRoleLoader::new(
                 client.client(),
                 assume_role_cfg,
