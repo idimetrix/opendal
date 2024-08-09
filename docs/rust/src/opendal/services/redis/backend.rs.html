@@ -455,6 +455,7 @@
 <a href="#455" id="455">455</a>
 <a href="#456" id="456">456</a>
 <a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -482,12 +483,12 @@
 <span class="kw">use </span>redis::cluster::ClusterClient;
 <span class="kw">use </span>redis::cluster::ClusterClientBuilder;
 <span class="kw">use </span>redis::cluster_async::ClusterConnection;
-<span class="kw">use </span>redis::AsyncCommands;
 <span class="kw">use </span>redis::Client;
 <span class="kw">use </span>redis::ConnectionAddr;
 <span class="kw">use </span>redis::ConnectionInfo;
 <span class="kw">use </span>redis::RedisConnectionInfo;
 <span class="kw">use </span>redis::RedisError;
+<span class="kw">use </span>redis::{AsyncCommands, ProtocolVersion};
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::OnceCell;
@@ -769,6 +770,7 @@
             db: <span class="self">self</span>.config.db,
             username: <span class="self">self</span>.config.username.clone(),
             password: <span class="self">self</span>.config.password.clone(),
+            protocol: ProtocolVersion::RESP2,
         };
 
         <span class="prelude-val">Ok</span>(ConnectionInfo {
