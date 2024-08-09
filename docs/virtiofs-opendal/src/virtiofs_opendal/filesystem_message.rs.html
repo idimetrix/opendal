@@ -111,6 +111,54 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -136,7 +184,10 @@
 /// The corresponding value needs to be aligned with the specification.
 </span><span class="attr">#[non_exhaustive]
 </span><span class="kw">pub enum </span>Opcode {
+    Getattr = <span class="number">3</span>,
+    Setattr = <span class="number">4</span>,
     Init = <span class="number">26</span>,
+    Destroy = <span class="number">38</span>,
 }
 
 <span class="kw">impl </span>TryFrom&lt;u32&gt; <span class="kw">for </span>Opcode {
@@ -144,10 +195,39 @@
 
     <span class="kw">fn </span>try_from(value: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">match </span>value {
+            <span class="number">3 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Getattr),
+            <span class="number">4 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Setattr),
             <span class="number">26 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Init),
+            <span class="number">38 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Destroy),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(new_vhost_user_fs_error(<span class="string">"failed to decode opcode"</span>, <span class="prelude-val">None</span>)),
         }
     }
+}
+
+<span class="doccomment">/// Attr represents the file attributes in virtiofs.
+///
+/// The fields of the struct need to conform to the specific format of the virtiofs message.
+/// Currently, we only need to align them exactly with virtiofsd.
+/// Reference: https://gitlab.com/virtio-fs/virtiofsd/-/blob/main/src/fuse.rs?ref_type=heads#L577
+</span><span class="attr">#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+</span><span class="kw">pub struct </span>Attr {
+    <span class="kw">pub </span>ino: u64,
+    <span class="kw">pub </span>size: u64,
+    <span class="kw">pub </span>blocks: u64,
+    <span class="kw">pub </span>atime: u64,
+    <span class="kw">pub </span>mtime: u64,
+    <span class="kw">pub </span>ctime: u64,
+    <span class="kw">pub </span>atimensec: u32,
+    <span class="kw">pub </span>mtimensec: u32,
+    <span class="kw">pub </span>ctimensec: u32,
+    <span class="kw">pub </span>mode: u32,
+    <span class="kw">pub </span>nlink: u32,
+    <span class="kw">pub </span>uid: u32,
+    <span class="kw">pub </span>gid: u32,
+    <span class="kw">pub </span>rdev: u32,
+    <span class="kw">pub </span>blksize: u32,
+    <span class="kw">pub </span>flags: u32,
 }
 
 <span class="doccomment">/// InHeader represents the incoming message header in the filesystem call.
@@ -218,10 +298,26 @@
     <span class="kw">pub </span>unused: [u32; <span class="number">7</span>],
 }
 
+<span class="doccomment">/// AttrOut is used to return the file attributes in the filesystem call.
+///
+/// The fields of the struct need to conform to the specific format of the virtiofs message.
+/// Currently, we only need to align them exactly with virtiofsd.
+/// Reference: https://gitlab.com/virtio-fs/virtiofsd/-/blob/main/src/fuse.rs?ref_type=heads#L782
+</span><span class="attr">#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+</span><span class="kw">pub struct </span>AttrOut {
+    <span class="kw">pub </span>attr_valid: u64,
+    <span class="kw">pub </span>attr_valid_nsec: u32,
+    <span class="kw">pub </span>dummy: u32,
+    <span class="kw">pub </span>attr: Attr,
+}
+
 <span class="doccomment">/// We will use ByteValued to implement the encoding and decoding
 /// of these structures in shared memory.
-</span><span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InHeader {}
+</span><span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>Attr {}
+<span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InHeader {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>OutHeader {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InitIn {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InitOut {}
+<span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>AttrOut {}
 </code></pre></div></section></main></body></html>
