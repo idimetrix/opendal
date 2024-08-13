@@ -159,6 +159,26 @@
 <a href="#159" id="159">159</a>
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -184,6 +204,7 @@
 /// The corresponding value needs to be aligned with the specification.
 </span><span class="attr">#[non_exhaustive]
 </span><span class="kw">pub enum </span>Opcode {
+    Lookup = <span class="number">1</span>,
     Getattr = <span class="number">3</span>,
     Setattr = <span class="number">4</span>,
     Init = <span class="number">26</span>,
@@ -195,6 +216,7 @@
 
     <span class="kw">fn </span>try_from(value: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">match </span>value {
+            <span class="number">1 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Lookup),
             <span class="number">3 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Getattr),
             <span class="number">4 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Setattr),
             <span class="number">26 </span>=&gt; <span class="prelude-val">Ok</span>(Opcode::Init),
@@ -298,6 +320,23 @@
     <span class="kw">pub </span>unused: [u32; <span class="number">7</span>],
 }
 
+<span class="doccomment">/// EntryOut is used to return the file entry in the filesystem call.
+///
+/// The fields of the struct need to conform to the specific format of the virtiofs message.
+/// Currently, we only need to align them exactly with virtiofsd.
+/// Reference: https://gitlab.com/virtio-fs/virtiofsd/-/blob/main/src/fuse.rs?ref_type=heads#L737
+</span><span class="attr">#[repr(C)]
+#[derive(Debug, Default, Clone, Copy)]
+</span><span class="kw">pub struct </span>EntryOut {
+    <span class="kw">pub </span>nodeid: u64,
+    <span class="kw">pub </span>generation: u64,
+    <span class="kw">pub </span>entry_valid: u64,
+    <span class="kw">pub </span>attr_valid: u64,
+    <span class="kw">pub </span>entry_valid_nsec: u32,
+    <span class="kw">pub </span>attr_valid_nsec: u32,
+    <span class="kw">pub </span>attr: Attr,
+}
+
 <span class="doccomment">/// AttrOut is used to return the file attributes in the filesystem call.
 ///
 /// The fields of the struct need to conform to the specific format of the virtiofs message.
@@ -319,5 +358,6 @@
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>OutHeader {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InitIn {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>InitOut {}
+<span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>EntryOut {}
 <span class="kw">unsafe impl </span>ByteValued <span class="kw">for </span>AttrOut {}
 </code></pre></div></section></main></body></html>
