@@ -666,6 +666,18 @@
 <a href="#666" id="666">666</a>
 <a href="#667" id="667">667</a>
 <a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -742,6 +754,10 @@
     </span><span class="kw">pub </span>disable_vm_metadata: bool,
     <span class="doccomment">/// Disable loading configuration from the environment.
     </span><span class="kw">pub </span>disable_config_load: bool,
+    <span class="doccomment">/// A Google Cloud OAuth2 token.
+    ///
+    /// Takes precedence over `credential` and `credential_path`.
+    </span><span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>GcsConfig {
@@ -879,6 +895,12 @@
     <span class="doccomment">/// Specify the customized token loader used by this service.
     </span><span class="kw">pub fn </span>customized_token_loader(<span class="kw-2">mut </span><span class="self">self</span>, token_load: Box&lt;<span class="kw">dyn </span>GoogleTokenLoad&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.customized_token_loader = <span class="prelude-val">Some</span>(token_load);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Provide the OAuth2 token to use.
+    </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token);
         <span class="self">self
     </span>}
 
@@ -1022,6 +1044,8 @@
                 client,
                 signer,
                 token_loader,
+                token: <span class="self">self</span>.config.token,
+                scope: scope.to_string(),
                 credential_loader: cred_loader,
                 predefined_acl: <span class="self">self</span>.config.predefined_acl.clone(),
                 default_storage_class: <span class="self">self</span>.config.default_storage_class.clone(),

@@ -798,6 +798,12 @@
 <a href="#798" id="798">798</a>
 <a href="#799" id="799">799</a>
 <a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -853,6 +859,8 @@
     <span class="kw">pub </span>client: HttpClient,
     <span class="kw">pub </span>signer: GoogleSigner,
     <span class="kw">pub </span>token_loader: GoogleTokenLoader,
+    <span class="kw">pub </span>token: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="kw">pub </span>scope: String,
     <span class="kw">pub </span>credential_loader: GoogleCredentialLoader,
 
     <span class="kw">pub </span>predefined_acl: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -876,6 +884,10 @@
 
 <span class="kw">impl </span>GcsCore {
     <span class="kw">async fn </span>load_token(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;GoogleToken&gt;&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(token) = <span class="kw-2">&amp;</span><span class="self">self</span>.token {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(GoogleToken::new(token, usize::MAX, <span class="kw-2">&amp;</span><span class="self">self</span>.scope)));
+        }
+
         <span class="kw">let </span>cred = { || <span class="self">self</span>.token_loader.load() }
             .retry(<span class="kw-2">&amp;*</span>BACKOFF)
             .<span class="kw">await
