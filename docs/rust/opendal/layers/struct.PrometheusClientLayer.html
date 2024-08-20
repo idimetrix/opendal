@@ -16,7 +16,7 @@ async fn main() -&gt; Result&lt;()&gt; {
 
     let op = Operator::new(builder)
         .expect(&quot;must init&quot;)
-        .layer(PrometheusClientLayer::with_registry(&amp;mut registry))
+        .layer(PrometheusClientLayer::new(&amp;mut registry))
         .finish();
     debug!(&quot;operator: {op:?}&quot;);
 

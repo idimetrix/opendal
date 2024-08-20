@@ -782,6 +782,15 @@
 <a href="#782" id="782">782</a>
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -841,7 +850,7 @@
 ///
 ///     let op = Operator::new(builder)
 ///         .expect("must init")
-///         .layer(PrometheusClientLayer::with_registry(&amp;mut registry))
+///         .layer(PrometheusClientLayer::new(&amp;mut registry))
 ///         .finish();
 ///     debug!("operator: {op:?}");
 ///
@@ -1104,6 +1113,7 @@
             Operation::CreateDir.into_static(),
             start_time.elapsed(),
         );
+
         create_res.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::CreateDir.into_static(), e.kind());
@@ -1112,16 +1122,17 @@
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>start = Instant::now();
+        <span class="self">self</span>.metrics
+            .increment_request_total(<span class="self">self</span>.scheme, Operation::Read.into_static());
 
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>res = <span class="self">self</span>.inner.read(path, args).<span class="kw">await</span>;
+
         <span class="self">self</span>.metrics.observe_request_duration(
             <span class="self">self</span>.scheme,
             Operation::Read.into_static(),
             start.elapsed(),
         );
-        <span class="self">self</span>.metrics
-            .increment_request_total(<span class="self">self</span>.scheme, Operation::Read.into_static());
 
         <span class="kw">match </span>res {
             <span class="prelude-val">Ok</span>((rp, r)) =&gt; <span class="prelude-val">Ok</span>((
@@ -1137,19 +1148,17 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>start = Instant::now();
-
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::Write.into_static());
 
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>res = <span class="self">self</span>.inner.write(path, args).<span class="kw">await</span>;
+
         <span class="self">self</span>.metrics.observe_request_duration(
             <span class="self">self</span>.scheme,
             Operation::Write.into_static(),
             start.elapsed(),
         );
-        <span class="self">self</span>.metrics
-            .increment_request_total(<span class="self">self</span>.scheme, Operation::Write.into_static());
 
         <span class="kw">match </span>res {
             <span class="prelude-val">Ok</span>((rp, w)) =&gt; <span class="prelude-val">Ok</span>((
@@ -1167,8 +1176,8 @@
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::Stat.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>stat_res = <span class="self">self
             </span>.inner
             .stat(path, args)
@@ -1183,6 +1192,7 @@
             Operation::Stat.into_static(),
             start_time.elapsed(),
         );
+
         stat_res.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::Stat.into_static(), e.kind());
@@ -1193,8 +1203,8 @@
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::Delete.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>delete_res = <span class="self">self</span>.inner.delete(path, args).<span class="kw">await</span>;
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1202,6 +1212,7 @@
             Operation::Delete.into_static(),
             start_time.elapsed(),
         );
+
         delete_res.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::Delete.into_static(), e.kind());
@@ -1212,8 +1223,8 @@
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::List.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>list_res = <span class="self">self</span>.inner.list(path, args).<span class="kw">await</span>;
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1221,6 +1232,7 @@
             Operation::List.into_static(),
             start_time.elapsed(),
         );
+
         list_res.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::List.into_static(), e.kind());
@@ -1231,8 +1243,8 @@
     <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::Batch.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.batch(args).<span class="kw">await</span>;
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1240,6 +1252,7 @@
             Operation::Batch.into_static(),
             start_time.elapsed(),
         );
+
         result.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::Batch.into_static(), e.kind());
@@ -1250,8 +1263,8 @@
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::Presign.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.presign(path, args).<span class="kw">await</span>;
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1259,6 +1272,7 @@
             Operation::Presign.into_static(),
             start_time.elapsed(),
         );
+
         result.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::Presign.into_static(), e.kind());
@@ -1269,8 +1283,8 @@
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::BlockingCreateDir.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create_dir(path, args);
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1278,6 +1292,7 @@
             Operation::BlockingCreateDir.into_static(),
             start_time.elapsed(),
         );
+
         result.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::BlockingCreateDir.into_static(), e.kind());
@@ -1324,9 +1339,10 @@
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::BlockingStat.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_stat(path, args);
+
         <span class="self">self</span>.metrics.observe_request_duration(
             <span class="self">self</span>.scheme,
             Operation::BlockingStat.into_static(),
@@ -1343,8 +1359,8 @@
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::BlockingDelete.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_delete(path, args);
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1352,6 +1368,7 @@
             Operation::BlockingDelete.into_static(),
             start_time.elapsed(),
         );
+
         result.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::BlockingDelete.into_static(), e.kind());
@@ -1362,8 +1379,8 @@
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
         <span class="self">self</span>.metrics
             .increment_request_total(<span class="self">self</span>.scheme, Operation::BlockingList.into_static());
-        <span class="kw">let </span>start_time = Instant::now();
 
+        <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_list(path, args);
 
         <span class="self">self</span>.metrics.observe_request_duration(
@@ -1371,6 +1388,7 @@
             Operation::BlockingList.into_static(),
             start_time.elapsed(),
         );
+
         result.map_err(|e| {
             <span class="self">self</span>.metrics
                 .increment_errors_total(Operation::BlockingList.into_static(), e.kind());
@@ -1476,26 +1494,6 @@
             })
     }
 
-    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>start = Instant::now();
-
-        <span class="self">self</span>.inner
-            .abort()
-            .<span class="kw">await
-            </span>.map(|<span class="kw">_</span>| {
-                <span class="self">self</span>.metrics.observe_request_duration(
-                    <span class="self">self</span>.scheme,
-                    Operation::WriterAbort.into_static(),
-                    start.elapsed(),
-                );
-            })
-            .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::WriterAbort.into_static(), err.kind());
-                err
-            })
-    }
-
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>start = Instant::now();
 
@@ -1512,6 +1510,26 @@
             .map_err(|err| {
                 <span class="self">self</span>.metrics
                     .increment_errors_total(Operation::WriterClose.into_static(), err.kind());
+                err
+            })
+    }
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>start = Instant::now();
+
+        <span class="self">self</span>.inner
+            .abort()
+            .<span class="kw">await
+            </span>.map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.metrics.observe_request_duration(
+                    <span class="self">self</span>.scheme,
+                    Operation::WriterAbort.into_static(),
+                    start.elapsed(),
+                );
+            })
+            .map_err(|err| {
+                <span class="self">self</span>.metrics
+                    .increment_errors_total(Operation::WriterAbort.into_static(), err.kind());
                 err
             })
     }
