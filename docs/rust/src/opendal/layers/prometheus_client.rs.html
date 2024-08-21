@@ -705,6 +705,15 @@
 <a href="#705" id="705">705</a>
 <a href="#706" id="706">706</a>
 <a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -722,16 +731,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::fmt::Formatter;
+</span><span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 <span class="kw">use </span>std::time::Instant;
 
 <span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>prometheus_client::encoding::EncodeLabel;
 <span class="kw">use </span>prometheus_client::encoding::EncodeLabelSet;
+<span class="kw">use </span>prometheus_client::encoding::LabelSetEncoder;
 <span class="kw">use </span>prometheus_client::metrics::counter::Counter;
 <span class="kw">use </span>prometheus_client::metrics::family::Family;
 <span class="kw">use </span>prometheus_client::metrics::histogram;
@@ -786,7 +795,7 @@
 ///     Ok(())
 /// }
 /// ```
-</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>PrometheusClientLayer {
     metrics: PrometheusClientMetricDefinitions,
 }
@@ -802,7 +811,7 @@
 }
 
 <span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>PrometheusClientLayer {
-    <span class="kw">type </span>LayeredAccess = PrometheusAccessor&lt;A&gt;;
+    <span class="kw">type </span>LayeredAccess = PrometheusClientAccessor&lt;A&gt;;
 
     <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
@@ -812,11 +821,11 @@
 
         <span class="kw">let </span>defs = Arc::new(<span class="self">self</span>.metrics.clone());
         <span class="kw">let </span>metrics = PrometheusClientMetrics::new(defs, scheme, root, name);
-        PrometheusAccessor { inner, metrics }
+        PrometheusClientAccessor { inner, metrics }
     }
 }
 
-<span class="attr">#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+<span class="attr">#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 </span><span class="kw">struct </span>OperationLabels {
     op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     scheme: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
@@ -825,37 +834,31 @@
 }
 
 <span class="kw">impl </span>EncodeLabelSet <span class="kw">for </span>OperationLabels {
-    <span class="kw">fn </span>encode(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="kw-2">mut </span>encoder: prometheus_client::encoding::LabelSetEncoder,
-    ) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>encoder: LabelSetEncoder) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         (<span class="string">"op"</span>, <span class="self">self</span>.op).encode(encoder.encode_label())<span class="question-mark">?</span>;
         (<span class="string">"scheme"</span>, <span class="self">self</span>.scheme).encode(encoder.encode_label())<span class="question-mark">?</span>;
-        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
         (<span class="string">"root"</span>, <span class="self">self</span>.root.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="attr">#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+<span class="attr">#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 </span><span class="kw">struct </span>ErrorLabels {
     op: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     scheme: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
-    err: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     root: Arc&lt;String&gt;,
     namespace: Arc&lt;String&gt;,
+    error: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
 }
 
 <span class="kw">impl </span>EncodeLabelSet <span class="kw">for </span>ErrorLabels {
-    <span class="kw">fn </span>encode(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="kw-2">mut </span>encoder: prometheus_client::encoding::LabelSetEncoder,
-    ) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>encoder: LabelSetEncoder) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         (<span class="string">"op"</span>, <span class="self">self</span>.op).encode(encoder.encode_label())<span class="question-mark">?</span>;
         (<span class="string">"scheme"</span>, <span class="self">self</span>.scheme).encode(encoder.encode_label())<span class="question-mark">?</span>;
-        (<span class="string">"error"</span>, <span class="self">self</span>.err).encode(encoder.encode_label())<span class="question-mark">?</span>;
-        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
         (<span class="string">"root"</span>, <span class="self">self</span>.root.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"namespace"</span>, <span class="self">self</span>.namespace.as_str()).encode(encoder.encode_label())<span class="question-mark">?</span>;
+        (<span class="string">"error"</span>, <span class="self">self</span>.error).encode(encoder.encode_label())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -908,11 +911,7 @@
         );
 
         registry.register(<span class="string">"opendal_bytes"</span>, <span class="string">"Total size of bytes"</span>, bytes_total.clone());
-        registry.register(
-            <span class="string">"opendal_bytes_histogram"</span>,
-            <span class="string">"The size of bytes"</span>,
-            bytes.clone(),
-        );
+        registry.register(<span class="string">"opendal_bytes"</span>, <span class="string">"The size of bytes"</span>, bytes.clone());
 
         <span class="self">Self </span>{
             requests_total,
@@ -947,78 +946,73 @@
         }
     }
 
+    <span class="kw">fn </span>increment_request_total(<span class="kw-2">&amp;</span><span class="self">self</span>, labels: <span class="kw-2">&amp;</span>OperationLabels) {
+        <span class="self">self</span>.metrics.requests_total.get_or_create(labels).inc();
+    }
+
     <span class="kw">fn </span>increment_errors_total(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, err: ErrorKind) {
-        <span class="kw">let </span>labels = ErrorLabels {
-            op: op.into_static(),
-            scheme: <span class="self">self</span>.scheme.into_static(),
-            err: err.into_static(),
-            root: <span class="self">self</span>.root.clone(),
-            namespace: <span class="self">self</span>.name.clone(),
-        };
+        <span class="kw">let </span>labels = <span class="self">self</span>.gen_error_labels(op, err);
         <span class="self">self</span>.metrics.errors_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
     }
 
-    <span class="kw">fn </span>increment_request_total(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation) {
-        <span class="kw">let </span>labels = OperationLabels {
-            op: op.into_static(),
-            scheme: <span class="self">self</span>.scheme.into_static(),
-            root: <span class="self">self</span>.root.clone(),
-            namespace: <span class="self">self</span>.name.clone(),
-        };
-        <span class="self">self</span>.metrics.requests_total.get_or_create(<span class="kw-2">&amp;</span>labels).inc();
-    }
-
-    <span class="kw">fn </span>observe_bytes_total(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, bytes: usize) {
-        <span class="kw">let </span>labels = OperationLabels {
-            op: op.into_static(),
-            scheme: <span class="self">self</span>.scheme.into_static(),
-            root: <span class="self">self</span>.root.clone(),
-            namespace: <span class="self">self</span>.name.clone(),
-        };
-        <span class="self">self</span>.metrics
-            .bytes
-            .get_or_create(<span class="kw-2">&amp;</span>labels)
-            .observe(bytes <span class="kw">as </span>f64);
-        <span class="self">self</span>.metrics
-            .bytes_total
-            .get_or_create(<span class="kw-2">&amp;</span>labels)
-            .inc_by(bytes <span class="kw">as </span>u64);
-    }
-
-    <span class="kw">fn </span>observe_request_duration(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, duration: Duration) {
-        <span class="kw">let </span>labels = OperationLabels {
-            op: op.into_static(),
-            scheme: <span class="self">self</span>.scheme.into_static(),
-            root: <span class="self">self</span>.root.clone(),
-            namespace: <span class="self">self</span>.name.clone(),
-        };
+    <span class="kw">fn </span>observe_request_duration(<span class="kw-2">&amp;</span><span class="self">self</span>, labels: <span class="kw-2">&amp;</span>OperationLabels, duration: Duration) {
         <span class="self">self</span>.metrics
             .request_duration_seconds
-            .get_or_create(<span class="kw-2">&amp;</span>labels)
+            .get_or_create(labels)
             .observe(duration.as_secs_f64());
+    }
+
+    <span class="kw">fn </span>observe_bytes_total(<span class="kw-2">&amp;</span><span class="self">self</span>, labels: <span class="kw-2">&amp;</span>OperationLabels, bytes: usize) {
+        <span class="self">self</span>.metrics
+            .bytes_total
+            .get_or_create(labels)
+            .inc_by(bytes <span class="kw">as </span>u64);
+        <span class="self">self</span>.metrics
+            .bytes
+            .get_or_create(labels)
+            .observe(bytes <span class="kw">as </span>f64);
+    }
+
+    <span class="kw">fn </span>gen_operation_labels(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation) -&gt; OperationLabels {
+        OperationLabels {
+            op: op.into_static(),
+            scheme: <span class="self">self</span>.scheme.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+        }
+    }
+
+    <span class="kw">fn </span>gen_error_labels(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, err: ErrorKind) -&gt; ErrorLabels {
+        ErrorLabels {
+            op: op.into_static(),
+            scheme: <span class="self">self</span>.scheme.into_static(),
+            root: <span class="self">self</span>.root.clone(),
+            namespace: <span class="self">self</span>.name.clone(),
+            error: err.into_static(),
+        }
     }
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>PrometheusAccessor&lt;A: Access&gt; {
+</span><span class="kw">pub struct </span>PrometheusClientAccessor&lt;A: Access&gt; {
     inner: A,
     metrics: PrometheusClientMetrics,
 }
 
-<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>PrometheusAccessor&lt;A&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>PrometheusClientAccessor&lt;A&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.debug_struct(<span class="string">"PrometheusAccessor"</span>)
             .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
             .finish_non_exhaustive()
     }
 }
 
-<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>PrometheusAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>PrometheusClientAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = PrometheusMetricWrapper&lt;A::Reader&gt;;
-    <span class="kw">type </span>BlockingReader = PrometheusMetricWrapper&lt;A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer = PrometheusMetricWrapper&lt;A::Writer&gt;;
-    <span class="kw">type </span>BlockingWriter = PrometheusMetricWrapper&lt;A::BlockingWriter&gt;;
+    <span class="kw">type </span>Reader = PrometheusClientMetricWrapper&lt;A::Reader&gt;;
+    <span class="kw">type </span>BlockingReader = PrometheusClientMetricWrapper&lt;A::BlockingReader&gt;;
+    <span class="kw">type </span>Writer = PrometheusClientMetricWrapper&lt;A::Writer&gt;;
+    <span class="kw">type </span>BlockingWriter = PrometheusClientMetricWrapper&lt;A::BlockingWriter&gt;;
     <span class="kw">type </span>Lister = A::Lister;
     <span class="kw">type </span>BlockingLister = A::BlockingLister;
 
@@ -1027,301 +1021,320 @@
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::CreateDir);
+        <span class="kw">let </span>op = Operation::CreateDir;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
-        <span class="kw">let </span>create_res = <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await</span>;
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
+        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::CreateDir, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        create_res.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::CreateDir, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Read);
+        <span class="kw">let </span>op = Operation::Read;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
         <span class="kw">let </span>start = Instant::now();
-        <span class="kw">let </span>res = <span class="self">self</span>.inner.read(path, args).<span class="kw">await</span>;
-
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.read(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Read, start.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>((rp, r)) =&gt; <span class="prelude-val">Ok</span>((rp, PrometheusMetricWrapper::new(r, <span class="self">self</span>.metrics.clone()))),
+        <span class="kw">match </span>result {
+            <span class="prelude-val">Ok</span>((rp, r)) =&gt; <span class="prelude-val">Ok</span>((
+                rp,
+                PrometheusClientMetricWrapper::new(r, <span class="self">self</span>.metrics.clone()),
+            )),
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::Read, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 <span class="prelude-val">Err</span>(err)
             }
         }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Write);
+        <span class="kw">let </span>op = Operation::Write;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
         <span class="kw">let </span>start = Instant::now();
-        <span class="kw">let </span>res = <span class="self">self</span>.inner.write(path, args).<span class="kw">await</span>;
-
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.write(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Write, start.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>((rp, w)) =&gt; <span class="prelude-val">Ok</span>((rp, PrometheusMetricWrapper::new(w, <span class="self">self</span>.metrics.clone()))),
+        <span class="kw">match </span>result {
+            <span class="prelude-val">Ok</span>((rp, w)) =&gt; <span class="prelude-val">Ok</span>((
+                rp,
+                PrometheusClientMetricWrapper::new(w, <span class="self">self</span>.metrics.clone()),
+            )),
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::Write, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 <span class="prelude-val">Err</span>(err)
             }
         }
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Stat);
+        <span class="kw">let </span>op = Operation::Stat;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
-        <span class="kw">let </span>stat_res = <span class="self">self
-            </span>.inner
-            .stat(path, args)
-            .inspect_err(|e| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::Stat, e.kind());
-            })
-            .<span class="kw">await</span>;
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
+        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.stat(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Stat, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        stat_res.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::Stat, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Delete);
+        <span class="kw">let </span>op = Operation::Delete;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
-        <span class="kw">let </span>delete_res = <span class="self">self</span>.inner.delete(path, args).<span class="kw">await</span>;
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
+        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.delete(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Delete, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        delete_res.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::Delete, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::List);
+        <span class="kw">let </span>op = Operation::List;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
-        <span class="kw">let </span>list_res = <span class="self">self</span>.inner.list(path, args).<span class="kw">await</span>;
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
+        <span class="kw">let </span>start = Instant::now();
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.list(path, args).<span class="kw">await</span>;
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::List, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        list_res.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::List, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Batch);
+        <span class="kw">let </span>op = Operation::Batch;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.batch(args).<span class="kw">await</span>;
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Batch, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::Batch, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="self">self</span>.metrics.increment_request_total(Operation::Presign);
+        <span class="kw">let </span>op = Operation::Presign;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.presign(path, args).<span class="kw">await</span>;
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::Presign, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::Presign, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingCreateDir);
+        <span class="kw">let </span>op = Operation::BlockingCreateDir;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create_dir(path, args);
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::BlockingCreateDir, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingCreateDir, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingRead);
+        <span class="kw">let </span>op = Operation::BlockingRead;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>result = <span class="self">self
-            </span>.inner
-            .blocking_read(path, args)
-            .map(|(rp, r)| (rp, PrometheusMetricWrapper::new(r, <span class="self">self</span>.metrics.clone())));
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingRead, e.kind());
-            e
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_read(path, args).map(|(rp, r)| {
+            (
+                rp,
+                PrometheusClientMetricWrapper::new(r, <span class="self">self</span>.metrics.clone()),
+            )
+        });
+
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingWrite);
+        <span class="kw">let </span>op = Operation::BlockingWrite;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>result = <span class="self">self
-            </span>.inner
-            .blocking_write(path, args)
-            .map(|(rp, r)| (rp, PrometheusMetricWrapper::new(r, <span class="self">self</span>.metrics.clone())));
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingWrite, e.kind());
-            e
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_write(path, args).map(|(rp, r)| {
+            (
+                rp,
+                PrometheusClientMetricWrapper::new(r, <span class="self">self</span>.metrics.clone()),
+            )
+        });
+
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingStat);
+        <span class="kw">let </span>op = Operation::BlockingList;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_stat(path, args);
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::BlockingStat, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingStat, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingDelete);
+        <span class="kw">let </span>op = Operation::BlockingDelete;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_delete(path, args);
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::BlockingDelete, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingDelete, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
-        <span class="self">self</span>.metrics
-            .increment_request_total(Operation::BlockingList);
+        <span class="kw">let </span>op = Operation::BlockingList;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
 
-        <span class="kw">let </span>start_time = Instant::now();
+        <span class="self">self</span>.metrics.increment_request_total(<span class="kw-2">&amp;</span>labels);
+
+        <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_list(path, args);
-
         <span class="self">self</span>.metrics
-            .observe_request_duration(Operation::BlockingList, start_time.elapsed());
+            .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
 
-        result.map_err(|e| {
-            <span class="self">self</span>.metrics
-                .increment_errors_total(Operation::BlockingList, e.kind());
-            e
+        result.map_err(|err| {
+            <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+            err
         })
     }
 }
 
-<span class="kw">pub struct </span>PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">pub struct </span>PrometheusClientMetricWrapper&lt;R&gt; {
     inner: R,
     metrics: PrometheusClientMetrics,
 }
 
-<span class="kw">impl</span>&lt;R&gt; PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R&gt; PrometheusClientMetricWrapper&lt;R&gt; {
     <span class="kw">fn </span>new(inner: R, metrics: PrometheusClientMetrics) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ inner, metrics }
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>PrometheusClientMetricWrapper&lt;R&gt; {
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>op = Operation::ReaderRead;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
 
         <span class="kw">match </span><span class="self">self</span>.inner.read().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(bs) =&gt; {
+                <span class="self">self</span>.metrics.observe_bytes_total(<span class="kw-2">&amp;</span>labels, bs.remaining());
                 <span class="self">self</span>.metrics
-                    .observe_bytes_total(Operation::ReaderRead, bs.remaining());
-                <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::ReaderRead, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
                 <span class="prelude-val">Ok</span>(bs)
             }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::ReaderRead, e.kind());
-                <span class="prelude-val">Err</span>(e)
+            <span class="prelude-val">Err</span>(err) =&gt; {
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+                <span class="prelude-val">Err</span>(err)
             }
         }
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusClientMetricWrapper&lt;R&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>op = Operation::BlockingReaderRead;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
+
         <span class="self">self</span>.inner
             .read()
             .map(|bs| {
+                <span class="self">self</span>.metrics.observe_bytes_total(<span class="kw-2">&amp;</span>labels, bs.remaining());
                 <span class="self">self</span>.metrics
-                    .observe_bytes_total(Operation::BlockingReaderRead, bs.remaining());
-                <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::BlockingReaderRead, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
                 bs
             })
-            .map_err(|e| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::BlockingReaderRead, e.kind());
-                e
+            .map_err(|err| {
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
+                err
             })
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusClientMetricWrapper&lt;R&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operation::WriterWrite;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>size = bs.len();
 
@@ -1329,19 +1342,20 @@
             .write(bs)
             .<span class="kw">await
             </span>.map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.metrics.observe_bytes_total(<span class="kw-2">&amp;</span>labels, size);
                 <span class="self">self</span>.metrics
-                    .observe_bytes_total(Operation::WriterWrite, size);
-                <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::WriterWrite, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::WriterWrite, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 err
             })
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operation::WriterClose;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
@@ -1349,16 +1363,18 @@
             .<span class="kw">await
             </span>.map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::WriterClose, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::WriterClose, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 err
             })
     }
 
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operation::WriterAbort;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
@@ -1366,48 +1382,50 @@
             .<span class="kw">await
             </span>.map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::WriterAbort, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::WriterAbort, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 err
             })
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
+<span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>PrometheusClientMetricWrapper&lt;R&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operation::BlockingWriterWrite;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
         <span class="kw">let </span>size = bs.len();
 
         <span class="self">self</span>.inner
             .write(bs)
             .map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.metrics.observe_bytes_total(<span class="kw-2">&amp;</span>labels, size);
                 <span class="self">self</span>.metrics
-                    .observe_bytes_total(Operation::BlockingWriterWrite, size);
-                <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::BlockingWriterWrite, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::BlockingWriterWrite, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 err
             })
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operation::BlockingWriterClose;
+        <span class="kw">let </span>labels = <span class="self">self</span>.metrics.gen_operation_labels(op);
+
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
             .close()
             .map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.metrics
-                    .observe_request_duration(Operation::BlockingWriterClose, start.elapsed());
+                    .observe_request_duration(<span class="kw-2">&amp;</span>labels, start.elapsed());
             })
             .map_err(|err| {
-                <span class="self">self</span>.metrics
-                    .increment_errors_total(Operation::BlockingWriterClose, err.kind());
+                <span class="self">self</span>.metrics.increment_errors_total(op, err.kind());
                 err
             })
     }
