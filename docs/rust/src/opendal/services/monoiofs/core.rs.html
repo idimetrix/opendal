@@ -234,6 +234,52 @@
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -260,21 +306,26 @@
 <span class="kw">use </span>flume::Sender;
 <span class="kw">use </span>futures::channel::oneshot;
 <span class="kw">use </span>futures::Future;
+<span class="kw">use </span>monoio::task::JoinHandle;
 <span class="kw">use </span>monoio::FusionDriver;
 <span class="kw">use </span>monoio::RuntimeBuilder;
 
-<span class="doccomment">/// a boxed function that spawns task in current monoio runtime
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="kw">pub const </span>BUFFER_SIZE: usize = <span class="number">2 </span>* <span class="number">1024 </span>* <span class="number">1024</span>; <span class="comment">// 2 MiB
+
+</span><span class="doccomment">/// a boxed function that spawns task in current monoio runtime
 </span><span class="kw">type </span>TaskSpawner = Box&lt;<span class="kw">dyn </span>FnOnce() + Send&gt;;
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>MonoiofsCore {
     root: PathBuf,
-    <span class="attr">#[allow(dead_code)]
-    </span><span class="doccomment">/// sender that sends [`TaskSpawner`] to worker threads
+    <span class="doccomment">/// sender that sends [`TaskSpawner`] to worker threads
     </span>tx: Sender&lt;TaskSpawner&gt;,
-    <span class="attr">#[allow(dead_code)]
-    </span><span class="doccomment">/// join handles of worker threads
+    <span class="doccomment">/// join handles of worker threads
     </span>threads: Mutex&lt;Vec&lt;std::thread::JoinHandle&lt;()&gt;&gt;&gt;,
+    <span class="kw">pub </span>buf_pool: oio::PooledBuf,
 }
 
 <span class="kw">impl </span>MonoiofsCore {
@@ -295,11 +346,20 @@
             .collect();
         <span class="kw">let </span>threads = Mutex::new(threads);
 
-        <span class="self">Self </span>{ root, tx, threads }
+        <span class="self">Self </span>{
+            root,
+            tx,
+            threads,
+            buf_pool: oio::PooledBuf::new(<span class="number">16</span>).with_initial_capacity(BUFFER_SIZE),
+        }
     }
 
     <span class="kw">pub fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>PathBuf {
         <span class="kw-2">&amp;</span><span class="self">self</span>.root
+    }
+
+    <span class="kw">pub fn </span>prepare_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; PathBuf {
+        <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>))
     }
 
     <span class="doccomment">/// entrypoint of each worker thread, sets up monoio runtimes and channels
@@ -318,9 +378,8 @@
         })
     }
 
-    <span class="attr">#[allow(dead_code)]
-    </span><span class="doccomment">/// create a TaskSpawner, send it to the thread pool and wait
-    /// for its result
+    <span class="doccomment">/// Create a TaskSpawner, send it to the thread pool and wait
+    /// for its result. Task panic will propagate.
     </span><span class="kw">pub async fn </span>dispatch&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; T
     <span class="kw">where
         </span>F: FnOnce() -&gt; Fut + <span class="lifetime">'static </span>+ Send,
@@ -329,32 +388,54 @@
     {
         <span class="comment">// oneshot channel to send result back
         </span><span class="kw">let </span>(tx, rx) = oneshot::channel();
-        <span class="self">self</span>.tx
+        <span class="kw">let </span>result = <span class="self">self
+            </span>.tx
             .send_async(Box::new(<span class="kw">move </span>|| {
-                monoio::spawn(<span class="kw">async move </span>{
-                    tx.send(f().<span class="kw">await</span>)
-                        <span class="comment">// discard result because it may be non-Debug and
-                        // we don't need it to appear in the panic message
-                        </span>.map_err(|<span class="kw">_</span>| ())
-                        .expect(<span class="string">"send result from worker thread should success"</span>);
+                <span class="comment">// task will be spawned on current thread, task panic
+                // will cause current worker thread panic
+                </span>monoio::spawn(<span class="kw">async move </span>{
+                    <span class="comment">// discard the result if send failed due to
+                    // MonoiofsCore::dispatch cancelled
+                    </span><span class="kw">let _ </span>= tx.send(f().<span class="kw">await</span>);
                 });
             }))
-            .<span class="kw">await
-            </span>.expect(<span class="string">"send new TaskSpawner to worker thread should success"</span>);
-        <span class="kw">match </span>rx.<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(result) =&gt; result,
-            <span class="comment">// tx is dropped without sending result, probably the worker
-            // thread has panicked.
-            </span><span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="self">self</span>.propagate_worker_panic(),
-        }
+            .<span class="kw">await</span>;
+        <span class="self">self</span>.unwrap(result);
+        <span class="self">self</span>.unwrap(rx.<span class="kw">await</span>)
+    }
+
+    <span class="doccomment">/// Create a TaskSpawner, send it to the thread pool, spawn the task
+    /// and return its [`JoinHandle`]. Task panic cannot propagate
+    /// through the [`JoinHandle`] and should be handled elsewhere.
+    </span><span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; JoinHandle&lt;T&gt;
+    <span class="kw">where
+        </span>F: FnOnce() -&gt; Fut + <span class="lifetime">'static </span>+ Send,
+        Fut: Future&lt;Output = T&gt;,
+        T: <span class="lifetime">'static </span>+ Send,
+    {
+        <span class="comment">// oneshot channel to send JoinHandle back
+        </span><span class="kw">let </span>(tx, rx) = oneshot::channel();
+        <span class="kw">let </span>result = <span class="self">self
+            </span>.tx
+            .send_async(Box::new(<span class="kw">move </span>|| {
+                <span class="comment">// task will be spawned on current thread, task panic
+                // will cause current worker thread panic
+                </span><span class="kw">let </span>handle = monoio::spawn(<span class="kw">async move </span>{ f().<span class="kw">await </span>});
+                <span class="comment">// discard the result if send failed due to
+                // MonoiofsCore::spawn cancelled
+                </span><span class="kw">let _ </span>= tx.send(handle);
+            }))
+            .<span class="kw">await</span>;
+        <span class="self">self</span>.unwrap(result);
+        <span class="self">self</span>.unwrap(rx.<span class="kw">await</span>)
     }
 
     <span class="doccomment">/// This method always panics. It is called only when at least a
     /// worker thread has panicked or meet a broken rx, which is
     /// unrecoverable. It propagates worker thread's panic if there
     /// is any and panics on normally exited thread.
-    </span><span class="kw">fn </span>propagate_worker_panic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ! {
-        <span class="kw">let </span><span class="kw-2">mut </span>guard = <span class="self">self</span>.threads.lock().unwrap();
+    </span><span class="kw">pub fn </span>propagate_worker_panic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ! {
+        <span class="kw">let </span><span class="kw-2">mut </span>guard = <span class="self">self</span>.threads.lock().expect(<span class="string">"worker thread has panicked"</span>);
         <span class="comment">// wait until the panicked thread exits
         </span>std::thread::sleep(Duration::from_millis(<span class="number">100</span>));
         <span class="kw">let </span>threads = mem::take(<span class="kw-2">&amp;mut *</span>guard);
@@ -372,6 +453,17 @@
             }
         }
         <span class="macro">unreachable!</span>(<span class="string">"this method should panic"</span>)
+    }
+
+    <span class="doccomment">/// Unwrap result if result is Ok, otherwise propagates worker thread's
+    /// panic. This method facilitates panic propagation in situation where
+    /// Err returned by broken channel indicates that the worker thread has
+    /// panicked.
+    </span><span class="kw">pub fn </span>unwrap&lt;T, E&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, result: <span class="prelude-ty">Result</span>&lt;T, E&gt;) -&gt; T {
+        <span class="kw">match </span>result {
+            <span class="prelude-val">Ok</span>(result) =&gt; result,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="self">self</span>.propagate_worker_panic(),
+        }
     }
 }
 
