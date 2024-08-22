@@ -306,7 +306,7 @@
                 .as_str(),
         );
 
-        <span class="prelude-val">Ok</span>(FoundationdbBackend::new(Adapter { db, _network }).with_root(<span class="kw-2">&amp;</span>root))
+        <span class="prelude-val">Ok</span>(FoundationdbBackend::new(Adapter { db, _network }).with_normalized_root(root))
     }
 }
 

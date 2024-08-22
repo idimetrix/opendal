@@ -270,6 +270,13 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -322,8 +329,15 @@
     }
 
     <span class="doccomment">/// Configure root within this backend.
-    </span><span class="kw">pub fn </span>with_root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.root = normalize_root(root);
+    </span><span class="kw">pub fn </span>with_root(<span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.with_normalized_root(normalize_root(root))
+    }
+
+    <span class="doccomment">/// Configure root within this backend.
+    ///
+    /// This method assumes root is normalized.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_normalized_root(<span class="kw-2">mut </span><span class="self">self</span>, root: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.root = root;
         <span class="self">self
     </span>}
 }

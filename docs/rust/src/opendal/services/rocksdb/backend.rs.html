@@ -202,6 +202,17 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -271,9 +282,12 @@
     ///
     /// default: "/"
     </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
-        }
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(root.to_string())
+        };
+
         <span class="self">self
     </span>}
 }
@@ -294,7 +308,15 @@
                 .set_source(e)
         })<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(RocksdbBackend::new(Adapter { db: Arc::new(db) }))
+        <span class="kw">let </span>root = normalize_root(
+            <span class="self">self</span>.config
+                .root
+                .clone()
+                .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
+                .as_str(),
+        );
+
+        <span class="prelude-val">Ok</span>(RocksdbBackend::new(Adapter { db: Arc::new(db) }).with_normalized_root(root))
     }
 }
 
