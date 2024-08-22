@@ -1376,6 +1376,24 @@
 <a href="#1376" id="1376">1376</a>
 <a href="#1377" id="1377">1377</a>
 <a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2449,6 +2467,8 @@
                 write_can_multi: <span class="bool-val">true</span>,
                 write_with_cache_control: <span class="bool-val">true</span>,
                 write_with_content_type: <span class="bool-val">true</span>,
+                write_with_user_metadata: <span class="bool-val">true</span>,
+
                 <span class="comment">// The min multipart size of S3 is 5 MiB.
                 //
                 // ref: &lt;https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html&gt;
@@ -2493,6 +2513,22 @@
             StatusCode::OK =&gt; {
                 <span class="kw">let </span>headers = resp.headers();
                 <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>user_meta: HashMap&lt;String, String&gt; = headers
+                    .iter()
+                    .filter_map(|(name, <span class="kw">_</span>)| {
+                        name.as_str()
+                            .strip_prefix(constants::X_AMZ_META_PREFIX)
+                            .and_then(|stripped_key| {
+                                parse_header_to_str(headers, name)
+                                    .unwrap_or(<span class="prelude-val">None</span>)
+                                    .map(|val| (stripped_key.to_string(), val.to_string()))
+                            })
+                    })
+                    .collect();
+                <span class="kw">if </span>!user_meta.is_empty() {
+                    meta.with_user_metadata(user_meta);
+                }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_header_to_str(headers, <span class="string">"x-amz-version-id"</span>)<span class="question-mark">? </span>{
                     meta.set_version(v);

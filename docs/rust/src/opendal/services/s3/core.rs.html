@@ -1133,6 +1133,15 @@
 <a href="#1133" id="1133">1133</a>
 <a href="#1134" id="1134">1134</a>
 <a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1182,7 +1191,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">mod </span>constants {
+<span class="kw">pub mod </span>constants {
     <span class="kw">pub const </span>X_AMZ_COPY_SOURCE: <span class="kw-2">&amp;</span>str = <span class="string">"x-amz-copy-source"</span>;
 
     <span class="kw">pub const </span>X_AMZ_SERVER_SIDE_ENCRYPTION: <span class="kw-2">&amp;</span>str = <span class="string">"x-amz-server-side-encryption"</span>;
@@ -1202,6 +1211,8 @@
         <span class="string">"x-amz-copy-source-server-side-encryption-customer-key"</span>;
     <span class="kw">pub const </span>X_AMZ_COPY_SOURCE_SERVER_SIDE_ENCRYPTION_CUSTOMER_KEY_MD5: <span class="kw-2">&amp;</span>str =
         <span class="string">"x-amz-copy-source-server-side-encryption-customer-key-md5"</span>;
+
+    <span class="kw">pub const </span>X_AMZ_META_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"x-amz-meta-"</span>;
 
     <span class="kw">pub const </span>RESPONSE_CONTENT_DISPOSITION: <span class="kw-2">&amp;</span>str = <span class="string">"response-content-disposition"</span>;
     <span class="kw">pub const </span>RESPONSE_CONTENT_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"response-content-type"</span>;
@@ -1589,6 +1600,13 @@
         <span class="comment">// Set storage class header
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="kw-2">&amp;</span><span class="self">self</span>.default_storage_class {
             req = req.header(HeaderName::from_static(constants::X_AMZ_STORAGE_CLASS), v);
+        }
+
+        <span class="comment">// Set user metadata headers.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(user_metadata) = args.user_metadata() {
+            <span class="kw">for </span>(key, value) <span class="kw">in </span>user_metadata {
+                req = req.header(<span class="macro">format!</span>(<span class="string">"{}{}"</span>, constants::X_AMZ_META_PREFIX, key), value)
+            }
         }
 
         <span class="comment">// Set SSE headers.
