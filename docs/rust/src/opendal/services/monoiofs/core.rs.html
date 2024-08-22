@@ -271,15 +271,6 @@
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -306,7 +297,6 @@
 <span class="kw">use </span>flume::Sender;
 <span class="kw">use </span>futures::channel::oneshot;
 <span class="kw">use </span>futures::Future;
-<span class="kw">use </span>monoio::task::JoinHandle;
 <span class="kw">use </span>monoio::FusionDriver;
 <span class="kw">use </span>monoio::RuntimeBuilder;
 
@@ -404,30 +394,22 @@
         <span class="self">self</span>.unwrap(rx.<span class="kw">await</span>)
     }
 
-    <span class="doccomment">/// Create a TaskSpawner, send it to the thread pool, spawn the task
-    /// and return its [`JoinHandle`]. Task panic cannot propagate
-    /// through the [`JoinHandle`] and should be handled elsewhere.
-    </span><span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; JoinHandle&lt;T&gt;
+    <span class="doccomment">/// Create a TaskSpawner, send it to the thread pool and spawn the task.
+    </span><span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F)
     <span class="kw">where
         </span>F: FnOnce() -&gt; Fut + <span class="lifetime">'static </span>+ Send,
         Fut: Future&lt;Output = T&gt;,
-        T: <span class="lifetime">'static </span>+ Send,
+        T: <span class="lifetime">'static</span>,
     {
-        <span class="comment">// oneshot channel to send JoinHandle back
-        </span><span class="kw">let </span>(tx, rx) = oneshot::channel();
         <span class="kw">let </span>result = <span class="self">self
             </span>.tx
             .send_async(Box::new(<span class="kw">move </span>|| {
                 <span class="comment">// task will be spawned on current thread, task panic
                 // will cause current worker thread panic
-                </span><span class="kw">let </span>handle = monoio::spawn(<span class="kw">async move </span>{ f().<span class="kw">await </span>});
-                <span class="comment">// discard the result if send failed due to
-                // MonoiofsCore::spawn cancelled
-                </span><span class="kw">let _ </span>= tx.send(handle);
+                </span>monoio::spawn(<span class="kw">async move </span>{ f().<span class="kw">await </span>});
             }))
             .<span class="kw">await</span>;
         <span class="self">self</span>.unwrap(result);
-        <span class="self">self</span>.unwrap(rx.<span class="kw">await</span>)
     }
 
     <span class="doccomment">/// This method always panics. It is called only when at least a
