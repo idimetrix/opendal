@@ -283,49 +283,6 @@
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -349,55 +306,12 @@
 
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::Mutex;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::IcloudConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// Config for icloud services support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>IcloudConfig {
-    <span class="doccomment">/// root of this backend.
-    ///
-    /// All operations will happen under this root.
-    ///
-    /// default to `/` if not set.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// apple_id of this backend.
-    ///
-    /// apple_id must be full, mostly like `example@gmail.com`.
-    </span><span class="kw">pub </span>apple_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// password of this backend.
-    ///
-    /// password must be full.
-    </span><span class="kw">pub </span>password: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    <span class="doccomment">/// Session
-    ///
-    /// token must be valid.
-    </span><span class="kw">pub </span>trust_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// ds_web_auth_token must be set in Session
-    </span><span class="kw">pub </span>ds_web_auth_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// enable the china origin
-    /// China region `origin` Header needs to be set to "https://www.icloud.com.cn".
-    ///
-    /// otherwise Apple server will return 302.
-    </span><span class="kw">pub </span>is_china_mainland: bool,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>IcloudConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"IcloudBuilder"</span>);
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
-        d.field(<span class="string">"is_china_mainland"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_china_mainland);
-        d.finish_non_exhaustive()
-    }
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>IcloudConfig {
     <span class="kw">type </span>Builder = IcloudBuilder;

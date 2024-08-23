@@ -576,51 +576,6 @@
 <a href="#576" id="576">576</a>
 <a href="#577" id="577">577</a>
 <a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -651,8 +606,6 @@
 <span class="kw">use </span>reqsign::AliyunConfig;
 <span class="kw">use </span>reqsign::AliyunLoader;
 <span class="kw">use </span>reqsign::AliyunOssSigner;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -660,53 +613,10 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::OssWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::oss::writer::OssWriters;
+<span class="kw">use </span><span class="kw">crate</span>::services::OssConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">const </span>DEFAULT_BATCH_MAX_OPERATIONS: usize = <span class="number">1000</span>;
-
-<span class="doccomment">/// Config for Aliyun Object Storage Service (OSS) support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>OssConfig {
-    <span class="doccomment">/// Root for oss.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    <span class="doccomment">/// Endpoint for oss.
-    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Presign endpoint for oss.
-    </span><span class="kw">pub </span>presign_endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Bucket for oss.
-    </span><span class="kw">pub </span>bucket: String,
-
-    <span class="comment">// OSS features
-    </span><span class="doccomment">/// Server side encryption for oss.
-    </span><span class="kw">pub </span>server_side_encryption: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Server side encryption key id for oss.
-    </span><span class="kw">pub </span>server_side_encryption_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Allow anonymous for oss.
-    </span><span class="kw">pub </span>allow_anonymous: bool,
-
-    <span class="comment">// authenticate options
-    </span><span class="doccomment">/// Access key id for oss.
-    </span><span class="kw">pub </span>access_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Access key secret for oss.
-    </span><span class="kw">pub </span>access_key_secret: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// batch_max_operations
-    </span><span class="kw">pub </span>batch_max_operations: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>OssConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"Builder"</span>);
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"bucket"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
-            .field(<span class="string">"endpoint"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
-            .field(<span class="string">"allow_anonymous"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.allow_anonymous);
-
-        d.finish_non_exhaustive()
-    }
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>OssConfig {
     <span class="kw">type </span>Builder = OssBuilder;

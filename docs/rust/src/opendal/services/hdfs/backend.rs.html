@@ -634,44 +634,6 @@
 <a href="#634" id="634">634</a>
 <a href="#635" id="635">635</a>
 <a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -698,52 +660,14 @@
 
 <span class="kw">use </span>futures::AsyncWriteExt;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">super</span>::lister::HdfsLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::HdfsWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::hdfs::reader::HdfsReader;
+<span class="kw">use </span><span class="kw">crate</span>::services::HdfsConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// [Hadoop Distributed File System (HDFS™)](https://hadoop.apache.org/) support.
-///
-/// Config for Hdfs services support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>HdfsConfig {
-    <span class="doccomment">/// work dir of this backend
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// name node of this backend
-    </span><span class="kw">pub </span>name_node: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// kerberos_ticket_cache_path of this backend
-    </span><span class="kw">pub </span>kerberos_ticket_cache_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// user of this backend
-    </span><span class="kw">pub </span>user: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// enable the append capacity
-    </span><span class="kw">pub </span>enable_append: bool,
-    <span class="doccomment">/// atomic_write_dir of this backend
-    </span><span class="kw">pub </span>atomic_write_dir: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>HdfsConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"HdfsConfig"</span>)
-            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"name_node"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name_node)
-            .field(
-                <span class="string">"kerberos_ticket_cache_path"</span>,
-                <span class="kw-2">&amp;</span><span class="self">self</span>.kerberos_ticket_cache_path,
-            )
-            .field(<span class="string">"user"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.user)
-            .field(<span class="string">"enable_append"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.enable_append)
-            .field(<span class="string">"atomic_write_dir"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir)
-            .finish_non_exhaustive()
-    }
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>HdfsConfig {
     <span class="kw">type </span>Builder = HdfsBuilder;

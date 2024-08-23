@@ -581,19 +581,6 @@
 <a href="#581" id="581">581</a>
 <a href="#582" id="582">582</a>
 <a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -618,8 +605,6 @@
 
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::lister::FsLister;
@@ -627,19 +612,8 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::FsConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// config for file system
-</span><span class="attr">#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>FsConfig {
-    <span class="doccomment">/// root dir for backend
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    <span class="doccomment">/// tmp dir for atomic write
-    </span><span class="kw">pub </span>atomic_write_dir: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>FsConfig {
     <span class="kw">type </span>Builder = FsBuilder;

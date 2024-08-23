@@ -23,6 +23,14 @@
 <a href="#23" id="23">23</a>
 <a href="#24" id="24">24</a>
 <a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
+<a href="#27" id="27">27</a>
+<a href="#28" id="28">28</a>
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -40,12 +48,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">mod </span>backend;
-<span class="kw">pub use </span>backend::WebdavBuilder <span class="kw">as </span>Webdav;
-<span class="kw">pub use </span>backend::WebdavConfig;
+</span><span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">mod </span>core;
+<span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">mod </span>error;
+<span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">mod </span>lister;
+<span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">mod </span>writer;
 
-<span class="kw">mod </span>core;
-<span class="kw">mod </span>error;
-<span class="kw">mod </span>lister;
-<span class="kw">mod </span>writer;
+<span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">mod </span>backend;
+<span class="attr">#[cfg(feature = <span class="string">"services-webdav"</span>)]
+</span><span class="kw">pub use </span>backend::WebdavBuilder <span class="kw">as </span>Webdav;
+
+<span class="kw">mod </span>config;
+<span class="kw">pub use </span>config::WebdavConfig;
 </code></pre></div></section></main></body></html>

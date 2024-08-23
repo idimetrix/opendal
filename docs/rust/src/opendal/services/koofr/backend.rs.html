@@ -361,35 +361,6 @@
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -415,8 +386,6 @@
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>tokio::sync::Mutex;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
@@ -428,35 +397,8 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::KoofrWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::KoofrWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::KoofrConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// Config for Koofr services support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>KoofrConfig {
-    <span class="doccomment">/// root of this backend.
-    ///
-    /// All operations will happen under this root.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Koofr endpoint.
-    </span><span class="kw">pub </span>endpoint: String,
-    <span class="doccomment">/// Koofr email.
-    </span><span class="kw">pub </span>email: String,
-    <span class="doccomment">/// password of this backend. (Must be the application password)
-    </span><span class="kw">pub </span>password: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>KoofrConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"Config"</span>);
-
-        ds.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
-        ds.field(<span class="string">"email"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.email);
-
-        ds.finish()
-    }
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>KoofrConfig {
     <span class="kw">type </span>Builder = KoofrBuilder;

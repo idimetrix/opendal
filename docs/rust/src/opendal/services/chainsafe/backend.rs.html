@@ -263,35 +263,6 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -317,8 +288,6 @@
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>serde::Serialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::parse_info;
 <span class="kw">use </span><span class="kw">super</span>::core::ChainsafeCore;
@@ -328,35 +297,8 @@
 <span class="kw">use </span><span class="kw">super</span>::writer::ChainsafeWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::ChainsafeWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::ChainsafeConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// Config for Chainsafe services support.
-</span><span class="attr">#[derive(Default, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>ChainsafeConfig {
-    <span class="doccomment">/// root of this backend.
-    ///
-    /// All operations will happen under this root.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// api_key of this backend.
-    </span><span class="kw">pub </span>api_key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// bucket_id of this backend.
-    ///
-    /// required.
-    </span><span class="kw">pub </span>bucket_id: String,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>ChainsafeConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"ChainsafeConfig"</span>);
-
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"bucket_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket_id);
-
-        d.finish_non_exhaustive()
-    }
-}
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>ChainsafeConfig {
     <span class="kw">type </span>Builder = ChainsafeBuilder;
