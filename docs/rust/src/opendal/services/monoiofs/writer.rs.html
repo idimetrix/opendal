@@ -151,6 +151,8 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -198,10 +200,10 @@
 }
 
 <span class="kw">impl </span>MonoiofsWriter {
-    <span class="kw">pub async fn </span>new(core: Arc&lt;MonoiofsCore&gt;, path: PathBuf) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">pub async fn </span>new(core: Arc&lt;MonoiofsCore&gt;, path: PathBuf, append: bool) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(open_result_tx, open_result_rx) = oneshot::channel();
         <span class="kw">let </span>(tx, rx) = mpsc::unbounded();
-        core.spawn(<span class="kw">move </span>|| <span class="self">Self</span>::worker_entrypoint(path, rx, open_result_tx))
+        core.spawn(<span class="kw">move </span>|| <span class="self">Self</span>::worker_entrypoint(path, append, rx, open_result_tx))
             .<span class="kw">await</span>;
         core.unwrap(open_result_rx.<span class="kw">await</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ core, tx, pos: <span class="number">0 </span>})
@@ -210,13 +212,15 @@
     <span class="doccomment">/// entrypoint of worker task that runs in context of monoio
     </span><span class="kw">async fn </span>worker_entrypoint(
         path: PathBuf,
+        append: bool,
         <span class="kw-2">mut </span>rx: mpsc::UnboundedReceiver&lt;WriterRequest&gt;,
         open_result_tx: oneshot::Sender&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;,
     ) {
         <span class="kw">let </span>result = OpenOptions::new()
             .write(<span class="bool-val">true</span>)
             .create(<span class="bool-val">true</span>)
-            .truncate(<span class="bool-val">true</span>)
+            .append(append)
+            .truncate(!append)
             .open(path)
             .<span class="kw">await</span>;
         <span class="comment">// [`monoio::fs::File`] is non-Send, hence it is kept within
