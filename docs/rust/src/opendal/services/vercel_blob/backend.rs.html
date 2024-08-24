@@ -241,6 +241,7 @@
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -325,8 +326,9 @@
     /// Get from Vercel environment variable `BLOB_READ_WRITE_TOKEN`.
     /// It is required.
     </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.config.token = token.to_string();
-
+        <span class="kw">if </span>!token.is_empty() {
+            <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
+        }
         <span class="self">self
     </span>}
 
@@ -354,11 +356,11 @@
         <span class="macro">debug!</span>(<span class="string">"backend use root {}"</span>, <span class="kw-2">&amp;</span>root);
 
         <span class="comment">// Handle token.
-        </span><span class="kw">if </span><span class="self">self</span>.config.token.is_empty() {
+        </span><span class="kw">let </span><span class="prelude-val">Some</span>(token) = <span class="self">self</span>.config.token.clone() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"token is empty"</span>)
                 .with_operation(<span class="string">"Builder::build"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::VercelBlob));
-        }
+        };
 
         <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
             client
@@ -372,7 +374,7 @@
         <span class="prelude-val">Ok</span>(VercelBlobBackend {
             core: Arc::new(VercelBlobCore {
                 root,
-                token: <span class="self">self</span>.config.token.clone(),
+                token,
                 client,
             }),
         })

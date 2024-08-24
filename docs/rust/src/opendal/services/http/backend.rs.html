@@ -463,7 +463,7 @@
     /// default: no access token
     </span><span class="kw">pub fn </span>token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
-            <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_owned());
+            <span class="self">self</span>.config.token = <span class="prelude-val">Some</span>(token.to_string());
         }
         <span class="self">self
     </span>}
