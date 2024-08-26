@@ -324,6 +324,8 @@
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -341,15 +343,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::vec::IntoIter;
-
-<span class="kw">use </span><span class="kw">super</span>::Adapter;
+</span><span class="kw">use </span><span class="kw">super</span>::Adapter;
 <span class="kw">use </span><span class="kw">super</span>::Value;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::HierarchyLister;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::QueueBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::vec::IntoIter;
 
 <span class="doccomment">/// The typed kv backend which implements Accessor for typed kv adapter.
 </span><span class="attr">#[derive(Debug, Clone)]
@@ -537,8 +538,11 @@
             } <span class="kw">else </span>{
                 EntryMode::FILE
             };
-
-            oio::Entry::new(<span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>v), Metadata::new(mode))
+            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>v);
+            <span class="kw">if </span>path.is_empty() {
+                path = <span class="string">"/"</span>.to_string();
+            }
+            oio::Entry::new(<span class="kw-2">&amp;</span>path, Metadata::new(mode))
         })
     }
 }

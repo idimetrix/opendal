@@ -277,6 +277,9 @@
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -488,8 +491,11 @@
             } <span class="kw">else </span>{
                 EntryMode::FILE
             };
-
-            oio::Entry::new(<span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>v), Metadata::new(mode))
+            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>v);
+            <span class="kw">if </span>path.is_empty() {
+                path = <span class="string">"/"</span>.to_string();
+            }
+            oio::Entry::new(<span class="kw-2">&amp;</span>path, Metadata::new(mode))
         })
     }
 }

@@ -114,6 +114,9 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -191,8 +194,12 @@
         <span class="kw">for </span>status <span class="kw">in </span>decoded_response {
             <span class="kw">let </span>entry: oio::Entry = <span class="kw">match </span>status {
                 ListOpResponse::Subdir { subdir } =&gt; {
+                    <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="self">self</span>.core.root.as_str(), subdir.as_str());
+                    <span class="kw">if </span>path.is_empty() {
+                        path = <span class="string">"/"</span>.to_string();
+                    }
                     <span class="kw">let </span>meta = Metadata::new(EntryMode::DIR);
-                    oio::Entry::new(<span class="kw-2">&amp;</span>subdir, meta)
+                    oio::Entry::with(path, meta)
                 }
                 ListOpResponse::FileInfo {
                     bytes,
@@ -201,12 +208,11 @@
                     content_type,
                     <span class="kw-2">mut </span>last_modified,
                 } =&gt; {
-                    <span class="comment">// this is the pseudo directory itself; we'll skip it.
-                    </span><span class="kw">if </span>name == <span class="self">self</span>.path {
-                        <span class="kw">continue</span>;
+                    <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="self">self</span>.core.root.as_str(), name.as_str());
+                    <span class="kw">if </span>path.is_empty() {
+                        path = <span class="string">"/"</span>.to_string();
                     }
-
-                    <span class="kw">let </span><span class="kw-2">mut </span>meta = Metadata::new(EntryMode::from_path(<span class="kw-2">&amp;</span>name));
+                    <span class="kw">let </span><span class="kw-2">mut </span>meta = Metadata::new(EntryMode::from_path(path.as_str()));
                     meta.set_content_length(bytes);
                     meta.set_content_md5(hash.as_str());
 
@@ -222,7 +228,7 @@
                         meta.set_content_type(content_type.as_str());
                     }
 
-                    oio::Entry::with(name, meta)
+                    oio::Entry::with(path, meta)
                 }
             };
             ctx.entries.push_back(entry);

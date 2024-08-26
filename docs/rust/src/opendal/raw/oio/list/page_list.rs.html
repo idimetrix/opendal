@@ -158,11 +158,11 @@
     </span><span class="kw">pub </span>done: bool,
     <span class="doccomment">/// token is used by underlying storage services to fetch next page.
     </span><span class="kw">pub </span>token: String,
-    <span class="doccomment">/// entries is used to store entries fetched from underlying storage.
+    <span class="doccomment">/// entries are used to store entries fetched from underlying storage.
     ///
     /// Please always reuse the same `VecDeque` to avoid unnecessary memory allocation.
     /// PageLister makes sure that entries is reset before calling `next_page`. Implementer
-    /// can calling `push_back` on `entries` directly.
+    /// can call `push_back` on `entries` directly.
     </span><span class="kw">pub </span>entries: VecDeque&lt;oio::Entry&gt;,
 }
 

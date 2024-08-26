@@ -65,6 +65,8 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -96,11 +98,13 @@
     ///
     /// ## Url
     ///
-    /// This format resembles the url format of the sqlite client. The format is: `file://[path]?flag`
+    /// This format resembles the url format of the sqlite client:
     ///
-    /// - `file://data.db`
+    /// - `sqlite::memory:`
+    /// - `sqlite:data.db`
+    /// - `sqlite://data.db`
     ///
-    /// For more information, please refer to [Opening A New Database Connection](http://www.sqlite.org/c3ref/open.html)
+    /// For more information, please visit &lt;https://docs.rs/sqlx/latest/sqlx/sqlite/struct.SqliteConnectOptions.html&gt;.
     </span><span class="kw">pub </span>connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
     <span class="doccomment">/// Set the table name of the sqlite service to read/write.

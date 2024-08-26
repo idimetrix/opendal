@@ -252,74 +252,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -337,20 +269,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::sync::Arc;
-
-<span class="kw">use </span>bb8::Pool;
-<span class="kw">use </span>bb8_postgres::PostgresConnectionManager;
-<span class="kw">use </span>tokio::sync::OnceCell;
-<span class="kw">use </span>tokio_postgres::Config;
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
+</span><span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::PostgresqlConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>sqlx::postgres::PgConnectOptions;
+<span class="kw">use </span>sqlx::PgPool;
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::str::FromStr;
+<span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>PostgresqlConfig {
     <span class="kw">type </span>Builder = PostgresqlBuilder;
@@ -376,36 +304,16 @@
 }
 
 <span class="kw">impl </span>PostgresqlBuilder {
-    <span class="doccomment">/// Set the connection_string of the postgresql service.
+    <span class="doccomment">/// Set the connection url string of the postgresql service.
     ///
-    /// This connection string is `libpq-style connection strings`. There are two formats:
-    ///
-    /// ## Key Value
-    ///
-    /// This format consists of space-separated key-value pairs. Values which are either the empty
-    /// string or contain whitespace should be wrapped in '. ' and \ characters should be
-    /// backslash-escaped.
-    ///
-    /// - `host=localhost user=postgres connect_timeout=10 keepalives=0`
-    /// - `host=/var/lib/postgresql,localhost port=1234 user=postgres password='password with spaces'`
-    /// - `host=host1,host2,host3 port=1234,,5678 user=postgres target_session_attrs=read-write`
-    ///
-    /// Available keys could found at: &lt;https://docs.rs/postgres/latest/postgres/config/struct.Config.html&gt;
-    ///
-    /// ## Url
-    ///
-    /// This format resembles a URL with a scheme of either `postgres://` or `postgresql://`.
+    /// The URL should be with a scheme of either `postgres://` or `postgresql://`.
     ///
     /// - `postgresql://user@localhost`
     /// - `postgresql://user:password@%2Fvar%2Flib%2Fpostgresql/mydb?connect_timeout=10`
     /// - `postgresql://user@host1:1234,host2,host3:5678?target_session_attrs=read-write`
     /// - `postgresql:///mydb?user=user&amp;host=/var/lib/postgresql`
     ///
-    /// # Notes
-    ///
-    /// If connection_string has been specified, other parameters will be ignored.
-    ///
-    /// For more information, please visit &lt;https://docs.rs/postgres/latest/postgres/config/struct.Config.html&gt;
+    /// For more information, please visit &lt;https://docs.rs/sqlx/latest/sqlx/postgres/struct.PgConnectOptions.html&gt;.
     </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
@@ -413,7 +321,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// set the working directory, all operations will be performed under it.
+    <span class="doccomment">/// Set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
     </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
@@ -460,7 +368,7 @@
     <span class="kw">type </span>Config = PostgresqlConfig;
 
     <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
-        <span class="kw">let </span>conn = <span class="kw">match </span><span class="self">self</span>.config.connection_string.clone() {
+        <span class="kw">let </span>conn = <span class="kw">match </span><span class="self">self</span>.config.connection_string {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -470,34 +378,28 @@
             }
         };
 
-        <span class="kw">let </span>config = Config::from_str(<span class="kw-2">&amp;</span>conn).map_err(|err| {
+        <span class="kw">let </span>config = PgConnectOptions::from_str(<span class="kw-2">&amp;</span>conn).map_err(|err| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"connection_string is invalid"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Postgresql)
                 .set_source(err)
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table.clone() {
+        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"table is empty"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Postgresql))
             }
         };
-        <span class="kw">let </span>key_field = <span class="kw">match </span><span class="self">self</span>.config.key_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"key"</span>.to_string(),
-        };
-        <span class="kw">let </span>value_field = <span class="kw">match </span><span class="self">self</span>.config.value_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"value"</span>.to_string(),
-        };
-        <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.config
-                .root
-                .clone()
-                .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
-                .as_str(),
-        );
+
+        <span class="kw">let </span>key_field = <span class="self">self</span>.config.key_field.unwrap_or_else(|| <span class="string">"key"</span>.to_string());
+
+        <span class="kw">let </span>value_field = <span class="self">self
+            </span>.config
+            .value_field
+            .unwrap_or_else(|| <span class="string">"value"</span>.to_string());
+
+        <span class="kw">let </span>root = normalize_root(<span class="self">self</span>.config.root.unwrap_or_else(|| <span class="string">"/"</span>.to_string()).as_str());
 
         <span class="prelude-val">Ok</span>(PostgresqlBackend::new(Adapter {
             pool: OnceCell::new(),
@@ -513,39 +415,27 @@
 <span class="doccomment">/// Backend for Postgresql service
 </span><span class="kw">pub type </span>PostgresqlBackend = kv::Backend&lt;Adapter&gt;;
 
-<span class="attr">#[derive(Clone)]
+<span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Adapter {
-    pool: OnceCell&lt;Arc&lt;Pool&lt;PostgresConnectionManager&lt;tokio_postgres::NoTls&gt;&gt;&gt;&gt;,
-    config: Config,
+    pool: OnceCell&lt;PgPool&gt;,
+    config: PgConnectOptions,
 
     table: String,
     key_field: String,
     value_field: String,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>Adapter {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"Adapter"</span>);
-        ds.finish_non_exhaustive()
-    }
-}
-
 <span class="kw">impl </span>Adapter {
-    <span class="kw">async fn </span>get_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>Pool&lt;PostgresConnectionManager&lt;tokio_postgres::NoTls&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>PgPool&gt; {
         <span class="self">self</span>.pool
             .get_or_try_init(|| <span class="kw">async </span>{
-                <span class="comment">// TODO: add tls support.
-                </span><span class="kw">let </span>manager =
-                    PostgresConnectionManager::new(<span class="self">self</span>.config.clone(), tokio_postgres::NoTls);
-                <span class="kw">let </span>pool = Pool::builder()
-                    .build(manager)
+                <span class="kw">let </span>pool = PgPool::connect_with(<span class="self">self</span>.config.clone())
                     .<span class="kw">await
-                    </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(Arc::new(pool))
+                    </span>.map_err(parse_postgres_error)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(pool)
             })
             .<span class="kw">await
-            </span>.map(|v| v.as_ref())
-    }
+    </span>}
 }
 
 <span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
@@ -562,84 +452,58 @@
     }
 
     <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"SELECT {} FROM {} WHERE {} = $1 LIMIT 1"</span>,
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>value: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt; = sqlx::query_scalar(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">r#"SELECT "{}" FROM "{}" WHERE "{}" = $1 LIMIT 1"#</span>,
             <span class="self">self</span>.value_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
-        );
-        <span class="kw">let </span>connection = <span class="self">self
-            </span>.get_client()
-            .<span class="kw">await</span><span class="question-mark">?
-            </span>.get()
-            .<span class="kw">await
-            </span>.map_err(parse_bb8_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = connection
-            .prepare(<span class="kw-2">&amp;</span>query)
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>rows = connection
-            .query(<span class="kw-2">&amp;</span>statement, <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>path])
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
-        <span class="kw">if </span>rows.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
-        }
-        <span class="kw">let </span>value: Vec&lt;u8&gt; = rows[<span class="number">0</span>].get(<span class="number">0</span>);
-        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(value)))
+        ))
+        .bind(path)
+        .fetch_optional(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_postgres_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(value.map(Buffer::from))
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="kw">let </span>table = <span class="kw-2">&amp;</span><span class="self">self</span>.table;
         <span class="kw">let </span>key_field = <span class="kw-2">&amp;</span><span class="self">self</span>.key_field;
         <span class="kw">let </span>value_field = <span class="kw-2">&amp;</span><span class="self">self</span>.value_field;
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"INSERT INTO {table} ({key_field}, {value_field}) \
-                VALUES ($1, $2) \
-                ON CONFLICT ({key_field}) \
-                    DO UPDATE SET {value_field} = EXCLUDED.{value_field}"</span>,
-        );
-        <span class="kw">let </span>connection = <span class="self">self
-            </span>.get_client()
-            .<span class="kw">await</span><span class="question-mark">?
-            </span>.get()
-            .<span class="kw">await
-            </span>.map_err(parse_bb8_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = connection
-            .prepare(<span class="kw-2">&amp;</span>query)
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
-        <span class="kw">let _ </span>= connection
-            .query(<span class="kw-2">&amp;</span>statement, <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>value.to_vec()])
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">r#"INSERT INTO "{table}" ("{key_field}", "{value_field}")
+                VALUES ($1, $2)
+                ON CONFLICT ("{key_field}")
+                    DO UPDATE SET "{value_field}" = EXCLUDED."{value_field}""#</span>,
+        ))
+        .bind(path)
+        .bind(value.to_vec())
+        .execute(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_postgres_error)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>query = <span class="macro">format!</span>(<span class="string">"DELETE FROM {} WHERE {} = $1"</span>, <span class="self">self</span>.table, <span class="self">self</span>.key_field);
-        <span class="kw">let </span>connection = <span class="self">self
-            </span>.get_client()
-            .<span class="kw">await</span><span class="question-mark">?
-            </span>.get()
-            .<span class="kw">await
-            </span>.map_err(parse_bb8_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = connection
-            .prepare(<span class="kw-2">&amp;</span>query)
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let _ </span>= connection
-            .query(<span class="kw-2">&amp;</span>statement, <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>path])
-            .<span class="kw">await
-            </span>.map_err(parse_postgre_error)<span class="question-mark">?</span>;
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"DELETE FROM {} WHERE {} = $1"</span>,
+            <span class="self">self</span>.table, <span class="self">self</span>.key_field
+        ))
+        .bind(path)
+        .execute(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_postgres_error)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">fn </span>parse_bb8_error(err: bb8::RunError&lt;tokio_postgres::Error&gt;) -&gt; Error {
-    Error::new(ErrorKind::Unexpected, <span class="string">"unhandled error from postgresql"</span>).set_source(err)
-}
-
-<span class="kw">fn </span>parse_postgre_error(err: tokio_postgres::Error) -&gt; Error {
+<span class="kw">fn </span>parse_postgres_error(err: sqlx::Error) -&gt; Error {
     Error::new(ErrorKind::Unexpected, <span class="string">"unhandled error from postgresql"</span>).set_source(err)
 }
 </code></pre></div></section></main></body></html>

@@ -117,6 +117,15 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -164,6 +173,10 @@
             <span class="kw">match </span>resp.status() {
                 StatusCode::OK =&gt; {
                     ctx.done = <span class="bool-val">true</span>;
+                    ctx.entries.push_back(oio::Entry::new(
+                        <span class="macro">format!</span>(<span class="string">"{}/"</span>, <span class="self">self</span>.path).as_str(),
+                        Metadata::new(EntryMode::DIR),
+                    ));
 
                     <span class="kw">let </span>bs = resp.into_body();
                     serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusesWrapper&gt;(bs.reader())
@@ -191,6 +204,11 @@
                     <span class="kw">let </span>file_statuses = directory_listing.partial_listing.file_statuses.file_status;
 
                     <span class="kw">if </span>directory_listing.remaining_entries == <span class="number">0 </span>{
+                        ctx.entries.push_back(oio::Entry::new(
+                            <span class="macro">format!</span>(<span class="string">"{}/"</span>, <span class="self">self</span>.path).as_str(),
+                            Metadata::new(EntryMode::DIR),
+                        ));
+
                         ctx.done = <span class="bool-val">true</span>;
                     } <span class="kw">else if </span>!file_statuses.is_empty() {
                         ctx.token
