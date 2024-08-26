@@ -1084,18 +1084,6 @@
 <a href="#1084" id="1084">1084</a>
 <a href="#1085" id="1085">1085</a>
 <a href="#1086" id="1086">1086</a>
-<a href="#1087" id="1087">1087</a>
-<a href="#1088" id="1088">1088</a>
-<a href="#1089" id="1089">1089</a>
-<a href="#1090" id="1090">1090</a>
-<a href="#1091" id="1091">1091</a>
-<a href="#1092" id="1092">1092</a>
-<a href="#1093" id="1093">1093</a>
-<a href="#1094" id="1094">1094</a>
-<a href="#1095" id="1095">1095</a>
-<a href="#1096" id="1096">1096</a>
-<a href="#1097" id="1097">1097</a>
-<a href="#1098" id="1098">1098</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1209,7 +1197,7 @@
 <span class="kw">impl</span>&lt;I&gt; Clone <span class="kw">for </span>RetryLayer&lt;I&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            builder: <span class="self">self</span>.builder.clone(),
+            builder: <span class="self">self</span>.builder,
             notify: <span class="self">self</span>.notify.clone(),
         }
     }
@@ -1324,7 +1312,7 @@
     <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         RetryAccessor {
             inner: Arc::new(inner),
-            builder: <span class="self">self</span>.builder.clone(),
+            builder: <span class="self">self</span>.builder,
             notify: <span class="self">self</span>.notify.clone(),
         }
     }
@@ -1391,7 +1379,7 @@
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         { || <span class="self">self</span>.inner.create_dir(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur: Duration| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
@@ -1400,39 +1388,33 @@
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>(rp, reader) = { || <span class="self">self</span>.inner.read(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .<span class="kw">await
             </span>.map_err(|e| e.set_persistent())<span class="question-mark">?</span>;
 
         <span class="kw">let </span>retry_reader = RetryReader::new(<span class="self">self</span>.inner.clone(), path.to_string(), args, reader);
-        <span class="kw">let </span>retry_wrapper =
-            RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone());
+        <span class="kw">let </span>retry_wrapper = RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
 
         <span class="prelude-val">Ok</span>((rp, retry_wrapper))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         { || <span class="self">self</span>.inner.write(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| {
-                v.map(|(rp, r)| {
-                    (
-                        rp,
-                        RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone()),
-                    )
-                })
-                .map_err(|e| e.set_persistent())
+                v.map(|(rp, r)| (rp, RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder)))
+                    .map_err(|e| e.set_persistent())
             })
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         { || <span class="self">self</span>.inner.stat(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
@@ -1441,7 +1423,7 @@
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         { || <span class="self">self</span>.inner.delete(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
@@ -1450,7 +1432,7 @@
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         { || <span class="self">self</span>.inner.copy(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
@@ -1459,7 +1441,7 @@
 
     <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         { || <span class="self">self</span>.inner.rename(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
@@ -1468,12 +1450,12 @@
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
         { || <span class="self">self</span>.inner.list(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| {
                 v.map(|(l, p)| {
-                    <span class="kw">let </span>lister = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone());
+                    <span class="kw">let </span>lister = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
                     (l, lister)
                 })
                 .map_err(|e| e.set_persistent())
@@ -1493,7 +1475,7 @@
                 <span class="prelude-val">Ok</span>(RpBatch::new(nrp))
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e: <span class="kw-2">&amp;</span>Error| e.is_temporary())
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
         .<span class="kw">await
@@ -1502,7 +1484,7 @@
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         { || <span class="self">self</span>.inner.blocking_create_dir(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
@@ -1511,37 +1493,31 @@
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="kw">let </span>(rp, reader) = { || <span class="self">self</span>.inner.blocking_read(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())<span class="question-mark">?</span>;
 
         <span class="kw">let </span>retry_reader = RetryReader::new(<span class="self">self</span>.inner.clone(), path.to_string(), args, reader);
-        <span class="kw">let </span>retry_wrapper =
-            RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone());
+        <span class="kw">let </span>retry_wrapper = RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
 
         <span class="prelude-val">Ok</span>((rp, retry_wrapper))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
         { || <span class="self">self</span>.inner.blocking_write(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
-            .map(|(rp, r)| {
-                (
-                    rp,
-                    RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone()),
-                )
-            })
+            .map(|(rp, r)| (rp, RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder)))
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         { || <span class="self">self</span>.inner.blocking_stat(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
@@ -1550,7 +1526,7 @@
 
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         { || <span class="self">self</span>.inner.blocking_delete(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
@@ -1559,7 +1535,7 @@
 
     <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         { || <span class="self">self</span>.inner.blocking_copy(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
@@ -1568,7 +1544,7 @@
 
     <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         { || <span class="self">self</span>.inner.blocking_rename(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
@@ -1577,12 +1553,12 @@
 
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
         { || <span class="self">self</span>.inner.blocking_list(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map(|(rp, p)| {
-                <span class="kw">let </span>p = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder.clone());
+                <span class="kw">let </span>p = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
                 (rp, p)
             })
             .map_err(|e| e.set_persistent())
@@ -1688,7 +1664,7 @@
                 (r, res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context(inner)
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1712,7 +1688,7 @@
                 (r, res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context(inner)
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1736,7 +1712,7 @@
                 ((r, bs), res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context((inner, bs))
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1758,7 +1734,7 @@
                 (r, res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context(inner)
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1780,7 +1756,7 @@
                 (r, res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context(inner)
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1794,7 +1770,7 @@
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
                 <span class="self">self</span>.notify.intercept(err, dur);
@@ -1805,7 +1781,7 @@
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().close() }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
                 <span class="self">self</span>.notify.intercept(err, dur);
@@ -1828,7 +1804,7 @@
                 (p, res)
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e| e.is_temporary())
         .context(inner)
         .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
@@ -1842,7 +1818,7 @@
 <span class="kw">impl</span>&lt;P: oio::BlockingList, I: RetryInterceptor&gt; oio::BlockingList <span class="kw">for </span>RetryWrapper&lt;P, I&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
         { || <span class="self">self</span>.inner.as_mut().unwrap().next() }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
                 <span class="self">self</span>.notify.intercept(err, dur);
