@@ -155,6 +155,28 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -282,19 +304,18 @@
 
     <span class="kw">fn </span>blocking_scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.inner.lock().unwrap();
-        <span class="kw">let </span>keys: Vec&lt;<span class="kw">_</span>&gt; = <span class="kw">if </span>path.is_empty() {
-            inner.keys().cloned().collect()
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>right_range = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = path.strip_suffix(<span class="string">'/'</span>) {
-                <span class="macro">format!</span>(<span class="string">"{}0"</span>, path)
-            } <span class="kw">else </span>{
-                <span class="macro">format!</span>(<span class="string">"{}{}"</span>, path, std::char::MAX)
-            };
-            inner
-                .range(path.to_string()..right_range)
-                .map(|(k, <span class="kw">_</span>)| k.to_string())
-                .collect()
-        };
+
+        <span class="kw">if </span>path.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(inner.keys().cloned().collect());
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
+        <span class="kw">for </span>(key, <span class="kw">_</span>) <span class="kw">in </span>inner.range(path.to_string()..) {
+            <span class="kw">if </span>!key.starts_with(path) {
+                <span class="kw">break</span>;
+            }
+            keys.push(key.to_string());
+        }
         <span class="prelude-val">Ok</span>(keys)
     }
 }
@@ -302,6 +323,8 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv::{Adapter, Value};
+    <span class="kw">use </span><span class="kw">crate</span>::services::memory::backend;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_accessor_metadata_name() {
@@ -310,6 +333,27 @@
 
         <span class="kw">let </span>b2 = MemoryBuilder::default().build().unwrap();
         <span class="macro">assert_ne!</span>(b1.info().name(), b2.info().name())
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_blocking_scan() {
+        <span class="kw">let </span>adapter = backend::Adapter {
+            inner: Arc::new(Mutex::new(BTreeMap::default())),
+        };
+
+        adapter.blocking_set(<span class="string">"aaa/bbb/"</span>, Value::new_dir()).unwrap();
+        adapter.blocking_set(<span class="string">"aab/bbb/"</span>, Value::new_dir()).unwrap();
+        adapter.blocking_set(<span class="string">"aab/ccc/"</span>, Value::new_dir()).unwrap();
+        adapter
+            .blocking_set(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"aab{}aaa/"</span>, std::char::MAX), Value::new_dir())
+            .unwrap();
+        adapter.blocking_set(<span class="string">"aac/bbb/"</span>, Value::new_dir()).unwrap();
+
+        <span class="kw">let </span>data = adapter.blocking_scan(<span class="string">"aab"</span>).unwrap();
+        <span class="macro">assert_eq!</span>(data.len(), <span class="number">3</span>);
+        <span class="kw">for </span>path <span class="kw">in </span>data {
+            <span class="macro">assert!</span>(path.starts_with(<span class="string">"aab"</span>));
+        }
     }
 }
 </code></pre></div></section></main></body></html>
