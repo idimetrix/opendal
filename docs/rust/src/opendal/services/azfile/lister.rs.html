@@ -209,6 +209,12 @@
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -265,6 +271,12 @@
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="comment">// Return self at the first page.
+        </span><span class="kw">if </span>ctx.token.is_empty() &amp;&amp; !ctx.done {
+            <span class="kw">let </span>e = oio::Entry::new(<span class="kw-2">&amp;</span><span class="self">self</span>.path, Metadata::new(EntryMode::DIR));
+            ctx.entries.push_back(e);
         }
 
         <span class="kw">let </span>bs = resp.into_body();

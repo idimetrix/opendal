@@ -108,9 +108,6 @@
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -208,9 +205,6 @@
                 <span class="kw">if </span>build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>start_after) == file.file_name {
                     <span class="kw">continue</span>;
                 }
-            }
-            <span class="kw">if </span>file.file_name == build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span><span class="self">self</span>.path) {
-                <span class="kw">continue</span>;
             }
             <span class="kw">let </span>file_name = file.file_name.clone();
             <span class="kw">let </span>metadata = parse_file_info(<span class="kw-2">&amp;</span>file);

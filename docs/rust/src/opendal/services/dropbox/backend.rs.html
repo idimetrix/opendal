@@ -377,7 +377,7 @@
         //
         // Let's try our best to make sure it won't failed for rate limited issues.
         </span><span class="kw">let </span>res = { || <span class="self">self</span>.core.dropbox_create_folder(path) }
-            .retry(<span class="kw-2">&amp;*</span>BACKOFF)
+            .retry(<span class="kw-2">*</span>BACKOFF)
             .when(|e| e.is_temporary())
             .<span class="kw">await
             </span><span class="comment">// Set this error to permanent to avoid retrying.
@@ -546,7 +546,7 @@
                     .async_job_id
                     .expect(<span class="string">"async_job_id should be present"</span>);
                 <span class="kw">let </span>res = { || <span class="self">self</span>.core.dropbox_delete_batch_check(job_id.clone()) }
-                    .retry(<span class="kw-2">&amp;*</span>BACKOFF)
+                    .retry(<span class="kw-2">*</span>BACKOFF)
                     .when(|e| e.is_temporary())
                     .<span class="kw">await</span><span class="question-mark">?</span>;
 

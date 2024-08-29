@@ -26,7 +26,7 @@
 <h2 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h2>
 <p><code>typed_kv::Adapter</code> is the typed version of <code>kv::Adapter</code>. It’s more
 efficient if the underlying kv service can store data with its type. For
-example, we can store <code>Bytes</code> along with it’s metadata so that we don’t
+example, we can store <code>Bytes</code> along with its metadata so that we don’t
 need to serialize/deserialize it when we get it from the service.</p>
 <p>Ideally, we should use <code>typed_kv::Adapter</code> instead of <code>kv::Adapter</code> for
 in-memory rust libs like moka and dashmap.</p>

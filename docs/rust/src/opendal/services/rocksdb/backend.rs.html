@@ -194,11 +194,6 @@
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -382,13 +377,8 @@
         <span class="kw">for </span>key <span class="kw">in </span>it {
             <span class="kw">let </span>key = key.map_err(parse_rocksdb_error)<span class="question-mark">?</span>;
             <span class="kw">let </span>key = String::from_utf8_lossy(<span class="kw-2">&amp;</span>key);
-            <span class="comment">// FIXME: it's must a bug that rocksdb returns key that not start with path.
-            </span><span class="kw">if </span>!key.starts_with(path) {
-                <span class="kw">continue</span>;
-            }
-            <span class="comment">// List should skip the path itself.
-            </span><span class="kw">if </span>key == path {
-                <span class="kw">continue</span>;
+            <span class="kw">if </span>!key.starts_with(path) {
+                <span class="kw">break</span>;
             }
             res.push(key.to_string());
         }

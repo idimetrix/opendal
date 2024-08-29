@@ -104,9 +104,6 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -126,14 +123,13 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>quick_xml::de;
-
 <span class="kw">use </span><span class="kw">super</span>::core::AzblobCore;
 <span class="kw">use </span><span class="kw">super</span>::core::ListBlobsOutput;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>quick_xml::de;
 
 <span class="kw">pub struct </span>AzblobLister {
     core: Arc&lt;AzblobCore&gt;,
@@ -192,11 +188,9 @@
         }
 
         <span class="kw">for </span>object <span class="kw">in </span>output.blobs.blob {
-            <span class="kw">let </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name);
-
-            <span class="comment">// azblob could return the dir itself in contents.
-            </span><span class="kw">if </span>path == <span class="self">self</span>.path || path.is_empty() {
-                <span class="kw">continue</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name);
+            <span class="kw">if </span>path.is_empty() {
+                path = <span class="string">"/"</span>.to_string();
             }
 
             <span class="kw">let </span>meta = Metadata::new(EntryMode::from_path(<span class="kw-2">&amp;</span>path))

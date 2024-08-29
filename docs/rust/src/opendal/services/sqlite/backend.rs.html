@@ -266,67 +266,6 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -344,17 +283,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::fmt::Formatter;
-
-<span class="kw">use </span>rusqlite::params;
-<span class="kw">use </span>rusqlite::Connection;
-<span class="kw">use </span>tokio::task;
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
+</span><span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::SqliteConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>sqlx::sqlite::SqliteConnectOptions;
+<span class="kw">use </span>sqlx::SqlitePool;
+<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::str::FromStr;
+<span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>SqliteConfig {
     <span class="kw">type </span>Builder = SqliteBuilder;
@@ -385,11 +323,13 @@
     ///
     /// ## Url
     ///
-    /// This format resembles the url format of the sqlite client. The format is: `file://[path]?flag`
+    /// This format resembles the url format of the sqlite client:
     ///
-    /// - `file://data.db`
+    /// - `sqlite::memory:`
+    /// - `sqlite:data.db`
+    /// - `sqlite://data.db`
     ///
-    /// For more information, please refer to [Opening A New Database Connection](http://www.sqlite.org/c3ref/open.html)
+    /// For more information, please visit &lt;https://docs.rs/sqlx/latest/sqlx/sqlite/struct.SqliteConnectOptions.html&gt;.
     </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
@@ -444,7 +384,7 @@
     <span class="kw">type </span>Config = SqliteConfig;
 
     <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
-        <span class="kw">let </span>connection_string = <span class="kw">match </span><span class="self">self</span>.config.connection_string.clone() {
+        <span class="kw">let </span>conn = <span class="kw">match </span><span class="self">self</span>.config.connection_string {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
@@ -454,35 +394,33 @@
                 .with_context(<span class="string">"service"</span>, Scheme::Sqlite));
             }
         };
-        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table.clone() {
+
+        <span class="kw">let </span>config = SqliteConnectOptions::from_str(<span class="kw-2">&amp;</span>conn).map_err(|err| {
+            Error::new(ErrorKind::ConfigInvalid, <span class="string">"connection_string is invalid"</span>)
+                .with_context(<span class="string">"service"</span>, Scheme::Sqlite)
+                .set_source(err)
+        })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"table is empty"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Sqlite));
             }
         };
-        <span class="kw">let </span>key_field = <span class="kw">match </span><span class="self">self</span>.config.key_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"key"</span>.to_string(),
-        };
-        <span class="kw">let </span>value_field = <span class="kw">match </span><span class="self">self</span>.config.value_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"value"</span>.to_string(),
-        };
-        <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.config
-                .root
-                .clone()
-                .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
-                .as_str(),
-        );
-        <span class="kw">let </span>mgr = SqliteConnectionManager { connection_string };
-        <span class="kw">let </span>pool = r2d2::Pool::new(mgr).map_err(|err| {
-            Error::new(ErrorKind::Unexpected, <span class="string">"sqlite pool init failed"</span>).set_source(err)
-        })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>key_field = <span class="self">self</span>.config.key_field.unwrap_or_else(|| <span class="string">"key"</span>.to_string());
+
+        <span class="kw">let </span>value_field = <span class="self">self
+            </span>.config
+            .value_field
+            .unwrap_or_else(|| <span class="string">"value"</span>.to_string());
+
+        <span class="kw">let </span>root = normalize_root(<span class="self">self</span>.config.root.as_deref().unwrap_or(<span class="string">"/"</span>));
 
         <span class="prelude-val">Ok</span>(SqliteBackend::new(Adapter {
-            pool,
+            pool: OnceCell::new(),
+            config,
             table,
             key_field,
             value_field,
@@ -491,47 +429,29 @@
     }
 }
 
-<span class="kw">struct </span>SqliteConnectionManager {
-    connection_string: String,
-}
-
-<span class="kw">impl </span>r2d2::ManageConnection <span class="kw">for </span>SqliteConnectionManager {
-    <span class="kw">type </span>Connection = Connection;
-    <span class="kw">type </span>Error = Error;
-
-    <span class="kw">fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Connection&gt; {
-        Connection::open(<span class="kw-2">&amp;</span><span class="self">self</span>.connection_string)
-            .map_err(|err| Error::new(ErrorKind::Unexpected, <span class="string">"sqlite open error"</span>).set_source(err))
-    }
-
-    <span class="kw">fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, conn: <span class="kw-2">&amp;mut </span>Connection) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        conn.execute_batch(<span class="string">""</span>).map_err(parse_rusqlite_error)
-    }
-
-    <span class="kw">fn </span>has_broken(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Connection) -&gt; bool {
-        <span class="bool-val">false
-    </span>}
-}
-
 <span class="kw">pub type </span>SqliteBackend = kv::Backend&lt;Adapter&gt;;
 
-<span class="attr">#[derive(Clone)]
+<span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Adapter {
-    pool: r2d2::Pool&lt;SqliteConnectionManager&gt;,
+    pool: OnceCell&lt;SqlitePool&gt;,
+    config: SqliteConnectOptions,
 
     table: String,
     key_field: String,
     value_field: String,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>Adapter {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">"SqliteAdapter"</span>);
-        ds.field(<span class="string">"table"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.table);
-        ds.field(<span class="string">"key_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key_field);
-        ds.field(<span class="string">"value_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value_field);
-        ds.finish()
-    }
+<span class="kw">impl </span>Adapter {
+    <span class="kw">async fn </span>get_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>SqlitePool&gt; {
+        <span class="self">self</span>.pool
+            .get_or_try_init(|| <span class="kw">async </span>{
+                <span class="kw">let </span>pool = SqlitePool::connect_with(<span class="self">self</span>.config.clone())
+                    .<span class="kw">await
+                    </span>.map_err(parse_sqlite_error)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(pool)
+            })
+            .<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
@@ -543,7 +463,6 @@
                 read: <span class="bool-val">true</span>,
                 write: <span class="bool-val">true</span>,
                 delete: <span class="bool-val">true</span>,
-                blocking: <span class="bool-val">true</span>,
                 list: <span class="bool-val">true</span>,
                 ..Default::default()
             },
@@ -551,109 +470,68 @@
     }
 
     <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.clone();
-        <span class="kw">let </span>path = path.to_string();
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        task::spawn_blocking(<span class="kw">move </span>|| this.blocking_get(<span class="kw-2">&amp;</span>path))
-            .<span class="kw">await
-            </span>.map_err(new_task_join_error)<span class="question-mark">?
-    </span>}
-
-    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.pool.get().map_err(parse_r2d2_error)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"SELECT {} FROM {} WHERE `{}` = $1 LIMIT 1"</span>,
+        <span class="kw">let </span>value: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt; = sqlx::query_scalar(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"SELECT `{}` FROM `{}` WHERE `{}` = $1 LIMIT 1"</span>,
             <span class="self">self</span>.value_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>statement = conn.prepare(<span class="kw-2">&amp;</span>query).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>result: rusqlite::Result&lt;Vec&lt;u8&gt;&gt; = statement.query_row([path], |row| row.get(<span class="number">0</span>));
-        <span class="kw">match </span>result {
-            <span class="prelude-val">Ok</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(v))),
-            <span class="prelude-val">Err</span>(rusqlite::Error::QueryReturnedNoRows) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-            <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(parse_rusqlite_error(err)),
-        }
+        ))
+        .bind(path)
+        .fetch_optional(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_sqlite_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(value.map(Buffer::from))
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.clone();
-        <span class="kw">let </span>path = path.to_string();
-        task::spawn_blocking(<span class="kw">move </span>|| this.blocking_set(<span class="kw-2">&amp;</span>path, value))
-            .<span class="kw">await
-            </span>.map_err(new_task_join_error)<span class="question-mark">?
-    </span>}
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.pool.get().map_err(parse_r2d2_error)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
             <span class="string">"INSERT OR REPLACE INTO `{}` (`{}`, `{}`) VALUES ($1, $2)"</span>,
-            <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.value_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>statement = conn.prepare(<span class="kw-2">&amp;</span>query).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
-        statement
-            .execute(<span class="macro">params!</span>[path, value.to_vec()])
-            .map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
+            <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.value_field,
+        ))
+        .bind(path)
+        .bind(value.to_vec())
+        .execute(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_sqlite_error)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.clone();
-        <span class="kw">let </span>path = path.to_string();
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        task::spawn_blocking(<span class="kw">move </span>|| this.blocking_delete(<span class="kw-2">&amp;</span>path))
-            .<span class="kw">await
-            </span>.map_err(new_task_join_error)<span class="question-mark">?
-    </span>}
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"DELETE FROM `{}` WHERE `{}` = $1"</span>,
+            <span class="self">self</span>.table, <span class="self">self</span>.key_field
+        ))
+        .bind(path)
+        .execute(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_sqlite_error)<span class="question-mark">?</span>;
 
-    <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.pool.get().map_err(parse_r2d2_error)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>query = <span class="macro">format!</span>(<span class="string">"DELETE FROM {} WHERE `{}` = $1"</span>, <span class="self">self</span>.table, <span class="self">self</span>.key_field);
-        <span class="kw">let </span><span class="kw-2">mut </span>statement = conn.prepare(<span class="kw-2">&amp;</span>query).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
-        statement.execute([path]).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.clone();
-        <span class="kw">let </span>path = path.to_string();
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        task::spawn_blocking(<span class="kw">move </span>|| this.blocking_scan(<span class="kw-2">&amp;</span>path))
-            .<span class="kw">await
-            </span>.map_err(new_task_join_error)<span class="question-mark">?
-    </span>}
+        <span class="kw">let </span>value = sqlx::query_scalar(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"SELECT `{}` FROM `{}` WHERE `{}` LIKE $1"</span>,
+            <span class="self">self</span>.key_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
+        ))
+        .bind(<span class="macro">format!</span>(<span class="string">"{path}%"</span>))
+        .fetch_all(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_sqlite_error)<span class="question-mark">?</span>;
 
-    <span class="kw">fn </span>blocking_scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.pool.get().map_err(parse_r2d2_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"SELECT {} FROM {} WHERE `{}` LIKE $1 and `{}` &lt;&gt; $2"</span>,
-            <span class="self">self</span>.key_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.key_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>statement = conn.prepare(<span class="kw-2">&amp;</span>query).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>like_param = <span class="macro">format!</span>(<span class="string">"{}%"</span>, path);
-        <span class="kw">let </span>result = statement.query(<span class="macro">params!</span>[like_param, path]);
-
-        <span class="kw">match </span>result {
-            <span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>rows) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>keys: Vec&lt;String&gt; = Vec::new();
-                <span class="kw">while let </span><span class="prelude-val">Some</span>(row) = rows.next().map_err(parse_rusqlite_error)<span class="question-mark">? </span>{
-                    <span class="kw">let </span>item = row.get(<span class="number">0</span>).map_err(parse_rusqlite_error)<span class="question-mark">?</span>;
-                    keys.push(item);
-                }
-                <span class="prelude-val">Ok</span>(keys)
-            }
-            <span class="prelude-val">Err</span>(rusqlite::Error::QueryReturnedNoRows) =&gt; <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]),
-            <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(parse_rusqlite_error(err)),
-        }
+        <span class="prelude-val">Ok</span>(value)
     }
 }
 
-<span class="kw">fn </span>parse_rusqlite_error(err: rusqlite::Error) -&gt; Error {
+<span class="kw">fn </span>parse_sqlite_error(err: sqlx::Error) -&gt; Error {
     Error::new(ErrorKind::Unexpected, <span class="string">"unhandled error from sqlite"</span>).set_source(err)
-}
-
-<span class="kw">fn </span>parse_r2d2_error(err: r2d2::Error) -&gt; Error {
-    Error::new(ErrorKind::Unexpected, <span class="string">"unhandled error from r2d2"</span>).set_source(err)
 }
 </code></pre></div></section></main></body></html>

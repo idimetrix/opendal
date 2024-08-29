@@ -889,7 +889,7 @@
         }
 
         <span class="kw">let </span>cred = { || <span class="self">self</span>.token_loader.load() }
-            .retry(<span class="kw-2">&amp;*</span>BACKOFF)
+            .retry(<span class="kw-2">*</span>BACKOFF)
             .<span class="kw">await
             </span>.map_err(new_request_credential_error)<span class="question-mark">?</span>;
 

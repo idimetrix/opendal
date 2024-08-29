@@ -2231,9 +2231,6 @@
 <a href="#2231" id="2231">2231</a>
 <a href="#2232" id="2232">2232</a>
 <a href="#2233" id="2233">2233</a>
-<a href="#2234" id="2234">2234</a>
-<a href="#2235" id="2235">2235</a>
-<a href="#2236" id="2236">2236</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -3687,9 +3684,6 @@
             obs.try_for_each(|v| <span class="kw">async move </span>{ <span class="self">self</span>.delete(v.path()).<span class="kw">await </span>})
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
-
-        <span class="comment">// Remove the directory itself.
-        </span><span class="self">self</span>.delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }

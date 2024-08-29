@@ -115,6 +115,12 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -190,6 +196,12 @@
                 <span class="kw">let </span>resp_body = resp.into_body();
                 <span class="kw">let </span>infos: Vec&lt;Info&gt; = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+                <span class="comment">// add path itself
+                </span>ctx.entries.push_back(Entry::new(
+                    <span class="self">self</span>.path.as_str(),
+                    Metadata::new(EntryMode::DIR),
+                ));
 
                 <span class="kw">for </span>info <span class="kw">in </span>infos {
                     <span class="kw">if </span>!info.name.is_empty() {

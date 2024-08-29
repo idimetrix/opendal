@@ -258,15 +258,6 @@
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -325,7 +316,6 @@
 /// always output directly while listing.
 </span><span class="kw">pub struct </span>FlatLister&lt;A: Access, L&gt; {
     acc: A,
-    root: String,
 
     next_dir: <span class="prelude-ty">Option</span>&lt;oio::Entry&gt;,
     active_lister: Vec&lt;(<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;, L)&gt;,
@@ -348,7 +338,6 @@
     </span><span class="kw">pub fn </span>new(acc: A, path: <span class="kw-2">&amp;</span>str) -&gt; FlatLister&lt;A, L&gt; {
         FlatLister {
             acc,
-            root: path.to_string(),
             next_dir: <span class="prelude-val">Some</span>(oio::Entry::new(path, Metadata::new(EntryMode::DIR))),
             active_lister: <span class="macro">vec!</span>[],
         }
@@ -374,25 +363,22 @@
 
             <span class="kw">match </span>lister.next().<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(v) <span class="kw">if </span>v.mode().is_dir() =&gt; {
-                    <span class="self">self</span>.next_dir = <span class="prelude-val">Some</span>(v);
-                    <span class="kw">continue</span>;
-                }
-                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
-                <span class="prelude-val">None </span>=&gt; {
-                    <span class="kw">match </span>de.take() {
-                        <span class="prelude-val">Some</span>(de) =&gt; {
-                            <span class="comment">// Only push entry if it's not root dir
-                            </span><span class="kw">if </span>de.path() != <span class="self">self</span>.root {
-                                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
-                            }
-                            <span class="kw">continue</span>;
-                        }
-                        <span class="prelude-val">None </span>=&gt; {
-                            <span class="kw">let _ </span>= <span class="self">self</span>.active_lister.pop();
-                            <span class="kw">continue</span>;
-                        }
+                    <span class="comment">// should not loop itself again
+                    </span><span class="kw">if </span>v.path() != de.as_ref().expect(<span class="string">"de should not be none here"</span>).path() {
+                        <span class="self">self</span>.next_dir = <span class="prelude-val">Some</span>(v);
+                        <span class="kw">continue</span>;
                     }
                 }
+                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">match </span>de.take() {
+                    <span class="prelude-val">Some</span>(de) =&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
+                    }
+                    <span class="prelude-val">None </span>=&gt; {
+                        <span class="kw">let _ </span>= <span class="self">self</span>.active_lister.pop();
+                        <span class="kw">continue</span>;
+                    }
+                },
             }
         }
     }
@@ -418,25 +404,21 @@
 
             <span class="kw">match </span>lister.next()<span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(v) <span class="kw">if </span>v.mode().is_dir() =&gt; {
-                    <span class="self">self</span>.next_dir = <span class="prelude-val">Some</span>(v);
-                    <span class="kw">continue</span>;
-                }
-                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
-                <span class="prelude-val">None </span>=&gt; {
-                    <span class="kw">match </span>de.take() {
-                        <span class="prelude-val">Some</span>(de) =&gt; {
-                            <span class="comment">// Only push entry if it's not root dir
-                            </span><span class="kw">if </span>de.path() != <span class="self">self</span>.root {
-                                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
-                            }
-                            <span class="kw">continue</span>;
-                        }
-                        <span class="prelude-val">None </span>=&gt; {
-                            <span class="kw">let _ </span>= <span class="self">self</span>.active_lister.pop();
-                            <span class="kw">continue</span>;
-                        }
+                    <span class="kw">if </span>v.path() != de.as_ref().expect(<span class="string">"de should not be none here"</span>).path() {
+                        <span class="self">self</span>.next_dir = <span class="prelude-val">Some</span>(v);
+                        <span class="kw">continue</span>;
                     }
                 }
+                <span class="prelude-val">Some</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">match </span>de.take() {
+                    <span class="prelude-val">Some</span>(de) =&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
+                    }
+                    <span class="prelude-val">None </span>=&gt; {
+                        <span class="kw">let _ </span>= <span class="self">self</span>.active_lister.pop();
+                        <span class="kw">continue</span>;
+                    }
+                },
             }
         }
     }
