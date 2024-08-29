@@ -97,13 +97,6 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -168,13 +161,6 @@
         </span><span class="kw">if </span>bytes.is_empty() {
             ctx.done = <span class="bool-val">true</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        }
-
-        <span class="comment">// Return self at the first page.
-        </span><span class="kw">if </span>ctx.token.is_empty() &amp;&amp; !ctx.done {
-            <span class="kw">let </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span><span class="self">self</span>.path);
-            <span class="kw">let </span>e = oio::Entry::new(<span class="kw-2">&amp;</span>path, Metadata::new(EntryMode::DIR));
-            ctx.entries.push_back(e);
         }
 
         <span class="kw">let </span>decoded_response =

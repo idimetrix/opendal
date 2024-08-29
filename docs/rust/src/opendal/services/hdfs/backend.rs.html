@@ -1022,7 +1022,7 @@
             }
         };
 
-        <span class="kw">let </span>rd = HdfsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f, path);
+        <span class="kw">let </span>rd = HdfsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
 
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
@@ -1218,7 +1218,7 @@
             }
         };
 
-        <span class="kw">let </span>rd = HdfsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f, path);
+        <span class="kw">let </span>rd = HdfsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
 
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }

@@ -296,7 +296,7 @@
         <span class="comment">// Get content length from header so that we can check it.
         //
         // - If the request method is HEAD, we will ignore content length.
-        // - If response contains content_encoding, we should omit its content length.
+        // - If response contains content_encoding, we should omit it's content length.
         </span><span class="kw">let </span>content_length = <span class="kw">if </span>is_head || parse_content_encoding(resp.headers())<span class="question-mark">?</span>.is_some() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{

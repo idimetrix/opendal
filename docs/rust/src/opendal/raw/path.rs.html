@@ -510,7 +510,7 @@
 /// - Add leading `/` if not starts with: `abc/` =&gt; `/abc/`
 /// - Add trailing `/` if not ends with: `/abc` =&gt; `/abc/`
 ///
-/// Finally, we will get path like `/path/to/root/`.
+/// Finally, we will got path like `/path/to/root/`.
 </span><span class="kw">pub fn </span>normalize_root(v: <span class="kw-2">&amp;</span>str) -&gt; String {
     <span class="kw">let </span><span class="kw-2">mut </span>v = v
         .split(<span class="string">'/'</span>)

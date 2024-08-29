@@ -296,7 +296,7 @@
         <span class="kw">if </span>path.is_empty() {
             <span class="prelude-val">Ok</span>(keys.collect())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(keys.filter(|k| k.starts_with(path)).collect())
+            <span class="prelude-val">Ok</span>(keys.filter(|k| k.starts_with(path) &amp;&amp; k != path).collect())
         }
     }
 }

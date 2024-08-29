@@ -1132,7 +1132,7 @@
 
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.webdav_stat_rooted_abs_path(path).<span class="kw">await </span>{
-                <span class="comment">// Dir exists, break the loop.
+                <span class="comment">// Dir is exist, break the loop.
                 </span><span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                     <span class="kw">break</span>;
                 }

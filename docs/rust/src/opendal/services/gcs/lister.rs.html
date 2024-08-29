@@ -238,9 +238,9 @@
 
         <span class="kw">for </span>object <span class="kw">in </span>output.items {
             <span class="comment">// exclude the inclusive start_after itself
-            </span><span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name);
-            <span class="kw">if </span>path.is_empty() {
-                path = <span class="string">"/"</span>.to_string();
+            </span><span class="kw">let </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name);
+            <span class="kw">if </span>path == <span class="self">self</span>.path || path.is_empty() {
+                <span class="kw">continue</span>;
             }
             <span class="kw">if </span><span class="self">self</span>.start_after.as_ref() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>path) {
                 <span class="kw">continue</span>;

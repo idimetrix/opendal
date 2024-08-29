@@ -229,6 +229,9 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -346,7 +349,7 @@
             datadir: datadir_path,
             tree,
         })
-        .with_root(<span class="self">self</span>.config.root.as_deref().unwrap_or(<span class="string">"/"</span>)))
+        .with_root(<span class="self">self</span>.config.root.as_deref().unwrap_or_default()))
     }
 }
 
@@ -449,6 +452,9 @@
                 Error::new(ErrorKind::Unexpected, <span class="string">"store key is not valid utf-8 string"</span>)
                     .set_source(err)
             })<span class="question-mark">?</span>;
+            <span class="kw">if </span>v == path {
+                <span class="kw">continue</span>;
+            }
 
             res.push(v);
         }

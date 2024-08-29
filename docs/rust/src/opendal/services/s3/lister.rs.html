@@ -133,6 +133,9 @@
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -203,7 +206,7 @@
                 <span class="kw-2">&amp;</span>ctx.token,
                 <span class="self">self</span>.delimiter,
                 <span class="self">self</span>.limit,
-                <span class="comment">// start after should only be set for the first page.
+                <span class="comment">// State after should only be set for the first page.
                 </span><span class="kw">if </span>ctx.token.is_empty() {
                     <span class="self">self</span>.start_after.clone()
                 } <span class="kw">else </span>{
@@ -215,6 +218,7 @@
         <span class="kw">if </span>resp.status() != http::StatusCode::OK {
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
+
         <span class="kw">let </span>bs = resp.into_body();
 
         <span class="kw">let </span>output: ListObjectsOutput =
@@ -224,7 +228,7 @@
         //
         // - Check `is_truncated`
         // - Check `next_continuation_token`
-        // - Check the length of `common_prefixes` and `contents` (very rare case)
+        // - Check the length of `common_prefixes` and `contents` (very rarely case)
         </span>ctx.done = <span class="kw">if let </span><span class="prelude-val">Some</span>(is_truncated) = output.is_truncated {
             !is_truncated
         } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_continuation_token) = output.next_continuation_token.as_ref() {
@@ -244,9 +248,11 @@
         }
 
         <span class="kw">for </span>object <span class="kw">in </span>output.contents {
-            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.key);
-            <span class="kw">if </span>path.is_empty() {
-                path = <span class="string">"/"</span>.to_string();
+            <span class="kw">let </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.key);
+
+            <span class="comment">// s3 could return the dir itself in contents.
+            </span><span class="kw">if </span>path == <span class="self">self</span>.path || path.is_empty() {
+                <span class="kw">continue</span>;
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>meta = Metadata::new(EntryMode::from_path(<span class="kw-2">&amp;</span>path));
@@ -257,7 +263,7 @@
             }
             meta.set_content_length(object.size);
 
-            <span class="comment">// object.last_modified provides more precise time that contains
+            <span class="comment">// object.last_modified provides more precious time that contains
             // nanosecond, let's trim them.
             </span>meta.set_last_modified(parse_datetime_from_rfc3339(object.last_modified.as_str())<span class="question-mark">?</span>);
 

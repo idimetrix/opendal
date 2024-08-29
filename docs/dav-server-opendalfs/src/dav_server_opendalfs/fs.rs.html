@@ -196,7 +196,6 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -286,11 +285,10 @@
         _meta: ReadDirMeta,
     ) -&gt; FsFuture&lt;FsStream&lt;Box&lt;<span class="kw">dyn </span>DavDirEntry&gt;&gt;&gt; {
         <span class="kw">async move </span>{
-            <span class="kw">let </span>path = path.as_url_string();
             <span class="self">self</span>.op
-                .lister(path.as_str())
+                .lister(path.as_url_string().as_str())
                 .<span class="kw">await
-                </span>.map(|lister| OpendalStream::new(<span class="self">self</span>.op.clone(), lister, path.as_str()).boxed())
+                </span>.map(|lister| OpendalStream::new(<span class="self">self</span>.op.clone(), lister).boxed())
                 .map_err(convert_error)
         }
         .boxed()
