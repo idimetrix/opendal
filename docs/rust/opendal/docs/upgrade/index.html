@@ -251,7 +251,7 @@
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Before
 </span><span class="kw">let </span>entries: Vec&lt;Entry&gt; = op.list(<span class="string">"dir/"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">for </span>entry <span class="kw">in </span>entris {
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
   <span class="kw">let </span>meta = op.metadata(<span class="kw-2">&amp;</span>entry, Metakey::ContentLength | Metakey::ContentType).<span class="kw">await</span><span class="question-mark">?</span>;
   <span class="macro">println!</span>(<span class="string">"{} {}"</span>, entry.name(), entry.metadata().content_length());
 }
@@ -260,7 +260,7 @@
 </span><span class="kw">let </span>entries: Vec&lt;Entry&gt; = op
   .list_with(<span class="string">"dir/"</span>)
   .metakey(Metakey::ContentLength | Metakey::ContentType).<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">for </span>entry <span class="kw">in </span>entris {
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
   <span class="macro">println!</span>(<span class="string">"{} {}"</span>, entry.name(), entry.metadata().content_length());
 }</code></pre></div>
 <h4 id="rfc-2852-native-capability"><a class="doc-anchor" href="#rfc-2852-native-capability">§</a>RFC-2852: Native Capability</h4>
