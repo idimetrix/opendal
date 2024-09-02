@@ -512,6 +512,8 @@
 <a href="#512" id="512">512</a>
 <a href="#513" id="513">513</a>
 <a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -804,6 +806,8 @@
             </span>Scheme::Mongodb =&gt; <span class="self">Self</span>::from_iter::&lt;services::Mongodb&gt;(iter)<span class="question-mark">?</span>.finish(),
             <span class="attr">#[cfg(feature = <span class="string">"services-hdfs-native"</span>)]
             </span>Scheme::HdfsNative =&gt; <span class="self">Self</span>::from_iter::&lt;services::HdfsNative&gt;(iter)<span class="question-mark">?</span>.finish(),
+            <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
+            </span>Scheme::Lakefs =&gt; <span class="self">Self</span>::from_iter::&lt;services::Lakefs&gt;(iter)<span class="question-mark">?</span>.finish(),
             v =&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::Unsupported,

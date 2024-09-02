@@ -484,6 +484,12 @@
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -649,6 +655,8 @@
     </span>HdfsNative,
     <span class="doccomment">/// [surrealdb](crate::services::Surrealdb): Surrealdb Services
     </span>Surrealdb,
+    <span class="doccomment">/// [lakefs](crate::services::Lakefs): LakeFS Services
+    </span>Lakefs,
     <span class="doccomment">/// Custom that allow users to implement services outside of OpenDAL.
     ///
     /// # NOTE
@@ -797,6 +805,8 @@
             </span>Scheme::HdfsNative,
             <span class="attr">#[cfg(feature = <span class="string">"services-surrealdb"</span>)]
             </span>Scheme::Surrealdb,
+            <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
+            </span>Scheme::Lakefs,
         ])
     }
 }
@@ -887,6 +897,7 @@
             <span class="string">"mongodb" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Mongodb),
             <span class="string">"hdfs_native" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::HdfsNative),
             <span class="string">"surrealdb" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Surrealdb),
+            <span class="string">"lakefs" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Lakefs),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Custom(Box::leak(s.into_boxed_str()))),
         }
     }
@@ -960,6 +971,7 @@
             Scheme::Pcloud =&gt; <span class="string">"pcloud"</span>,
             Scheme::HdfsNative =&gt; <span class="string">"hdfs_native"</span>,
             Scheme::Surrealdb =&gt; <span class="string">"surrealdb"</span>,
+            Scheme::Lakefs =&gt; <span class="string">"lakefs"</span>,
             Scheme::Custom(v) =&gt; v,
         }
     }
