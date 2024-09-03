@@ -627,13 +627,6 @@
 <a href="#627" id="627">627</a>
 <a href="#628" id="628">628</a>
 <a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -658,7 +651,6 @@
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>futures::AsyncWriteExt;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>uuid::Uuid;
 
@@ -926,45 +918,35 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-            <span class="kw">let </span>tmp_path = build_rooted_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path));
-
-            <span class="comment">// If the target file exists, we should append to the end of it directly.
-            </span><span class="kw">if </span>op.append() &amp;&amp; <span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path).is_ok() {
-                (target_path, <span class="prelude-val">None</span>)
-            } <span class="kw">else </span>{
-                (target_path, <span class="prelude-val">Some</span>(tmp_path))
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-            (p, <span class="prelude-val">None</span>)
+        <span class="kw">let </span>target_path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+        <span class="kw">let </span>target_exists = <span class="kw">match </span><span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path) {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+            <span class="prelude-val">Err</span>(err) =&gt; {
+                <span class="kw">if </span>err.kind() != io::ErrorKind::NotFound {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(new_std_io_error(err));
+                }
+                <span class="bool-val">false
+            </span>}
         };
 
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path) {
-            <span class="comment">// Early return if other error happened.
-            </span><span class="kw">if </span>err.kind() != io::ErrorKind::NotFound {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(new_std_io_error(err));
+        <span class="kw">let </span>should_append = op.append() &amp;&amp; target_exists;
+        <span class="kw">let </span>tmp_path = <span class="self">self</span>.atomic_write_dir.as_ref().and_then(|atomic_write_dir| {
+            <span class="comment">// If the target file exists, we should append to the end of it directly.
+            </span><span class="kw">if </span>should_append {
+                <span class="prelude-val">None
+            </span>} <span class="kw">else </span>{
+                <span class="prelude-val">Some</span>(build_rooted_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path)))
             }
+        });
 
+        <span class="kw">if </span>!target_exists {
             <span class="kw">let </span>parent = get_parent(<span class="kw-2">&amp;</span>target_path);
-
             <span class="self">self</span>.client.create_dir(parent).map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-            <span class="kw">let </span><span class="kw-2">mut </span>f = <span class="self">self
-                </span>.client
-                .open_file()
-                .create(<span class="bool-val">true</span>)
-                .write(<span class="bool-val">true</span>)
-                .async_open(<span class="kw-2">&amp;</span>target_path)
-                .<span class="kw">await
-                </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-            f.close().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>open_options = <span class="self">self</span>.client.open_file();
         open_options.create(<span class="bool-val">true</span>);
-        <span class="kw">if </span>op.append() {
+        <span class="kw">if </span>should_append {
             open_options.append(<span class="bool-val">true</span>);
         } <span class="kw">else </span>{
             open_options.write(<span class="bool-val">true</span>);
@@ -977,7 +959,13 @@
 
         <span class="prelude-val">Ok</span>((
             RpWrite::new(),
-            HdfsWriter::new(target_path, tmp_path, f, Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.client)),
+            HdfsWriter::new(
+                target_path,
+                tmp_path,
+                f,
+                Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.client),
+                target_exists,
+            ),
         ))
     }
 
@@ -1125,43 +1113,35 @@
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-            <span class="kw">let </span>tmp_path = build_rooted_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path));
-
-            <span class="comment">// If the target file exists, we should append to the end of it directly.
-            </span><span class="kw">if </span>op.append() &amp;&amp; <span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path).is_ok() {
-                (target_path, <span class="prelude-val">None</span>)
-            } <span class="kw">else </span>{
-                (target_path, <span class="prelude-val">Some</span>(tmp_path))
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-
-            (p, <span class="prelude-val">None</span>)
+        <span class="kw">let </span>target_path = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+        <span class="kw">let </span>target_exists = <span class="kw">match </span><span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path) {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+            <span class="prelude-val">Err</span>(err) =&gt; {
+                <span class="kw">if </span>err.kind() != io::ErrorKind::NotFound {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(new_std_io_error(err));
+                }
+                <span class="bool-val">false
+            </span>}
         };
 
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.client.metadata(<span class="kw-2">&amp;</span>target_path) {
-            <span class="comment">// Early return if other error happened.
-            </span><span class="kw">if </span>err.kind() != io::ErrorKind::NotFound {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(new_std_io_error(err));
+        <span class="kw">let </span>should_append = op.append() &amp;&amp; target_exists;
+        <span class="kw">let </span>tmp_path = <span class="self">self</span>.atomic_write_dir.as_ref().and_then(|atomic_write_dir| {
+            <span class="comment">// If the target file exists, we should append to the end of it directly.
+            </span><span class="kw">if </span>should_append {
+                <span class="prelude-val">None
+            </span>} <span class="kw">else </span>{
+                <span class="prelude-val">Some</span>(build_rooted_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path)))
             }
+        });
 
+        <span class="kw">if </span>!target_exists {
             <span class="kw">let </span>parent = get_parent(<span class="kw-2">&amp;</span>target_path);
-
             <span class="self">self</span>.client.create_dir(parent).map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-            <span class="self">self</span>.client
-                .open_file()
-                .create(<span class="bool-val">true</span>)
-                .write(<span class="bool-val">true</span>)
-                .open(<span class="kw-2">&amp;</span>target_path)
-                .map_err(new_std_io_error)<span class="question-mark">?</span>;
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>open_options = <span class="self">self</span>.client.open_file();
         open_options.create(<span class="bool-val">true</span>);
-        <span class="kw">if </span>op.append() {
+        <span class="kw">if </span>should_append {
             open_options.append(<span class="bool-val">true</span>);
         } <span class="kw">else </span>{
             open_options.write(<span class="bool-val">true</span>);
@@ -1173,7 +1153,13 @@
 
         <span class="prelude-val">Ok</span>((
             RpWrite::new(),
-            HdfsWriter::new(target_path, tmp_path, f, Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.client)),
+            HdfsWriter::new(
+                target_path,
+                tmp_path,
+                f,
+                Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.client),
+                target_exists,
+            ),
         ))
     }
 

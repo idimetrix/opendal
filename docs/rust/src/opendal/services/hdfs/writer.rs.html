@@ -110,6 +110,21 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -141,6 +156,7 @@
     tmp_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
     f: <span class="prelude-ty">Option</span>&lt;F&gt;,
     client: Arc&lt;hdrs::Client&gt;,
+    target_path_exists: bool,
 }
 
 <span class="doccomment">/// # Safety
@@ -154,12 +170,14 @@
         tmp_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
         f: F,
         client: Arc&lt;hdrs::Client&gt;,
+        target_path_exists: bool,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             target_path,
             tmp_path,
             f: <span class="prelude-val">Some</span>(f),
             client,
+            target_path_exists,
         }
     }
 }
@@ -182,6 +200,12 @@
 
         <span class="comment">// TODO: we need to make rename async.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(tmp_path) = <span class="kw-2">&amp;</span><span class="self">self</span>.tmp_path {
+            <span class="comment">// we must delete the target_path, otherwise the rename_file operation will fail
+            </span><span class="kw">if </span><span class="self">self</span>.target_path_exists {
+                <span class="self">self</span>.client
+                    .remove_file(<span class="kw-2">&amp;</span><span class="self">self</span>.target_path)
+                    .map_err(new_std_io_error)<span class="question-mark">?</span>;
+            }
             <span class="self">self</span>.client
                 .rename_file(tmp_path, <span class="kw-2">&amp;</span><span class="self">self</span>.target_path)
                 .map_err(new_std_io_error)<span class="question-mark">?
@@ -214,6 +238,12 @@
         f.flush().map_err(new_std_io_error)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(tmp_path) = <span class="kw-2">&amp;</span><span class="self">self</span>.tmp_path {
+            <span class="comment">// we must delete the target_path, otherwise the rename_file operation will fail
+            </span><span class="kw">if </span><span class="self">self</span>.target_path_exists {
+                <span class="self">self</span>.client
+                    .remove_file(<span class="kw-2">&amp;</span><span class="self">self</span>.target_path)
+                    .map_err(new_std_io_error)<span class="question-mark">?</span>;
+            }
             <span class="self">self</span>.client
                 .rename_file(tmp_path, <span class="kw-2">&amp;</span><span class="self">self</span>.target_path)
                 .map_err(new_std_io_error)<span class="question-mark">?</span>;
