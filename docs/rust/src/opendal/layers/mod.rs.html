@@ -178,7 +178,7 @@
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus-client"</span>)]
 </span><span class="kw">mod </span>prometheus_client;
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus-client"</span>)]
-</span><span class="kw">pub use </span><span class="self">self</span>::prometheus_client::PrometheusClientLayer;
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus_client::{PrometheusClientLayer, PrometheusClientLayerBuilder};
 
 <span class="kw">mod </span>retry;
 <span class="kw">pub use </span><span class="self">self</span>::retry::RetryInterceptor;
