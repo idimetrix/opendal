@@ -438,7 +438,7 @@
     </span><span class="kw">pub async fn </span>spawn&lt;F, Fut, T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F)
     <span class="kw">where
         </span>F: FnOnce() -&gt; Fut + <span class="lifetime">'static </span>+ Send,
-        Fut: Future&lt;Output = T&gt;,
+        Fut: Future&lt;Output = T&gt; + <span class="lifetime">'static</span>,
         T: <span class="lifetime">'static</span>,
     {
         <span class="kw">let </span>result = <span class="self">self
@@ -446,7 +446,7 @@
             .send_async(Box::new(<span class="kw">move </span>|| {
                 <span class="comment">// task will be spawned on current thread, task panic
                 // will cause current worker thread panic
-                </span>monoio::spawn(<span class="kw">async move </span>{ f().<span class="kw">await </span>});
+                </span>monoio::spawn(f());
             }))
             .<span class="kw">await</span>;
         <span class="self">self</span>.unwrap(result);

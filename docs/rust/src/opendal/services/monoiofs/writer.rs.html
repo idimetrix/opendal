@@ -153,6 +153,7 @@
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -227,15 +228,16 @@
         // worker thread
         </span><span class="kw">let </span>file = <span class="kw">match </span>result {
             <span class="prelude-val">Ok</span>(file) =&gt; {
-                open_result_tx
-                    .send(<span class="prelude-val">Ok</span>(()))
-                    .expect(<span class="string">"send result from worker thread should success"</span>);
+                <span class="kw">let </span><span class="prelude-val">Ok</span>(()) = open_result_tx.send(<span class="prelude-val">Ok</span>(())) <span class="kw">else </span>{
+                    <span class="comment">// MonoiofsWriter::new is cancelled, exit worker task
+                    </span><span class="kw">return</span>;
+                };
                 file
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
-                open_result_tx
-                    .send(<span class="prelude-val">Err</span>(new_std_io_error(e)))
-                    .expect(<span class="string">"send result from worker thread should success"</span>);
+                <span class="comment">// discard the result if send failed due to MonoiofsWriter::new
+                // cancelled since we are going to exit anyway
+                </span><span class="kw">let _ </span>= open_result_tx.send(<span class="prelude-val">Err</span>(new_std_io_error(e)));
                 <span class="kw">return</span>;
             }
         };

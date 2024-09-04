@@ -141,6 +141,7 @@
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -211,15 +212,16 @@
         // worker thread
         </span><span class="kw">let </span>file = <span class="kw">match </span>result {
             <span class="prelude-val">Ok</span>(file) =&gt; {
-                open_result_tx
-                    .send(<span class="prelude-val">Ok</span>(()))
-                    .expect(<span class="string">"send result from worker thread should success"</span>);
+                <span class="kw">let </span><span class="prelude-val">Ok</span>(()) = open_result_tx.send(<span class="prelude-val">Ok</span>(())) <span class="kw">else </span>{
+                    <span class="comment">// MonoiofsReader::new is cancelled, exit worker task
+                    </span><span class="kw">return</span>;
+                };
                 file
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
-                open_result_tx
-                    .send(<span class="prelude-val">Err</span>(new_std_io_error(e)))
-                    .expect(<span class="string">"send result from worker thread should success"</span>);
+                <span class="comment">// discard the result if send failed due to MonoiofsReader::new
+                // cancelled since we are going to exit anyway
+                </span><span class="kw">let _ </span>= open_result_tx.send(<span class="prelude-val">Err</span>(new_std_io_error(e)));
                 <span class="kw">return</span>;
             }
         };
@@ -232,8 +234,8 @@
             <span class="kw">match </span>req {
                 ReaderRequest::Read { pos, buf, tx } =&gt; {
                     <span class="kw">let </span>(result, buf) = file.read_at(buf, pos).<span class="kw">await</span>;
-                    <span class="comment">// buf.len() will be set to n by monoio if read successfully,
-                    // so n is dropped
+                    <span class="comment">// buf.len() will be set to n by monoio if read
+                    // successfully, so n is dropped
                     </span><span class="kw">let </span>result = result.map(<span class="kw">move </span>|<span class="kw">_</span>| buf).map_err(new_std_io_error);
                     <span class="comment">// discard the result if send failed due to
                     // MonoiofsReader::read cancelled
