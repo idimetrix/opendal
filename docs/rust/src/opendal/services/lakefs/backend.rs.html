@@ -263,6 +263,20 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -293,6 +307,7 @@
 <span class="kw">use </span><span class="kw">super</span>::core::LakefsCore;
 <span class="kw">use </span><span class="kw">super</span>::core::LakefsStatus;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
+<span class="kw">use </span><span class="kw">super</span>::lister::LakefsLister;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::LakefsConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -458,7 +473,7 @@
 <span class="kw">impl </span>Access <span class="kw">for </span>LakefsBackend {
     <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = ();
-    <span class="kw">type </span>Lister = ();
+    <span class="kw">type </span>Lister = oio::PageLister&lt;LakefsLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>BlockingWriter = ();
     <span class="kw">type </span>BlockingLister = ();
@@ -468,7 +483,7 @@
         am.set_scheme(Scheme::Lakefs)
             .set_native_capability(Capability {
                 stat: <span class="bool-val">true</span>,
-
+                list: <span class="bool-val">true</span>,
                 read: <span class="bool-val">true</span>,
 
                 ..Default::default()
@@ -493,8 +508,9 @@
 
                 <span class="kw">let </span>decoded_response: LakefsStatus =
                     serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-
-                meta.set_content_length(decoded_response.size_bytes);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(size_bytes) = decoded_response.size_bytes {
+                    meta.set_content_length(size_bytes);
+                }
                 meta.set_mode(EntryMode::FILE);
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_content_disposition(resp.headers())<span class="question-mark">? </span>{
                     meta.set_content_disposition(v);
@@ -526,6 +542,18 @@
                 <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
             }
         }
+    }
+
+    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
+        <span class="kw">let </span>l = LakefsLister::new(
+            <span class="self">self</span>.core.clone(),
+            path.to_string(),
+            args.limit(),
+            args.start_after(),
+            args.recursive(),
+        );
+
+        <span class="prelude-val">Ok</span>((RpList::default(), oio::PageLister::new(l)))
     }
 }
 </code></pre></div></section></main></body></html>

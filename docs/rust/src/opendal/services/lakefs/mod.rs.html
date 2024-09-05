@@ -27,6 +27,9 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -48,6 +51,9 @@
 </span><span class="kw">mod </span>core;
 <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
 </span><span class="kw">mod </span>error;
+
+<span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
+</span><span class="kw">mod </span>lister;
 
 <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
 </span><span class="kw">mod </span>backend;
