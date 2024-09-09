@@ -30,6 +30,10 @@
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
 <a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -56,10 +60,14 @@
 </span><span class="kw">mod </span>lister;
 
 <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
+</span><span class="kw">mod </span>writer;
+
+<span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
 </span><span class="kw">mod </span>backend;
 <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
 </span><span class="kw">pub use </span>backend::LakefsBuilder <span class="kw">as </span>Lakefs;
 
 <span class="kw">mod </span>config;
+
 <span class="kw">pub use </span>config::LakefsConfig;
 </code></pre></div></section></main></body></html>
