@@ -1351,6 +1351,11 @@
 <a href="#1351" id="1351">1351</a>
 <a href="#1352" id="1352">1352</a>
 <a href="#1353" id="1353">1353</a>
+<a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1396,16 +1401,18 @@
 /// # Examples
 ///
 /// ```no_run
-/// use anyhow::Result;
-/// use opendal::layers::LoggingLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::LoggingLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+///  let _ = Operator::new(services::Memory::default())?
 ///     .layer(LoggingLayer::default())
 ///     .finish();
+///  Ok(())
+/// # }
 /// ```
 ///
 /// # Output
@@ -1429,13 +1436,14 @@
 /// You can implement your own logging interceptor to customize the logging behavior.
 ///
 /// ```no_run
-/// use opendal::layers::LoggingInterceptor;
-/// use opendal::layers::LoggingLayer;
-/// use opendal::raw;
-/// use opendal::services;
-/// use opendal::Error;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::LoggingInterceptor;
+/// # use opendal::layers::LoggingLayer;
+/// # use opendal::raw;
+/// # use opendal::services;
+/// # use opendal::Error;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
 /// #[derive(Debug, Clone)]
 /// struct MyLoggingInterceptor;
@@ -1453,10 +1461,12 @@
 ///     }
 /// }
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+///  let _ = Operator::new(services::Memory::default())?
 ///     .layer(LoggingLayer::new(MyLoggingInterceptor))
 ///     .finish();
+///  Ok(())
+/// # }
 /// ```
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>LoggingLayer&lt;I = DefaultLoggingInterceptor&gt; {

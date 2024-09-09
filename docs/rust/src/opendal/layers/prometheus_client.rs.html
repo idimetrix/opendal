@@ -448,7 +448,6 @@
 <a href="#448" id="448">448</a>
 <a href="#449" id="449">449</a>
 <a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -503,31 +502,30 @@
 ///
 /// # #[tokio::main]
 /// # async fn main() -&gt; Result&lt;()&gt; {
-///     // Pick a builder and configure it.
-///     let builder = services::Memory::default();
-///     let mut registry = prometheus_client::registry::Registry::default();
+/// let mut registry = prometheus_client::registry::Registry::default();
 ///
-///     let op = Operator::new(builder)?
-///         .layer(PrometheusClientLayer::builder().register(&amp;mut registry))
-///         .finish();
-///     debug!("operator: {op:?}");
+/// let op = Operator::new(services::Memory::default())?
+///     .layer(PrometheusClientLayer::builder().register(&amp;mut registry))
+///     .finish();
+/// debug!("operator: {op:?}");
 ///
-///     // Write data into object test.
-///     op.write("test", "Hello, World!").await?;
-///     // Read data from object.
-///     let bs = op.read("test").await?;
-///     info!("content: {}", String::from_utf8_lossy(&amp;bs.to_bytes()));
+/// // Write data into object test.
+/// op.write("test", "Hello, World!").await?;
+/// // Read data from object.
+/// let bs = op.read("test").await?;
+/// info!("content: {}", String::from_utf8_lossy(&amp;bs.to_bytes()));
 ///
-///     // Get object metadata.
-///     let meta = op.stat("test").await?;
-///     info!("meta: {:?}", meta);
+/// // Get object metadata.
+/// let meta = op.stat("test").await?;
+/// info!("meta: {:?}", meta);
 ///
-///     // Export prometheus metrics.
-///     let mut buf = String::new();
-///     prometheus_client::encoding::text::encode(&amp;mut buf, &amp;registry).unwrap();
-///     println!("## Prometheus Metrics");
-///     println!("{}", buf);
-///     Ok(())
+/// // Export prometheus metrics.
+/// let mut buf = String::new();
+/// prometheus_client::encoding::text::encode(&amp;mut buf, &amp;registry).unwrap();
+/// println!("## Prometheus Metrics");
+/// println!("{}", buf);
+///
+/// Ok(())
 /// # }
 /// ```
 </span><span class="attr">#[derive(Clone, Debug)]

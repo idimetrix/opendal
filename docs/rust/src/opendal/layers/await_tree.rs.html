@@ -234,6 +234,8 @@
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -258,7 +260,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Add a Instrument await-tree for actor-based applications to the underlying services.
+<span class="doccomment">/// Add an Instrument await-tree for actor-based applications to the underlying services.
 ///
 /// # AwaitTree
 ///
@@ -269,16 +271,18 @@
 /// # Examples
 ///
 /// ```no_run
-/// use anyhow::Result;
-/// use opendal::layers::AwaitTreeLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::AwaitTreeLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(AwaitTreeLayer::new())
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 </span><span class="attr">#[derive(Clone, Default)]
 </span><span class="kw">pub struct </span>AwaitTreeLayer {}

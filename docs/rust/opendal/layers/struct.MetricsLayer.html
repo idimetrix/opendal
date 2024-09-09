@@ -7,10 +7,10 @@ Otherwise, the histogram data collected by <code>requests_duration_seconds</code
 could result in OOM.</p>
 <h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>
-    <span class="kw">let _ </span>= Operator::new(services::Memory::default())<span class="question-mark">?
-        </span>.layer(MetricsLayer::default())
-        .finish();
-    <span class="prelude-val">Ok</span>(())</code></pre></div>
+<span class="kw">let _ </span>= Operator::new(services::Memory::default())<span class="question-mark">?
+    </span>.layer(MetricsLayer::default())
+    .finish();
+<span class="prelude-val">Ok</span>(())</code></pre></div>
 <h2 id="output"><a class="doc-anchor" href="#output">§</a>Output</h2>
 <p>OpenDAL is using <a href="https://docs.rs/metrics/latest/metrics/"><code>metrics</code></a> for metrics internally.</p>
 <p>To enable metrics output, please enable one of the exporters that <code>metrics</code> supports.</p>

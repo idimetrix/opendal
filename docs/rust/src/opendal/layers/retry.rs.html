@@ -1084,6 +1084,20 @@
 <a href="#1084" id="1084">1084</a>
 <a href="#1085" id="1085">1085</a>
 <a href="#1086" id="1086">1086</a>
+<a href="#1087" id="1087">1087</a>
+<a href="#1088" id="1088">1088</a>
+<a href="#1089" id="1089">1089</a>
+<a href="#1090" id="1090">1090</a>
+<a href="#1091" id="1091">1091</a>
+<a href="#1092" id="1092">1092</a>
+<a href="#1093" id="1093">1093</a>
+<a href="#1094" id="1094">1094</a>
+<a href="#1095" id="1095">1095</a>
+<a href="#1096" id="1096">1096</a>
+<a href="#1097" id="1097">1097</a>
+<a href="#1098" id="1098">1098</a>
+<a href="#1099" id="1099">1099</a>
+<a href="#1100" id="1100">1100</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1134,30 +1148,42 @@
 ///
 /// For example, while composing `RetryLayer` with `TimeoutLayer`. The order of layer is sensitive.
 ///
-/// ```no_build
-///  let op = Operator::new(builder.clone())
-///     .unwrap()
+/// ```no_run
+/// # use std::time::Duration;
+///
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::layers::TimeoutLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+///
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let op = Operator::new(services::Memory::default())?
 ///     // This is fine, since timeout happen during retry.
 ///     .layer(TimeoutLayer::new().with_io_timeout(Duration::from_nanos(1)))
 ///     .layer(RetryLayer::new())
 ///     // This is wrong. Since timeout layer will drop future, leaving retry layer in a bad state.
 ///     .layer(TimeoutLayer::new().with_io_timeout(Duration::from_nanos(1)))
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 ///
 /// # Examples
 ///
 /// ```no_run
-/// use anyhow::Result;
-/// use opendal::layers::RetryLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(RetryLayer::new())
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 ///
 /// ## Customize retry interceptor
@@ -1166,15 +1192,15 @@
 /// their own retry interceptor logic.
 ///
 /// ```no_run
-/// use std::time::Duration;
+/// # use std::time::Duration;
 ///
-/// use anyhow::Result;
-/// use opendal::layers::RetryInterceptor;
-/// use opendal::layers::RetryLayer;
-/// use opendal::services;
-/// use opendal::Error;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::RetryInterceptor;
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::services;
+/// # use opendal::Error;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
 /// struct MyRetryInterceptor;
 ///
@@ -1184,10 +1210,12 @@
 ///     }
 /// }
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(RetryLayer::new().with_notify(MyRetryInterceptor))
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 </span><span class="kw">pub struct </span>RetryLayer&lt;I = DefaultRetryInterceptor&gt; {
     builder: ExponentialBuilder,
