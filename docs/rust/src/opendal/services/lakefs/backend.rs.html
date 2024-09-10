@@ -286,6 +286,23 @@
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -496,7 +513,7 @@
                 list: <span class="bool-val">true</span>,
                 read: <span class="bool-val">true</span>,
                 write: <span class="bool-val">true</span>,
-
+                delete: <span class="bool-val">true</span>,
                 ..Default::default()
             });
         am.into()
@@ -572,6 +589,23 @@
             RpWrite::default(),
             oio::OneShotWriter::new(LakefsWriter::new(<span class="self">self</span>.core.clone(), path.to_string(), args)),
         ))
+    }
+
+    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
+        <span class="comment">// This would delete the bucket, do not perform
+        </span><span class="kw">if </span><span class="self">self</span>.core.root == <span class="string">"/" </span>&amp;&amp; path == <span class="string">"/" </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(RpDelete::default());
+        }
+
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.delete_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+
+        <span class="kw">match </span>status {
+            StatusCode::NO_CONTENT =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
+            StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        }
     }
 }
 </code></pre></div></section></main></body></html>
