@@ -346,6 +346,9 @@
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -403,7 +406,8 @@
 /// # use opendal::Operator;
 ///
 /// # fn main() -&gt; Result&lt;()&gt; {
-/// let reporter = fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse()?, "opendal").unwrap();
+/// let reporter =
+///     fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse()?, "opendal").unwrap();
 /// fastrace::set_reporter(reporter, fastrace::collector::Config::default());
 ///
 /// {
@@ -415,7 +419,8 @@
 ///             let op = Operator::new(services::Memory::default())?
 ///                 .layer(FastraceLayer)
 ///                 .finish();
-///             op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes()).await?;
+///             op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes())
+///                 .await?;
 ///             op.stat("test").await?;
 ///             op.read("test").await?;
 ///             Ok::&lt;(), opendal::Error&gt;(())
@@ -442,7 +447,8 @@
 /// # use anyhow::Result;
 ///
 /// # fn main() -&gt; Result&lt;()&gt; {
-/// let reporter = fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse()?, "opendal").unwrap();
+/// let reporter =
+///     fastrace_jaeger::JaegerReporter::new("127.0.0.1:6831".parse()?, "opendal").unwrap();
 /// fastrace::set_reporter(reporter, fastrace::collector::Config::default());
 /// Ok(())
 /// # }

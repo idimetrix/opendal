@@ -448,6 +448,10 @@
 <a href="#448" id="448">448</a>
 <a href="#449" id="449">449</a>
 <a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -553,24 +557,26 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let mut registry = prometheus_client::registry::Registry::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let mut registry = prometheus_client::registry::Registry::default();
     ///
-    ///     let duration_seconds_buckets = prometheus_client::metrics::histogram::exponential_buckets(0.01, 2.0, 16).collect();
-    ///     let bytes_buckets = prometheus_client::metrics::histogram::exponential_buckets(1.0, 2.0, 16).collect();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusClientLayer::builder()
-    ///                 .operation_duration_seconds_buckets(duration_seconds_buckets)
-    ///                 .operation_bytes_buckets(bytes_buckets)
-    ///                 .path_label(0)
-    ///                 .register(&amp;mut registry)
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let duration_seconds_buckets =
+    ///     prometheus_client::metrics::histogram::exponential_buckets(0.01, 2.0, 16).collect();
+    /// let bytes_buckets =
+    ///     prometheus_client::metrics::histogram::exponential_buckets(1.0, 2.0, 16).collect();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusClientLayer::builder()
+    ///             .operation_duration_seconds_buckets(duration_seconds_buckets)
+    ///             .operation_bytes_buckets(bytes_buckets)
+    ///             .path_label(0)
+    ///             .register(&amp;mut registry),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>builder() -&gt; PrometheusClientLayerBuilder {
@@ -625,21 +631,22 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let mut registry = prometheus_client::registry::Registry::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let mut registry = prometheus_client::registry::Registry::default();
     ///
-    ///     let buckets = prometheus_client::metrics::histogram::exponential_buckets(0.01, 2.0, 16).collect();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusClientLayer::builder()
-    ///                 .operation_duration_seconds_buckets(buckets)
-    ///                 .register(&amp;mut registry)
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let buckets =
+    ///     prometheus_client::metrics::histogram::exponential_buckets(0.01, 2.0, 16).collect();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusClientLayer::builder()
+    ///             .operation_duration_seconds_buckets(buckets)
+    ///             .register(&amp;mut registry),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>operation_duration_seconds_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
@@ -662,21 +669,22 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let mut registry = prometheus_client::registry::Registry::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let mut registry = prometheus_client::registry::Registry::default();
     ///
-    ///     let buckets = prometheus_client::metrics::histogram::exponential_buckets(1.0, 2.0, 16).collect();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusClientLayer::builder()
-    ///                 .operation_bytes_buckets(buckets)
-    ///                 .register(&amp;mut registry)
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let buckets =
+    ///     prometheus_client::metrics::histogram::exponential_buckets(1.0, 2.0, 16).collect();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusClientLayer::builder()
+    ///             .operation_bytes_buckets(buckets)
+    ///             .register(&amp;mut registry),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>operation_bytes_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
@@ -703,20 +711,20 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let mut registry = prometheus_client::registry::Registry::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let mut registry = prometheus_client::registry::Registry::default();
     ///
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusClientLayer::builder()
-    ///                 .path_label(1)
-    ///                 .register(&amp;mut registry)
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusClientLayer::builder()
+    ///             .path_label(1)
+    ///             .register(&amp;mut registry),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>path_label(<span class="kw-2">mut </span><span class="self">self</span>, level: usize) -&gt; <span class="self">Self </span>{
@@ -737,16 +745,16 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let mut registry = prometheus_client::registry::Registry::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let mut registry = prometheus_client::registry::Registry::default();
     ///
-    ///     let op = Operator::new(builder)?
-    ///         .layer(PrometheusClientLayer::builder().register(&amp;mut registry))
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let op = Operator::new(builder)?
+    ///     .layer(PrometheusClientLayer::builder().register(&amp;mut registry))
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>register(<span class="self">self</span>, registry: <span class="kw-2">&amp;mut </span>Registry) -&gt; PrometheusClientLayer {

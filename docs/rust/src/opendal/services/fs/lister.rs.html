@@ -162,6 +162,8 @@
 <a href="#162" id="162">162</a>
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -179,12 +181,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Metadata;
-<span class="kw">use </span><span class="kw">crate</span>::Result;
-<span class="kw">use crate</span>::{EntryMode, Metakey};
-<span class="kw">use </span>std::path::Path;
+</span><span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::EntryMode;
+<span class="kw">use </span><span class="kw">crate</span>::Metadata;
+<span class="kw">use </span><span class="kw">crate</span>::Metakey;
+<span class="kw">use </span><span class="kw">crate</span>::Result;
 
 <span class="kw">pub struct </span>FsLister&lt;P&gt; {
     root: PathBuf,

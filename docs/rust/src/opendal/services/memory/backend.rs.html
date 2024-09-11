@@ -177,6 +177,7 @@
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -323,7 +324,8 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv::{Adapter, Value};
+    <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv::Adapter;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv::Value;
     <span class="kw">use </span><span class="kw">crate</span>::services::memory::backend;
 
     <span class="attr">#[test]

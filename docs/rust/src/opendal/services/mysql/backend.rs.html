@@ -250,6 +250,8 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -267,15 +269,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
+</span><span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::str::FromStr;
+
+<span class="kw">use </span>sqlx::mysql::MySqlConnectOptions;
+<span class="kw">use </span>sqlx::MySqlPool;
+<span class="kw">use </span>tokio::sync::OnceCell;
+
+<span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::services::MysqlConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span>sqlx::mysql::MySqlConnectOptions;
-<span class="kw">use </span>sqlx::MySqlPool;
-<span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">impl </span>Configurator <span class="kw">for </span>MysqlConfig {
     <span class="kw">type </span>Builder = MysqlBuilder;

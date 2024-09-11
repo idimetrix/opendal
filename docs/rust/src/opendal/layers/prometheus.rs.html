@@ -536,6 +536,10 @@
 <a href="#536" id="536">536</a>
 <a href="#537" id="537">537</a>
 <a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -592,7 +596,11 @@
 /// let registry = prometheus::default_registry();
 ///
 /// let op = Operator::new(services::Memory::default())?
-///     .layer(PrometheusLayer::builder().register(registry).expect("register metrics successfully"))
+///     .layer(
+///         PrometheusLayer::builder()
+///             .register(registry)
+///             .expect("register metrics successfully"),
+///     )
 ///     .finish();
 /// debug!("operator: {op:?}");
 ///
@@ -641,25 +649,25 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let registry = prometheus::default_registry();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
     ///
-    ///     let duration_seconds_buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
-    ///     let bytes_buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
-    ///                 .operation_duration_seconds_buckets(duration_seconds_buckets)
-    ///                 .operation_bytes_buckets(bytes_buckets)
-    ///                 .path_label(0)
-    ///                 .register(registry)
-    ///                 .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let duration_seconds_buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
+    /// let bytes_buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_duration_seconds_buckets(duration_seconds_buckets)
+    ///             .operation_bytes_buckets(bytes_buckets)
+    ///             .path_label(0)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>builder() -&gt; PrometheusLayerBuilder {
@@ -715,22 +723,22 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let registry = prometheus::default_registry();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
     ///
-    ///     let buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
-    ///                 .operation_duration_seconds_buckets(buckets)
-    ///                 .register(registry)
-    ///                 .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_duration_seconds_buckets(buckets)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>operation_duration_seconds_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
@@ -753,22 +761,22 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let registry = prometheus::default_registry();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
     ///
-    ///     let buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
-    ///                 .operation_bytes_buckets(buckets)
-    ///                 .register(registry)
-    ///                 .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_bytes_buckets(buckets)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>operation_bytes_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
@@ -795,21 +803,21 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let registry = prometheus::default_registry();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
     ///
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
-    ///                 .path_label(1)
-    ///                 .register(registry)
-    ///                 .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .path_label(1)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>path_label(<span class="kw-2">mut </span><span class="self">self</span>, level: usize) -&gt; <span class="self">Self </span>{
@@ -830,20 +838,20 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
-    ///     let registry = prometheus::default_registry();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
     ///
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
     ///             .register(registry)
-    ///             .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>register(<span class="self">self</span>, registry: <span class="kw-2">&amp;</span>Registry) -&gt; <span class="prelude-ty">Result</span>&lt;PrometheusLayer&gt; {
@@ -910,19 +918,19 @@
     /// #
     /// # #[tokio::main]
     /// # async fn main() -&gt; Result&lt;()&gt; {
-    ///     // Pick a builder and configure it.
-    ///     let builder = services::Memory::default();
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
     ///
-    ///     let op = Operator::new(builder)?
-    ///         .layer(
-    ///             PrometheusLayer::builder()
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
     ///             .register_default()
-    ///             .expect("register metrics successfully")
-    ///         )
-    ///         .finish();
-    ///     debug!("operator: {op:?}");
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
     ///
-    ///     Ok(())
+    /// Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>register_default(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PrometheusLayer&gt; {

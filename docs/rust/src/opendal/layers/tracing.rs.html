@@ -364,7 +364,6 @@
 <a href="#364" id="364">364</a>
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -430,10 +429,9 @@
 /// let tracer_provider = opentelemetry_otlp::new_pipeline()
 ///     .tracing()
 ///     .with_exporter(opentelemetry_otlp::new_exporter().tonic())
-///     .with_trace_config(
-///         trace::Config::default()
-///             .with_resource(Resource::new(vec![KeyValue::new("service.name", "opendal_example")]))
-///     )
+///     .with_trace_config(trace::Config::default().with_resource(Resource::new(vec![
+///         KeyValue::new("service.name", "opendal_example"),
+///     ])))
 ///     .install_simple()?;
 /// let tracer = tracer_provider.tracer("opendal_tracer");
 /// let opentelemetry = tracing_opentelemetry::layer().with_tracer(tracer);
@@ -454,10 +452,11 @@
 ///             .layer(TracingLayer)
 ///             .finish();
 ///
-///         op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes()).await?;
+///         op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes())
+///             .await?;
 ///         op.stat("test").await?;
 ///         op.read("test").await?;
-///        Ok::&lt;(), opendal::Error&gt;(())
+///         Ok::&lt;(), opendal::Error&gt;(())
 ///     })?;
 /// }
 ///
@@ -500,8 +499,7 @@
 /// # impl FooSubscriber { fn new() -&gt; Self { FooSubscriber } }
 ///
 /// let my_subscriber = FooSubscriber::new();
-/// tracing::subscriber::set_global_default(my_subscriber)
-///     .expect("setting tracing default failed");
+/// tracing::subscriber::set_global_default(my_subscriber).expect("setting tracing default failed");
 /// ```
 ///
 /// For real-world usage, please take a look at [`tracing-opentelemetry`](https://crates.io/crates/tracing-opentelemetry).

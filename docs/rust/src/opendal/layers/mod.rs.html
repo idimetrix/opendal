@@ -109,6 +109,10 @@
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -173,12 +177,16 @@
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus"</span>)]
 </span><span class="kw">mod </span>prometheus;
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus"</span>)]
-</span><span class="kw">pub use </span><span class="self">self</span>::prometheus::{PrometheusLayer, PrometheusLayerBuilder};
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus::PrometheusLayer;
+<span class="attr">#[cfg(feature = <span class="string">"layers-prometheus"</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus::PrometheusLayerBuilder;
 
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus-client"</span>)]
 </span><span class="kw">mod </span>prometheus_client;
 <span class="attr">#[cfg(feature = <span class="string">"layers-prometheus-client"</span>)]
-</span><span class="kw">pub use </span><span class="self">self</span>::prometheus_client::{PrometheusClientLayer, PrometheusClientLayerBuilder};
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus_client::PrometheusClientLayer;
+<span class="attr">#[cfg(feature = <span class="string">"layers-prometheus-client"</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus_client::PrometheusClientLayerBuilder;
 
 <span class="kw">mod </span>retry;
 <span class="kw">pub use </span><span class="self">self</span>::retry::RetryInterceptor;

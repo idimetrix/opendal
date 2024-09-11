@@ -402,6 +402,7 @@
 <a href="#402" id="402">402</a>
 <a href="#403" id="403">403</a>
 <a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -429,12 +430,13 @@
 <span class="kw">use </span>redis::cluster::ClusterClient;
 <span class="kw">use </span>redis::cluster::ClusterClientBuilder;
 <span class="kw">use </span>redis::cluster_async::ClusterConnection;
+<span class="kw">use </span>redis::AsyncCommands;
 <span class="kw">use </span>redis::Client;
 <span class="kw">use </span>redis::ConnectionAddr;
 <span class="kw">use </span>redis::ConnectionInfo;
+<span class="kw">use </span>redis::ProtocolVersion;
 <span class="kw">use </span>redis::RedisConnectionInfo;
 <span class="kw">use </span>redis::RedisError;
-<span class="kw">use </span>redis::{AsyncCommands, ProtocolVersion};
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
