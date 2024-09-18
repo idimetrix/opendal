@@ -400,6 +400,8 @@
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -600,6 +602,7 @@
 #[allow(dead_code)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>HuggingfaceSecurity {
     <span class="kw">pub </span>blob_id: String,
+    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>safe: bool,
     <span class="kw">pub </span>av_scan: <span class="prelude-ty">Option</span>&lt;HuggingfaceAvScan&gt;,
     <span class="kw">pub </span>pickle_import_scan: <span class="prelude-ty">Option</span>&lt;HuggingfacePickleImportScan&gt;,
@@ -764,6 +767,7 @@
             }),
             security: <span class="prelude-val">Some</span>(HuggingfaceSecurity {
                 blob_id: <span class="string">"45fa7c3d85ee7dd4139adbc056da25ae136a65f2"</span>.to_string(),
+                name: <span class="string">"maelstrom/lib/maelstrom.jar"</span>.to_string(),
                 safe: <span class="bool-val">true</span>,
                 av_scan: <span class="prelude-val">Some</span>(HuggingfaceAvScan {
                     virus_found: <span class="bool-val">false</span>,
