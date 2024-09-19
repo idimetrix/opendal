@@ -553,7 +553,7 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(resp.into_body())),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -570,7 +570,7 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -584,7 +584,7 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -611,18 +611,18 @@
                     })<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(response.result.into_iter().map(|r| r.name).collect())
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }
 
 <span class="attr">#[derive(Debug, Deserialize)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CfKvResponse {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) errors: Vec&lt;CfKvError&gt;,
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>CfKvResponse {
+    <span class="kw">pub</span>(<span class="kw">super</span>) errors: Vec&lt;CfKvError&gt;,
 }
 
 <span class="attr">#[derive(Debug, Deserialize)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CfKvScanResponse {
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>CfKvScanResponse {
     result: Vec&lt;CfKvScanResult&gt;,
     <span class="comment">// According to https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-a-namespace'-s-keys, result_info is used to determine if there are more keys to be listed
     // result_info: Option&lt;CfKvResultInfo&gt;,
@@ -640,8 +640,8 @@
 // }
 
 </span><span class="attr">#[derive(Debug, Deserialize)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CfKvError {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) code: i32,
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>CfKvError {
+    <span class="kw">pub</span>(<span class="kw">super</span>) code: i32,
 }
 
 <span class="attr">#[cfg(test)]

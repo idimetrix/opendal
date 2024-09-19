@@ -747,6 +747,25 @@
 <a href="#747" id="747">747</a>
 <a href="#748" id="748">748</a>
 <a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -771,10 +790,9 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>flagset::FlagSet;
-
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>flagset::FlagSet;
 
 <span class="doccomment">/// Args for `create` operation.
 ///
@@ -849,6 +867,14 @@
     /// - If this is set to &gt; 1, the list operation will be concurrent,
     ///   and the maximum number of concurrent operations will be determined by this value.
     </span>concurrent: usize,
+    <span class="doccomment">/// The version is used to control whether the object versions should be returned.
+    ///
+    /// - If `false`, list operation will not return with object versions
+    /// - If `true`, list operation will return with object versions if object versioning is supported
+    ///   by the underlying service
+    ///
+    /// Default to `false`
+    </span>version: bool,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>OpList {
@@ -860,6 +886,7 @@
             <span class="comment">// By default, we want to know what's the mode of this entry.
             </span>metakey: Metakey::Mode.into(),
             concurrent: <span class="number">1</span>,
+            version: <span class="bool-val">false</span>,
         }
     }
 }
@@ -932,6 +959,17 @@
     <span class="doccomment">/// Get the concurrent of list operation.
     </span><span class="kw">pub fn </span>concurrent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.concurrent
+    }
+
+    <span class="doccomment">/// Change the version of this list operation
+    </span><span class="kw">pub fn </span>with_version(<span class="kw-2">mut </span><span class="self">self</span>, version: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.version = version;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the version of this list operation
+    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.version
     }
 }
 
@@ -1082,36 +1120,36 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.range
     }
 
-    <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-disposition header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, content_disposition: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_disposition = <span class="prelude-val">Some</span>(content_disposition.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-disposition header that should be send back by the remote read
+    <span class="doccomment">/// Returns the content-disposition header that should be sent back by the remote read
     /// operation.
     </span><span class="kw">pub fn </span>override_content_disposition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_disposition.as_deref()
     }
 
-    <span class="doccomment">/// Sets the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_cache_control(<span class="kw-2">mut </span><span class="self">self</span>, cache_control: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_cache_control = <span class="prelude-val">Some</span>(cache_control.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_cache_control.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_type(<span class="kw-2">mut </span><span class="self">self</span>, content_type: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_type = <span class="prelude-val">Some</span>(content_type.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_type.as_deref()
     }
@@ -1275,13 +1313,13 @@
         <span class="self">self</span>.if_none_match.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-disposition header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, content_disposition: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_disposition = <span class="prelude-val">Some</span>(content_disposition.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-disposition header that should be send back by the remote read
+    <span class="doccomment">/// Returns the content-disposition header that should be sent back by the remote read
     /// operation.
     </span><span class="kw">pub fn </span>override_content_disposition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_disposition.as_deref()
