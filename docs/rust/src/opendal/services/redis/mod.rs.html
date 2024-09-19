@@ -22,6 +22,7 @@
 <a href="#22" id="22">22</a>
 <a href="#23" id="23">23</a>
 <a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -43,7 +44,8 @@
 </span><span class="kw">mod </span>backend;
 <span class="attr">#[cfg(feature = <span class="string">"services-redis"</span>)]
 </span><span class="kw">pub use </span>backend::RedisBuilder <span class="kw">as </span>Redis;
-
 <span class="kw">mod </span>config;
+<span class="attr">#[cfg(feature = <span class="string">"services-redis"</span>)]
+</span><span class="kw">mod </span>core;
 <span class="kw">pub use </span>config::RedisConfig;
 </code></pre></div></section></main></body></html>
