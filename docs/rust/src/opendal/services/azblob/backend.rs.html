@@ -1353,7 +1353,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; parse_into_metadata(path, resp.headers()).map(RpStat::new),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1366,7 +1366,7 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
@@ -1393,7 +1393,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::ACCEPTED | StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1415,7 +1415,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::ACCEPTED =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1458,7 +1458,7 @@
 
         <span class="comment">// check response status
         </span><span class="kw">if </span>resp.status() != StatusCode::ACCEPTED {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="comment">// get boundary from response header
@@ -1508,7 +1508,7 @@
             </span><span class="kw">if </span>resp.status() == StatusCode::ACCEPTED || resp.status() == StatusCode::NOT_FOUND {
                 results.push((path, <span class="prelude-val">Ok</span>(RpDelete::default().into())));
             } <span class="kw">else </span>{
-                results.push((path, <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)));
+                results.push((path, <span class="prelude-val">Err</span>(parse_error(resp))));
             }
         }
         <span class="prelude-val">Ok</span>(RpBatch::new(results))

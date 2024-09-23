@@ -199,7 +199,7 @@
 }
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, body) = resp.into_parts();
 
     <span class="kw">let </span>(<span class="kw-2">mut </span>kind, <span class="kw-2">mut </span>retryable) = <span class="kw">match </span>parts.status.as_u16() {

@@ -435,7 +435,7 @@
 
                 parse_blob(<span class="kw-2">&amp;</span>resp).map(RpStat::new)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -451,7 +451,7 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
@@ -477,7 +477,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 

@@ -97,7 +97,6 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -131,7 +130,7 @@
     message: String,
 }
 
-<span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -156,7 +155,7 @@
 
     err = with_error_response_context(err, parts);
 
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 
 <span class="attr">#[cfg(test)]
@@ -166,8 +165,8 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="doccomment">/// Error response example is from https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
-    </span><span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_parse_error() {
+    </span><span class="attr">#[test]
+    </span><span class="kw">fn </span>test_parse_error() {
         <span class="kw">let </span>err_res = <span class="macro">vec!</span>[
             (
                 <span class="string">r#"{"statusCode":"ALREADY_EXISTS","message":"The resource you requested already exist"}"#</span>,
@@ -191,10 +190,9 @@
                 .body(body)
                 .unwrap();
 
-            <span class="kw">let </span>err = parse_error(resp).<span class="kw">await</span>;
+            <span class="kw">let </span>err = parse_error(resp);
 
-            <span class="macro">assert!</span>(err.is_ok());
-            <span class="macro">assert_eq!</span>(err.unwrap().kind(), res.<span class="number">1</span>);
+            <span class="macro">assert_eq!</span>(err.kind(), res.<span class="number">1</span>);
         }
     }
 }

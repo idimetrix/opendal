@@ -770,7 +770,7 @@
                 <span class="kw">let </span>meta = parse_file_info(<span class="kw-2">&amp;</span>resp.files[<span class="number">0</span>]);
                 <span class="prelude-val">Ok</span>(RpStat::new(meta))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -788,7 +788,7 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
@@ -811,7 +811,7 @@
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>err = parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>err = parse_error(resp);
                 <span class="kw">match </span>err.kind() {
                     ErrorKind::NotFound =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
                     <span class="comment">// Representative deleted
@@ -856,7 +856,7 @@
                 <span class="kw">let </span>file_id = resp.files[<span class="number">0</span>].clone().file_id;
                 <span class="prelude-val">Ok</span>(file_id)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="prelude-val">Some</span>(source_file_id) = source_file_id <span class="kw">else </span>{
@@ -869,7 +869,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 

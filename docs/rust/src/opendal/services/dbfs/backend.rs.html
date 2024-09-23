@@ -438,7 +438,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCreateDir::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -473,7 +473,7 @@
             StatusCode::NOT_FOUND <span class="kw">if </span>path.ends_with(<span class="string">'/'</span>) =&gt; {
                 <span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -492,7 +492,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -511,7 +511,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpRename::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

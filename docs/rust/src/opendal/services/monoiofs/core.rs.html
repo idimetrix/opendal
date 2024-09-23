@@ -516,7 +516,7 @@
     <span class="kw">async fn </span>dispatch_concurrent(core: Arc&lt;MonoiofsCore&gt;) {
         <span class="kw">let </span>(tx, <span class="kw-2">mut </span>rx) = mpsc::unbounded();
 
-        <span class="kw">async fn </span>spawn_task(core: Arc&lt;MonoiofsCore&gt;, tx: UnboundedSender&lt;u64&gt;, sleep_millis: u64) {
+        <span class="kw">fn </span>spawn_task(core: Arc&lt;MonoiofsCore&gt;, tx: UnboundedSender&lt;u64&gt;, sleep_millis: u64) {
             tokio::spawn(<span class="kw">async move </span>{
                 <span class="kw">let </span>result = core
                     .dispatch(<span class="kw">move </span>|| <span class="kw">async move </span>{
@@ -529,8 +529,8 @@
             });
         }
 
-        spawn_task(core.clone(), tx.clone(), <span class="number">200</span>).<span class="kw">await</span>;
-        spawn_task(core.clone(), tx.clone(), <span class="number">20</span>).<span class="kw">await</span>;
+        spawn_task(core.clone(), tx.clone(), <span class="number">200</span>);
+        spawn_task(core.clone(), tx.clone(), <span class="number">20</span>);
         drop(tx);
         <span class="kw">let </span>first = rx.next().<span class="kw">await</span>;
         <span class="kw">let </span>second = rx.next().<span class="kw">await</span>;

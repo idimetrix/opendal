@@ -445,7 +445,7 @@
         <span class="kw">if </span>!resp.status().is_success() {
             <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
             <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)));
         }
         <span class="prelude-val">Ok</span>((RpRead::new(), resp.into_body()))
     }

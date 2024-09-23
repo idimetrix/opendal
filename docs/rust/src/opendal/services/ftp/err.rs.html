@@ -68,7 +68,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
 
-<span class="kw">pub fn </span>parse_error(err: FtpError) -&gt; Error {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(err: FtpError) -&gt; Error {
     <span class="kw">let </span>(kind, retryable) = <span class="kw">match </span>err {
         <span class="comment">// Allow retry for error
         //

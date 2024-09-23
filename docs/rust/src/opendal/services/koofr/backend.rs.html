@@ -628,7 +628,7 @@
 
                 <span class="prelude-val">Ok</span>(RpStat::new(md))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -643,7 +643,7 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
@@ -665,7 +665,7 @@
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
             <span class="comment">// Allow 404 when deleting a non-existing object
             </span>StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -686,7 +686,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if </span>status != StatusCode::OK &amp;&amp; status != StatusCode::NOT_FOUND {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.copy(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -695,7 +695,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -711,7 +711,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if </span>status != StatusCode::OK &amp;&amp; status != StatusCode::NOT_FOUND {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.move_object(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -720,7 +720,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpRename::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

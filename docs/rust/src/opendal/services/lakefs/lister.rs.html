@@ -193,7 +193,7 @@
 
         <span class="kw">let </span>status_code = response.status();
         <span class="kw">if </span>!status_code.is_success() {
-            <span class="kw">let </span>error = parse_error(response).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>error = parse_error(response);
             <span class="kw">return </span><span class="prelude-val">Err</span>(error);
         }
 

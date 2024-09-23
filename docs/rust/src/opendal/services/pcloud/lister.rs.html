@@ -184,7 +184,7 @@
                     String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs.to_bytes()),
                 ));
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

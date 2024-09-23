@@ -375,7 +375,7 @@
             StatusCode::NOT_FOUND =&gt; {
                 <span class="self">self</span>.dbfs_create_dir(path).<span class="kw">await</span><span class="question-mark">?</span>;
             }
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)),
         }
         <span class="prelude-val">Ok</span>(())
     }

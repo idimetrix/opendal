@@ -507,12 +507,6 @@
 <a href="#507" id="507">507</a>
 <a href="#508" id="508">508</a>
 <a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
-<a href="#512" id="512">512</a>
-<a href="#513" id="513">513</a>
-<a href="#514" id="514">514</a>
-<a href="#515" id="515">515</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -774,7 +768,7 @@
     ///
     /// In this way, we can support both self-hosted GHES and `github.com`.
     </span><span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -784,7 +778,7 @@
                 serde_json::from_reader(slc.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             query_resp.archive_location
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         };
 
         <span class="kw">let </span>req = Request::get(location)
@@ -807,12 +801,12 @@
 
                 <span class="prelude-val">Ok</span>(RpStat::new(meta))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -822,10 +816,10 @@
                 serde_json::from_reader(slc.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             query_resp.archive_location
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         };
 
-        <span class="kw">let </span>req = <span class="self">self</span>.ghac_get_location(<span class="kw-2">&amp;</span>location, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.ghac_get_location(<span class="kw-2">&amp;</span>location, args.range())<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.client.fetch(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
@@ -836,13 +830,13 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.ghac_reserve(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.ghac_reserve(path)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -852,9 +846,7 @@
                 serde_json::from_reader(slc.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
             reserve_resp.cache_id
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)
-                .<span class="kw">await
-                </span>.map(|err| err.with_operation(<span class="string">"Backend::ghac_reserve"</span>))<span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).map(|err| err.with_operation(<span class="string">"Backend::ghac_reserve"</span>)));
         };
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), GhacWriter::new(<span class="self">self</span>.clone(), cache_id)))
@@ -874,13 +866,13 @@
         </span><span class="kw">if </span>resp.status().is_success() || resp.status() == StatusCode::NOT_FOUND {
             <span class="prelude-val">Ok</span>(RpDelete::default())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
+            <span class="prelude-val">Err</span>(parse_error(resp))
         }
     }
 }
 
 <span class="kw">impl </span>GhacBackend {
-    <span class="kw">async fn </span>ghac_query(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">fn </span>ghac_query(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -899,11 +891,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>ghac_get_location(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        location: <span class="kw-2">&amp;</span>str,
-        range: BytesRange,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">pub fn </span>ghac_get_location(<span class="kw-2">&amp;</span><span class="self">self</span>, location: <span class="kw-2">&amp;</span>str, range: BytesRange) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(location);
 
         <span class="kw">if </span>!range.is_full() {
@@ -913,7 +901,7 @@
         req.body(Buffer::new()).map_err(new_request_build_error)
     }
 
-    <span class="kw">async fn </span>ghac_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">fn </span>ghac_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{CACHE_URL_BASE}/caches"</span>, <span class="self">self</span>.cache_url);
@@ -937,7 +925,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>ghac_upload(
+    <span class="kw">pub fn </span>ghac_upload(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         cache_id: i64,
         offset: u64,
@@ -963,7 +951,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>ghac_commit(<span class="kw-2">&amp;</span><span class="self">self</span>, cache_id: i64, size: u64) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">pub fn </span>ghac_commit(<span class="kw-2">&amp;</span><span class="self">self</span>, cache_id: i64, size: u64) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}{CACHE_URL_BASE}/caches/{cache_id}"</span>, <span class="self">self</span>.cache_url);
 
         <span class="kw">let </span>bs =

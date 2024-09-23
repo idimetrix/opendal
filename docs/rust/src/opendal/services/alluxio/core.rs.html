@@ -468,7 +468,7 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -503,7 +503,7 @@
                     serde_json::from_reader(body.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(steam_id)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -527,7 +527,7 @@
                     serde_json::from_reader(body.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(steam_id)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -547,7 +547,7 @@
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>err = parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>err = parse_error(resp);
                 <span class="kw">if </span>err.kind() == ErrorKind::NotFound {
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                 }
@@ -575,7 +575,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -601,7 +601,7 @@
                     serde_json::from_reader(body.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(file_info)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -627,7 +627,7 @@
                     serde_json::from_reader(body.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(file_infos)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -663,7 +663,7 @@
                     serde_json::from_reader(body.reader()).map_err(new_json_serialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(size)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -680,7 +680,7 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

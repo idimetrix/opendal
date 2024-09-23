@@ -78,12 +78,12 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[derive(Default, Debug, Deserialize)]
-</span><span class="kw">pub struct </span>AliyunDriveError {
+</span><span class="kw">struct </span>AliyunDriveError {
     code: String,
     message: String,
 }
 
-<span class="kw">pub async fn </span>parse_error(res: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(res: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = res.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
     <span class="kw">let </span>(code, message) = serde_json::from_reader::&lt;<span class="kw">_</span>, AliyunDriveError&gt;(bs.clone().reader())
@@ -108,6 +108,6 @@
     <span class="kw">if </span>retryable {
         err = err.set_temporary();
     }
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 </code></pre></div></section></main></body></html>

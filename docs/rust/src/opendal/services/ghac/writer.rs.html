@@ -74,13 +74,6 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -125,22 +118,17 @@
         <span class="kw">let </span>size = bs.len();
         <span class="kw">let </span>offset = <span class="self">self</span>.size;
 
-        <span class="kw">let </span>req = <span class="self">self
-            </span>.backend
-            .ghac_upload(
-                <span class="self">self</span>.cache_id,
-                offset,
-                size <span class="kw">as </span>u64,
-                Buffer::from(bs.to_bytes()),
-            )
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.backend.ghac_upload(
+            <span class="self">self</span>.cache_id,
+            offset,
+            size <span class="kw">as </span>u64,
+            Buffer::from(bs.to_bytes()),
+        )<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>!resp.status().is_success() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)
-                .<span class="kw">await
-                </span>.map(|err| err.with_operation(<span class="string">"Backend::ghac_upload"</span>))<span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).map(|err| err.with_operation(<span class="string">"Backend::ghac_upload"</span>)));
         }
 
         <span class="self">self</span>.size += size <span class="kw">as </span>u64;
@@ -152,15 +140,13 @@
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.backend.ghac_commit(<span class="self">self</span>.cache_id, <span class="self">self</span>.size).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.backend.ghac_commit(<span class="self">self</span>.cache_id, <span class="self">self</span>.size)<span class="question-mark">?</span>;
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp)
-                .<span class="kw">await
-                </span>.map(|err| err.with_operation(<span class="string">"Backend::ghac_commit"</span>))<span class="question-mark">?</span>)
+            <span class="prelude-val">Err</span>(parse_error(resp).map(|err| err.with_operation(<span class="string">"Backend::ghac_commit"</span>)))
         }
     }
 }

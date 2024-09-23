@@ -122,7 +122,7 @@
     p: String,
 }
 
-<span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -147,7 +147,7 @@
         err = err.set_temporary();
     }
 
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 
 <span class="kw">fn </span>parse_error_response(resp: <span class="kw-2">&amp;</span>Bytes) -&gt; String {

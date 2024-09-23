@@ -528,7 +528,7 @@
                 <span class="kw">let </span>status = resp.status();
 
                 <span class="kw">if </span>status != StatusCode::OK {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
                 }
 
                 <span class="kw">let </span>bs = resp.into_body();
@@ -575,7 +575,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if </span>status != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>bs = resp.into_body();
@@ -653,11 +653,11 @@
                     <span class="comment">// When the directory already exists, Koofr returns 400 Bad Request.
                     // We should treat it as success.
                     </span>StatusCode::OK | StatusCode::CREATED | StatusCode::BAD_REQUEST =&gt; <span class="prelude-val">Ok</span>(()),
-                    <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+                    <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
                 }
             }
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 

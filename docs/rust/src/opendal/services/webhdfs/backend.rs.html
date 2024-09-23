@@ -669,10 +669,6 @@
 <a href="#669" id="669">669</a>
 <a href="#670" id="670">670</a>
 <a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -925,7 +921,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if </span>status != StatusCode::CREATED &amp;&amp; status != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>bs = resp.into_body();
@@ -974,7 +970,7 @@
 
                 <span class="prelude-val">Ok</span>(resp.location)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1000,7 +996,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>webhdfs_append_request(
+    <span class="kw">pub fn </span>webhdfs_append_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         location: <span class="kw-2">&amp;</span>str,
         size: u64,
@@ -1049,11 +1045,7 @@
         req.body(Buffer::new()).map_err(new_request_build_error)
     }
 
-    <span class="kw">async fn </span>webhdfs_open_request(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        range: <span class="kw-2">&amp;</span>BytesRange,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
+    <span class="kw">fn </span>webhdfs_open_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, range: <span class="kw-2">&amp;</span>BytesRange) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/webhdfs/v1/{}?op=OPEN"</span>,
@@ -1125,7 +1117,7 @@
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_open_request(path, <span class="kw-2">&amp;</span>range).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_open_request(path, <span class="kw-2">&amp;</span>range)<span class="question-mark">?</span>;
         <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
@@ -1186,7 +1178,7 @@
             StatusCode::NOT_FOUND =&gt; {
                 <span class="self">self</span>.create_dir(<span class="string">"/"</span>, OpCreateDir::new()).<span class="kw">await</span><span class="question-mark">?</span>;
             }
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)),
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1251,7 +1243,7 @@
                     ))
                 }
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1283,7 +1275,7 @@
                 <span class="prelude-val">Ok</span>(RpStat::new(meta))
             }
 
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1299,7 +1291,7 @@
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
                 <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)).<span class="kw">await</span><span class="question-mark">?</span>)
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
         }
     }
@@ -1325,7 +1317,7 @@
 
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 

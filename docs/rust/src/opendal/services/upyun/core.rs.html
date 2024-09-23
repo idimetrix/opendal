@@ -583,7 +583,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>sign(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">pub fn </span>sign(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// get rfc1123 date
         </span><span class="kw">let </span>date = chrono::Utc::now()
             .format(<span class="string">"%a, %d %b %Y %H:%M:%S GMT"</span>)
@@ -617,7 +617,7 @@
             .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
@@ -635,12 +635,12 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>upload(
+    <span class="kw">pub fn </span>upload(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
@@ -676,7 +676,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -694,7 +694,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -720,7 +720,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -746,7 +746,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -769,7 +769,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -807,12 +807,12 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>upload_part(
+    <span class="kw">pub fn </span>upload_part(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         upload_id: <span class="kw-2">&amp;</span>str,
@@ -841,7 +841,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(req)
     }
@@ -867,7 +867,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -904,7 +904,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}

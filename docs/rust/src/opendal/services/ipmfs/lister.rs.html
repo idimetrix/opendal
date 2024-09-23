@@ -168,7 +168,7 @@
         <span class="kw">let </span>resp = <span class="self">self</span>.backend.ipmfs_ls(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>bs = resp.into_body();

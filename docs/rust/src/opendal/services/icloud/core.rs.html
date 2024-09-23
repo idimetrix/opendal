@@ -1042,13 +1042,13 @@
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(rscd) = resp.headers().get(APPLE_RESPONSE_HEADER) {
             <span class="kw">let </span>status_code = StatusCode::from_bytes(rscd.as_bytes()).unwrap();
             <span class="kw">if </span>status_code != StatusCode::CONFLICT {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+                <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
             }
         }
 
@@ -1069,7 +1069,7 @@
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="comment">// Update SessionData cookies.We need obtain `X-APPLE-WEBAUTH-USER` cookie to get file.
@@ -1236,7 +1236,7 @@
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>body = resp.into_body();
@@ -1267,7 +1267,7 @@
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>body = resp.into_body();
@@ -1395,7 +1395,7 @@
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>body = resp.into_body();
@@ -1436,7 +1436,7 @@
 
         <span class="kw">let </span>resp = signer.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>resp.status() != StatusCode::OK {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="kw">let </span>body = resp.into_body();
@@ -1446,7 +1446,7 @@
     }
 }
 
-<span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -1472,7 +1472,7 @@
 
     err = with_error_response_context(err, parts);
 
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 
 <span class="attr">#[derive(Default, Debug, Deserialize)]

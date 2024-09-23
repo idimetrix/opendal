@@ -77,7 +77,7 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Parse error response into Error.
-</span><span class="kw">pub async fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Error&gt; {
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_error(resp: Response&lt;Buffer&gt;) -&gt; Error {
     <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = resp.into_parts();
     <span class="kw">let </span>bs = body.copy_to_bytes(body.remaining());
 
@@ -104,6 +104,6 @@
         err = err.set_temporary();
     }
 
-    <span class="prelude-val">Ok</span>(err)
+    err
 }
 </code></pre></div></section></main></body></html>

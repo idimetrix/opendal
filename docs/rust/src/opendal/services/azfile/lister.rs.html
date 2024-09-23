@@ -270,7 +270,7 @@
                 ctx.done = <span class="bool-val">true</span>;
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
         <span class="comment">// Return self at the first page.
