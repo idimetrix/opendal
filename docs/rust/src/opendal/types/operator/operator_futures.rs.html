@@ -958,7 +958,7 @@
     ///
     /// ## Notes
     ///
-    /// we don't need to include the user defined metadata prefix in the key
+    /// we don't need to include the user defined metadata prefix in the key.
     /// every service will handle it internally
     </span><span class="kw">pub fn </span>user_metadata(<span class="self">self</span>, data: <span class="kw">impl </span>IntoIterator&lt;Item = (String, String)&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|(args, options)| (args.with_user_metadata(HashMap::from_iter(data)), options))

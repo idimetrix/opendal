@@ -198,6 +198,12 @@
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -261,12 +267,14 @@
     </span><span class="kw">pub </span>stat_with_if_match: bool,
     <span class="doccomment">/// If operator supports stat with if none match.
     </span><span class="kw">pub </span>stat_with_if_none_match: bool,
-    <span class="doccomment">/// if operator supports read with override cache control.
+    <span class="doccomment">/// if operator supports stat with override cache control.
     </span><span class="kw">pub </span>stat_with_override_cache_control: bool,
-    <span class="doccomment">/// if operator supports read with override content disposition.
+    <span class="doccomment">/// if operator supports stat with override content disposition.
     </span><span class="kw">pub </span>stat_with_override_content_disposition: bool,
-    <span class="doccomment">/// if operator supports read with override content type.
+    <span class="doccomment">/// if operator supports stat with override content type.
     </span><span class="kw">pub </span>stat_with_override_content_type: bool,
+    <span class="doccomment">/// if operator supports stat with version.
+    </span><span class="kw">pub </span>stat_with_version: bool,
 
     <span class="doccomment">/// If operator supports read.
     </span><span class="kw">pub </span>read: bool,
@@ -280,6 +288,8 @@
     </span><span class="kw">pub </span>read_with_override_content_disposition: bool,
     <span class="doccomment">/// if operator supports read with override content type.
     </span><span class="kw">pub </span>read_with_override_content_type: bool,
+    <span class="doccomment">/// if operator supports read with version.
+    </span><span class="kw">pub </span>read_with_version: bool,
 
     <span class="doccomment">/// If operator supports write.
     </span><span class="kw">pub </span>write: bool,
@@ -319,6 +329,8 @@
 
     <span class="doccomment">/// If operator supports delete.
     </span><span class="kw">pub </span>delete: bool,
+    <span class="doccomment">/// if operator supports delete with version.
+    </span><span class="kw">pub </span>delete_with_version: bool,
 
     <span class="doccomment">/// If operator supports copy.
     </span><span class="kw">pub </span>copy: bool,
@@ -334,7 +346,7 @@
     </span><span class="kw">pub </span>list_with_start_after: bool,
     <span class="doccomment">/// If backend supports list with recursive.
     </span><span class="kw">pub </span>list_with_recursive: bool,
-    <span class="doccomment">/// If backend supports list with object version.
+    <span class="doccomment">/// if operator supports list with version.
     </span><span class="kw">pub </span>list_with_version: bool,
 
     <span class="doccomment">/// If operator supports presign.

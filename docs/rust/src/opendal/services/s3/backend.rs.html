@@ -1258,6 +1258,9 @@
 <a href="#1258" id="1258">1258</a>
 <a href="#1259" id="1259">1259</a>
 <a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2162,14 +2165,15 @@
                 stat_with_override_cache_control: !<span class="self">self</span>.core.disable_stat_with_override,
                 stat_with_override_content_disposition: !<span class="self">self</span>.core.disable_stat_with_override,
                 stat_with_override_content_type: !<span class="self">self</span>.core.disable_stat_with_override,
+                stat_with_version: <span class="self">self</span>.core.enable_versioning,
 
                 read: <span class="bool-val">true</span>,
-
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
                 read_with_override_cache_control: <span class="bool-val">true</span>,
                 read_with_override_content_disposition: <span class="bool-val">true</span>,
                 read_with_override_content_type: <span class="bool-val">true</span>,
+                read_with_version: <span class="self">self</span>.core.enable_versioning,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
@@ -2192,6 +2196,8 @@
                 },
 
                 delete: <span class="bool-val">true</span>,
+                delete_with_version: <span class="self">self</span>.core.enable_versioning,
+
                 copy: <span class="bool-val">true</span>,
 
                 list: <span class="bool-val">true</span>,
