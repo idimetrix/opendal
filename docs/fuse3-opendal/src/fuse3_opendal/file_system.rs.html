@@ -872,6 +872,29 @@
 <a href="#872" id="872">872</a>
 <a href="#873" id="873">873</a>
 <a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1248,6 +1271,11 @@
             new_name
         );
         <span class="prelude-val">Err</span>(libc::EOPNOTSUPP.into())
+    }
+
+    <span class="kw">async fn </span>opendir(<span class="kw-2">&amp;</span><span class="self">self</span>, _req: Request, path: <span class="kw-2">&amp;</span>OsStr, flags: u32) -&gt; <span class="prelude-ty">Result</span>&lt;ReplyOpen&gt; {
+        <span class="macro">log::debug!</span>(<span class="string">"opendir(path={:?}, flags=0x{:x})"</span>, path, flags);
+        <span class="prelude-val">Ok</span>(ReplyOpen { fh: <span class="number">0</span>, flags })
     }
 
     <span class="kw">async fn </span>open(<span class="kw-2">&amp;</span><span class="self">self</span>, _req: Request, path: <span class="kw-2">&amp;</span>OsStr, flags: u32) -&gt; <span class="prelude-ty">Result</span>&lt;ReplyOpen&gt; {
@@ -1695,6 +1723,20 @@
             copied: u64::from(written),
         })
     }
+
+    <span class="kw">async fn </span>statfs(<span class="kw-2">&amp;</span><span class="self">self</span>, _req: Request, path: <span class="kw-2">&amp;</span>OsStr) -&gt; <span class="prelude-ty">Result</span>&lt;ReplyStatFs&gt; {
+        <span class="macro">log::debug!</span>(<span class="string">"statfs(path={:?})"</span>, path);
+        <span class="prelude-val">Ok</span>(ReplyStatFs {
+            blocks: <span class="number">1</span>,
+            bfree: <span class="number">0</span>,
+            bavail: <span class="number">0</span>,
+            files: <span class="number">1</span>,
+            ffree: <span class="number">0</span>,
+            bsize: <span class="number">4096</span>,
+            namelen: u32::MAX,
+            frsize: <span class="number">0</span>,
+        })
+    }
 }
 
 <span class="kw">const fn </span>entry_mode2file_type(mode: EntryMode) -&gt; FileType {
@@ -1729,6 +1771,10 @@
         gid,
         rdev: <span class="number">0</span>,
         blksize: <span class="number">4096</span>,
+        <span class="attr">#[cfg(target_os = <span class="string">"macos"</span>)]
+        </span>crtime: now,
+        <span class="attr">#[cfg(target_os = <span class="string">"macos"</span>)]
+        </span>flags: <span class="number">0</span>,
     }
 }
 
