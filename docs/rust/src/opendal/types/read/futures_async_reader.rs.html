@@ -283,6 +283,10 @@
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -348,7 +352,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(start, end) = (range.start, range.end);
-        <span class="kw">let </span>stream = BufferStream::new(ctx.clone(), range);
+        <span class="kw">let </span>stream = BufferStream::new(ctx.clone(), start, <span class="prelude-val">Some</span>(end - start));
 
         FuturesAsyncReader {
             ctx,
@@ -442,7 +446,11 @@
             <span class="self">self</span>.buf.advance(cnt <span class="kw">as _</span>);
         } <span class="kw">else </span>{
             <span class="self">self</span>.buf = Buffer::new();
-            <span class="self">self</span>.stream = BufferStream::new(<span class="self">self</span>.ctx.clone(), new_pos + <span class="self">self</span>.start..<span class="self">self</span>.end);
+            <span class="self">self</span>.stream = BufferStream::new(
+                <span class="self">self</span>.ctx.clone(),
+                new_pos + <span class="self">self</span>.start,
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.end - <span class="self">self</span>.start - new_pos),
+            );
         }
 
         <span class="self">self</span>.pos = new_pos;
@@ -462,8 +470,8 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_trait() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_trait() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>acc = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>.into_inner();
         <span class="kw">let </span>ctx = Arc::new(ReadContext::new(
             acc,

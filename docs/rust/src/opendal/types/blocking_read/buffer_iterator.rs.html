@@ -110,7 +110,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::ops::Range;
+</span><span class="kw">use </span>std::ops::RangeBounds;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -125,8 +125,8 @@
 <span class="kw">impl </span>IteratingReader {
     <span class="doccomment">/// Create a new iterating reader.
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>generator = ReadGenerator::new(ctx.clone(), range);
+    </span><span class="kw">fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: BytesRange) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>generator = ReadGenerator::new(ctx.clone(), range.offset(), range.size());
         <span class="self">Self </span>{
             generator,
             reader: <span class="prelude-val">None</span>,
@@ -168,9 +168,9 @@
 <span class="kw">impl </span>BufferIterator {
     <span class="doccomment">/// Create a new buffer iterator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            inner: IteratingReader::new(ctx, range),
+            inner: IteratingReader::new(ctx, range.into()),
         }
     }
 }

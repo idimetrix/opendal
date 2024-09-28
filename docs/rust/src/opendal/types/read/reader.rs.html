@@ -505,55 +505,6 @@
 <a href="#505" id="505">505</a>
 <a href="#506" id="506">506</a>
 <a href="#507" id="507">507</a>
-<a href="#508" id="508">508</a>
-<a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
-<a href="#512" id="512">512</a>
-<a href="#513" id="513">513</a>
-<a href="#514" id="514">514</a>
-<a href="#515" id="515">515</a>
-<a href="#516" id="516">516</a>
-<a href="#517" id="517">517</a>
-<a href="#518" id="518">518</a>
-<a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
-<a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
-<a href="#546" id="546">546</a>
-<a href="#547" id="547">547</a>
-<a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
-<a href="#551" id="551">551</a>
-<a href="#552" id="552">552</a>
-<a href="#553" id="553">553</a>
-<a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
-<a href="#556" id="556">556</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -571,8 +522,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::ops::Bound;
-<span class="kw">use </span>std::ops::Range;
+</span><span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::ops::RangeBounds;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -581,7 +531,6 @@
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>futures::TryStreamExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Reader is designed to read data from given path in an asynchronous
@@ -650,9 +599,6 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Reader {
     ctx: Arc&lt;ReadContext&gt;,
-
-    <span class="doccomment">/// Total size of the reader.
-    </span>size: Arc&lt;AtomicContentLength&gt;,
 }
 
 <span class="kw">impl </span>Reader {
@@ -664,48 +610,7 @@
     /// We don't want to expose those details to users so keep this function
     /// in crate only.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(ctx: ReadContext) -&gt; <span class="self">Self </span>{
-        Reader {
-            ctx: Arc::new(ctx),
-            size: Arc::new(AtomicContentLength::new()),
-        }
-    }
-
-    <span class="doccomment">/// Parse users input range bounds into valid `Range&lt;u64&gt;`.
-    ///
-    /// To avoid duplicated stat call, we will cache the size of the reader.
-    </span><span class="kw">async fn </span>parse_range(<span class="kw-2">&amp;</span><span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Range&lt;u64&gt;&gt; {
-        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound() {
-            Bound::Included(v) =&gt; <span class="kw-2">*</span>v,
-            Bound::Excluded(v) =&gt; v + <span class="number">1</span>,
-            Bound::Unbounded =&gt; <span class="number">0</span>,
-        };
-
-        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound() {
-            Bound::Included(v) =&gt; v + <span class="number">1</span>,
-            Bound::Excluded(v) =&gt; <span class="kw-2">*</span>v,
-            Bound::Unbounded =&gt; <span class="kw">match </span><span class="self">self</span>.size.load() {
-                <span class="prelude-val">Some</span>(v) =&gt; v,
-                <span class="prelude-val">None </span>=&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>op_stat = OpStat::new();
-
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.ctx.args().version() {
-                        op_stat = op_stat.with_version(v);
-                    }
-
-                    <span class="kw">let </span>size = <span class="self">self
-                        </span>.ctx
-                        .accessor()
-                        .stat(<span class="self">self</span>.ctx.path(), op_stat)
-                        .<span class="kw">await</span><span class="question-mark">?
-                        </span>.into_metadata()
-                        .content_length();
-                    <span class="self">self</span>.size.store(size);
-                    size
-                }
-            },
-        };
-
-        <span class="prelude-val">Ok</span>(start..end)
+        Reader { ctx: Arc::new(ctx) }
     }
 
     <span class="doccomment">/// Read give range from reader into [`Buffer`].
@@ -802,9 +707,8 @@
     /// And the name `BufferStream` is not good enough to expose to users.
     /// Let's keep it inside for now.
     </span><span class="kw">async fn </span>into_stream(<span class="self">self</span>, range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;BufferStream&gt; {
-        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(BufferStream::new(<span class="self">self</span>.ctx, range))
-    }
+        BufferStream::create(<span class="self">self</span>.ctx, range).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Convert reader into [`FuturesAsyncReader`] which implements [`futures::AsyncRead`],
     /// [`futures::AsyncSeek`] and [`futures::AsyncBufRead`].
@@ -868,7 +772,7 @@
         <span class="self">self</span>,
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;FuturesAsyncReader&gt; {
-        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>range = <span class="self">self</span>.ctx.parse_into_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(FuturesAsyncReader::new(<span class="self">self</span>.ctx, range))
     }
 
@@ -928,21 +832,19 @@
         <span class="self">self</span>,
         range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;FuturesBytesStream&gt; {
-        <span class="kw">let </span>range = <span class="self">self</span>.parse_range(range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(FuturesBytesStream::new(<span class="self">self</span>.ctx, range))
-    }
+        FuturesBytesStream::new(<span class="self">self</span>.ctx, range).<span class="kw">await
+    </span>}
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-
     <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>rand::rngs::ThreadRng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::MaybeSend;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::services;
     <span class="kw">use </span><span class="kw">crate</span>::Operator;
 

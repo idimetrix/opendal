@@ -919,7 +919,7 @@
 
         <span class="prelude-val">Ok</span>((
             RpRead::default(),
-            SftpReader::new(client, f, args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>),
+            SftpReader::new(client, f, args.range().size()),
         ))
     }
 

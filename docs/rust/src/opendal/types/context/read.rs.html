@@ -202,6 +202,67 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -219,7 +280,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::ops::Range;
+</span><span class="kw">use </span>std::ops::{Bound, Range, RangeBounds};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -272,6 +333,38 @@
     </span><span class="kw">pub fn </span>options(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>OpReader {
         <span class="kw-2">&amp;</span><span class="self">self</span>.options
     }
+
+    <span class="doccomment">/// Parse the range bounds into a range.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>parse_into_range(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        range: <span class="kw">impl </span>RangeBounds&lt;u64&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Range&lt;u64&gt;&gt; {
+        <span class="kw">let </span>start = <span class="kw">match </span>range.start_bound() {
+            Bound::Included(v) =&gt; <span class="kw-2">*</span>v,
+            Bound::Excluded(v) =&gt; v + <span class="number">1</span>,
+            Bound::Unbounded =&gt; <span class="number">0</span>,
+        };
+
+        <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound() {
+            Bound::Included(v) =&gt; v + <span class="number">1</span>,
+            Bound::Excluded(v) =&gt; <span class="kw-2">*</span>v,
+            Bound::Unbounded =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>op_stat = OpStat::new();
+
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.args().version() {
+                    op_stat = op_stat.with_version(v);
+                }
+
+                <span class="self">self</span>.accessor()
+                    .stat(<span class="self">self</span>.path(), op_stat)
+                    .<span class="kw">await</span><span class="question-mark">?
+                    </span>.into_metadata()
+                    .content_length()
+            }
+        };
+
+        <span class="prelude-val">Ok</span>(start..end)
+    }
 }
 
 <span class="doccomment">/// ReadGenerator is used to generate new readers.
@@ -287,62 +380,65 @@
     ctx: Arc&lt;ReadContext&gt;,
 
     offset: u64,
-    end: u64,
+    size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 }
 
 <span class="kw">impl </span>ReadGenerator {
     <span class="doccomment">/// Create a new ReadGenerator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(ctx: Arc&lt;ReadContext&gt;, range: Range&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            ctx,
-            offset: range.start,
-            end: range.end,
+    </span><span class="kw">pub fn </span>new(ctx: Arc&lt;ReadContext&gt;, offset: u64, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ ctx, offset, size }
+    }
+
+    <span class="doccomment">/// Generate next range to read.
+    </span><span class="kw">fn </span>next_range(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;BytesRange&gt; {
+        <span class="kw">if </span><span class="self">self</span>.size == <span class="prelude-val">Some</span>(<span class="number">0</span>) {
+            <span class="kw">return </span><span class="prelude-val">None</span>;
         }
+
+        <span class="kw">let </span>next_offset = <span class="self">self</span>.offset;
+        <span class="kw">let </span>next_size = <span class="kw">match </span><span class="self">self</span>.size {
+            <span class="comment">// Given size is None, read all data.
+            </span><span class="prelude-val">None </span>=&gt; {
+                <span class="comment">// Update size to Some(0) to indicate that there is no more data to read.
+                </span><span class="self">self</span>.size = <span class="prelude-val">Some</span>(<span class="number">0</span>);
+                <span class="prelude-val">None
+            </span>}
+            <span class="prelude-val">Some</span>(remaining) =&gt; {
+                <span class="comment">// If chunk is set, read data in chunks.
+                </span><span class="kw">let </span>read_size = <span class="self">self
+                    </span>.ctx
+                    .options
+                    .chunk()
+                    .map_or(remaining, |chunk| remaining.min(chunk <span class="kw">as </span>u64));
+                <span class="comment">// Update (offset, size) before building future.
+                </span><span class="self">self</span>.offset += read_size;
+                <span class="self">self</span>.size = <span class="prelude-val">Some</span>(remaining - read_size);
+                <span class="prelude-val">Some</span>(read_size)
+            }
+        };
+
+        <span class="prelude-val">Some</span>(BytesRange::new(next_offset, next_size))
     }
 
     <span class="doccomment">/// Generate next reader.
     </span><span class="kw">pub async fn </span>next_reader(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Reader&gt;&gt; {
-        <span class="kw">if </span><span class="self">self</span>.offset &gt;= <span class="self">self</span>.end {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(range) = <span class="self">self</span>.next_range() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
-        }
+        };
 
-        <span class="kw">let </span>offset = <span class="self">self</span>.offset;
-        <span class="kw">let </span><span class="kw-2">mut </span>size = (<span class="self">self</span>.end - <span class="self">self</span>.offset) <span class="kw">as </span>usize;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(chunk) = <span class="self">self</span>.ctx.options.chunk() {
-            size = size.min(chunk)
-        }
-
-        <span class="comment">// Update self.offset before building future.
-        </span><span class="self">self</span>.offset += size <span class="kw">as </span>u64;
-        <span class="kw">let </span>args = <span class="self">self
-            </span>.ctx
-            .args
-            .clone()
-            .with_range(BytesRange::new(offset, <span class="prelude-val">Some</span>(size <span class="kw">as </span>u64)));
+        <span class="kw">let </span>args = <span class="self">self</span>.ctx.args.clone().with_range(range);
         <span class="kw">let </span>(<span class="kw">_</span>, r) = <span class="self">self</span>.ctx.acc.read(<span class="kw-2">&amp;</span><span class="self">self</span>.ctx.path, args).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(r))
     }
 
     <span class="doccomment">/// Generate next blocking reader.
     </span><span class="kw">pub fn </span>next_blocking_reader(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::BlockingReader&gt;&gt; {
-        <span class="kw">if </span><span class="self">self</span>.offset &gt;= <span class="self">self</span>.end {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(range) = <span class="self">self</span>.next_range() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
-        }
+        };
 
-        <span class="kw">let </span>offset = <span class="self">self</span>.offset;
-        <span class="kw">let </span><span class="kw-2">mut </span>size = (<span class="self">self</span>.end - <span class="self">self</span>.offset) <span class="kw">as </span>usize;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(chunk) = <span class="self">self</span>.ctx.options.chunk() {
-            size = size.min(chunk)
-        }
-
-        <span class="comment">// Update self.offset before building future.
-        </span><span class="self">self</span>.offset += size <span class="kw">as </span>u64;
-        <span class="kw">let </span>args = <span class="self">self
-            </span>.ctx
-            .args
-            .clone()
-            .with_range(BytesRange::new(offset, <span class="prelude-val">Some</span>(size <span class="kw">as </span>u64)));
+        <span class="kw">let </span>args = <span class="self">self</span>.ctx.args.clone().with_range(range);
         <span class="kw">let </span>(<span class="kw">_</span>, r) = <span class="self">self</span>.ctx.acc.blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>.ctx.path, args)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(r))
     }
@@ -371,13 +467,39 @@
             OpRead::new(),
             OpReader::new().with_chunk(<span class="number">3</span>),
         ));
-        <span class="kw">let </span><span class="kw-2">mut </span>generator = ReadGenerator::new(ctx, <span class="number">0</span>..<span class="number">10</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>generator = ReadGenerator::new(ctx, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">10</span>));
         <span class="kw">let </span><span class="kw-2">mut </span>readers = <span class="macro">vec!</span>[];
         <span class="kw">while let </span><span class="prelude-val">Some</span>(r) = generator.next_reader().<span class="kw">await</span><span class="question-mark">? </span>{
             readers.push(r);
         }
 
         <span class="macro">pretty_assertions::assert_eq!</span>(readers.len(), <span class="number">4</span>);
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_next_reader_without_size() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>op = Operator::via_iter(Scheme::Memory, [])<span class="question-mark">?</span>;
+        op.write(
+            <span class="string">"test"</span>,
+            Buffer::from(<span class="macro">vec!</span>[Bytes::from(<span class="string">"Hello"</span>), Bytes::from(<span class="string">"World"</span>)]),
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>acc = op.into_inner();
+        <span class="kw">let </span>ctx = Arc::new(ReadContext::new(
+            acc,
+            <span class="string">"test"</span>.to_string(),
+            OpRead::new(),
+            OpReader::new().with_chunk(<span class="number">3</span>),
+        ));
+        <span class="kw">let </span><span class="kw-2">mut </span>generator = ReadGenerator::new(ctx, <span class="number">0</span>, <span class="prelude-val">None</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>readers = <span class="macro">vec!</span>[];
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(r) = generator.next_reader().<span class="kw">await</span><span class="question-mark">? </span>{
+            readers.push(r);
+        }
+
+        <span class="macro">pretty_assertions::assert_eq!</span>(readers.len(), <span class="number">1</span>);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -396,7 +518,7 @@
             OpRead::new(),
             OpReader::new().with_chunk(<span class="number">3</span>),
         ));
-        <span class="kw">let </span><span class="kw-2">mut </span>generator = ReadGenerator::new(ctx, <span class="number">0</span>..<span class="number">10</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>generator = ReadGenerator::new(ctx, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">10</span>));
         <span class="kw">let </span><span class="kw-2">mut </span>readers = <span class="macro">vec!</span>[];
         <span class="kw">while let </span><span class="prelude-val">Some</span>(r) = generator.next_blocking_reader()<span class="question-mark">? </span>{
             readers.push(r);
