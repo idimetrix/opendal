@@ -85,8 +85,6 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a333cc71b98ca4ce17183c1b4263ddd1f"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="opendal_8h.html#a6715be152766e5b8f840ce10cf9442c2">opendal_code</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a333cc71b98ca4ce17183c1b4263ddd1f">opendal_code</a></td></tr>
 <tr class="memdesc:a333cc71b98ca4ce17183c1b4263ddd1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The error code for all opendal APIs in C binding.  <a href="opendal_8h.html#a333cc71b98ca4ce17183c1b4263ddd1f">More...</a><br /></td></tr>
 <tr class="separator:a333cc71b98ca4ce17183c1b4263ddd1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03ea17a7d09e319825d05a1d9f5d933c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="opendal_8h.html#a03ea17a7d09e319825d05a1d9f5d933c">BlockingLister</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a03ea17a7d09e319825d05a1d9f5d933c">BlockingLister</a></td></tr>
-<tr class="separator:a03ea17a7d09e319825d05a1d9f5d933c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -111,26 +109,6 @@ Enumerations</h2></td></tr>
 <tr class="separator:a6715be152766e5b8f840ce10cf9442c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="a03ea17a7d09e319825d05a1d9f5d933c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a03ea17a7d09e319825d05a1d9f5d933c">&#9670;&nbsp;</a></span>BlockingLister</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="opendal_8h.html#a03ea17a7d09e319825d05a1d9f5d933c">BlockingLister</a> <a class="el" href="opendal_8h.html#a03ea17a7d09e319825d05a1d9f5d933c">BlockingLister</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>BlockingLister is designed to list entries at given path in a blocking manner.</p>
-<p>Users can construct Lister by [<code>BlockingOperator::lister</code>] or [<code>BlockingOperator::lister_with</code>].</p>
-<ul>
-<li>Lister implements <code>Iterator&lt;Item = Result&lt;Entry&gt;&gt;</code>.</li>
-<li>Lister will return <code>None</code> if there is no more entries or error has been returned. </li>
-</ul>
-
-</div>
-</div>
 <a id="a333cc71b98ca4ce17183c1b4263ddd1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a333cc71b98ca4ce17183c1b4263ddd1f">&#9670;&nbsp;</a></span>opendal_code</h2>
 
