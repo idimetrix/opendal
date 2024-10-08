@@ -1300,6 +1300,10 @@
 <a href="#1300" id="1300">1300</a>
 <a href="#1301" id="1301">1301</a>
 <a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1775,6 +1779,10 @@
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(checksum) = <span class="self">self</span>.calculate_checksum(<span class="kw-2">&amp;</span>body) {
             <span class="comment">// Set Checksum header.
             </span>req = <span class="self">self</span>.insert_checksum_header(req, <span class="kw-2">&amp;</span>checksum);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
+            req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
         <span class="comment">// Set body

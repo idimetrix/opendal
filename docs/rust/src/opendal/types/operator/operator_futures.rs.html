@@ -550,6 +550,11 @@
 <a href="#550" id="550">550</a>
 <a href="#551" id="551">551</a>
 <a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -874,6 +879,11 @@
     <span class="doccomment">/// Set the executor for this operation.
     </span><span class="kw">pub fn </span>executor(<span class="self">self</span>, executor: Executor) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.map(|(args, options, bs)| (args.with_executor(executor), options, bs))
+    }
+
+    <span class="doccomment">/// Set the If-None-Match for this operation.
+    </span><span class="kw">pub fn </span>if_none_match(<span class="self">self</span>, s: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.map(|(args, options, bs)| (args.with_if_none_match(s), options, bs))
     }
 
     <span class="doccomment">/// Set the user defined metadata of the op

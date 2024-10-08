@@ -31,7 +31,7 @@ Limit is usually the maximum size of data that operator will handle in one opera
 <span class="kw">let </span>info = op.info();</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.blocking" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#141-143">source</a><h4 class="code-header">pub fn <a href="#method.blocking" class="fn">blocking</a>(&amp;self) -&gt; <a class="struct" href="struct.BlockingOperator.html" title="struct opendal::BlockingOperator">BlockingOperator</a></h4></section></summary><div class="docblock"><p>Create a new blocking operator.</p>
 <p>This operation is nearly no cost.</p>
-</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-1" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#147-1913">source</a><a href="#impl-Operator-1" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><h4 id="operator-async-api"><a class="doc-anchor" href="#operator-async-api">§</a>Operator async API.</h4></div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.check" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#162-169">source</a><h4 class="code-header">pub async fn <a href="#method.check" class="fn">check</a>(&amp;self) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Check if this operator can work correctly.</p>
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-1" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#147-1936">source</a><a href="#impl-Operator-1" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><h4 id="operator-async-api"><a class="doc-anchor" href="#operator-async-api">§</a>Operator async API.</h4></div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.check" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#162-169">source</a><h4 class="code-header">pub async fn <a href="#method.check" class="fn">check</a>(&amp;self) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Check if this operator can work correctly.</p>
 <p>We will send a <code>list</code> request to path and return any errors we met.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
@@ -397,7 +397,7 @@ w.close().<span class="kw">await</span><span class="question-mark">?</span>;</co
 w.write(<span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
 w.write(<span class="macro">vec!</span>[<span class="number">1</span>; <span class="number">4096</span>]).<span class="kw">await</span><span class="question-mark">?</span>;
 w.close().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1220-1253">source</a><h4 class="code-header">pub fn <a href="#method.write_with" class="fn">write_with</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1243-1276">source</a><h4 class="code-header">pub fn <a href="#method.write_with" class="fn">write_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     bs: impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="struct.Buffer.html" title="struct opendal::Buffer">Buffer</a>&gt;,
@@ -452,6 +452,19 @@ please set <code>append</code> to true.</p>
     .write_with(<span class="string">"path/to/file"</span>, bs)
     .content_disposition(<span class="string">"attachment; filename=\"filename.jpg\""</span>)
     .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h6 id="if_none_match-2"><a class="doc-anchor" href="#if_none_match-2">§</a><code>if_none_match</code></h6>
+<p>Set <code>if_none_match</code> for this <code>write</code> request.</p>
+<p>This feature can be used to check if the file already exists.
+This prevents overwriting of existing objects with identical key names.
+Users can use *(asterisk) to verify if a file already exists by matching with any ETag.
+Note: S3 only support use *(asterisk).</p>
+<p>If file exists, an error with kind <a href="enum.ErrorKind.html#variant.ConditionNotMatch" title="variant opendal::ErrorKind::ConditionNotMatch"><code>ErrorKind::ConditionNotMatch</code></a> will be returned.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span>bs = <span class="string">b"hello, world!"</span>.to_vec();
+<span class="kw">let </span>res = op.write_with(<span class="string">"path/to/file"</span>, bs).if_none_match(<span class="string">"*"</span>).<span class="kw">await</span>;
+<span class="macro">assert!</span>(res.is_err());
+<span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::ConditionNotMatch);</code></pre></div>
 <h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bytes::Bytes;
 
@@ -460,14 +473,14 @@ please set <code>append</code> to true.</p>
     .write_with(<span class="string">"path/to/file"</span>, bs)
     .content_type(<span class="string">"text/plain"</span>)
     .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.delete" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1272-1274">source</a><h4 class="code-header">pub async fn <a href="#method.delete" class="fn">delete</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Delete the given path.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.delete" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1295-1297">source</a><h4 class="code-header">pub async fn <a href="#method.delete" class="fn">delete</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Delete the given path.</p>
 <h5 id="notes-12"><a class="doc-anchor" href="#notes-12">§</a>Notes</h5>
 <ul>
 <li>Deleting a file that does not exist won’t return errors.</li>
 </ul>
 <h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>op.delete(<span class="string">"test"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.delete_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1294-1306">source</a><h4 class="code-header">pub fn <a href="#method.delete_with" class="fn">delete_with</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.delete_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1317-1329">source</a><h4 class="code-header">pub fn <a href="#method.delete_with" class="fn">delete_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
 ) -&gt; <a class="type" href="operator_futures/type.FutureDelete.html" title="type opendal::operator_futures::FutureDelete">FutureDelete</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>Delete the given path with extra options.</p>
@@ -478,13 +491,13 @@ please set <code>append</code> to true.</p>
 <h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>
 op.delete_with(<span class="string">"test"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.remove" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1327-1329">source</a><h4 class="code-header">pub async fn <a href="#method.remove" class="fn">remove</a>(&amp;self, paths: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><h5 id="notes-14"><a class="doc-anchor" href="#notes-14">§</a>Notes</h5>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.remove" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1350-1352">source</a><h4 class="code-header">pub async fn <a href="#method.remove" class="fn">remove</a>(&amp;self, paths: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><h5 id="notes-14"><a class="doc-anchor" href="#notes-14">§</a>Notes</h5>
 <p>If underlying services support delete in batch, we will use batch
 delete instead.</p>
 <h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>op.remove(<span class="macro">vec!</span>[<span class="string">"abc"</span>.to_string(), <span class="string">"def"</span>.to_string()])
     .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.remove_via" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1356-1387">source</a><h4 class="code-header">pub async fn <a href="#method.remove_via" class="fn">remove_via</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.remove_via" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1379-1410">source</a><h4 class="code-header">pub async fn <a href="#method.remove_via" class="fn">remove_via</a>(
     &amp;self,
     input: impl Stream&lt;Item = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a>,
 ) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>remove will remove files via the given paths.</p>
@@ -497,13 +510,13 @@ delete instead.</p>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>futures::stream;
 <span class="kw">let </span>stream = stream::iter(<span class="macro">vec!</span>[<span class="string">"abc"</span>.to_string(), <span class="string">"def"</span>.to_string()]);
 op.remove_via(stream).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.remove_all" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1408-1456">source</a><h4 class="code-header">pub async fn <a href="#method.remove_all" class="fn">remove_all</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Remove the path and all nested dirs and files recursively.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.remove_all" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1431-1479">source</a><h4 class="code-header">pub async fn <a href="#method.remove_all" class="fn">remove_all</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Remove the path and all nested dirs and files recursively.</p>
 <h5 id="notes-16"><a class="doc-anchor" href="#notes-16">§</a>Notes</h5>
 <p>If underlying services support delete in batch, we will use batch
 delete instead.</p>
 <h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>op.remove_all(<span class="string">"path/to/dir"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.list" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1539-1541">source</a><h4 class="code-header">pub async fn <a href="#method.list" class="fn">list</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="struct.Entry.html" title="struct opendal::Entry">Entry</a>&gt;&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.list" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1562-1564">source</a><h4 class="code-header">pub async fn <a href="#method.list" class="fn">list</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="struct.Entry.html" title="struct opendal::Entry">Entry</a>&gt;&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
 <h5 id="notes-17"><a class="doc-anchor" href="#notes-17">§</a>Notes</h5><h6 id="recursively-list"><a class="doc-anchor" href="#recursively-list">§</a>Recursively List</h6>
 <p>This function only read the children of the given directory. To read
 all entries recursively, use <code>Operator::list_with(&quot;path&quot;).recursive(true)</code>
@@ -556,7 +569,7 @@ make sure the path is end with <code>/</code>.</p>
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.list_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1692-1705">source</a><h4 class="code-header">pub fn <a href="#method.list_with" class="fn">list_with</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.list_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1715-1728">source</a><h4 class="code-header">pub fn <a href="#method.list_with" class="fn">list_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
 ) -&gt; <a class="type" href="operator_futures/type.FutureList.html" title="type opendal::operator_futures::FutureList">FutureList</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="struct.Entry.html" title="struct opendal::Entry">Entry</a>&gt;&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir with more options.</p>
@@ -653,7 +666,7 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1750-1752">source</a><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct opendal::Lister">Lister</a>&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1773-1775">source</a><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct opendal::Lister">Lister</a>&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
 <p>This function will create a new <a href="struct.Lister.html" title="struct opendal::Lister"><code>Lister</code></a> to list entries. Users can stop
 listing via dropping this <a href="struct.Lister.html" title="struct opendal::Lister"><code>Lister</code></a>.</p>
 <h5 id="notes-19"><a class="doc-anchor" href="#notes-19">§</a>Notes</h5><h6 id="recursively-list-1"><a class="doc-anchor" href="#recursively-list-1">§</a>Recursively list</h6>
@@ -680,7 +693,7 @@ For fetching more metadata, please use <a href="struct.Operator.html#method.list
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.lister_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1903-1912">source</a><h4 class="code-header">pub fn <a href="#method.lister_with" class="fn">lister_with</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.lister_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1926-1935">source</a><h4 class="code-header">pub fn <a href="#method.lister_with" class="fn">lister_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
 ) -&gt; <a class="type" href="operator_futures/type.FutureLister.html" title="type opendal::operator_futures::FutureLister">FutureLister</a>&lt;impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="type.Result.html" title="type opendal::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct opendal::Lister">Lister</a>&gt;&gt;&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir with options.</p>
@@ -780,8 +793,8 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-2" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1916-2233">source</a><a href="#impl-Operator-2" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><p>Operator presign API.</p>
-</div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.presign_stat" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1937-1944">source</a><h4 class="code-header">pub async fn <a href="#method.presign_stat" class="fn">presign_stat</a>(
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Operator-2" class="impl"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1939-2256">source</a><a href="#impl-Operator-2" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Operator.html" title="struct opendal::Operator">Operator</a></h3></section></summary><div class="docblock"><p>Operator presign API.</p>
+</div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.presign_stat" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1960-1967">source</a><h4 class="code-header">pub async fn <a href="#method.presign_stat" class="fn">presign_stat</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,
@@ -799,7 +812,7 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
         .uri(signed_req.uri())
         .body(())<span class="question-mark">?</span>;
 </code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_stat_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1961-1978">source</a><h4 class="code-header">pub fn <a href="#method.presign_stat_with" class="fn">presign_stat_with</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_stat_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#1984-2001">source</a><h4 class="code-header">pub fn <a href="#method.presign_stat_with" class="fn">presign_stat_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,
@@ -812,7 +825,7 @@ Please pick up the metadata you need to reduce the extra <code>stat</code> cost.
 
 <span class="kw">async fn </span>test(op: Operator) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>signed_req = op.presign_stat_with(<span class="string">"test"</span>,Duration::from_secs(<span class="number">3600</span>)).override_content_disposition(<span class="string">"attachment; filename=\"othertext.txt\""</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2013-2020">source</a><h4 class="code-header">pub async fn <a href="#method.presign_read" class="fn">presign_read</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2036-2043">source</a><h4 class="code-header">pub async fn <a href="#method.presign_read" class="fn">presign_read</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,
@@ -836,7 +849,7 @@ instead.</p>
 </ul>
 <p>We can download this file via <code>curl</code> or other tools without credentials:</p>
 <div class="example-wrap"><pre class="language-shell"><code>curl &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -O /tmp/test.txt
-</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2083-2100">source</a><h4 class="code-header">pub fn <a href="#method.presign_read_with" class="fn">presign_read_with</a>(
+</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_read_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2106-2123">source</a><h4 class="code-header">pub fn <a href="#method.presign_read_with" class="fn">presign_read_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,
@@ -887,7 +900,7 @@ instead.</p>
         .<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2136-2138">source</a><h4 class="code-header">pub async fn <a href="#method.presign_write" class="fn">presign_write</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2159-2161">source</a><h4 class="code-header">pub async fn <a href="#method.presign_write" class="fn">presign_write</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,
@@ -914,7 +927,7 @@ extra options like <code>content_type</code>, please use <a href="struct.Operato
 </ul>
 <p>We can upload file as this file via <code>curl</code> or other tools without credential:</p>
 <div class="example-wrap"><pre class="language-shell"><code>curl -X PUT &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -d &quot;Hello, World!&quot;
-</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2215-2232">source</a><h4 class="code-header">pub fn <a href="#method.presign_write_with" class="fn">presign_write_with</a>(
+</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.presign_write_with" class="method"><a class="src rightside" href="../src/opendal/types/operator/operator.rs.html#2238-2255">source</a><h4 class="code-header">pub fn <a href="#method.presign_write_with" class="fn">presign_write_with</a>(
     &amp;self,
     path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     expire: <a class="struct" href="https://doc.rust-lang.org/nightly/core/time/struct.Duration.html" title="struct core::time::Duration">Duration</a>,

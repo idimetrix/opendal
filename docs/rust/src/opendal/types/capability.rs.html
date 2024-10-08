@@ -204,6 +204,8 @@
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -305,6 +307,8 @@
     </span><span class="kw">pub </span>write_with_content_disposition: bool,
     <span class="doccomment">/// If operator supports write with cache control.
     </span><span class="kw">pub </span>write_with_cache_control: bool,
+    <span class="doccomment">/// If operator supports write with if none match.
+    </span><span class="kw">pub </span>write_with_if_none_match: bool,
     <span class="doccomment">/// If operator supports write with user defined metadata
     </span><span class="kw">pub </span>write_with_user_metadata: bool,
     <span class="doccomment">/// write_multi_max_size is the max size that services support in write_multi.
