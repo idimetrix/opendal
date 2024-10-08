@@ -80,6 +80,16 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">RetryLayer</span>
 <span class="extends-implements">extends <a href="../Layer.html" title="class in org.apache.opendal">Layer</a></span></div>
+<div class="block">This layer will retry failed operations when <code>Error::is_temporary</code> returns <code>true</code>.
+ If operation still failed, this layer will set error to Persistent which means error has been retried.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="https://docs.rs/opendal/latest/opendal/layers/struct.RetryLayer.html">RetryLayer's rustdoc</a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">

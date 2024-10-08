@@ -88,8 +88,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>class&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="../layer/RetryLayer.html" class="type-name-link" title="class in org.apache.opendal.layer">RetryLayer</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="../layer/ConcurrentLimitLayer.html" class="type-name-link" title="class in org.apache.opendal.layer">ConcurrentLimitLayer</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Users can control how many concurrent connections could be established between
+ OpenDAL and underlying storage services.</div>
+</div>
+<div class="col-first odd-row-color"><code>class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="../layer/RetryLayer.html" class="type-name-link" title="class in org.apache.opendal.layer">RetryLayer</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">This layer will retry failed operations when <code>Error::is_temporary</code> returns <code>true</code>.</div>
+</div>
 </div>
 </section>
 </li>

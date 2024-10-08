@@ -106,6 +106,15 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OperatorOutputStream.html#close()" class="member-name-link">close()</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/OperatorOutputStream.html" title="class in org.apache.opendal">OperatorOutputStream</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="org/apache/opendal/layer/ConcurrentLimitLayer.html" class="type-name-link" title="class in org.apache.opendal.layer">ConcurrentLimitLayer</a> - Class in <a href="org/apache/opendal/layer/package-summary.html">org.apache.opendal.layer</a></dt>
+<dd>
+<div class="block">Users can control how many concurrent connections could be established between
+ OpenDAL and underlying storage services.</div>
+</dd>
+<dt><a href="org/apache/opendal/layer/ConcurrentLimitLayer.html#%3Cinit%3E(long)" class="member-name-link">ConcurrentLimitLayer(long)</a> - Constructor for class org.apache.opendal.layer.<a href="org/apache/opendal/layer/ConcurrentLimitLayer.html" title="class in org.apache.opendal.layer">ConcurrentLimitLayer</a></dt>
+<dd>
+<div class="block">Create a new ConcurrentLimitLayer will specify permits.</div>
+</dd>
 <dt><a href="org/apache/opendal/OpenDALException.Code.html#ConditionNotMatch" class="member-name-link">ConditionNotMatch</a> - Enum constant in enum org.apache.opendal.<a href="org/apache/opendal/OpenDALException.Code.html" title="enum in org.apache.opendal">OpenDALException.Code</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OpenDALException.Code.html#ConfigInvalid" class="member-name-link">ConfigInvalid</a> - Enum constant in enum org.apache.opendal.<a href="org/apache/opendal/OpenDALException.Code.html" title="enum in org.apache.opendal">OpenDALException.Code</a></dt>
@@ -250,6 +259,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Last Modified of the entry.</div>
 </dd>
+<dt><a href="org/apache/opendal/layer/ConcurrentLimitLayer.html#layer(long)" class="member-name-link">layer(long)</a> - Method in class org.apache.opendal.layer.<a href="org/apache/opendal/layer/ConcurrentLimitLayer.html" title="class in org.apache.opendal.layer">ConcurrentLimitLayer</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/Layer.html#layer(long)" class="member-name-link">layer(long)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Layer.html" title="class in org.apache.opendal">Layer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/layer/RetryLayer.html#layer(long)" class="member-name-link">layer(long)</a> - Method in class org.apache.opendal.layer.<a href="org/apache/opendal/layer/RetryLayer.html" title="class in org.apache.opendal.layer">RetryLayer</a></dt>
@@ -472,7 +483,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="org/apache/opendal/Operator.html#rename(java.lang.String,java.lang.String)" class="member-name-link">rename(String, String)</a> - Method in class org.apache.opendal.<a href="org/apache/opendal/Operator.html" title="class in org.apache.opendal">Operator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/layer/RetryLayer.html" class="type-name-link" title="class in org.apache.opendal.layer">RetryLayer</a> - Class in <a href="org/apache/opendal/layer/package-summary.html">org.apache.opendal.layer</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">This layer will retry failed operations when <code>Error::is_temporary</code> returns <code>true</code>.</div>
+</dd>
 <dt><a href="org/apache/opendal/layer/RetryLayer.html#%3Cinit%3E()" class="member-name-link">RetryLayer()</a> - Constructor for class org.apache.opendal.layer.<a href="org/apache/opendal/layer/RetryLayer.html" title="class in org.apache.opendal.layer">RetryLayer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/apache/opendal/OperatorInfo.html#root" class="member-name-link">root</a> - Variable in class org.apache.opendal.<a href="org/apache/opendal/OperatorInfo.html" title="class in org.apache.opendal">OperatorInfo</a></dt>
