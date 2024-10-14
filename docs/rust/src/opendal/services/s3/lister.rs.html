@@ -242,6 +242,19 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -267,6 +280,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::PageContext;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
+<span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::Metadata;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use </span>bytes::Buf;
@@ -328,8 +342,14 @@
         }
         <span class="kw">let </span>bs = resp.into_body();
 
-        <span class="kw">let </span>output: ListObjectsOutput =
-            de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>output: ListObjectsOutput = de::from_reader(bs.reader())
+            .map_err(new_xml_deserialize_error)
+            <span class="comment">// Allow S3 list to retry on XML deserialization errors.
+            //
+            // This is because the S3 list API may return incomplete XML data under high load.
+            // We are confident that our XML decoding logic is correct. When this error occurs,
+            // we allow retries to obtain the correct data.
+            </span>.map_err(Error::set_temporary)<span class="question-mark">?</span>;
 
         <span class="comment">// Try our best to check whether this list is done.
         //
@@ -440,8 +460,14 @@
         }
 
         <span class="kw">let </span>body = resp.into_body();
-        <span class="kw">let </span>output: ListObjectVersionsOutput =
-            de::from_reader(body.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>output: ListObjectVersionsOutput = de::from_reader(body.reader())
+            .map_err(new_xml_deserialize_error)
+            <span class="comment">// Allow S3 list to retry on XML deserialization errors.
+            //
+            // This is because the S3 list API may return incomplete XML data under high load.
+            // We are confident that our XML decoding logic is correct. When this error occurs,
+            // we allow retries to obtain the correct data.
+            </span>.map_err(Error::set_temporary)<span class="question-mark">?</span>;
 
         ctx.done = <span class="kw">if let </span><span class="prelude-val">Some</span>(is_truncated) = output.is_truncated {
             !is_truncated
