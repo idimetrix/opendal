@@ -152,7 +152,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The is the result type returned by <a class="el" href="opendal_8h.html#a3a545abe828d76ad772403935bc9a0a1" title="Read data from the reader.">opendal_reader_read()</a>. The result type contains a size field, which is the size of the data read, which is zero on error. The error field is the error code and error message.  <a href="structopendal__result__reader__read.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structopendal__result__writer__write.html">opendal_result_writer_write</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result type returned by <a class="el" href="opendal_8h.html#a44ccdbee76a447cb5c2764cecccc12c1" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message.  <a href="structopendal__result__writer__write.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result type returned by <a class="el" href="opendal_8h.html#a690230e446bbf3184725e3c10ae11056" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message.  <a href="structopendal__result__writer__write.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -221,7 +221,7 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:a1fc707d831b5e91edd1a34c0f08805ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">The is the result type returned by <a class="el" href="opendal_8h.html#a3a545abe828d76ad772403935bc9a0a1" title="Read data from the reader.">opendal_reader_read()</a>. The result type contains a size field, which is the size of the data read, which is zero on error. The error field is the error code and error message.  <br /></td></tr>
 <tr class="separator:a1fc707d831b5e91edd1a34c0f08805ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2315c6e9814447e0a3287272217af2b" id="r_ac2315c6e9814447e0a3287272217af2b"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structopendal__result__writer__write.html">opendal_result_writer_write</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#ac2315c6e9814447e0a3287272217af2b">opendal_result_writer_write</a></td></tr>
-<tr class="memdesc:ac2315c6e9814447e0a3287272217af2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result type returned by <a class="el" href="opendal_8h.html#a44ccdbee76a447cb5c2764cecccc12c1" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message.  <br /></td></tr>
+<tr class="memdesc:ac2315c6e9814447e0a3287272217af2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result type returned by <a class="el" href="opendal_8h.html#a690230e446bbf3184725e3c10ae11056" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message.  <br /></td></tr>
 <tr class="separator:ac2315c6e9814447e0a3287272217af2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
@@ -278,9 +278,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a3b32f655689a122d2b6feff169fac442" id="r_a3b32f655689a122d2b6feff169fac442"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__result__operator__new.html">opendal_result_operator_new</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a3b32f655689a122d2b6feff169fac442">opendal_operator_new</a> (const char *scheme, const struct <a class="el" href="structopendal__operator__options.html">opendal_operator_options</a> *options)</td></tr>
 <tr class="memdesc:a3b32f655689a122d2b6feff169fac442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an operator based on <code>scheme</code> and <code>options</code>  <br /></td></tr>
 <tr class="separator:a3b32f655689a122d2b6feff169fac442"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec26e06958eaaa97bcc6161d1c0cc82d" id="r_aec26e06958eaaa97bcc6161d1c0cc82d"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__error.html">opendal_error</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a> (const struct <a class="el" href="structopendal__operator.html">opendal_operator</a> *op, const char *path, struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> bytes)</td></tr>
-<tr class="memdesc:aec26e06958eaaa97bcc6161d1c0cc82d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking write raw bytes to <code>path</code>.  <br /></td></tr>
-<tr class="separator:aec26e06958eaaa97bcc6161d1c0cc82d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0514188e04a2780293ef39b30ba22764" id="r_a0514188e04a2780293ef39b30ba22764"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__error.html">opendal_error</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a> (const struct <a class="el" href="structopendal__operator.html">opendal_operator</a> *op, const char *path, const struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> *bytes)</td></tr>
+<tr class="memdesc:a0514188e04a2780293ef39b30ba22764"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking write raw bytes to <code>path</code>.  <br /></td></tr>
+<tr class="separator:a0514188e04a2780293ef39b30ba22764"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1419180b377316e27416b742bcc059f" id="r_ab1419180b377316e27416b742bcc059f"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__result__read.html">opendal_result_read</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#ab1419180b377316e27416b742bcc059f">opendal_operator_read</a> (const struct <a class="el" href="structopendal__operator.html">opendal_operator</a> *op, const char *path)</td></tr>
 <tr class="memdesc:ab1419180b377316e27416b742bcc059f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking read the data from <code>path</code>.  <br /></td></tr>
 <tr class="separator:ab1419180b377316e27416b742bcc059f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -359,9 +359,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a7ef708841e8d9a0cebb64a983ef4d472" id="r_a7ef708841e8d9a0cebb64a983ef4d472"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a7ef708841e8d9a0cebb64a983ef4d472">opendal_reader_free</a> (struct <a class="el" href="structopendal__reader.html">opendal_reader</a> *ptr)</td></tr>
 <tr class="memdesc:a7ef708841e8d9a0cebb64a983ef4d472"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees the heap memory used by the <a class="el" href="structopendal__reader.html" title="The result type returned by opendal&#39;s reader operation.">opendal_reader</a>.  <br /></td></tr>
 <tr class="separator:a7ef708841e8d9a0cebb64a983ef4d472"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44ccdbee76a447cb5c2764cecccc12c1" id="r_a44ccdbee76a447cb5c2764cecccc12c1"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__result__writer__write.html">opendal_result_writer_write</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a44ccdbee76a447cb5c2764cecccc12c1">opendal_writer_write</a> (struct <a class="el" href="structopendal__writer.html">opendal_writer</a> *self, struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> bytes)</td></tr>
-<tr class="memdesc:a44ccdbee76a447cb5c2764cecccc12c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to the writer.  <br /></td></tr>
-<tr class="separator:a44ccdbee76a447cb5c2764cecccc12c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a690230e446bbf3184725e3c10ae11056" id="r_a690230e446bbf3184725e3c10ae11056"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structopendal__result__writer__write.html">opendal_result_writer_write</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#a690230e446bbf3184725e3c10ae11056">opendal_writer_write</a> (struct <a class="el" href="structopendal__writer.html">opendal_writer</a> *self, const struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> *bytes)</td></tr>
+<tr class="memdesc:a690230e446bbf3184725e3c10ae11056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to the writer.  <br /></td></tr>
+<tr class="separator:a690230e446bbf3184725e3c10ae11056"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab86c1565108cac74cfd9fdfa6eaf4a99" id="r_ab86c1565108cac74cfd9fdfa6eaf4a99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="opendal_8h.html#ab86c1565108cac74cfd9fdfa6eaf4a99">opendal_writer_free</a> (struct <a class="el" href="structopendal__writer.html">opendal_writer</a> *ptr)</td></tr>
 <tr class="memdesc:ab86c1565108cac74cfd9fdfa6eaf4a99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees the heap memory used by the <a class="el" href="structopendal__writer.html" title="The result type returned by opendal&#39;s writer operation.">opendal_writer</a>.  <br /></td></tr>
 <tr class="separator:ab86c1565108cac74cfd9fdfa6eaf4a99"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -453,7 +453,7 @@ opendal_list_entry_name() </dd></dl>
 
 <p>The opendal error type for C binding, containing an error code and corresponding error message. </p>
 <p>The normal operations returns a pointer to the <a class="el" href="structopendal__error.html" title="The opendal error type for C binding, containing an error code and corresponding error message.">opendal_error</a>, and the <b>nullptr normally represents no error has taken placed</b>. If any error has taken place, the caller should check the error code and print the error message.</p>
-<p>The error code is represented in opendal_code, which is a enum on different type of errors. The error messages is represented in <a class="el" href="structopendal__bytes.html" title="opendal_bytes carries raw-bytes with its length">opendal_bytes</a>, which is a non-null terminated byte array.</p>
+<p>The error code is represented in opendal_code, which is an enum on different type of errors. The error messages is represented in <a class="el" href="structopendal__bytes.html" title="opendal_bytes carries raw-bytes with its length">opendal_bytes</a>, which is a non-null terminated byte array.</p>
 <dl class="section note"><dt>Note</dt><dd>1. The error message is on heap, so the error needs to be freed by the caller, by calling opendal_error_free. 2. The error message is not null terminated, so the caller should never use "%s" to print the error message.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="opendal_8h.html#a6715be152766e5b8f840ce10cf9442c2" title="The error code for all opendal APIs in C binding.">opendal_code</a> </dd>
 <dd>
@@ -746,7 +746,7 @@ opendal_list_entry_name() </dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>The result type returned by <a class="el" href="opendal_8h.html#a44ccdbee76a447cb5c2764cecccc12c1" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message. </p>
+<p>The result type returned by <a class="el" href="opendal_8h.html#a690230e446bbf3184725e3c10ae11056" title="Write data to the writer.">opendal_writer_write()</a>. The result type contains a size field, which is the size of the data written, which is zero on error. The error field is the error code and error message. </p>
 
 </div>
 </div>
@@ -1154,8 +1154,8 @@ Example</h1>
 <div class="line"> </div>
 <div class="line"><span class="comment">// prepare your data</span></div>
 <div class="line"><span class="keywordtype">char</span>* data = <span class="stringliteral">&quot;Hello, World!&quot;</span>;</div>
-<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#af7a7f99a262f8a3912f4d1cddb798c86">data</a> = (uint8_t*)data, .len = 13 };</div>
-<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
+<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#a935f1136d26c36261920197f205cc35c">data</a> = (uint8_t*)data, .len = 13 };</div>
+<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
 <div class="line"> </div>
 <div class="line">assert(error == NULL);</div>
 <div class="line"> </div>
@@ -1164,10 +1164,10 @@ Example</h1>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Assert that this succeeds</span></div>
 <div class="line">assert(error == NULL);</div>
+<div class="ttc" id="aopendal_8h_html_a0514188e04a2780293ef39b30ba22764"><div class="ttname"><a href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a></div><div class="ttdeci">struct opendal_error * opendal_operator_write(const struct opendal_operator *op, const char *path, const struct opendal_bytes *bytes)</div><div class="ttdoc">Blocking write raw bytes to path.</div></div>
 <div class="ttc" id="aopendal_8h_html_a5f975eac26553d38609ec3edab726e2d"><div class="ttname"><a href="opendal_8h.html#a5f975eac26553d38609ec3edab726e2d">opendal_operator_copy</a></div><div class="ttdeci">struct opendal_error * opendal_operator_copy(const struct opendal_operator *op, const char *src, const char *dest)</div><div class="ttdoc">Blocking copy the object in path.</div></div>
-<div class="ttc" id="aopendal_8h_html_aec26e06958eaaa97bcc6161d1c0cc82d"><div class="ttname"><a href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a></div><div class="ttdeci">struct opendal_error * opendal_operator_write(const struct opendal_operator *op, const char *path, struct opendal_bytes bytes)</div><div class="ttdoc">Blocking write raw bytes to path.</div></div>
 <div class="ttc" id="astructopendal__bytes_html"><div class="ttname"><a href="structopendal__bytes.html">opendal_bytes</a></div><div class="ttdoc">opendal_bytes carries raw-bytes with its length</div><div class="ttdef"><b>Definition</b> opendal.h:93</div></div>
-<div class="ttc" id="astructopendal__bytes_html_af7a7f99a262f8a3912f4d1cddb798c86"><div class="ttname"><a href="structopendal__bytes.html#af7a7f99a262f8a3912f4d1cddb798c86">opendal_bytes::data</a></div><div class="ttdeci">const uint8_t * data</div><div class="ttdef"><b>Definition</b> opendal.h:97</div></div>
+<div class="ttc" id="astructopendal__bytes_html_a935f1136d26c36261920197f205cc35c"><div class="ttname"><a href="structopendal__bytes.html#a935f1136d26c36261920197f205cc35c">opendal_bytes::data</a></div><div class="ttdeci">uint8_t * data</div><div class="ttdef"><b>Definition</b> opendal.h:97</div></div>
 <div class="ttc" id="astructopendal__error_html"><div class="ttname"><a href="structopendal__error.html">opendal_error</a></div><div class="ttdoc">The opendal error type for C binding, containing an error code and corresponding error message.</div><div class="ttdef"><b>Definition</b> opendal.h:127</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md38"></a>
 Safety</h1>
@@ -1289,8 +1289,8 @@ Example</h1>
 <div class="line"> </div>
 <div class="line"><span class="comment">// prepare your data</span></div>
 <div class="line"><span class="keywordtype">char</span>* data = <span class="stringliteral">&quot;Hello, World!&quot;</span>;</div>
-<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#af7a7f99a262f8a3912f4d1cddb798c86">data</a> = (uint8_t*)data, .len = 13 };</div>
-<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
+<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#a935f1136d26c36261920197f205cc35c">data</a> = (uint8_t*)data, .len = 13 };</div>
+<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
 <div class="line"> </div>
 <div class="line">assert(error == NULL);</div>
 <div class="line"> </div>
@@ -1851,13 +1851,15 @@ Example</h1>
 <div class="line"><a class="code hl_struct" href="structopendal__result__read.html">opendal_result_read</a> r = <a class="code hl_function" href="opendal_8h.html#ab1419180b377316e27416b742bcc059f">opendal_operator_read</a>(op, <span class="stringliteral">&quot;testpath&quot;</span>);</div>
 <div class="line">assert(r.<a class="code hl_variable" href="structopendal__result__read.html#a6cd0e4e83ed4509856de0d1e6b83e2f2">error</a> == NULL);</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> *bytes = r.<a class="code hl_variable" href="structopendal__result__read.html#ad8ca467bcbe6d1768e15fcf64fe78e9f">data</a>;</div>
-<div class="line">assert(bytes-&gt;<a class="code hl_variable" href="structopendal__bytes.html#a16abed2ad211c076650d1ea81772b851">len</a> == 13);</div>
+<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = r.<a class="code hl_variable" href="structopendal__result__read.html#a1028a16cc39b26b4a02f36c24c41b26e">data</a>;</div>
+<div class="line">assert(bytes.<a class="code hl_variable" href="structopendal__bytes.html#a16abed2ad211c076650d1ea81772b851">len</a> == 13);</div>
+<div class="line"><a class="code hl_function" href="opendal_8h.html#aea5253c2bbe9438349eebb68a18a82ea">opendal_bytes_free</a>(&amp;bytes);</div>
 <div class="ttc" id="aopendal_8h_html_ab1419180b377316e27416b742bcc059f"><div class="ttname"><a href="opendal_8h.html#ab1419180b377316e27416b742bcc059f">opendal_operator_read</a></div><div class="ttdeci">struct opendal_result_read opendal_operator_read(const struct opendal_operator *op, const char *path)</div><div class="ttdoc">Blocking read the data from path.</div></div>
+<div class="ttc" id="aopendal_8h_html_aea5253c2bbe9438349eebb68a18a82ea"><div class="ttname"><a href="opendal_8h.html#aea5253c2bbe9438349eebb68a18a82ea">opendal_bytes_free</a></div><div class="ttdeci">void opendal_bytes_free(struct opendal_bytes *ptr)</div><div class="ttdoc">Frees the heap memory used by the opendal_bytes.</div></div>
 <div class="ttc" id="astructopendal__bytes_html_a16abed2ad211c076650d1ea81772b851"><div class="ttname"><a href="structopendal__bytes.html#a16abed2ad211c076650d1ea81772b851">opendal_bytes::len</a></div><div class="ttdeci">uintptr_t len</div><div class="ttdef"><b>Definition</b> opendal.h:101</div></div>
 <div class="ttc" id="astructopendal__result__read_html"><div class="ttname"><a href="structopendal__result__read.html">opendal_result_read</a></div><div class="ttdoc">The result type returned by opendal's read operation.</div><div class="ttdef"><b>Definition</b> opendal.h:272</div></div>
+<div class="ttc" id="astructopendal__result__read_html_a1028a16cc39b26b4a02f36c24c41b26e"><div class="ttname"><a href="structopendal__result__read.html#a1028a16cc39b26b4a02f36c24c41b26e">opendal_result_read::data</a></div><div class="ttdeci">struct opendal_bytes data</div><div class="ttdef"><b>Definition</b> opendal.h:276</div></div>
 <div class="ttc" id="astructopendal__result__read_html_a6cd0e4e83ed4509856de0d1e6b83e2f2"><div class="ttname"><a href="structopendal__result__read.html#a6cd0e4e83ed4509856de0d1e6b83e2f2">opendal_result_read::error</a></div><div class="ttdeci">struct opendal_error * error</div><div class="ttdef"><b>Definition</b> opendal.h:280</div></div>
-<div class="ttc" id="astructopendal__result__read_html_ad8ca467bcbe6d1768e15fcf64fe78e9f"><div class="ttname"><a href="structopendal__result__read.html#ad8ca467bcbe6d1768e15fcf64fe78e9f">opendal_result_read::data</a></div><div class="ttdeci">struct opendal_bytes * data</div><div class="ttdef"><b>Definition</b> opendal.h:276</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md11"></a>
 Safety</h1>
 <p>It is <b>safe</b> under the cases below</p><ul>
@@ -1991,8 +1993,8 @@ Example</h1>
 <div class="line"> </div>
 <div class="line"><span class="comment">// prepare your data</span></div>
 <div class="line"><span class="keywordtype">char</span>* data = <span class="stringliteral">&quot;Hello, World!&quot;</span>;</div>
-<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#af7a7f99a262f8a3912f4d1cddb798c86">data</a> = (uint8_t*)data, .len = 13 };</div>
-<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
+<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#a935f1136d26c36261920197f205cc35c">data</a> = (uint8_t*)data, .len = 13 };</div>
+<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *error = <a class="code hl_function" href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
 <div class="line"> </div>
 <div class="line">assert(error == NULL);</div>
 <div class="line"> </div>
@@ -2079,8 +2081,8 @@ Panic</h1>
 
 </div>
 </div>
-<a id="aec26e06958eaaa97bcc6161d1c0cc82d" name="aec26e06958eaaa97bcc6161d1c0cc82d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec26e06958eaaa97bcc6161d1c0cc82d">&#9670;&#160;</a></span>opendal_operator_write()</h2>
+<a id="a0514188e04a2780293ef39b30ba22764" name="a0514188e04a2780293ef39b30ba22764"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0514188e04a2780293ef39b30ba22764">&#9670;&#160;</a></span>opendal_operator_write()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2100,7 +2102,7 @@ Panic</h1>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a>&#160;</td>
+          <td class="paramtype">const struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> *&#160;</td>
           <td class="paramname"><em>bytes</em>&#160;</td>
         </tr>
         <tr>
@@ -2134,10 +2136,10 @@ Example</h1>
 <div class="line"> </div>
 <div class="line"><span class="comment">// prepare your data</span></div>
 <div class="line"><span class="keywordtype">char</span>* data = <span class="stringliteral">&quot;Hello, World!&quot;</span>;</div>
-<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#af7a7f99a262f8a3912f4d1cddb798c86">data</a> = (uint8_t*)data, .len = 13 };</div>
+<div class="line"><a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> bytes = <a class="code hl_struct" href="structopendal__bytes.html">opendal_bytes</a> { .<a class="code hl_variable" href="structopendal__bytes.html#a935f1136d26c36261920197f205cc35c">data</a> = (uint8_t*)data, .len = 13 };</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// now you can write!</span></div>
-<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *err = <a class="code hl_function" href="opendal_8h.html#aec26e06958eaaa97bcc6161d1c0cc82d">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
+<div class="line"><a class="code hl_struct" href="structopendal__error.html">opendal_error</a> *err = <a class="code hl_function" href="opendal_8h.html#a0514188e04a2780293ef39b30ba22764">opendal_operator_write</a>(op, <span class="stringliteral">&quot;/testpath&quot;</span>, bytes);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Assert that this succeeds</span></div>
 <div class="line">assert(err == NULL);</div>
@@ -2299,8 +2301,8 @@ Panic</h1>
 
 </div>
 </div>
-<a id="a44ccdbee76a447cb5c2764cecccc12c1" name="a44ccdbee76a447cb5c2764cecccc12c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44ccdbee76a447cb5c2764cecccc12c1">&#9670;&#160;</a></span>opendal_writer_write()</h2>
+<a id="a690230e446bbf3184725e3c10ae11056" name="a690230e446bbf3184725e3c10ae11056"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a690230e446bbf3184725e3c10ae11056">&#9670;&#160;</a></span>opendal_writer_write()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2314,7 +2316,7 @@ Panic</h1>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a>&#160;</td>
+          <td class="paramtype">const struct <a class="el" href="structopendal__bytes.html">opendal_bytes</a> *&#160;</td>
           <td class="paramname"><em>bytes</em>&#160;</td>
         </tr>
         <tr>

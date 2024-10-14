@@ -93,7 +93,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The opendal error type for C binding, containing an error code and corresponding error message. </p>
 <p>The normal operations returns a pointer to the <a class="el" href="structopendal__error.html" title="The opendal error type for C binding, containing an error code and corresponding error message.">opendal_error</a>, and the <b>nullptr normally represents no error has taken placed</b>. If any error has taken place, the caller should check the error code and print the error message.</p>
-<p>The error code is represented in opendal_code, which is a enum on different type of errors. The error messages is represented in <a class="el" href="structopendal__bytes.html" title="opendal_bytes carries raw-bytes with its length">opendal_bytes</a>, which is a non-null terminated byte array.</p>
+<p>The error code is represented in opendal_code, which is an enum on different type of errors. The error messages is represented in <a class="el" href="structopendal__bytes.html" title="opendal_bytes carries raw-bytes with its length">opendal_bytes</a>, which is a non-null terminated byte array.</p>
 <dl class="section note"><dt>Note</dt><dd>1. The error message is on heap, so the error needs to be freed by the caller, by calling opendal_error_free. 2. The error message is not null terminated, so the caller should never use "%s" to print the error message.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="opendal_8h.html#a6715be152766e5b8f840ce10cf9442c2" title="The error code for all opendal APIs in C binding.">opendal_code</a> </dd>
 <dd>
