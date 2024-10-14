@@ -1,1 +1,1 @@
-var searchData=[["apache_20opendal\u2122_20c_20binding_20_28wip_29_0",["Apache OpenDAL\u2122 C Binding (WIP)",["../index.html",1,""]]]];
+var searchData=[["and_20trademarks_0",["License and Trademarks",["../index.html#autotoc_md48",1,""]]],["apache_20opendal\u2122_20c_20binding_20wip_1",["Apache OpenDAL\u2122 C Binding (WIP)",["../index.html",1,""]]]];
