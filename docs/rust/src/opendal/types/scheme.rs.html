@@ -490,6 +490,12 @@
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
 <a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -657,6 +663,8 @@
     </span>Surrealdb,
     <span class="doccomment">/// [lakefs](crate::services::Lakefs): LakeFS Services
     </span>Lakefs,
+    <span class="doccomment">/// [NebulaGraph](crate::services::NebulaGraph): NebulaGraph Services
+    </span>NebulaGraph,
     <span class="doccomment">/// Custom that allow users to implement services outside of OpenDAL.
     ///
     /// # NOTE
@@ -807,6 +815,8 @@
             </span>Scheme::Surrealdb,
             <span class="attr">#[cfg(feature = <span class="string">"services-lakefs"</span>)]
             </span>Scheme::Lakefs,
+            <span class="attr">#[cfg(feature = <span class="string">"services-nebula-graph"</span>)]
+            </span>Scheme::NebulaGraph,
         ])
     }
 }
@@ -898,6 +908,7 @@
             <span class="string">"hdfs_native" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::HdfsNative),
             <span class="string">"surrealdb" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Surrealdb),
             <span class="string">"lakefs" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Lakefs),
+            <span class="string">"nebula_graph" </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::NebulaGraph),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Custom(Box::leak(s.into_boxed_str()))),
         }
     }
@@ -972,6 +983,7 @@
             Scheme::HdfsNative =&gt; <span class="string">"hdfs_native"</span>,
             Scheme::Surrealdb =&gt; <span class="string">"surrealdb"</span>,
             Scheme::Lakefs =&gt; <span class="string">"lakefs"</span>,
+            Scheme::NebulaGraph =&gt; <span class="string">"nebula_graph"</span>,
             Scheme::Custom(v) =&gt; v,
         }
     }
