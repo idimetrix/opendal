@@ -2254,6 +2254,9 @@
 <a href="#2254" id="2254">2254</a>
 <a href="#2255" id="2255">2255</a>
 <a href="#2256" id="2256">2256</a>
+<a href="#2257" id="2257">2257</a>
+<a href="#2258" id="2258">2258</a>
+<a href="#2259" id="2259">2259</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2325,11 +2328,13 @@
 
 <span class="doccomment">/// # Operator basic API.
 </span><span class="kw">impl </span>Operator {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
+    <span class="doccomment">/// Fetch the internal accessor.
+    </span><span class="kw">pub fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
         <span class="kw-2">&amp;</span><span class="self">self</span>.accessor
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_inner(accessor: Accessor) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Convert inner accessor into operator.
+    </span><span class="kw">pub fn </span>from_inner(accessor: Accessor) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>limit = accessor
             .info()
             .full_capability()
@@ -2342,7 +2347,8 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_inner(<span class="self">self</span>) -&gt; Accessor {
+    <span class="doccomment">/// Convert operator into inner accessor.
+    </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; Accessor {
         <span class="self">self</span>.accessor
     }
 
