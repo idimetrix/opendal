@@ -1028,7 +1028,7 @@
             })<span class="question-mark">?
         </span>};
 
-        <span class="kw">let </span>loader = AliyunLoader::new(client.client(), cfg);
+        <span class="kw">let </span>loader = AliyunLoader::new(GLOBAL_REQWEST_CLIENT.clone(), cfg);
 
         <span class="kw">let </span>signer = AliyunOssSigner::new(bucket);
 

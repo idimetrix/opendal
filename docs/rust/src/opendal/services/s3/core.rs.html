@@ -1420,7 +1420,7 @@
     </span><span class="kw">async fn </span>load_credential(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;AwsCredential&gt;&gt; {
         <span class="kw">let </span>cred = <span class="self">self
             </span>.loader
-            .load_credential(<span class="self">self</span>.client.client())
+            .load_credential(GLOBAL_REQWEST_CLIENT.clone())
             .<span class="kw">await
             </span>.map_err(new_request_credential_error)<span class="question-mark">?</span>;
 

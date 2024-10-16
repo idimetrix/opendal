@@ -592,7 +592,7 @@
             cfg.secret_key = <span class="prelude-val">Some</span>(v);
         }
 
-        <span class="kw">let </span>cred_loader = TencentCosCredentialLoader::new(client.client(), cfg);
+        <span class="kw">let </span>cred_loader = TencentCosCredentialLoader::new(GLOBAL_REQWEST_CLIENT.clone(), cfg);
 
         <span class="kw">let </span>signer = TencentCosSigner::new();
 

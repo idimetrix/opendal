@@ -1262,6 +1262,8 @@
 <a href="#1262" id="1262">1262</a>
 <a href="#1263" id="1263">1263</a>
 <a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2064,7 +2066,8 @@
         <span class="comment">// If role_arn is set, we must use AssumeRoleLoad.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(role_arn) = <span class="self">self</span>.config.role_arn {
             <span class="comment">// use current env as source credential loader.
-            </span><span class="kw">let </span>default_loader = AwsDefaultLoader::new(client.client(), cfg.clone());
+            </span><span class="kw">let </span>default_loader =
+                AwsDefaultLoader::new(GLOBAL_REQWEST_CLIENT.clone().clone(), cfg.clone());
 
             <span class="comment">// Build the config for assume role.
             </span><span class="kw">let </span><span class="kw-2">mut </span>assume_role_cfg = AwsConfig {
@@ -2081,7 +2084,7 @@
             }
 
             <span class="kw">let </span>assume_role_loader = AwsAssumeRoleLoader::new(
-                client.client(),
+                GLOBAL_REQWEST_CLIENT.clone().clone(),
                 assume_role_cfg,
                 Box::new(default_loader),
             )
@@ -2099,7 +2102,8 @@
         </span><span class="kw">let </span>loader = <span class="kw">match </span>loader {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>default_loader = AwsDefaultLoader::new(client.client(), cfg);
+                <span class="kw">let </span><span class="kw-2">mut </span>default_loader =
+                    AwsDefaultLoader::new(GLOBAL_REQWEST_CLIENT.clone().clone(), cfg);
                 <span class="kw">if </span><span class="self">self</span>.config.disable_ec2_metadata {
                     default_loader = default_loader.with_disable_ec2_metadata();
                 }
