@@ -318,7 +318,7 @@
             // During MKCOL processing, a server MUST make the Request-URI a member of its parent collection, unless the Request-URI is "/".  If no such ancestor exists, the method MUST fail.
             // refer to https://datatracker.ietf.org/doc/html/rfc2518#section-8.3.1
             </span><span class="kw">let </span>parent = Path::new(<span class="kw-2">&amp;</span>path).parent().unwrap();
-            <span class="kw">match </span><span class="self">self</span>.op.is_exist(parent.to_str().unwrap()).<span class="kw">await </span>{
+            <span class="kw">match </span><span class="self">self</span>.op.exists(parent.to_str().unwrap()).<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>(exist) =&gt; {
                     <span class="kw">if </span>!exist &amp;&amp; parent != Path::new(<span class="string">"/"</span>) {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(FsError::NotFound);
@@ -331,7 +331,7 @@
 
             <span class="kw">let </span>path = path.as_str();
             <span class="comment">// check if the given path is exist (MKCOL on existing collection should fail (RFC2518:8.3.1))
-            </span><span class="kw">let </span>exist = <span class="self">self</span>.op.is_exist(path).<span class="kw">await</span>;
+            </span><span class="kw">let </span>exist = <span class="self">self</span>.op.exists(path).<span class="kw">await</span>;
             <span class="kw">match </span>exist {
                 <span class="prelude-val">Ok</span>(exist) =&gt; <span class="kw">match </span>exist {
                     <span class="bool-val">true </span>=&gt; <span class="prelude-val">Err</span>(FsError::Exists),
