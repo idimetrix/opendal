@@ -1,1 +1,0 @@
-var searchData=[["opendal\u2122_20c_20binding_20wip_0",["Apache OpenDAL\u2122 C Binding (WIP)",["../index.html",1,""]]]];

@@ -1,1 +1,1 @@
-var searchData=[["wip_0",["Apache OpenDAL\u2122 CPP Binding (WIP)",["../index.html",1,""]]],["write_1",["write",["../classopendal_1_1Operator.html#a3bfa933634917127b3fdc8027b3ee45b",1,"opendal::Operator"]]]];
+var searchData=[["write_49",["write",["../classopendal_1_1Operator.html#a3bfa933634917127b3fdc8027b3ee45b",1,"opendal::Operator"]]]];
