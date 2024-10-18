@@ -670,9 +670,9 @@
             .<span class="kw">await</span><span class="question-mark">?
             </span>.query(query)
             .bind((<span class="string">"namespace"</span>, <span class="string">"opendal"</span>))
-            .bind((<span class="string">"path"</span>, path))
-            .bind((<span class="string">"table"</span>, <span class="self">self</span>.table.as_str()))
-            .bind((<span class="string">"value_field"</span>, <span class="self">self</span>.value_field.as_str()))
+            .bind((<span class="string">"path"</span>, path.to_string()))
+            .bind((<span class="string">"table"</span>, <span class="self">self</span>.table.to_string()))
+            .bind((<span class="string">"value_field"</span>, <span class="self">self</span>.value_field.to_string()))
             .<span class="kw">await
             </span>.map_err(parse_surrealdb_error)<span class="question-mark">?</span>;
 
@@ -693,7 +693,7 @@
         <span class="self">self</span>.get_connection()
             .<span class="kw">await</span><span class="question-mark">?
             </span>.query(query)
-            .bind((<span class="string">"path"</span>, path))
+            .bind((<span class="string">"path"</span>, path.to_string()))
             .bind((<span class="string">"value"</span>, value.to_vec()))
             .<span class="kw">await
             </span>.map_err(parse_surrealdb_error)<span class="question-mark">?</span>;
@@ -713,8 +713,8 @@
         <span class="self">self</span>.get_connection()
             .<span class="kw">await</span><span class="question-mark">?
             </span>.query(query.as_str())
-            .bind((<span class="string">"path"</span>, path))
-            .bind((<span class="string">"table"</span>, <span class="self">self</span>.table.as_str()))
+            .bind((<span class="string">"path"</span>, path.to_string()))
+            .bind((<span class="string">"table"</span>, <span class="self">self</span>.table.to_string()))
             .<span class="kw">await
             </span>.map_err(parse_surrealdb_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
