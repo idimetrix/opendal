@@ -240,19 +240,19 @@
                     <a class="class" href="#Metadata">Metadata</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Metadata.content_type">content_type</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Metadata.etag">etag</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Metadata.content_disposition">content_disposition</a>
+                                <a class="variable" href="#Metadata.content_length">content_length</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Metadata.content_md5">content_md5</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Metadata.content_length">content_length</a>
+                                <a class="variable" href="#Metadata.content_disposition">content_disposition</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Metadata.content_type">content_type</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Metadata.mode">mode</a>
@@ -264,13 +264,13 @@
                     <a class="class" href="#PresignedRequest">PresignedRequest</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#PresignedRequest.url">url</a>
+                                <a class="variable" href="#PresignedRequest.headers">headers</a>
                         </li>
                         <li>
                                 <a class="variable" href="#PresignedRequest.method">method</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PresignedRequest.headers">headers</a>
+                                <a class="variable" href="#PresignedRequest.url">url</a>
                         </li>
                 </ul>
 
@@ -279,100 +279,94 @@
                     <a class="class" href="#Capability">Capability</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Capability.write_with_cache_control">write_with_cache_control</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.blocking">blocking</a>
+                                <a class="variable" href="#Capability.read">read</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Capability.write_can_multi">write_can_multi</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Capability.presign">presign</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.presign_write">presign_write</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.read_with_override_content_disposition">read_with_override_content_disposition</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.write_with_content_disposition">write_with_content_disposition</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Capability.write_multi_max_size">write_multi_max_size</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.write_total_max_size">write_total_max_size</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.create_dir">create_dir</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.write">write</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.read_with_if_match">read_with_if_match</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.read_with_override_content_type">read_with_override_content_type</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Capability.write_multi_min_size">write_multi_min_size</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Capability.batch">batch</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.copy">copy</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.stat_with_if_match">stat_with_if_match</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.stat">stat</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.read">read</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.stat_with_if_none_match">stat_with_if_none_match</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.delete">delete</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.rename">rename</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.write_can_append">write_can_append</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.list">list</a>
+                                <a class="variable" href="#Capability.presign_stat">presign_stat</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Capability.presign_read">presign_read</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Capability.list_with_start_after">list_with_start_after</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.list_with_limit">list_with_limit</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.list_with_recursive">list_with_recursive</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.write_multi_align_size">write_multi_align_size</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Capability.batch_delete">batch_delete</a>
+                                <a class="variable" href="#Capability.stat_with_if_match">stat_with_if_match</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Capability.write_can_empty">write_can_empty</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Capability.batch_delete">batch_delete</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.batch_max_operations">batch_max_operations</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.read_with_if_match">read_with_if_match</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Capability.read_with_override_cache_control">read_with_override_cache_control</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.presign_write">presign_write</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.write_multi_align_size">write_multi_align_size</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.delete">delete</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.blocking">blocking</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.create_dir">create_dir</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.batch">batch</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.write_with_content_disposition">write_with_content_disposition</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.copy">copy</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.stat">stat</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.write">write</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.read_with_override_content_disposition">read_with_override_content_disposition</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.list">list</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.list_with_recursive">list_with_recursive</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.read_with_override_content_type">read_with_override_content_type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.stat_with_if_none_match">stat_with_if_none_match</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.write_with_cache_control">write_with_cache_control</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.write_can_append">write_can_append</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.rename">rename</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Capability.read_with_if_none_match">read_with_if_none_match</a>
@@ -381,10 +375,16 @@
                                 <a class="variable" href="#Capability.write_with_content_type">write_with_content_type</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Capability.batch_max_operations">batch_max_operations</a>
+                                <a class="variable" href="#Capability.list_with_limit">list_with_limit</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Capability.presign_stat">presign_stat</a>
+                                <a class="variable" href="#Capability.write_total_max_size">write_total_max_size</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.list_with_start_after">list_with_start_after</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Capability.presign">presign</a>
                         </li>
                 </ul>
 
@@ -1432,19 +1432,6 @@ The default value for whence is <code>SEEK_SET</code>. Values for <code>whence</
     
     
 
-                            <div id="Metadata.content_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">content_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Metadata.content_type"></a>
-    
-            <div class="docstring"><p>Content Type of this entry.</p>
-</div>
-
-
-                            </div>
                             <div id="Metadata.etag" class="classattr">
                                 <div class="attr variable">
             <span class="name">etag</span>
@@ -1458,15 +1445,17 @@ The default value for whence is <code>SEEK_SET</code>. Values for <code>whence</
 
 
                             </div>
-                            <div id="Metadata.content_disposition" class="classattr">
+                            <div id="Metadata.content_length" class="classattr">
                                 <div class="attr variable">
-            <span class="name">content_disposition</span>
+            <span class="name">content_length</span>
 
         
     </div>
-    <a class="headerlink" href="#Metadata.content_disposition"></a>
+    <a class="headerlink" href="#Metadata.content_length"></a>
     
-    
+            <div class="docstring"><p>Content length of this entry.</p>
+</div>
+
 
                             </div>
                             <div id="Metadata.content_md5" class="classattr">
@@ -1482,15 +1471,26 @@ The default value for whence is <code>SEEK_SET</code>. Values for <code>whence</
 
 
                             </div>
-                            <div id="Metadata.content_length" class="classattr">
+                            <div id="Metadata.content_disposition" class="classattr">
                                 <div class="attr variable">
-            <span class="name">content_length</span>
+            <span class="name">content_disposition</span>
 
         
     </div>
-    <a class="headerlink" href="#Metadata.content_length"></a>
+    <a class="headerlink" href="#Metadata.content_disposition"></a>
     
-            <div class="docstring"><p>Content length of this entry.</p>
+    
+
+                            </div>
+                            <div id="Metadata.content_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">content_type</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Metadata.content_type"></a>
+    
+            <div class="docstring"><p>Content Type of this entry.</p>
 </div>
 
 
@@ -1521,15 +1521,15 @@ The default value for whence is <code>SEEK_SET</code>. Values for <code>whence</
     
     
 
-                            <div id="PresignedRequest.url" class="classattr">
+                            <div id="PresignedRequest.headers" class="classattr">
                                 <div class="attr variable">
-            <span class="name">url</span>
+            <span class="name">headers</span>
 
         
     </div>
-    <a class="headerlink" href="#PresignedRequest.url"></a>
+    <a class="headerlink" href="#PresignedRequest.headers"></a>
     
-            <div class="docstring"><p>Return the URL of this request.</p>
+            <div class="docstring"><p>Return the HTTP headers of this request.</p>
 </div>
 
 
@@ -1547,15 +1547,15 @@ The default value for whence is <code>SEEK_SET</code>. Values for <code>whence</
 
 
                             </div>
-                            <div id="PresignedRequest.headers" class="classattr">
+                            <div id="PresignedRequest.url" class="classattr">
                                 <div class="attr variable">
-            <span class="name">headers</span>
+            <span class="name">url</span>
 
         
     </div>
-    <a class="headerlink" href="#PresignedRequest.headers"></a>
+    <a class="headerlink" href="#PresignedRequest.url"></a>
     
-            <div class="docstring"><p>Return the HTTP headers of this request.</p>
+            <div class="docstring"><p>Return the URL of this request.</p>
 </div>
 
 
@@ -1576,28 +1576,15 @@ by current Operator.</p>
 </div>
 
 
-                            <div id="Capability.write_with_cache_control" class="classattr">
+                            <div id="Capability.read" class="classattr">
                                 <div class="attr variable">
-            <span class="name">write_with_cache_control</span>
+            <span class="name">read</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.write_with_cache_control"></a>
+    <a class="headerlink" href="#Capability.read"></a>
     
-            <div class="docstring"><p>If operator supports write with cache control.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.blocking" class="classattr">
-                                <div class="attr variable">
-            <span class="name">blocking</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.blocking"></a>
-    
-            <div class="docstring"><p>If operator supports blocking.</p>
+            <div class="docstring"><p>If operator supports read.</p>
 </div>
 
 
@@ -1611,58 +1598,6 @@ by current Operator.</p>
     <a class="headerlink" href="#Capability.write_can_multi"></a>
     
             <div class="docstring"><p>If operator supports write can be called in multi times.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.presign" class="classattr">
-                                <div class="attr variable">
-            <span class="name">presign</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.presign"></a>
-    
-            <div class="docstring"><p>If operator supports presign.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.presign_write" class="classattr">
-                                <div class="attr variable">
-            <span class="name">presign_write</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.presign_write"></a>
-    
-            <div class="docstring"><p>If operator supports presign write.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.read_with_override_content_disposition" class="classattr">
-                                <div class="attr variable">
-            <span class="name">read_with_override_content_disposition</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.read_with_override_content_disposition"></a>
-    
-            <div class="docstring"><p>if operator supports read with override content disposition.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.write_with_content_disposition" class="classattr">
-                                <div class="attr variable">
-            <span class="name">write_with_content_disposition</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.write_with_content_disposition"></a>
-    
-            <div class="docstring"><p>If operator supports write with content disposition.</p>
 </div>
 
 
@@ -1682,73 +1617,6 @@ by current Operator.</p>
 
 
                             </div>
-                            <div id="Capability.write_total_max_size" class="classattr">
-                                <div class="attr variable">
-            <span class="name">write_total_max_size</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.write_total_max_size"></a>
-    
-            <div class="docstring"><p>write_total_max_size is the max size that services support in write_total.</p>
-
-<p>For example, Cloudflare D1 supports 1MB as max in write_total.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.create_dir" class="classattr">
-                                <div class="attr variable">
-            <span class="name">create_dir</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.create_dir"></a>
-    
-            <div class="docstring"><p>If operator supports create dir.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.write" class="classattr">
-                                <div class="attr variable">
-            <span class="name">write</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.write"></a>
-    
-            <div class="docstring"><p>If operator supports write.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.read_with_if_match" class="classattr">
-                                <div class="attr variable">
-            <span class="name">read_with_if_match</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.read_with_if_match"></a>
-    
-            <div class="docstring"><p>If operator supports read with if match.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.read_with_override_content_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">read_with_override_content_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.read_with_override_content_type"></a>
-    
-            <div class="docstring"><p>if operator supports read with override content type.</p>
-</div>
-
-
-                            </div>
                             <div id="Capability.write_multi_min_size" class="classattr">
                                 <div class="attr variable">
             <span class="name">write_multi_min_size</span>
@@ -1764,132 +1632,15 @@ by current Operator.</p>
 
 
                             </div>
-                            <div id="Capability.batch" class="classattr">
+                            <div id="Capability.presign_stat" class="classattr">
                                 <div class="attr variable">
-            <span class="name">batch</span>
+            <span class="name">presign_stat</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.batch"></a>
+    <a class="headerlink" href="#Capability.presign_stat"></a>
     
-            <div class="docstring"><p>If operator supports batch.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.copy" class="classattr">
-                                <div class="attr variable">
-            <span class="name">copy</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.copy"></a>
-    
-            <div class="docstring"><p>If operator supports copy.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.stat_with_if_match" class="classattr">
-                                <div class="attr variable">
-            <span class="name">stat_with_if_match</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.stat_with_if_match"></a>
-    
-            <div class="docstring"><p>If operator supports stat with if match.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.stat" class="classattr">
-                                <div class="attr variable">
-            <span class="name">stat</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.stat"></a>
-    
-            <div class="docstring"><p>If operator supports stat.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.read" class="classattr">
-                                <div class="attr variable">
-            <span class="name">read</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.read"></a>
-    
-            <div class="docstring"><p>If operator supports read.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.stat_with_if_none_match" class="classattr">
-                                <div class="attr variable">
-            <span class="name">stat_with_if_none_match</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.stat_with_if_none_match"></a>
-    
-            <div class="docstring"><p>If operator supports stat with if none match.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.delete" class="classattr">
-                                <div class="attr variable">
-            <span class="name">delete</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.delete"></a>
-    
-            <div class="docstring"><p>If operator supports delete.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.rename" class="classattr">
-                                <div class="attr variable">
-            <span class="name">rename</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.rename"></a>
-    
-            <div class="docstring"><p>If operator supports rename.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.write_can_append" class="classattr">
-                                <div class="attr variable">
-            <span class="name">write_can_append</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.write_can_append"></a>
-    
-            <div class="docstring"><p>If operator supports write by append.</p>
-</div>
-
-
-                            </div>
-                            <div id="Capability.list" class="classattr">
-                                <div class="attr variable">
-            <span class="name">list</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Capability.list"></a>
-    
-            <div class="docstring"><p>If operator supports list.</p>
+            <div class="docstring"><p>If operator supports presign stat.</p>
 </div>
 
 
@@ -1907,41 +1658,93 @@ by current Operator.</p>
 
 
                             </div>
-                            <div id="Capability.list_with_start_after" class="classattr">
+                            <div id="Capability.stat_with_if_match" class="classattr">
                                 <div class="attr variable">
-            <span class="name">list_with_start_after</span>
+            <span class="name">stat_with_if_match</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.list_with_start_after"></a>
+    <a class="headerlink" href="#Capability.stat_with_if_match"></a>
     
-            <div class="docstring"><p>If backend supports list with start after.</p>
+            <div class="docstring"><p>If operator supports stat with if match.</p>
 </div>
 
 
                             </div>
-                            <div id="Capability.list_with_limit" class="classattr">
+                            <div id="Capability.write_can_empty" class="classattr">
                                 <div class="attr variable">
-            <span class="name">list_with_limit</span>
+            <span class="name">write_can_empty</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.list_with_limit"></a>
+    <a class="headerlink" href="#Capability.write_can_empty"></a>
     
-            <div class="docstring"><p>If backend supports list with limit.</p>
+            <div class="docstring"><p>If operator supports write with empty content.</p>
 </div>
 
 
                             </div>
-                            <div id="Capability.list_with_recursive" class="classattr">
+                            <div id="Capability.batch_delete" class="classattr">
                                 <div class="attr variable">
-            <span class="name">list_with_recursive</span>
+            <span class="name">batch_delete</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.list_with_recursive"></a>
+    <a class="headerlink" href="#Capability.batch_delete"></a>
     
-            <div class="docstring"><p>If backend supports list without delimiter.</p>
+            <div class="docstring"><p>If operator supports batch delete.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.batch_max_operations" class="classattr">
+                                <div class="attr variable">
+            <span class="name">batch_max_operations</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.batch_max_operations"></a>
+    
+            <div class="docstring"><p>The max operations that operator supports in batch.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.read_with_if_match" class="classattr">
+                                <div class="attr variable">
+            <span class="name">read_with_if_match</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.read_with_if_match"></a>
+    
+            <div class="docstring"><p>If operator supports read with if match.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.read_with_override_cache_control" class="classattr">
+                                <div class="attr variable">
+            <span class="name">read_with_override_cache_control</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.read_with_override_cache_control"></a>
+    
+            <div class="docstring"><p>if operator supports read with override cache control.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.presign_write" class="classattr">
+                                <div class="attr variable">
+            <span class="name">presign_write</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.presign_write"></a>
+    
+            <div class="docstring"><p>If operator supports presign write.</p>
 </div>
 
 
@@ -1961,41 +1764,210 @@ by current Operator.</p>
 
 
                             </div>
-                            <div id="Capability.batch_delete" class="classattr">
+                            <div id="Capability.delete" class="classattr">
                                 <div class="attr variable">
-            <span class="name">batch_delete</span>
+            <span class="name">delete</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.batch_delete"></a>
+    <a class="headerlink" href="#Capability.delete"></a>
     
-            <div class="docstring"><p>If operator supports batch delete.</p>
+            <div class="docstring"><p>If operator supports delete.</p>
 </div>
 
 
                             </div>
-                            <div id="Capability.write_can_empty" class="classattr">
+                            <div id="Capability.blocking" class="classattr">
                                 <div class="attr variable">
-            <span class="name">write_can_empty</span>
+            <span class="name">blocking</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.write_can_empty"></a>
+    <a class="headerlink" href="#Capability.blocking"></a>
     
-            <div class="docstring"><p>If operator supports write with empty content.</p>
+            <div class="docstring"><p>If operator supports blocking.</p>
 </div>
 
 
                             </div>
-                            <div id="Capability.read_with_override_cache_control" class="classattr">
+                            <div id="Capability.create_dir" class="classattr">
                                 <div class="attr variable">
-            <span class="name">read_with_override_cache_control</span>
+            <span class="name">create_dir</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.read_with_override_cache_control"></a>
+    <a class="headerlink" href="#Capability.create_dir"></a>
     
-            <div class="docstring"><p>if operator supports read with override cache control.</p>
+            <div class="docstring"><p>If operator supports create dir.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.batch" class="classattr">
+                                <div class="attr variable">
+            <span class="name">batch</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.batch"></a>
+    
+            <div class="docstring"><p>If operator supports batch.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.write_with_content_disposition" class="classattr">
+                                <div class="attr variable">
+            <span class="name">write_with_content_disposition</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.write_with_content_disposition"></a>
+    
+            <div class="docstring"><p>If operator supports write with content disposition.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.copy" class="classattr">
+                                <div class="attr variable">
+            <span class="name">copy</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.copy"></a>
+    
+            <div class="docstring"><p>If operator supports copy.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.stat" class="classattr">
+                                <div class="attr variable">
+            <span class="name">stat</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.stat"></a>
+    
+            <div class="docstring"><p>If operator supports stat.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.write" class="classattr">
+                                <div class="attr variable">
+            <span class="name">write</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.write"></a>
+    
+            <div class="docstring"><p>If operator supports write.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.read_with_override_content_disposition" class="classattr">
+                                <div class="attr variable">
+            <span class="name">read_with_override_content_disposition</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.read_with_override_content_disposition"></a>
+    
+            <div class="docstring"><p>if operator supports read with override content disposition.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.list" class="classattr">
+                                <div class="attr variable">
+            <span class="name">list</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.list"></a>
+    
+            <div class="docstring"><p>If operator supports list.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.list_with_recursive" class="classattr">
+                                <div class="attr variable">
+            <span class="name">list_with_recursive</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.list_with_recursive"></a>
+    
+            <div class="docstring"><p>If backend supports list without delimiter.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.read_with_override_content_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">read_with_override_content_type</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.read_with_override_content_type"></a>
+    
+            <div class="docstring"><p>if operator supports read with override content type.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.stat_with_if_none_match" class="classattr">
+                                <div class="attr variable">
+            <span class="name">stat_with_if_none_match</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.stat_with_if_none_match"></a>
+    
+            <div class="docstring"><p>If operator supports stat with if none match.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.write_with_cache_control" class="classattr">
+                                <div class="attr variable">
+            <span class="name">write_with_cache_control</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.write_with_cache_control"></a>
+    
+            <div class="docstring"><p>If operator supports write with cache control.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.write_can_append" class="classattr">
+                                <div class="attr variable">
+            <span class="name">write_can_append</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.write_can_append"></a>
+    
+            <div class="docstring"><p>If operator supports write by append.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.rename" class="classattr">
+                                <div class="attr variable">
+            <span class="name">rename</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.rename"></a>
+    
+            <div class="docstring"><p>If operator supports rename.</p>
 </div>
 
 
@@ -2026,28 +1998,56 @@ by current Operator.</p>
 
 
                             </div>
-                            <div id="Capability.batch_max_operations" class="classattr">
+                            <div id="Capability.list_with_limit" class="classattr">
                                 <div class="attr variable">
-            <span class="name">batch_max_operations</span>
+            <span class="name">list_with_limit</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.batch_max_operations"></a>
+    <a class="headerlink" href="#Capability.list_with_limit"></a>
     
-            <div class="docstring"><p>The max operations that operator supports in batch.</p>
+            <div class="docstring"><p>If backend supports list with limit.</p>
 </div>
 
 
                             </div>
-                            <div id="Capability.presign_stat" class="classattr">
+                            <div id="Capability.write_total_max_size" class="classattr">
                                 <div class="attr variable">
-            <span class="name">presign_stat</span>
+            <span class="name">write_total_max_size</span>
 
         
     </div>
-    <a class="headerlink" href="#Capability.presign_stat"></a>
+    <a class="headerlink" href="#Capability.write_total_max_size"></a>
     
-            <div class="docstring"><p>If operator supports presign stat.</p>
+            <div class="docstring"><p>write_total_max_size is the max size that services support in write_total.</p>
+
+<p>For example, Cloudflare D1 supports 1MB as max in write_total.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.list_with_start_after" class="classattr">
+                                <div class="attr variable">
+            <span class="name">list_with_start_after</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.list_with_start_after"></a>
+    
+            <div class="docstring"><p>If backend supports list with start after.</p>
+</div>
+
+
+                            </div>
+                            <div id="Capability.presign" class="classattr">
+                                <div class="attr variable">
+            <span class="name">presign</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Capability.presign"></a>
+    
+            <div class="docstring"><p>If operator supports presign.</p>
 </div>
 
 

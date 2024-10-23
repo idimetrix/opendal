@@ -65,11 +65,6 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -121,22 +116,17 @@
 
         <span class="kw">let </span>path = <span class="self">self</span>.path.to_string() + de.name();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="kw">if </span>de.is_file() {
-            Metadata::new(EntryMode::FILE)
-        } <span class="kw">else if </span>de.is_directory() {
-            Metadata::new(EntryMode::DIR)
-        } <span class="kw">else </span>{
-            Metadata::new(EntryMode::Unknown)
-        };
-        meta.set_content_length(de.size() <span class="kw">as </span>u64);
-        meta.set_last_modified(de.modified().into());
-
         <span class="kw">let </span>entry = <span class="kw">if </span>de.is_file() {
-            oio::Entry::new(<span class="kw-2">&amp;</span>path, meta)
+            oio::Entry::new(
+                <span class="kw-2">&amp;</span>path,
+                Metadata::new(EntryMode::FILE)
+                    .with_content_length(de.size() <span class="kw">as </span>u64)
+                    .with_last_modified(de.modified().into()),
+            )
         } <span class="kw">else if </span>de.is_directory() {
-            oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}/"</span>, <span class="kw-2">&amp;</span>path), meta)
+            oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}/"</span>, <span class="kw-2">&amp;</span>path), Metadata::new(EntryMode::DIR))
         } <span class="kw">else </span>{
-            oio::Entry::new(<span class="kw-2">&amp;</span>path, meta)
+            oio::Entry::new(<span class="kw-2">&amp;</span>path, Metadata::new(EntryMode::Unknown))
         };
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(entry))
