@@ -459,6 +459,78 @@
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
 <a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -483,6 +555,7 @@
 };
 <span class="kw">use </span>opendal_v0_49::Buffer;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::ops::Deref;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="doccomment">/// Convert an opendal v0.50 `Operator` into an opendal v0.49 `Operator` for compatibility.
@@ -525,7 +598,10 @@
     <span class="kw">type </span>BlockingLister = CompatWrapper&lt;A::BlockingLister&gt;;
 
     <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
-        convert::raw_oio_accessor_info_into(<span class="self">self</span>.<span class="number">0</span>.info())
+        <span class="kw">let </span>new_info = <span class="self">self</span>.<span class="number">0</span>.info().deref().clone();
+        <span class="kw">let </span>old_info = convert::raw_oio_accessor_info_into(new_info);
+
+        Arc::new(old_info)
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; opendal_v0_49::Result&lt;RpCreateDir&gt; {
@@ -803,7 +879,6 @@
 /// in which we added a new field since v0.50.
 </span><span class="kw">mod </span>convert {
     <span class="kw">use </span>std::mem::transmute;
-    <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">pub fn </span>error_into(e: opendal_v0_50::Error) -&gt; opendal_v0_49::Error {
         <span class="kw">unsafe </span>{ transmute(e) }
@@ -818,9 +893,61 @@
     }
 
     <span class="kw">pub fn </span>raw_oio_accessor_info_into(
-        e: Arc&lt;opendal_v0_50::raw::AccessorInfo&gt;,
-    ) -&gt; Arc&lt;opendal_v0_49::raw::AccessorInfo&gt; {
-        <span class="kw">unsafe </span>{ transmute(e) }
+        e: opendal_v0_50::raw::AccessorInfo,
+    ) -&gt; opendal_v0_49::raw::AccessorInfo {
+        <span class="kw">let </span><span class="kw-2">mut </span>info = opendal_v0_49::raw::AccessorInfo::default();
+        info.set_name(e.name())
+            .set_root(e.root())
+            .set_scheme(e.scheme().into_static().parse().unwrap())
+            .set_native_capability(capability_into(e.native_capability()));
+
+        info
+    }
+
+    <span class="doccomment">/// opendal_v0_50 added a new field `write_with_if_none_match`.
+    </span><span class="kw">pub fn </span>capability_into(e: opendal_v0_50::Capability) -&gt; opendal_v0_49::Capability {
+        opendal_v0_49::Capability {
+            stat: e.stat,
+            stat_with_if_match: e.stat_with_if_match,
+            stat_with_if_none_match: e.stat_with_if_none_match,
+            stat_with_override_cache_control: e.stat_with_override_cache_control,
+            stat_with_override_content_disposition: e.stat_with_override_content_disposition,
+            stat_with_override_content_type: e.stat_with_override_content_type,
+            read: e.read,
+            read_with_if_match: e.read_with_if_match,
+            read_with_if_none_match: e.read_with_if_none_match,
+            read_with_override_cache_control: e.read_with_override_cache_control,
+            read_with_override_content_disposition: e.read_with_override_content_disposition,
+            read_with_override_content_type: e.read_with_override_content_type,
+            write: e.write,
+            write_can_multi: e.write_can_multi,
+            write_can_empty: e.write_can_empty,
+            write_can_append: e.write_can_append,
+            write_with_content_type: e.write_with_content_type,
+            write_with_content_disposition: e.write_with_content_disposition,
+            write_with_cache_control: e.write_with_cache_control,
+            write_with_user_metadata: e.write_with_user_metadata,
+            write_multi_max_size: e.write_multi_max_size,
+            write_multi_min_size: e.write_multi_min_size,
+            write_multi_align_size: e.write_multi_align_size,
+            write_total_max_size: e.write_total_max_size,
+            create_dir: e.create_dir,
+            delete: e.delete,
+            copy: e.copy,
+            rename: e.rename,
+            list: e.list,
+            list_with_limit: e.list_with_limit,
+            list_with_start_after: e.list_with_start_after,
+            list_with_recursive: e.list_with_recursive,
+            presign: e.presign,
+            presign_read: e.presign_read,
+            presign_stat: e.presign_stat,
+            presign_write: e.presign_write,
+            batch: e.batch,
+            batch_delete: e.batch_delete,
+            batch_max_operations: e.batch_max_operations,
+            blocking: e.blocking,
+        }
     }
 
     <span class="kw">pub fn </span>raw_oio_entry_into(e: opendal_v0_50::raw::oio::Entry) -&gt; opendal_v0_49::raw::oio::Entry {
@@ -918,6 +1045,23 @@
 
     <span class="kw">pub fn </span>raw_rp_batch_into(e: opendal_v0_50::raw::RpBatch) -&gt; opendal_v0_49::raw::RpBatch {
         <span class="kw">unsafe </span>{ transmute(e) }
+    }
+}
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>opendal_v0_50 <span class="kw">as </span>new_o;
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_read() {
+        <span class="kw">let </span>new_op = new_o::Operator::from_config(new_o::services::MemoryConfig::default())
+            .unwrap()
+            .finish();
+        <span class="kw">let </span>old_op = <span class="kw">super</span>::v0_50_to_v0_49(new_op);
+
+        old_op.write(<span class="string">"test"</span>, <span class="string">"hello, world!"</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>bs = old_op.read(<span class="string">"test"</span>).<span class="kw">await</span>.unwrap();
+        <span class="macro">assert_eq!</span>(String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs.to_vec()), <span class="string">"hello, world!"</span>);
     }
 }
 </code></pre></div></section></main></body></html>
