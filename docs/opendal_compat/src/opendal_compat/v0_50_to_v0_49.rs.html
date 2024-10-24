@@ -531,6 +531,27 @@
 <a href="#531" id="531">531</a>
 <a href="#532" id="532">532</a>
 <a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -878,6 +899,7 @@
 /// `transmute` also perform compile time checks to detect any type size mismatch like `OpWrite`
 /// in which we added a new field since v0.50.
 </span><span class="kw">mod </span>convert {
+    <span class="kw">use </span>opendal_v0_50::Metakey;
     <span class="kw">use </span>std::mem::transmute;
 
     <span class="kw">pub fn </span>error_into(e: opendal_v0_50::Error) -&gt; opendal_v0_49::Error {
@@ -1007,8 +1029,28 @@
         <span class="kw">unsafe </span>{ transmute(e) }
     }
 
-    <span class="kw">pub fn </span>raw_op_list_from(e: opendal_v0_49::raw::OpList) -&gt; opendal_v0_50::raw::OpList {
-        <span class="kw">unsafe </span>{ transmute(e) }
+    <span class="doccomment">/// OpenDAL v0.50's OpList has a new field `version`.
+    </span><span class="kw">pub fn </span>raw_op_list_from(e: opendal_v0_49::raw::OpList) -&gt; opendal_v0_50::raw::OpList {
+        <span class="kw">let </span><span class="kw-2">mut </span>op = opendal_v0_50::raw::OpList::new();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = e.limit() {
+            op = op.with_limit(v);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = e.start_after() {
+            op = op.with_start_after(v);
+        }
+
+        <span class="kw">if </span>e.recursive() {
+            op = op.with_recursive(<span class="bool-val">true</span>);
+        }
+
+        <span class="comment">// There is no way for us to convert `metakey` without depending on `flagset`,
+        // let's just hardcode them.
+        </span>op = op.with_metakey(Metakey::Mode | Metakey::LastModified);
+        op = op.with_concurrent(e.concurrent());
+
+        op
     }
 
     <span class="kw">pub fn </span>raw_rp_list_into(e: opendal_v0_50::raw::RpList) -&gt; opendal_v0_49::raw::RpList {
