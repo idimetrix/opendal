@@ -552,6 +552,38 @@
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -613,10 +645,10 @@
 <span class="kw">impl</span>&lt;A: opendal_v0_50::raw::Access&gt; opendal_v0_49::raw::Access <span class="kw">for </span>CompatAccessor&lt;A&gt; {
     <span class="kw">type </span>Reader = CompatWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>Writer = CompatWrapper&lt;A::Writer&gt;;
-    <span class="kw">type </span>Lister = CompatWrapper&lt;A::Lister&gt;;
+    <span class="kw">type </span>Lister = CompatListWrapper&lt;A::Lister&gt;;
     <span class="kw">type </span>BlockingReader = CompatWrapper&lt;A::BlockingReader&gt;;
     <span class="kw">type </span>BlockingWriter = CompatWrapper&lt;A::BlockingWriter&gt;;
-    <span class="kw">type </span>BlockingLister = CompatWrapper&lt;A::BlockingLister&gt;;
+    <span class="kw">type </span>BlockingLister = CompatListWrapper&lt;A::BlockingLister&gt;;
 
     <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span>new_info = <span class="self">self</span>.<span class="number">0</span>.info().deref().clone();
@@ -685,7 +717,10 @@
             </span>.list(path, convert::raw_op_list_from(args))
             .<span class="kw">await
             </span>.map_err(convert::error_into)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((convert::raw_rp_list_into(rp), CompatWrapper(lister)))
+        <span class="prelude-val">Ok</span>((
+            convert::raw_rp_list_into(rp),
+            CompatListWrapper(path.to_string(), lister),
+        ))
     }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; opendal_v0_49::Result&lt;RpCopy&gt; {
@@ -783,7 +818,10 @@
             </span>.<span class="number">0
             </span>.blocking_list(path, convert::raw_op_list_from(args))
             .map_err(convert::error_into)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((convert::raw_rp_list_into(rp), CompatWrapper(lister)))
+        <span class="prelude-val">Ok</span>((
+            convert::raw_rp_list_into(rp),
+            CompatListWrapper(path.to_string(), lister),
+        ))
     }
 
     <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; opendal_v0_49::Result&lt;RpCopy&gt; {
@@ -835,16 +873,6 @@
     }
 }
 
-<span class="kw">impl</span>&lt;I: opendal_v0_50::raw::oio::List&gt; opendal_v0_49::raw::oio::List <span class="kw">for </span>CompatWrapper&lt;I&gt; {
-    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; opendal_v0_49::Result&lt;<span class="prelude-ty">Option</span>&lt;opendal_v0_49::raw::oio::Entry&gt;&gt; {
-        <span class="self">self</span>.<span class="number">0
-            </span>.next()
-            .<span class="kw">await
-            </span>.map(|v| v.map(convert::raw_oio_entry_into))
-            .map_err(convert::error_into)
-    }
-}
-
 <span class="kw">impl</span>&lt;I: opendal_v0_50::raw::oio::BlockingRead&gt; opendal_v0_49::raw::oio::BlockingRead
     <span class="kw">for </span>CompatWrapper&lt;I&gt;
 {
@@ -870,14 +898,50 @@
     }
 }
 
+<span class="doccomment">/// A wrapper to convert `List` from v0.50 to v0.49.
+///
+/// The first `String` is the path of parent. We save it to check if the entry is itself.
+/// In OpenDAL v0.50, lister will return itself, this behavior is different from v0.49.
+</span><span class="kw">struct </span>CompatListWrapper&lt;I&gt;(String, I);
+
+<span class="kw">impl</span>&lt;I: opendal_v0_50::raw::oio::List&gt; opendal_v0_49::raw::oio::List <span class="kw">for </span>CompatListWrapper&lt;I&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; opendal_v0_49::Result&lt;<span class="prelude-ty">Option</span>&lt;opendal_v0_49::raw::oio::Entry&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(de) = <span class="self">self
+                </span>.<span class="number">1
+                </span>.next()
+                .<span class="kw">await
+                </span>.map(|v| v.map(convert::raw_oio_entry_into))
+                .map_err(convert::error_into)<span class="question-mark">?
+            </span><span class="kw">else </span>{
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+            };
+            <span class="kw">if </span>de.path() == <span class="self">self</span>.<span class="number">0 </span>{
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
+        }
+    }
+}
+
 <span class="kw">impl</span>&lt;I: opendal_v0_50::raw::oio::BlockingList&gt; opendal_v0_49::raw::oio::BlockingList
-    <span class="kw">for </span>CompatWrapper&lt;I&gt;
+    <span class="kw">for </span>CompatListWrapper&lt;I&gt;
 {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; opendal_v0_49::Result&lt;<span class="prelude-ty">Option</span>&lt;opendal_v0_49::raw::oio::Entry&gt;&gt; {
-        <span class="self">self</span>.<span class="number">0
-            </span>.next()
-            .map(|v| v.map(convert::raw_oio_entry_into))
-            .map_err(convert::error_into)
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(de) = <span class="self">self
+                </span>.<span class="number">1
+                </span>.next()
+                .map(|v| v.map(convert::raw_oio_entry_into))
+                .map_err(convert::error_into)<span class="question-mark">?
+            </span><span class="kw">else </span>{
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+            };
+            <span class="kw">if </span>de.path() == <span class="self">self</span>.<span class="number">0 </span>{
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(de));
+        }
     }
 }
 
