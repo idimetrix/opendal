@@ -235,7 +235,6 @@
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
 <a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -255,7 +254,6 @@
 
 </span><span class="kw">use </span>await_tree::InstrumentAwait;
 <span class="kw">use </span>futures::Future;
-<span class="kw">use </span>futures::FutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -324,17 +322,17 @@
         <span class="self">self</span>.inner
             .read(path, args)
             .instrument_await(<span class="macro">format!</span>(<span class="string">"opendal::{}"</span>, Operation::Read))
-            .map(|v| v.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r))))
             .<span class="kw">await
-    </span>}
+            </span>.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r)))
+    }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="self">self</span>.inner
             .write(path, args)
             .instrument_await(<span class="macro">format!</span>(<span class="string">"opendal::{}"</span>, Operation::Write))
-            .map(|v| v.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r))))
             .<span class="kw">await
-    </span>}
+            </span>.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r)))
+    }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         <span class="self">self</span>.inner()
@@ -368,9 +366,9 @@
         <span class="self">self</span>.inner
             .list(path, args)
             .instrument_await(<span class="macro">format!</span>(<span class="string">"opendal::{}"</span>, Operation::List))
-            .map(|v| v.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r))))
             .<span class="kw">await
-    </span>}
+            </span>.map(|(rp, r)| (rp, AwaitTreeWrapper::new(r)))
+    }
 
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="self">self</span>.inner

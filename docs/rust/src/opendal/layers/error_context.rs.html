@@ -463,23 +463,6 @@
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -500,8 +483,6 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
-
-<span class="kw">use </span>futures::TryFutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -564,21 +545,19 @@
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="self">self</span>.inner
-            .create_dir(path, args)
-            .map_err(|err| {
-                err.with_operation(Operation::CreateDir)
-                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
-                    .with_context(<span class="string">"path"</span>, path)
-            })
-            .<span class="kw">await
-    </span>}
+        <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::CreateDir)
+                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">"path"</span>, path)
+        })
+    }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>range = args.range();
         <span class="self">self</span>.inner
             .read(path, args)
-            .map_ok(|(rp, r)| {
+            .<span class="kw">await
+            </span>.map(|(rp, r)| {
                 (
                     rp,
                     ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), r)
@@ -591,13 +570,13 @@
                     .with_context(<span class="string">"path"</span>, path)
                     .with_context(<span class="string">"range"</span>, range.to_string())
             })
-            .<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="self">self</span>.inner
             .write(path, args)
-            .map_ok(|(rp, w)| {
+            .<span class="kw">await
+            </span>.map(|(rp, w)| {
                 (
                     rp,
                     ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), w),
@@ -608,59 +587,47 @@
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
             })
-            .<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="self">self</span>.inner
-            .copy(from, to, args)
-            .map_err(|err| {
-                err.with_operation(Operation::Copy)
-                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
-                    .with_context(<span class="string">"from"</span>, from)
-                    .with_context(<span class="string">"to"</span>, to)
-            })
-            .<span class="kw">await
-    </span>}
+        <span class="self">self</span>.inner.copy(from, to, args).<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::Copy)
+                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">"from"</span>, from)
+                .with_context(<span class="string">"to"</span>, to)
+        })
+    }
 
     <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="self">self</span>.inner
-            .rename(from, to, args)
-            .map_err(|err| {
-                err.with_operation(Operation::Rename)
-                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
-                    .with_context(<span class="string">"from"</span>, from)
-                    .with_context(<span class="string">"to"</span>, to)
-            })
-            .<span class="kw">await
-    </span>}
+        <span class="self">self</span>.inner.rename(from, to, args).<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::Rename)
+                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">"from"</span>, from)
+                .with_context(<span class="string">"to"</span>, to)
+        })
+    }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="self">self</span>.inner
-            .stat(path, args)
-            .map_err(|err| {
-                err.with_operation(Operation::Stat)
-                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
-                    .with_context(<span class="string">"path"</span>, path)
-            })
-            .<span class="kw">await
-    </span>}
+        <span class="self">self</span>.inner.stat(path, args).<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::Stat)
+                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">"path"</span>, path)
+        })
+    }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="self">self</span>.inner
-            .delete(path, args)
-            .map_err(|err| {
-                err.with_operation(Operation::Delete)
-                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
-                    .with_context(<span class="string">"path"</span>, path)
-            })
-            .<span class="kw">await
-    </span>}
+        <span class="self">self</span>.inner.delete(path, args).<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::Delete)
+                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">"path"</span>, path)
+        })
+    }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
         <span class="self">self</span>.inner
             .list(path, args)
-            .map_ok(|(rp, p)| {
+            .<span class="kw">await
+            </span>.map(|(rp, p)| {
                 (
                     rp,
                     ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), p),
@@ -671,13 +638,13 @@
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
             })
-            .<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
         <span class="self">self</span>.inner
             .batch(args)
-            .map_ok(|v| {
+            .<span class="kw">await
+            </span>.map(|v| {
                 <span class="kw">let </span>res = v
                     .into_results()
                     .into_iter()
@@ -697,8 +664,7 @@
                 err.with_operation(Operation::Batch)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
             })
-            .<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="self">self</span>.inner.presign(path, args).<span class="kw">await</span>.map_err(|err| {

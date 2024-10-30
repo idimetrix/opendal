@@ -1351,11 +1351,6 @@
 <a href="#1351" id="1351">1351</a>
 <a href="#1352" id="1352">1352</a>
 <a href="#1353" id="1353">1353</a>
-<a href="#1354" id="1354">1354</a>
-<a href="#1355" id="1355">1355</a>
-<a href="#1356" id="1356">1356</a>
-<a href="#1357" id="1357">1357</a>
-<a href="#1358" id="1358">1358</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1377,8 +1372,6 @@
 <span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>log::log;
 <span class="kw">use </span>log::Level;
 
@@ -1857,28 +1850,28 @@
 
         <span class="self">self</span>.inner
             .delete(path, args.clone())
-            .inspect(|v| <span class="kw">match </span>v {
-                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="self">self</span>.logger.log(
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.info,
-                        Operation::Delete,
-                        <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
-                        <span class="string">"finished"</span>,
-                        <span class="prelude-val">None</span>,
-                    );
-                }
-                <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="self">self</span>.logger.log(
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.info,
-                        Operation::Delete,
-                        <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
-                        <span class="string">"failed"</span>,
-                        <span class="prelude-val">Some</span>(err),
-                    );
-                }
-            })
             .<span class="kw">await
-    </span>}
+            </span>.map(|v| {
+                <span class="self">self</span>.logger.log(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.info,
+                    Operation::Delete,
+                    <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
+                    <span class="string">"finished"</span>,
+                    <span class="prelude-val">None</span>,
+                );
+                v
+            })
+            .map_err(|err| {
+                <span class="self">self</span>.logger.log(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.info,
+                    Operation::Delete,
+                    <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
+                    <span class="string">"failed"</span>,
+                    <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>err),
+                );
+                err
+            })
+    }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
         <span class="self">self</span>.logger.log(
@@ -1891,32 +1884,29 @@
 
         <span class="self">self</span>.inner
             .list(path, args)
-            .map(|v| <span class="kw">match </span>v {
-                <span class="prelude-val">Ok</span>((rp, v)) =&gt; {
-                    <span class="self">self</span>.logger.log(
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.info,
-                        Operation::List,
-                        <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
-                        <span class="string">"created lister"</span>,
-                        <span class="prelude-val">None</span>,
-                    );
-                    <span class="kw">let </span>streamer =
-                        LoggingLister::new(<span class="self">self</span>.info.clone(), <span class="self">self</span>.logger.clone(), path, v);
-                    <span class="prelude-val">Ok</span>((rp, streamer))
-                }
-                <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="self">self</span>.logger.log(
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.info,
-                        Operation::List,
-                        <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
-                        <span class="string">"failed"</span>,
-                        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>err),
-                    );
-                    <span class="prelude-val">Err</span>(err)
-                }
-            })
             .<span class="kw">await
-    </span>}
+            </span>.map(|(rp, v)| {
+                <span class="self">self</span>.logger.log(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.info,
+                    Operation::List,
+                    <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
+                    <span class="string">"created lister"</span>,
+                    <span class="prelude-val">None</span>,
+                );
+                <span class="kw">let </span>streamer = LoggingLister::new(<span class="self">self</span>.info.clone(), <span class="self">self</span>.logger.clone(), path, v);
+                (rp, streamer)
+            })
+            .map_err(|err| {
+                <span class="self">self</span>.logger.log(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.info,
+                    Operation::List,
+                    <span class="kw-2">&amp;</span>[(<span class="string">"path"</span>, path)],
+                    <span class="string">"failed"</span>,
+                    <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>err),
+                );
+                err
+            })
+    }
 
     <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="self">self</span>.logger.log(
@@ -1965,7 +1955,8 @@
 
         <span class="self">self</span>.inner
             .batch(args)
-            .map_ok(|v| {
+            .<span class="kw">await
+            </span>.map(|v| {
                 <span class="self">self</span>.logger.log(
                     <span class="kw-2">&amp;</span><span class="self">self</span>.info,
                     Operation::Batch,
@@ -1990,8 +1981,7 @@
                 );
                 err
             })
-            .<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="self">self</span>.logger.log(
