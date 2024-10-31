@@ -1192,13 +1192,6 @@
 <a href="#1192" id="1192">1192</a>
 <a href="#1193" id="1193">1193</a>
 <a href="#1194" id="1194">1194</a>
-<a href="#1195" id="1195">1195</a>
-<a href="#1196" id="1196">1196</a>
-<a href="#1197" id="1197">1197</a>
-<a href="#1198" id="1198">1198</a>
-<a href="#1199" id="1199">1199</a>
-<a href="#1200" id="1200">1200</a>
-<a href="#1201" id="1201">1201</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1507,14 +1500,7 @@
     /// ```
     </span><span class="attr">#[deprecated(note = <span class="string">"rename to `exists` for consistence with `std::fs::exists`"</span>)]
     </span><span class="kw">pub fn </span>is_exist(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.stat(path);
-        <span class="kw">match </span>r {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
-            <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">match </span>err.kind() {
-                ErrorKind::NotFound =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
-                <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(err),
-            },
-        }
+        <span class="self">self</span>.exists(path)
     }
 
     <span class="doccomment">/// Create a dir at given path.
