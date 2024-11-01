@@ -688,11 +688,6 @@
 <a href="#688" id="688">688</a>
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -757,16 +752,11 @@
 ///
 /// #[tokio::main]
 /// async fn main() {
-///     let builder = S3::from_map(
-///         vec![
-///             ("access_key".to_string(), "my_access_key".to_string()),
-///             ("secret_key".to_string(), "my_secret_key".to_string()),
-///             ("endpoint".to_string(), "my_endpoint".to_string()),
-///             ("region".to_string(), "my_region".to_string()),
-///         ]
-///         .into_iter()
-///         .collect(),
-///     ).unwrap();
+///    let builder = S3::default()
+///     .access_key_id("my_access_key")
+///     .secret_access_key("my_secret_key")
+///     .endpoint("my_endpoint")
+///     .region("my_region");
 ///
 ///     // Create a new operator
 ///     let operator = Operator::new(builder).unwrap().finish();
