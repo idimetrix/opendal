@@ -1254,16 +1254,6 @@
 <a href="#1254" id="1254">1254</a>
 <a href="#1255" id="1255">1255</a>
 <a href="#1256" id="1256">1256</a>
-<a href="#1257" id="1257">1257</a>
-<a href="#1258" id="1258">1258</a>
-<a href="#1259" id="1259">1259</a>
-<a href="#1260" id="1260">1260</a>
-<a href="#1261" id="1261">1261</a>
-<a href="#1262" id="1262">1262</a>
-<a href="#1263" id="1263">1263</a>
-<a href="#1264" id="1264">1264</a>
-<a href="#1265" id="1265">1265</a>
-<a href="#1266" id="1266">1266</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1292,6 +1282,7 @@
 <span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>constants::X_AMZ_META_PREFIX;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
@@ -2236,18 +2227,7 @@
                 <span class="kw">let </span>headers = resp.headers();
                 <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
 
-                <span class="kw">let </span>user_meta: HashMap&lt;String, String&gt; = headers
-                    .iter()
-                    .filter_map(|(name, <span class="kw">_</span>)| {
-                        name.as_str()
-                            .strip_prefix(constants::X_AMZ_META_PREFIX)
-                            .and_then(|stripped_key| {
-                                parse_header_to_str(headers, name)
-                                    .unwrap_or(<span class="prelude-val">None</span>)
-                                    .map(|val| (stripped_key.to_string(), val.to_string()))
-                            })
-                    })
-                    .collect();
+                <span class="kw">let </span>user_meta = parse_prefixed_headers(headers, X_AMZ_META_PREFIX);
                 <span class="kw">if </span>!user_meta.is_empty() {
                     meta.with_user_metadata(user_meta);
                 }

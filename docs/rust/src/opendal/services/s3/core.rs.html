@@ -1304,6 +1304,7 @@
 <a href="#1304" id="1304">1304</a>
 <a href="#1305" id="1305">1305</a>
 <a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1333,6 +1334,7 @@
 <span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>constants::X_AMZ_META_PREFIX;
 <span class="kw">use </span>http::header::HeaderName;
 <span class="kw">use </span>http::header::CACHE_CONTROL;
 <span class="kw">use </span>http::header::CONTENT_DISPOSITION;
@@ -1768,7 +1770,7 @@
         <span class="comment">// Set user metadata headers.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(user_metadata) = args.user_metadata() {
             <span class="kw">for </span>(key, value) <span class="kw">in </span>user_metadata {
-                req = req.header(<span class="macro">format!</span>(<span class="string">"{}{}"</span>, constants::X_AMZ_META_PREFIX, key), value)
+                req = req.header(<span class="macro">format!</span>(<span class="string">"{X_AMZ_META_PREFIX}{key}"</span>), value)
             }
         }
 

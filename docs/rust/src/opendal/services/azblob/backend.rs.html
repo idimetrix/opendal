@@ -805,6 +805,18 @@
 <a href="#805" id="805">805</a>
 <a href="#806" id="806">806</a>
 <a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -840,6 +852,7 @@
 <span class="kw">use </span>sha2::Digest;
 <span class="kw">use </span>sha2::Sha256;
 
+<span class="kw">use </span><span class="kw">super</span>::core::constants::X_MS_META_PREFIX;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::AzblobLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::AzblobWriter;
@@ -1324,6 +1337,7 @@
                 write_can_multi: <span class="bool-val">true</span>,
                 write_with_cache_control: <span class="bool-val">true</span>,
                 write_with_content_type: <span class="bool-val">true</span>,
+                write_with_user_metadata: <span class="bool-val">true</span>,
 
                 delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
@@ -1352,7 +1366,17 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; parse_into_metadata(path, resp.headers()).map(RpStat::new),
+            StatusCode::OK =&gt; {
+                <span class="kw">let </span>headers = resp.headers();
+                <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>user_meta = parse_prefixed_headers(headers, X_MS_META_PREFIX);
+                <span class="kw">if </span>!user_meta.is_empty() {
+                    meta.with_user_metadata(user_meta);
+                }
+
+                <span class="prelude-val">Ok</span>(RpStat::new(meta))
+            }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }

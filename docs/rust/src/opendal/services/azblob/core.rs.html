@@ -900,6 +900,15 @@
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -926,6 +935,7 @@
 <span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>constants::X_MS_META_PREFIX;
 <span class="kw">use </span>http::header::HeaderName;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
@@ -944,13 +954,14 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">mod </span>constants {
+<span class="kw">pub mod </span>constants {
     <span class="kw">pub const </span>X_MS_VERSION: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-version"</span>;
 
     <span class="kw">pub const </span>X_MS_BLOB_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-blob-type"</span>;
     <span class="kw">pub const </span>X_MS_COPY_SOURCE: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-copy-source"</span>;
     <span class="kw">pub const </span>X_MS_BLOB_CACHE_CONTROL: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-blob-cache-control"</span>;
     <span class="kw">pub const </span>X_MS_BLOB_CONDITION_APPENDPOS: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-blob-condition-appendpos"</span>;
+    <span class="kw">pub const </span>X_MS_META_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-meta-"</span>;
 
     <span class="comment">// Server-side encryption with customer-provided headers
     </span><span class="kw">pub const </span>X_MS_ENCRYPTION_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"x-ms-encryption-key"</span>;
@@ -1145,12 +1156,19 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>url);
 
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(user_metadata) = args.user_metadata() {
+            <span class="kw">for </span>(key, value) <span class="kw">in </span>user_metadata {
+                req = req.header(<span class="macro">format!</span>(<span class="string">"{X_MS_META_PREFIX}{key}"</span>), value)
+            }
+        }
+
         <span class="comment">// Set SSE headers.
         </span>req = <span class="self">self</span>.insert_sse_headers(req);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cache_control) = args.cache_control() {
             req = req.header(constants::X_MS_BLOB_CACHE_CONTROL, cache_control);
         }
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = size {
             req = req.header(CONTENT_LENGTH, size)
         }
